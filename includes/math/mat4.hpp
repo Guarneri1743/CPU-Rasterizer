@@ -100,6 +100,42 @@ namespace guarneri {
 			return m;
 		}
 
+		static mat4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
+			float s = 1.0f / (float)(std::tan((fov / 2.0) * (PI / 180.0)));
+			mat4 m = ZERO;
+			m.at(0, 0) = s / aspect;
+			m.at(1, 1) = s;
+			m.at(2, 2) = -far / (far - near);
+			m.at(2, 3) = -1.0f;
+			m.at(3, 2) = -(far * near) / (far - near);
+			return m;
+		}
+
+		static mat4 lookat_matrix(const float3& position, const float3& target) {
+			// dir
+			float3 zaxis = float3::normalize(position - target);
+			// right
+			float3 xaxis = float3::normalize(float3::cross(float3::normalize(float3::UP), zaxis));
+			// up
+			float3 yaxis = float3::cross(zaxis, xaxis);
+
+			mat4 translation = mat4::translation(-position);
+
+			// VPN
+			mat4 rotation = mat4::IDENTITY;
+			rotation.at(0, 0) = xaxis.x;
+			rotation.at(0, 1) = xaxis.y;
+			rotation.at(0, 2) = xaxis.z;
+			rotation.at(1, 0) = yaxis.x;
+			rotation.at(1, 1) = yaxis.y;
+			rotation.at(2, 1) = yaxis.z;
+			rotation.at(2, 0) = zaxis.x;
+			rotation.at(2, 1) = zaxis.y;
+			rotation.at(2, 2) = zaxis.z;
+
+			return rotation * translation;
+		}
+
 		float3 transform_point(const float3& point) const {
 			float3 ret;
 			ret.x = m00 * point.x + m01 * point.y + m02 * point.z + m03;

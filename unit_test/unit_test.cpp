@@ -10,6 +10,7 @@
 #include <ray.hpp>
 #include <plane.hpp>
 #include <vertex.hpp>
+#include <camera.hpp>
 
 using namespace guarneri;
 using namespace std;

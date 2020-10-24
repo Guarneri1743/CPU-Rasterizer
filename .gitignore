@@ -89,3 +89,4 @@ vs2019/obj/Win64/Release/UnitTest/UnitTest.tlog/UnitTest.lastbuildstate
 vs2019/obj/Win64/Release/UnitTest/vc142.pdb
 vs2019/SoftRasterizer.vcxproj.user
 vs2019/UnitTest.vcxproj.user
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/2c5f3add21c7af0b/CAMERA.ipch
