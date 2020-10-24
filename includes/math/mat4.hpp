@@ -1,15 +1,14 @@
 #pragma once
-#include "common.hpp"
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <iostream>
-#include "vec4.hpp"
-#include "vec3.hpp"
-#include <assert.h>
+#include <common.hpp>
+#include <float4.hpp>
+#include <float3.hpp>
 
 namespace guarneri {
 	struct mat4 {
+	public:
+		static const mat4 IDENTITY;
+		static const mat4 ZERO;
+
 	public:
 		mat4(){
 			for (int i = 0; i < 16; i++) {
@@ -17,13 +16,7 @@ namespace guarneri {
 			}
 		}
 
-		mat4(const mat4& v) {
-			for (int i = 0; i < 16; i++) {
-				this->operator[](i) = v[i];
-			}
-		}
-
-		mat4(const vec4& column0, const vec4& column1, const vec4& column2, const vec4& column3) {
+		mat4(const float4& column0, const float4& column1, const float4& column2, const float4& column3) {
 			m00 = column0.x;
 			m01 = column1.x;
 			m02 = column2.x;
@@ -40,6 +33,12 @@ namespace guarneri {
 			m31 = column1.w;
 			m32 = column2.w;
 			m33 = column3.w;
+		}
+
+		mat4(const mat4& v) {
+			for (int i = 0; i < 16; i++) {
+				this->operator[](i) = v[i];
+			}
 		}
 
 	private:
@@ -61,11 +60,48 @@ namespace guarneri {
 		float m33;
 
 	public:
-		static const mat4 IDENTITY;
-		static const mat4 ZERO;
+		static mat4 translation(const float3& translation) {
+			mat4 m = IDENTITY;
+			m.at(0, 3) = translation.x;
+			m.at(1, 3) = translation.y;
+			m.at(2, 3) = translation.z;
+			return m;
+		}
 
-		vec3 transform_point(const vec3& point) const {
-			vec3 ret;
+		static mat4 rotation(const float3& axis, const float& theta) {
+			float rad = DEGREE2RAD(theta);
+			float s = std::sin(rad);
+			float c = std::cos(rad);
+			float3 normalized_axis = float3::normalize(axis);
+			float x = normalized_axis.x;
+			float y = normalized_axis.y;
+			float z = normalized_axis.z;
+			mat4 m = IDENTITY;
+			m.at(0, 0) = c + (1 - c) * x * x;
+			m.at(0, 1) = (1 - c) * x * y - s * z;
+			m.at(0, 2) = (1 - c) * x * z + s * y;
+			m.at(1, 0) = (1 - c) * y * x + s * z;
+			m.at(1, 1) = c + (1 - c) * y * y;
+			m.at(1, 2) = (1 - c) * y * z - s * x;
+			m.at(2, 0) = (1 - c) * z * x - s * y;
+			m.at(2, 1) = (1 - c) * z * y + s * x;
+			m.at(2, 2) = c + (1 - c) * z * z;
+			/*m.at(0, 3) = m.at(1, 3) = m.at(2, 3) = 0.0f;
+			m.at(3, 0) = m.at(3, 1) = m.at(3, 2) = 0.0f;
+			m.at(3, 3) = 1.0f;*/
+			return m;
+		}
+
+		static mat4 scale(const float3& scale) {
+			mat4 m = IDENTITY;
+			m.at(0, 0) = scale.x;
+			m.at(1, 1) = scale.y;
+			m.at(2, 2) = scale.z;
+			return m;
+		}
+
+		float3 transform_point(const float3& point) const {
+			float3 ret;
 			ret.x = m00 * point.x + m01 * point.y + m02 * point.z + m03;
 			ret.y = m10 * point.x + m11 * point.y + m12 * point.z + m13;
 			ret.z = m20 * point.x + m21 * point.y + m22 * point.z + m23;
@@ -77,8 +113,8 @@ namespace guarneri {
 			return ret;
 		}
 
-		vec3 transform_direction(const vec3& point) const {
-			vec3 ret;
+		float3 transform_direction(const float3& point) const {
+			float3 ret;
 			ret.x = m00 * point.x + m01 * point.y + m02 * point.z;
 			ret.y = m10 * point.x + m11 * point.y + m12 * point.z;
 			ret.z = m20 * point.x + m21 * point.y + m22 * point.z;
@@ -105,7 +141,6 @@ namespace guarneri {
 			ret.m33 = m30 * rhs.m03 + m31 * rhs.m13 + m32 * rhs.m23 + m33 * rhs.m33;
 			return ret;
 		}
-
 
 		mat4 transpose() {
 			mat4 ret = mat4(*this);
@@ -306,8 +341,8 @@ namespace guarneri {
 			return out;
 		}
 
-		vec4 operator *(const vec4& vector) const {
-			vec4 ret;
+		float4 operator *(const float4& vector) const {
+			float4 ret;
 			ret.x = m00 * vector.x + m01 * vector.y + m02 * vector.z + m03 * vector.w;
 			ret.y = m10 * vector.x + m11 * vector.y + m12 * vector.z + m13 * vector.w;
 			ret.z = m20 * vector.x + m21 * vector.y + m22 * vector.z + m23 * vector.w;
@@ -328,21 +363,21 @@ namespace guarneri {
 			return false;
 		}
 
-		vec4 row(const int& index) const {
-			vec4 ret;
+		float4 row(const int& index) const {
+			float4 ret;
 			switch (index)
 			{
 			case 0:
-				ret = vec4(m00, m01, m02, m03);
+				ret = float4(m00, m01, m02, m03);
 				break;
 			case 1:
-				ret = vec4(m10, m11, m12, m13);
+				ret = float4(m10, m11, m12, m13);
 				break;
 			case 2:
-				ret = vec4(m20, m21, m22, m23);
+				ret = float4(m20, m21, m22, m23);
 				break;
 			case 3:
-				ret = vec4(m30, m31, m32, m33);
+				ret = float4(m30, m31, m32, m33);
 				break;
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
@@ -350,21 +385,21 @@ namespace guarneri {
 			return ret;
 		}
 
-		vec4 column(const int& index) const {
-			vec4 ret;
+		float4 column(const int& index) const {
+			float4 ret;
 			switch (index)
 			{
 			case 0:
-				ret = vec4(m00, m10, m20, m30);
+				ret = float4(m00, m10, m20, m30);
 				break;
 			case 1:
-				ret = vec4(m01, m11, m21, m31);
+				ret = float4(m01, m11, m21, m31);
 				break;
 			case 2:
-				ret = vec4(m02, m12, m22, m32);
+				ret = float4(m02, m12, m22, m32);
 				break;
 			case 3:
-				ret = vec4(m03, m13, m23, m33);
+				ret = float4(m03, m13, m23, m33);
 				break;
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
@@ -486,6 +521,9 @@ namespace guarneri {
 		}
 	};
 
+	const mat4 mat4::IDENTITY(float4(1.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 1.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 1.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 1.0f));
+	const mat4 mat4::ZERO;
+
 	static std::ostream& operator << (std::ostream& stream, const mat4& mat) {
 		stream << mat.str();
 		return stream;
@@ -495,7 +533,4 @@ namespace guarneri {
 		stream << mat.str();
 		return stream;
 	}
-
-	const mat4 mat4::IDENTITY(vec4(1.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 1.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 1.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	const mat4 mat4::ZERO;
 }

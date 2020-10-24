@@ -70,7 +70,9 @@ solution "SoftRasterizer"
    filter { }
 
    includedirs {
-      "includes"
+      "includes",
+      "includes/math",
+      "includes/primitives"
    }
 
 project "SoftRasterizer"
@@ -80,6 +82,8 @@ project "SoftRasterizer"
    files 
    { 
       "includes/*.*",
+      "includes/math/*.*",
+      "includes/primitives/*.*",
       "src/*.*",
       "samples/*.*"
    }
@@ -97,6 +101,8 @@ project "UnitTest"
    files 
    { 
       "includes/*.*",
+      "includes/math/*.*",
+      "includes/primitives/*.*",
       "src/*.*",
       "unit_test/*.*"
    }
