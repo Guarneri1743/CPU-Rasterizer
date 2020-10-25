@@ -82,15 +82,15 @@ namespace guarneri {
 
 			vertex p1 = v1;
 			p1.position = float4(s1.xyz(), c1.w);
-			p1.perspective_division(c1.w);
+			p1 = p1.perspective_division();
 
 			vertex p2 = v2;
 			p2.position = float4(s2.xyz(), c2.w);
-			p2.perspective_division(c2.w);
+			p2 = p2.perspective_division();
 
 			vertex p3 = v3;
 			p3.position = float4(s3.xyz(), c3.w);
-			p3.perspective_division(c3.w);
+			p3 = p3.perspective_division();
 
 			int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
 
@@ -111,7 +111,7 @@ namespace guarneri {
 			int bottom = CEIL(trapezoid.bottom);
 			for (row = top; row < bottom; row++) {
 				if (row >= 0 && row < this->height) {
-					trapezoid.interpolate_lr_edge((float)CEIL(row));
+					trapezoid.interpolate_lr_edge((float)row + 0.5f);
 					scanline.next_step(trapezoid, row);
 					scan(scanline, material);
 				}
@@ -137,15 +137,21 @@ namespace guarneri {
 							float r = scanline.v.color.x * original_w;
 							float g = scanline.v.color.y * original_w;
 							float b = scanline.v.color.z * original_w;
-							unsigned char R = (unsigned char)(r * 255.0f);
-							unsigned char G = (unsigned char)(g * 255.0f);
-							unsigned char B = (unsigned char)(b * 255.0f);
+							int R = (int)(r * 255.0f);
+							int G = (int)(g * 255.0f);
+							int B = (int)(b * 255.0f);
 							R = CLAMP(R, 0, 255);
 							G = CLAMP(G, 0, 255);
 							B = CLAMP(B, 0, 255);
-							bitmap_color_t c = {R, G, B, 1};
-							//(R << 16) | (G << 8) | (B)
+							color_t c = (R << 16) | (G << 8) | (B);
 							write_color_buffer(y, x, c);
+						}
+						else {
+							/*int R = 0;
+							int G = 255;
+							int B = 0;
+							color_t c = (R << 16) | (G << 8) | (B);
+							write_color_buffer(y, x, c);*/
 						}
 					}
 				}
@@ -222,15 +228,20 @@ namespace guarneri {
 			zbuffer->clear();
 		}
 
-		bool read_color_buffer(const int& x, const int& y, bitmap_color_t& ret) {
+		bool read_color_buffer(const int& x, const int& y, color_t& ret) {
 			return frame_buffer->read(x, y, ret);
 		}
 
-		bool write_color_buffer(const int& x, const int& y, const bitmap_color_t& ret) {
+		bool write_color_buffer(const int& x, const int& y, const color_t& ret) {
 			return frame_buffer->write(x, y, ret);
 		}
 
 		void clear_color_buffer() {
+			frame_buffer->clear();
+		}
+
+		void clear() {
+			zbuffer->clear();
 			frame_buffer->clear();
 		}
 	};

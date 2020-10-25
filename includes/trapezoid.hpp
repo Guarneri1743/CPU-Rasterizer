@@ -23,17 +23,16 @@ namespace guarneri {
 
 		static int generate_trapezoid(vertex& p1, vertex& p2, vertex& p3, std::vector<trapezoid>& ret) {
 			assert(ret.size() == 2);
-			vertex p;
 			float k, x;
 
-			if (p1.position.y > p2.position.y) p = p1, p1 = p2, p2 = p;
-			if (p1.position.y > p3.position.y) p = p1, p1 = p3, p3 = p;
-			if (p2.position.y > p3.position.y) p = p2, p2 = p3, p3 = p;
+			if (p1.position.y > p2.position.y) std::swap(p1, p2);
+			if (p1.position.y > p3.position.y) std::swap(p1, p3);
+			if (p2.position.y > p3.position.y) std::swap(p2, p3);
 			if (p1.position.y == p2.position.y && p1.position.y == p3.position.y) return 0;
 			if (p1.position.x == p2.position.x && p1.position.x == p3.position.x) return 0;
 
 			if (p1.position.y == p2.position.y) {	// triangle down
-				if (p1.position.x > p2.position.x) p = p1, p1 = p2, p2 = p;
+				if (p1.position.x > p2.position.x) std::swap(p1, p2);
 				ret[0].top = p1.position.y;
 				ret[0].bottom = p3.position.y;
 				ret[0].left.v1 = p1;
@@ -44,7 +43,7 @@ namespace guarneri {
 			}
 
 			if (p2.position.y == p3.position.y) {	// triangle up
-				if (p2.position.x > p3.position.x) p = p2, p2 = p3, p3 = p;
+				if (p2.position.x > p3.position.x) std::swap(p2, p3);
 				ret[0].top = p1.position.y;
 				ret[0].bottom = p3.position.y;
 				ret[0].left.v1 = p1;

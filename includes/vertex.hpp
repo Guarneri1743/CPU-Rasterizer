@@ -42,9 +42,9 @@ namespace guarneri {
 		float rhw;
 
 	public:
-		vertex perspective_division(const float& w) {
+		vertex perspective_division() {
 			vertex ret = *this;
-			ret.rhw = 1.0f / w;
+			ret.rhw = 1.0f / ret.position.w;
 			ret.uv *= rhw;
 			ret.color *= rhw;
 			return ret;

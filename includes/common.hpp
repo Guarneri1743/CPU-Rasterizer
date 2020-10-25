@@ -21,15 +21,9 @@ namespace guarneri{
 	#define INVALID_TEXTURE_ID 0
 	#define CEIL(val) (int)(val + 0.5f)
 
-	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
-
 	typedef unsigned int int32_t;
 	typedef unsigned int id_t;
-	typedef unsigned int color_t;
-	typedef struct{
-		unsigned char r;
-		unsigned char g;
-		unsigned char b;
-		unsigned char a;
-	} bitmap_color_t;
+	typedef int color_t;
+
+	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
 }
