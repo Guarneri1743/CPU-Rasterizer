@@ -125,33 +125,33 @@ namespace guarneri {
 			int y = scanline.y;
 			int x = scanline.x;
 			int w = scanline.w;
+			id_t id = mat.get_shader_id();
+			shader* s = shader_manager::singleton()->get_shader(id);
 			for (; w > 0; x++, w--) {
 				if (x >= 0 && x < width) {
 					float rhw = scanline.v.rhw;
 					float depth = 0.0f;
 					if (read_zbuffer(y, x, depth)) {
-						// depth test
+						// z-test pass
 						if (rhw >= depth) {
 							float original_w = 1.0f / rhw;
+							// write z buffer
 							write_zbuffer(y, x, rhw);
-							float r = scanline.v.color.x;
-							float g = scanline.v.color.y;
-							float b = scanline.v.color.z;
-							int R = (int)(r * 255.0f);
-							int G = (int)(g * 255.0f);
-							int B = (int)(b * 255.0f);
-							R = CLAMP(R, 0, 255);
-							G = CLAMP(G, 0, 255);
-							B = CLAMP(B, 0, 255);
-							color_t c = (R << 16) | (G << 8) | (B);
-							write_color_buffer(y, x, c);
-						}
-						else {
-							/*int R = 0;
-							int G = 255;
-							int B = 0;
-							color_t c = (R << 16) | (G << 8) | (B);
-							write_color_buffer(y, x, c);*/
+							// fragment shader
+							if (s != nullptr) {
+								v_output v_out;
+								v_out.position = scanline.v.position;
+								v_out.color = scanline.v.color;
+								v_out.normal = scanline.v.normal;
+								v_out.uv = scanline.v.uv;
+								float4 ret = s->fragment_shader(v_out);
+								color_t c = encode_color(ret.x, ret.y, ret.z);
+								write_color_buffer(y, x, c);
+							}
+							else {
+								color_t c = encode_color(scanline.v.color.x, scanline.v.color.y, scanline.v.color.z);
+								write_color_buffer(y, x, c);
+							}
 						}
 					}
 				}

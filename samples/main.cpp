@@ -8,7 +8,6 @@
 using namespace guarneri;
 using namespace std;
 
-
 vertex mesh[8] = {
 	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f), float3::ONE, float2(0.0f, 0.0f), float3()),
 	 vertex(float4(1, -1,  1, 1), float4(0.2f, 0.2f, 1.0f),float3::ONE,  float2(0.0f, 1.0f), float3()),
@@ -40,7 +39,9 @@ void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v
 int main(void)
 {
 	shader* s = new shader();
+
 	id_t shader_id = 0;
+
 	if (!shader_manager::singleton()->add_shader(s, shader_id)) {
 		return 0;
 	}
@@ -49,32 +50,40 @@ int main(void)
 
 	float alpha = 1;
 
-	TCHAR* title = _T("Mini3d (software render tutorial) - ")
-		_T("Left/Right: rotation, Up/Down: forward/backward, Space: swiuvh state");
+	TCHAR* title = _T("SoftRasterizer");
 
 	if (screen_init(800, 600, title))
 		return -1;
 
-	render_device device(screen_fb, 800, 600);
+	int w = 800;
+	int h = 600;
 
-	float3 pos = float3(4.0f, 4.0f, 4.0f);
-	camera cam(pos, (float)8 / (float)6, 60.0f, 0.5f, 500.0f, camera::projection::perspective);
+	render_device device(screen_fb, 800, 600);
+	float aspect = (float)w / (float)h;
+
+	float3 cam_pos = float3(4.0f, 4.0f, 4.0f);
+	float3 box_pos = float3(0.0f, 1.0f, 0.0f);
+
+	camera cam(cam_pos, aspect, 60.0f, 0.5f, 500.0f, camera::projection::perspective);
 
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
 		screen_dispatch();
-		if (screen_keys[VK_UP]) pos.y -= 0.1f;
-		if (screen_keys[VK_DOWN]) pos.y += 0.1f;
-		if (screen_keys[VK_LEFT]) alpha += 1.0f;
-		if (screen_keys[VK_RIGHT]) alpha -= 1.0f;
+
+		if (screen_keys[VK_UP]) cam_pos.y -= 0.5f;
+		if (screen_keys[VK_DOWN]) cam_pos.y += 0.5f;
+		if (screen_keys[VK_LEFT]) alpha += 10.0f;
+		if (screen_keys[VK_RIGHT]) alpha -= 10.0f;
 
 		device.clear();
-		cam.set_position(pos);
-		cam.set_target(float3(0, 0, 0));
+		cam.set_position(cam_pos);
+		cam.set_target(box_pos);
 
+		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
-		mat4 m = r;
+		mat4 m = t * r;
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
 		screen_update();
+
 		Sleep(1);
 	}
 	return 0;

@@ -45,7 +45,8 @@ namespace guarneri {
 		}
 
 		float4 fragment_shader(const v_output& input) {
-			return float4();
+			// return vertex color;
+			return input.color;
 		}
 	};
 }

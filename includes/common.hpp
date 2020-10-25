@@ -26,4 +26,15 @@ namespace guarneri{
 	typedef int color_t;
 
 	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
+
+	color_t encode_color(const float& r, const float& g, const float& b) {
+		int R = (int)(r * 255.0f);
+		int G = (int)(g * 255.0f);
+		int B = (int)(b * 255.0f);
+		R = CLAMP(R, 0, 255);
+		G = CLAMP(G, 0, 255);
+		B = CLAMP(B, 0, 255);
+		color_t c = (R << 16) | (G << 8) | (B);
+		return c;
+	}
 }
