@@ -100,40 +100,62 @@ namespace guarneri {
 			return m;
 		}
 
+		static mat4 viewport(const int& x, const int& y, const int& w, const int& h) {
+			mat4 ret = IDENTITY;
+			ret.at(0, 0) = w * 0.5f;
+			ret.at(0, 3) = x + (w * 0.5f);
+			ret.at(1, 1) = h * 0.5f;
+			ret.at(1, 3) = y + (h * 0.5f);
+			return ret;
+		}
+
+		// perspective matrix
 		static mat4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
-			float s = 1.0f / (float)(std::tan((fov / 2.0) * (PI / 180.0)));
+			float rad = DEGREE2RAD(fov * 0.5f);
+			float cot = std::cos(rad) / std::sin(rad);
 			mat4 m = ZERO;
-			m.at(0, 0) = s / aspect;
-			m.at(1, 1) = s;
-			m.at(2, 2) = -far / (far - near);
-			m.at(2, 3) = -1.0f;
-			m.at(3, 2) = -(far * near) / (far - near);
+			m.at(0, 0) = cot / aspect;
+			m.at(1, 1) = cot;
+			m.at(2, 2) = (far + near) / (near - far);
+			m.at(3, 2) = -1.0f;
+			m.at(2, 3) = 2.0f * (far * near) / (near - far);
 			return m;
 		}
 
-		static mat4 lookat_matrix(const float3& position, const float3& target) {
-			// dir
-			float3 zaxis = float3::normalize(position - target);
-			// right
-			float3 xaxis = float3::normalize(float3::cross(float3::normalize(float3::UP), zaxis));
-			// up
-			float3 yaxis = float3::cross(zaxis, xaxis);
+		// ortho matrix
+		static mat4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+			mat4 m = IDENTITY;
+			m.at(0, 0) = 2.0f / (right - left);
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 1) = 2.0f / (top - bottom);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 2) = -2.0f / (far - near);
+			m.at(2, 3) = -(far + near) / (far - near);
+			return m;
+		}
 
-			mat4 translation = mat4::translation(-position);
+		// view matrix
+		static mat4 lookat_matrix(const float3& position, const float3& target, const float3& world_up) {
+			float3 forward = float3::normalize(position - target);
+			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up)));
+			float3 up = float3::cross(right, forward);
 
-			// VPN
-			mat4 rotation = mat4::IDENTITY;
-			rotation.at(0, 0) = xaxis.x;
-			rotation.at(0, 1) = xaxis.y;
-			rotation.at(0, 2) = xaxis.z;
-			rotation.at(1, 0) = yaxis.x;
-			rotation.at(1, 1) = yaxis.y;
-			rotation.at(2, 1) = yaxis.z;
-			rotation.at(2, 0) = zaxis.x;
-			rotation.at(2, 1) = zaxis.y;
-			rotation.at(2, 2) = zaxis.z;
+			// UVN--right up forward
+			mat4 view = mat4::IDENTITY;
+			view.at(0, 0) = right.x;
+			view.at(0, 1) = right.y;
+			view.at(0, 2) = right.z;
+			view.at(1, 0) = up.x;
+			view.at(1, 1) = up.y;
+			view.at(1, 2) = up.z;
+			view.at(2, 0) = forward.x;
+			view.at(2, 1) = forward.y;
+			view.at(2, 2) = forward.z;
+			view.at(0, 3) = -float3::dot(right, position);
+			view.at(1, 3) = -float3::dot(up, position);
+			view.at(2, 3) = -float3::dot(forward, position);
 
-			return rotation * translation;
+			return view;
 		}
 
 		float3 transform_point(const float3& point) const {

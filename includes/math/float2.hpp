@@ -140,10 +140,10 @@ namespace guarneri {
 		}
 
 		public:
-			float2 xx() { return float2(x, x); }
-			float2 yy() { return float2(y, y); }
-			float2 yx() { return float2(y, x); }
-			float2 xy() { return float2(x, y); }
+			float2 xx() const { return float2(x, x); }
+			float2 yy() const { return float2(y, y); }
+			float2 yx() const { return float2(y, x); }
+			float2 xy() const { return float2(x, y); }
 	};
 
 	static float2 operator *(const float& val, const float2& vec) {

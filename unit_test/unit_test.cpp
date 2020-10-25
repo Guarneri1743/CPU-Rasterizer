@@ -1,23 +1,43 @@
 ﻿#include <iostream>
-#include <mat4.hpp>
-#include <float4.hpp>
-#include <aabb.hpp>
-#include <line.hpp>
-#include <sphere.hpp>
-#include <cylinder.hpp>
-#include <capsule.hpp>
-#include <segment.hpp>
-#include <ray.hpp>
-#include <plane.hpp>
-#include <vertex.hpp>
-#include <camera.hpp>
+//#include <mat4.hpp>
+//#include <float4.hpp>
+//#include <aabb.hpp>
+//#include <line.hpp>
+//#include <sphere.hpp>
+//#include <cylinder.hpp>
+//#include <capsule.hpp>
+//#include <segment.hpp>
+//#include <ray.hpp>
+//#include <plane.hpp>
+//#include <vertex.hpp>
+//#include <camera.hpp>
+//#include <render_device.hpp>
+#include <raw_buffer.hpp>
+#include <framebuffer.hpp>
 
 using namespace guarneri;
 using namespace std;
 
 int main()
 {
-	mat4 m(float4(0, 0, -1, 0), float4(0, 2, 0, 0), float4(3, 0, 0, 0), float4(50, 60, 70, 1));
+	//void* buffer = malloc(400);
+	//framebuffer fb(buffer, 3, 3);
+	//for (int i = 0; i < 3; i++) {
+	//	for (int j = 0; j < 3; j++) {
+	//		unsigned char c = (unsigned char)(i * 100);
+	//		fb.write(i, j, { c, c, c, 1});
+	//	}
+	//}
+
+	//for (int i = 0; i < 3; i++) {
+	//	for (int j = 0; j < 3; j++) {
+	//		bitmap_color_t color;
+	//		fb.read(i, j, color);
+	//		cout << (int)color.r << ", " << (int)color.g << ", " << (int)color.b << ", " << (int)color.a << endl;
+	//	}
+	//}
+	//free(buffer);
+	/*mat4 m(float4(0, 0, -1, 0), float4(0, 2, 0, 0), float4(3, 0, 0, 0), float4(50, 60, 70, 1));
 	mat4 t(float4(0, 0, 3, 50), float4(0, 2, 0, 60), float4(-1, 0, 0, 70), float4(0, 0, 0, 1));
 	mat4 i(float4(0, 0, 0.33333f, 0), float4(0, 0.5f, 0, 0), float4(-1, 0, 0, 0), float4(70, -30, -16.66666f, 1));
 
@@ -43,7 +63,7 @@ int main()
 	cout << "world_direction: " << world_dir << endl;
 
 	mat4 rot = mat4::rotation(float3(1, 1, 1), 70.0f);
-	cout << rot << endl; 
+	cout << rot << endl; */
 
 	/*0.56135  -0.32321  0.76186	0.00000
 	0.76186	  0.56135  -0.32321	0.00000

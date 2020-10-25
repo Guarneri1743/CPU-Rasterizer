@@ -10,26 +10,76 @@ namespace guarneri {
 			position = float4();
 			color = float4();
 			uv = float2();
-			rhw = 1.0f / position.w;
+			normal = float3();
+			tangent = float3();
+			this->rhw = 1.0f;
+		}
+
+		vertex(const float4& position, const float4& color, const float3& normal, const float2& uv, const float3& tangent) {
+			this->position = position;
+			this->color = color;
+			this->normal = normal;
+			this->uv = uv;
+			this->tangent = tangent;
+			this->rhw = 1.0f / this->position.w;
 		}
 
 		vertex(const vertex& other) {
 			this->position = other.position;
 			this->color = other.color;
 			this->uv = other.uv;
+			this->normal = other.normal;
+			this->tangent = other.tangent;
 			this->rhw = other.rhw;
 		}
 
 	public:
 		float4 position;
 		float4 color;
+		float3 normal;
 		float2 uv;
+		float3 tangent;
 		float rhw;
 
 	public:
-		void apply_rhw() {
-			this->rhw = 1.0f / position.w;
-			this->uv *= this->rhw;
+		vertex perspective_division(const float& w) {
+			vertex ret = *this;
+			ret.rhw = 1.0f / w;
+			ret.uv *= rhw;
+			ret.color *= rhw;
+			return ret;
+		}
+
+		static vertex add(const vertex& left, const vertex& right) {
+			vertex ret;
+			ret.position = (right.position + left.position);
+			ret.color = (right.color + left.color);
+			ret.normal = (right.normal + left.normal);
+			ret.uv = (right.uv + left.uv);
+			ret.tangent = (right.tangent + left.tangent);
+			ret.rhw = (right.rhw + left.rhw);
+			return ret;
+		}
+
+		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
+			vertex ret;
+			ret.position = right.position + (right.position - left.position) * t;
+			ret.color = right.color + (right.color - left.color) * t;
+			ret.normal = right.normal + (right.normal - left.normal) * t;
+			ret.uv = right.uv + (right.uv - left.uv) * t;
+			ret.tangent = right.tangent + (right.tangent - left.tangent) * t;
+			ret.rhw = right.rhw + (right.rhw - left.rhw) * t;
+			return ret;
+		}
+
+		static vertex perspective_division(const vertex& left, const vertex& right, const float& w) {
+			float inv_w = 1.0f / w;
+			vertex ret;
+			ret.position = (right.position - left.position) * inv_w;
+			ret.color = (right.color - left.color) * inv_w;
+			ret.uv = (right.uv - left.uv) * inv_w;
+			ret.rhw = (right.rhw - left.rhw) * inv_w;
+			return ret;
 		}
 	};
 }

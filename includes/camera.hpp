@@ -4,7 +4,7 @@
 #include <mat4.hpp>
 
 namespace guarneri {
-	class camera
+	struct camera
 	{
 	public:
 		enum class projection {
@@ -23,6 +23,7 @@ namespace guarneri {
 			this->pitch = 0.0f;
 			this->proj_type = proj_type;
 			update_camera();
+			update_proj_mode();
 		}
 
 	public:
@@ -44,24 +45,53 @@ namespace guarneri {
 
 	public:
 		mat4 view_matrix() {
-			return mat4::lookat_matrix(this->position, this->position + this->front);
+			return mat4::lookat_matrix(this->position, this->target, float3::UP);
+		}
+
+		void set_target(const float3& target) {
+			this->target = target;
 		}
 
 		const mat4& get_projection_matrix() const{
 			return projection_matrix;
 		}
 
+		void set_position(const float3& pos) {
+			this->position = pos;
+		}
+
+		void move(const float3& t) {
+			this->position += t;
+		}
+
+		void rotate(const float& yaw_offset, const float& pitch_offset) {
+			this->yaw += yaw_offset;
+			this->pitch += pitch_offset;
+
+			if (this->pitch > 89.0f)
+			{
+				this->pitch = 89.0f;
+			}
+			if (this->pitch < -89.0f)
+			{
+				this->pitch = -89.0f;
+			}
+			update_camera();
+		}
+
 		void update_camera() {
-			float3 target_front;
+			/*float3 target_front;
 			target_front.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
 			target_front.y = sin(DEGREE2RAD(this->pitch));
 			target_front.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
 			target_front = float3::normalize(target_front);
 			float3 target_right = float3::normalize(float3::cross(target_front, float3::UP));
-			float3 targetUp = float3::normalize(float3::cross(target_right, target_front));
+			float3 target_up = float3::normalize(float3::cross(target_right, target_front));
 			this->front = target_front;
 			this->right = target_right;
-			this->up = targetUp;
+			this->up = target_up;*/
+
+
 		}
 
 		//todo: ortho

@@ -166,47 +166,47 @@ namespace guarneri {
 		}
 
 		public:
-			float3 xxx() { return float3(x, x, x); }
-			float3 xxy() { return float3(x, x, y); }
-			float3 xxz() { return float3(x, x, z); }
-			float3 xyx() { return float3(x, y, x); }
-			float3 xyy() { return float3(x, y, y); }
-			float3 xyz() { return float3(x, y, z); }
-			float3 xzx() { return float3(x, z, x); }
-			float3 xzy() { return float3(x, z, y); }
-			float3 xzz() { return float3(x, z, z); }
+			float3 xxx() const { return float3(x, x, x); }
+			float3 xxy() const { return float3(x, x, y); }
+			float3 xxz() const { return float3(x, x, z); }
+			float3 xyx() const { return float3(x, y, x); }
+			float3 xyy() const { return float3(x, y, y); }
+			float3 xyz() const { return float3(x, y, z); }
+			float3 xzx() const { return float3(x, z, x); }
+			float3 xzy() const { return float3(x, z, y); }
+			float3 xzz() const { return float3(x, z, z); }
 
-			float3 yxx() { return float3(y, x, x); }
-			float3 yxy() { return float3(y, x, y); }
-			float3 yxz() { return float3(y, x, z); }
-			float3 yyx() { return float3(y, y, x); }
-			float3 yyy() { return float3(y, y, y); }
-			float3 yyz() { return float3(y, y, z); }
-			float3 yzx() { return float3(y, z, x); }
-			float3 yzy() { return float3(y, z, y); }
-			float3 yzz() { return float3(y, z, z); }
+			float3 yxx() const { return float3(y, x, x); }
+			float3 yxy() const { return float3(y, x, y); }
+			float3 yxz() const { return float3(y, x, z); }
+			float3 yyx() const { return float3(y, y, x); }
+			float3 yyy() const { return float3(y, y, y); }
+			float3 yyz() const { return float3(y, y, z); }
+			float3 yzx() const { return float3(y, z, x); }
+			float3 yzy() const { return float3(y, z, y); }
+			float3 yzz() const { return float3(y, z, z); }
 
-			float3 zxx() { return float3(z, x, x); }
-			float3 zxy() { return float3(z, x, y); }
-			float3 zxz() { return float3(z, x, z); }
-			float3 zyx() { return float3(z, y, x); }
-			float3 zyy() { return float3(z, y, y); }
-			float3 zyz() { return float3(z, y, z); }
-			float3 zzx() { return float3(z, z, x); }
-			float3 zzy() { return float3(z, z, y); }
-			float3 zzz() { return float3(z, z, z); }
+			float3 zxx() const { return float3(z, x, x); }
+			float3 zxy() const { return float3(z, x, y); }
+			float3 zxz() const { return float3(z, x, z); }
+			float3 zyx() const { return float3(z, y, x); }
+			float3 zyy() const { return float3(z, y, y); }
+			float3 zyz() const { return float3(z, y, z); }
+			float3 zzx() const { return float3(z, z, x); }
+			float3 zzy() const { return float3(z, z, y); }
+			float3 zzz() const { return float3(z, z, z); }
 
-			float2 xx() { return float2(x, x); }
-			float2 xy() { return float2(x, y); }
-			float2 xz() { return float2(x, z); }
+			float2 xx() const { return float2(x, x); }
+			float2 xy() const { return float2(x, y); }
+			float2 xz() const { return float2(x, z); }
 
-			float2 yx() { return float2(y, x); }
-			float2 yy() { return float2(y, y); }
-			float2 yz() { return float2(y, z); }
+			float2 yx() const { return float2(y, x); }
+			float2 yy() const { return float2(y, y); }
+			float2 yz() const { return float2(y, z); }
 
-			float2 zz() { return float2(z, z); }
-			float2 zx() { return float2(z, x); }
-			float2 zy() { return float2(z, y); }
+			float2 zz() const { return float2(z, z); }
+			float2 zx() const { return float2(z, x); }
+			float2 zy() const { return float2(z, y); }
 	};
 
 	static float3 operator *(const float& val, const float3& vec) {
