@@ -134,9 +134,9 @@ namespace guarneri {
 						if (rhw >= depth) {
 							float original_w = 1.0f / rhw;
 							write_zbuffer(y, x, rhw);
-							float r = scanline.v.color.x * original_w;
-							float g = scanline.v.color.y * original_w;
-							float b = scanline.v.color.z * original_w;
+							float r = scanline.v.color.x;
+							float g = scanline.v.color.y;
+							float b = scanline.v.color.z;
 							int R = (int)(r * 255.0f);
 							int G = (int)(g * 255.0f);
 							int B = (int)(b * 255.0f);

@@ -59,14 +59,7 @@ int main(void)
 
 	float3 pos = float3(4.0f, 4.0f, 4.0f);
 	camera cam(pos, (float)8 / (float)6, 60.0f, 0.5f, 500.0f, camera::projection::perspective);
-	cout << cam.get_projection_matrix() << endl << endl;
-	cout << cam.view_matrix() << endl << endl;
-	cout << cam.get_projection_matrix() * cam.view_matrix() << endl;
-	cout << mat4::IDENTITY << endl << endl;
-	cout << cam.get_projection_matrix() * cam.view_matrix() * mat4::IDENTITY << endl;
-	float4 pt(0, 0, 0, 1);
-	cout << cam.view_matrix() * pt << endl;
-	cout << cam.get_projection_matrix() * cam.view_matrix() * pt << endl;
+
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
 		screen_dispatch();
 		if (screen_keys[VK_UP]) pos.y -= 0.1f;

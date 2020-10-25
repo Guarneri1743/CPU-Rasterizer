@@ -63,12 +63,13 @@ namespace guarneri {
 
 		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
 			vertex ret;
-			ret.position = right.position + (right.position - left.position) * t;
-			ret.color = right.color + (right.color - left.color) * t;
-			ret.normal = right.normal + (right.normal - left.normal) * t;
-			ret.uv = right.uv + (right.uv - left.uv) * t;
-			ret.tangent = right.tangent + (right.tangent - left.tangent) * t;
-			ret.rhw = right.rhw + (right.rhw - left.rhw) * t;
+			ret.position = left.position + (right.position - left.position) * t;
+			ret.position.w = 1.0f;
+			ret.color = left.color + (right.color - left.color) * t;
+			ret.normal = left.normal + (right.normal - left.normal) * t;
+			ret.uv = left.uv + (right.uv - left.uv) * t;
+			ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
+			ret.rhw = left.rhw + (right.rhw - left.rhw) * t;
 			return ret;
 		}
 
