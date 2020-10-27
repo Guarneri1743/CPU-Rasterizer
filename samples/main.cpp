@@ -61,22 +61,23 @@ int main(void)
 	render_device device(screen_fb, 800, 600);
 	float aspect = (float)w / (float)h;
 
-	float3 cam_pos = float3(4.0f, 4.0f, 4.0f);
-	float3 box_pos = float3(0.0f, 1.0f, 0.0f);
+	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
+	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
 
-	camera cam(cam_pos, aspect, 60.0f, 0.5f, 500.0f, camera::projection::perspective);
+	camera cam(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
 		screen_dispatch();
 
-		if (screen_keys[VK_UP]) cam_pos.y -= 0.5f;
-		if (screen_keys[VK_DOWN]) cam_pos.y += 0.5f;
-		if (screen_keys[VK_LEFT]) alpha += 10.0f;
-		if (screen_keys[VK_RIGHT]) alpha -= 10.0f;
+		if (screen_keys[VK_UP]) box_pos.z -= 0.2f;
+		if (screen_keys[VK_DOWN]) box_pos.z += 0.2f;
+		if (screen_keys[VK_LEFT]) box_pos.x += 0.2f;
+		if (screen_keys[VK_RIGHT]) box_pos.x -= 0.2f;
+		if (screen_keys[VK_SPACE]) alpha += 5.0f;
 
 		device.clear();
 		cam.set_position(cam_pos);
-		cam.set_target(box_pos);
+		cam.set_target(float3(0.0f, 0.0f, 0.0f));
 
 		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);

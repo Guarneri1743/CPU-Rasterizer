@@ -74,12 +74,12 @@ namespace guarneri {
 		}
 
 		static vertex perspective_division(const vertex& left, const vertex& right, const float& w) {
-			float inv_w = 1.0f / w;
+			float rhw = 1.0f / w;
 			vertex ret;
-			ret.position = (right.position - left.position) * inv_w;
-			ret.color = (right.color - left.color) * inv_w;
-			ret.uv = (right.uv - left.uv) * inv_w;
-			ret.rhw = (right.rhw - left.rhw) * inv_w;
+			ret.position = (right.position - left.position) * rhw;
+			ret.color = (right.color - left.color) * rhw;
+			ret.uv = (right.uv - left.uv) * rhw;
+			ret.rhw = (right.rhw - left.rhw) * rhw;
 			return ret;
 		}
 	};

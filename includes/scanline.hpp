@@ -8,16 +8,16 @@ namespace guarneri {
 	struct scanline {
 		vertex v;
 		vertex step;
-		int x;
-		int y;
+		int row;
+		int col;
 		int w;
 
 	public:
-		void next_step(const trapezoid& trap, int offset) {
+		void next_step(const trapezoid& trap, int r) {
 			float width = trap.right.v.position.x - trap.left.v.position.x;
-			this->x = CEIL(trap.left.v.position.x);
-			this->w = CEIL(trap.right.v.position.x) - this->x;
-			this->y = offset;
+			this->col = CEIL(trap.left.v.position.x);
+			this->w = CEIL(trap.right.v.position.x) - this->col;
+			this->row = r;
 			this->v = trap.left.v;
 			if (trap.left.v.position.x >= trap.right.v.position.x){
 				this->w = 0;

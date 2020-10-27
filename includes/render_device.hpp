@@ -7,9 +7,11 @@
 #include <trapezoid.hpp>
 #include <scanline.hpp>
 #include <material.hpp>
+#include <aabb2d.hpp>
+#include <triangle.hpp>
 #include <shader_manager.hpp>
 #include <texture_manager.hpp>
-#include <util.hpp>
+#include <line_drawer.hpp>
 
 namespace guarneri {
 	enum class render_state {
@@ -23,7 +25,7 @@ namespace guarneri {
 			this->width = width;
 			this->height = height;
 			this->background_color = 0;
-			this->wire_frame_color = 256;
+			this->wire_frame_color = encode_color(1.0f, 1.0f, 1.0f);
 			state = render_state::shaded;
 			zbuffer = new raw_buffer<float>(width, height);
 			frame_buffer = new framebuffer(fb, width, height);
@@ -92,16 +94,15 @@ namespace guarneri {
 			p3.position = float4(s3.xyz(), c3.w);
 			p3 = p3.perspective_division();
 
+
 			int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
 
 			if (n >= 1) render_trapezoid(material, trapezoids[0]);
 			if (n >= 2) render_trapezoid(material, trapezoids[1]);
 
-			//if (state == render_state::wire_frame) {
-			//	util::draw_line<color_t>(this->color_buffer, (int)p1.position.x, (int)p1.position.y, (int)p2.position.x, (int)p2.position.y, this->wire_frame_color);
-			//	util::draw_line<color_t>(this->color_buffer, (int)p1.position.x, (int)p1.position.y, (int)p3.position.x, (int)p3.position.y, this->wire_frame_color);
-			//	util::draw_line<color_t>(this->color_buffer, (int)p3.position.x, (int)p3.position.y, (int)p2.position.x, (int)p2.position.y, this->wire_frame_color);
-			//}
+			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, this->wire_frame_color);
+			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s3.x, (int)s3.y, this->wire_frame_color);
+			line_drawer::bresenham(*this->frame_buffer, (int)s3.x, (int)s3.y, (int)s2.x, (int)s2.y, this->wire_frame_color);
 		}
 
 		void render_trapezoid(material& material, trapezoid& trapezoid) {
@@ -122,21 +123,21 @@ namespace guarneri {
 		}
 
 		void scan(scanline& scanline, material& mat) {
-			int y = scanline.y;
-			int x = scanline.x;
+			int row = scanline.row;
+			int col = scanline.col;
 			int w = scanline.w;
 			id_t id = mat.get_shader_id();
 			shader* s = shader_manager::singleton()->get_shader(id);
-			for (; w > 0; x++, w--) {
-				if (x >= 0 && x < width) {
+			for (; w > 0; col++, w--) {
+				if (col >= 0 && col < width) {
 					float rhw = scanline.v.rhw;
 					float depth = 0.0f;
-					if (read_zbuffer(y, x, depth)) {
+					if (read_zbuffer(row, col, depth)) {
 						// z-test pass
 						if (rhw >= depth) {
 							float original_w = 1.0f / rhw;
 							// write z buffer
-							write_zbuffer(y, x, rhw);
+							write_zbuffer(row, col, rhw);
 							// fragment shader
 							if (s != nullptr) {
 								v_output v_out;
@@ -146,17 +147,17 @@ namespace guarneri {
 								v_out.uv = scanline.v.uv;
 								float4 ret = s->fragment_shader(v_out);
 								color_t c = encode_color(ret.x, ret.y, ret.z);
-								write_color_buffer(y, x, c);
+								write_color_buffer(row, col, c);
 							}
 							else {
 								color_t c = encode_color(scanline.v.color.x, scanline.v.color.y, scanline.v.color.z);
-								write_color_buffer(y, x, c);
+								write_color_buffer(row, col, c);
 							}
 						}
 					}
 				}
 				scanline.v = vertex::add(scanline.v, scanline.step);
-				if (x >= width) break;
+				if (col >= width) break;
 			}
 		}
 

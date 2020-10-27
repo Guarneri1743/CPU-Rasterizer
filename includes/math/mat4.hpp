@@ -136,9 +136,9 @@ namespace guarneri {
 
 		// view matrix
 		static mat4 lookat_matrix(const float3& position, const float3& target, const float3& world_up) {
-			float3 forward = float3::normalize(position - target);
-			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up)));
-			float3 up = float3::cross(right, forward);
+			float3 forward = float3::normalize(position - target); 
+			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
+			float3 up = float3::cross(right, forward); // no need to normalize
 
 			// UVN--right up forward
 			mat4 view = mat4::IDENTITY;

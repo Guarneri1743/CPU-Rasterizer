@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdlib>
 #include <cmath>
+#include <limits.h>
 #include <algorithm>
 #include <string>
 #include <sstream>
@@ -19,7 +20,9 @@ namespace guarneri{
 	#define SCREEN_WIDTH 1024
 	#define SCREEN_HEIGHT 768
 	#define INVALID_TEXTURE_ID 0
+	#define FLOOR(val) (int)(val)
 	#define CEIL(val) (int)(val + 0.5f)
+	
 
 	typedef unsigned int int32_t;
 	typedef unsigned int id_t;

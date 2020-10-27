@@ -123,3 +123,7 @@ vs2019/obj/Win64/Debug/UnitTest/UnitTest.tlog/link.7668-rc.write.1.tlog
 vs2019/obj/Win64/Debug/UnitTest/UnitTest.tlog/link.7668.read.1.tlog
 vs2019/obj/Win64/Debug/UnitTest/UnitTest.tlog/link.7668.write.1.tlog
 vs2019/obj/Win64/Debug/UnitTest/UnitTest.tlog/unsuccessfulbuild
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/1cdfeeaa0fd9c081/TRIANGLE.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/26de9bdba3ca2c80/RASTERIZER.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/cfc314c62bafb4cd/AABB2D.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/f2a0d110840c0dc1/LINE_DRAWER.ipch
