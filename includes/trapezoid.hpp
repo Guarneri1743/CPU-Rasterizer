@@ -5,6 +5,8 @@ namespace guarneri {
 	struct edge {
 		vertex v, v1, v2;
 	};
+
+
 	struct trapezoid {
 		float top;
 		float bottom;

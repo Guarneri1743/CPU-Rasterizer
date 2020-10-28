@@ -73,7 +73,7 @@ int main(void)
 		if (screen_keys[VK_DOWN]) box_pos.z += 0.2f;
 		if (screen_keys[VK_LEFT]) box_pos.x += 0.2f;
 		if (screen_keys[VK_RIGHT]) box_pos.x -= 0.2f;
-		if (screen_keys[VK_SPACE]) alpha += 5.0f;
+		if (screen_keys[VK_SPACE]) alpha += 1.0f;
 
 		device.clear();
 		cam.set_position(cam_pos);

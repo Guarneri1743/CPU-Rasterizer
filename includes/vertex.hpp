@@ -82,5 +82,22 @@ namespace guarneri {
 			ret.rhw = (right.rhw - left.rhw) * rhw;
 			return ret;
 		}
+
+	public:
+		std::string str() const {
+			std::stringstream ss;
+			ss << "vertex: [pos: " << this->position << ", color: " << this->color << ", uv: " << uv << "]";
+			return ss.str();
+		}
 	};
+
+	static std::ostream& operator << (std::ostream& stream, const vertex& ray) {
+		stream << ray.str();
+		return stream;
+	}
+
+	static std::stringstream& operator << (std::stringstream& stream, const vertex& ray) {
+		stream << ray.str();
+		return stream;
+	}
 }

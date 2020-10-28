@@ -17,18 +17,18 @@ namespace guarneri {
 		int height;
 
 	public:
-		bool write(const int& x, const int& y, const color_t& color) {
-			int pos = static_cast<int>(x * width + y);
+		bool write(const int& row, const int& col, const color_t& color) {
+			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;
 			}
-			this->buffer[pos] = color;
+ 			this->buffer[pos] = color;
 			return true;
 		}
 
-		bool read(const int& x, const int& y, color_t& color) {
-			int pos = static_cast<int>(x * width + y);
+		bool read(const int& row, const int& col, color_t& color) {
+			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;

@@ -50,10 +50,6 @@ namespace guarneri {
 		framebuffer* frame_buffer;
 
 	public:
-		void update_global_uniforms() {
-
-		}
-
 		void draw_primitive(material& material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
 			if (culling(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
@@ -94,15 +90,42 @@ namespace guarneri {
 			p3.position = float4(s3.xyz(), c3.w);
 			p3 = p3.perspective_division();
 
+			triangle tri(p1, p2, p3);
 
-			int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
+			std::vector<triangle> tris = tri.horizontal_split();
+
+			// split triangles wireframe
+			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
+				auto& tri = *iter;
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+			}
+			
+			/*int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
 
 			if (n >= 1) render_trapezoid(material, trapezoids[0]);
 			if (n >= 2) render_trapezoid(material, trapezoids[1]);
 
 			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, this->wire_frame_color);
 			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s3.x, (int)s3.y, this->wire_frame_color);
-			line_drawer::bresenham(*this->frame_buffer, (int)s3.x, (int)s3.y, (int)s2.x, (int)s2.y, this->wire_frame_color);
+			line_drawer::bresenham(*this->frame_buffer, (int)s3.x, (int)s3.y, (int)s2.x, (int)s2.y, this->wire_frame_color);*/
+		}
+
+		void scan_triangles(std::vector<triangle> tris) {
+			scanline scanline;
+			int row = 0;
+			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
+				auto& tri = *iter;
+				int top = CEIL(tri[0].position.y);
+				int bottom = CEIL(tri[2].position.y);
+				while (row >= 0 && row <= bottom && row < this->height) {
+					vertex lhs;
+					vertex rhs;
+					tri.interpolate((float)row + 0.5f, lhs, rhs);
+					row++;
+				}
+			}
 		}
 
 		void render_trapezoid(material& material, trapezoid& trapezoid) {
@@ -132,12 +155,12 @@ namespace guarneri {
 				if (col >= 0 && col < width) {
 					float rhw = scanline.v.rhw;
 					float depth = 0.0f;
-					if (read_zbuffer(row, col, depth)) {
+					if (zbuffer->read(row, col, depth)) {
 						// z-test pass
 						if (rhw >= depth) {
 							float original_w = 1.0f / rhw;
 							// write z buffer
-							write_zbuffer(row, col, rhw);
+							zbuffer->write(row, col, rhw);
 							// fragment shader
 							if (s != nullptr) {
 								v_output v_out;
@@ -147,11 +170,11 @@ namespace guarneri {
 								v_out.uv = scanline.v.uv;
 								float4 ret = s->fragment_shader(v_out);
 								color_t c = encode_color(ret.x, ret.y, ret.z);
-								write_color_buffer(row, col, c);
+								frame_buffer->write(row, col, c);
 							}
 							else {
 								color_t c = encode_color(scanline.v.color.x, scanline.v.color.y, scanline.v.color.z);
-								write_color_buffer(row, col, c);
+								frame_buffer->write(row, col, c);
 							}
 						}
 					}
@@ -190,7 +213,7 @@ namespace guarneri {
 		}
 
 		bool culling(const float4& v1, const float4& v2, const float4& v3, const mat4& m, const mat4& v, const mat4& p) {
-			auto mvp = p * v * m;
+			auto& mvp = p * v * m;
 			float4 c1 = mvp * v1;
 			float4 c2 = mvp * v2;
 			float4 c3 = mvp * v3;
@@ -217,24 +240,8 @@ namespace guarneri {
 			return check;
 		}
 
-		bool read_zbuffer(const int& x, const int& y, float& ret) {
-			return zbuffer->read(x, y, ret);
-		}
-
-		bool write_zbuffer(const int& x, const int& y, const float& ret) {
-			return zbuffer->write(x, y, ret);
-		}
-
 		void clear_zbuffer() {
 			zbuffer->clear();
-		}
-
-		bool read_color_buffer(const int& x, const int& y, color_t& ret) {
-			return frame_buffer->read(x, y, ret);
-		}
-
-		bool write_color_buffer(const int& x, const int& y, const color_t& ret) {
-			return frame_buffer->write(x, y, ret);
 		}
 
 		void clear_color_buffer() {

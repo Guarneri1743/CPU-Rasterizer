@@ -28,8 +28,8 @@ namespace guarneri {
 			return read(x, y, out);
 		}
 
-		bool read(const int& x, const int& y, T& out) {
-			int pos = static_cast<int>(x * width + y);
+		bool read(const int& row, const int& col, T& out) {
+			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;
@@ -44,8 +44,8 @@ namespace guarneri {
 			return this->write(x, y, data);
 		}
 
-		bool write(int x, int y, T data) {
-			int pos = static_cast<int>(x * width + y);
+		bool write(int row, int col, T data) {
+			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;
