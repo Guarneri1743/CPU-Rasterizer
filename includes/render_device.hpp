@@ -4,8 +4,6 @@
 #include <float4.hpp>
 #include <transform.hpp>
 #include <shader.hpp>
-#include <trapezoid.hpp>
-#include <scanline.hpp>
 #include <material.hpp>
 #include <aabb2d.hpp>
 #include <triangle.hpp>
@@ -74,10 +72,6 @@ namespace guarneri {
 			float4 s2 = ndc2viewport(n2);
 			float4 s3 = ndc2viewport(n3);
 
-			std::vector<trapezoid> trapezoids;
-			trapezoids.reserve(2);
-			trapezoids.resize(2);
-
 			vertex p1 = v1;
 			p1.position = float4(s1.xyz(), c1.w);
 			p1 = p1.perspective_division();
@@ -102,18 +96,9 @@ namespace guarneri {
 				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
 			}
 			scan_triangles(tris, material);
-			/*int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
-
-			if (n >= 1) render_trapezoid(material, trapezoids[0]);
-			if (n >= 2) render_trapezoid(material, trapezoids[1]);
-
-			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, this->wire_frame_color);
-			line_drawer::bresenham(*this->frame_buffer, (int)s1.x, (int)s1.y, (int)s3.x, (int)s3.y, this->wire_frame_color);
-			line_drawer::bresenham(*this->frame_buffer, (int)s3.x, (int)s3.y, (int)s2.x, (int)s2.y, this->wire_frame_color);*/
 		}
 
 		void scan_triangles(std::vector<triangle>& tris, material& mat) {
-			scanline scanline;
 			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
@@ -166,62 +151,6 @@ namespace guarneri {
 						frame_buffer->write(row, col, c);
 					}
 				}
-			}
-		}
-
-		void render_trapezoid(material& material, trapezoid& trapezoid) {
-			scanline scanline;
-			int row;
-			int top = CEIL(trapezoid.top);
-			int bottom = CEIL(trapezoid.bottom);
-			for (row = top; row < bottom; row++) {
-				if (row >= 0 && row < this->height) {
-					trapezoid.interpolate_lr_edge((float)row + 0.5f);
-					scanline.next_step(trapezoid, row);
-					scan(scanline, material);
-				}
-				else if (row >= this->height) {
-					break;
-				}
-			}
-		}
-
-		void scan(scanline& scanline, material& mat) {
-			int row = scanline.row;
-			int col = scanline.col;
-			int w = scanline.w;
-			id_t id = mat.get_shader_id();
-			shader* s = shader_manager::singleton()->get_shader(id);
-			for (; w > 0; col++, w--) {
-				if (col >= 0 && col < width) {
-					float rhw = scanline.v.rhw;
-					float depth = 0.0f;
-					if (zbuffer->read(row, col, depth)) {
-						// z-test pass
-						if (rhw >= depth) {
-							float original_w = 1.0f / rhw;
-							// write z buffer
-							zbuffer->write(row, col, rhw);
-							// fragment shader
-							if (s != nullptr) {
-								v_output v_out;
-								v_out.position = scanline.v.position;
-								v_out.color = scanline.v.color;
-								v_out.normal = scanline.v.normal;
-								v_out.uv = scanline.v.uv;
-								float4 ret = s->fragment_shader(v_out);
-								color_t c = encode_color(ret.x, ret.y, ret.z);
-								frame_buffer->write(row, col, c);
-							}
-							else {
-								color_t c = encode_color(scanline.v.color.x, scanline.v.color.y, scanline.v.color.z);
-								frame_buffer->write(row, col, c);
-							}
-						}
-					}
-				}
-				scanline.v = vertex::intagral(scanline.v, scanline.step);
-				if (col >= width) break;
 			}
 		}
 
