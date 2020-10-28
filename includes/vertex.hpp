@@ -50,17 +50,6 @@ namespace guarneri {
 			return ret;
 		}
 
-		static vertex add(const vertex& left, const vertex& right) {
-			vertex ret;
-			ret.position = (right.position + left.position);
-			ret.color = (right.color + left.color);
-			ret.normal = (right.normal + left.normal);
-			ret.uv = (right.uv + left.uv);
-			ret.tangent = (right.tangent + left.tangent);
-			ret.rhw = (right.rhw + left.rhw);
-			return ret;
-		}
-
 		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
 			vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
@@ -73,13 +62,25 @@ namespace guarneri {
 			return ret;
 		}
 
-		static vertex perspective_division(const vertex& left, const vertex& right, const float& w) {
-			float rhw = 1.0f / w;
+		static vertex differential(const vertex& lhs, const vertex& rhs) {
+			float w = rhs.position.x - lhs.position.x;
+			float segmentation = 1.0f / w;
 			vertex ret;
-			ret.position = (right.position - left.position) * rhw;
-			ret.color = (right.color - left.color) * rhw;
-			ret.uv = (right.uv - left.uv) * rhw;
-			ret.rhw = (right.rhw - left.rhw) * rhw;
+			ret.position = (rhs.position - lhs.position) * segmentation;
+			ret.color = (rhs.color - lhs.color) * segmentation;
+			ret.uv = (rhs.uv - lhs.uv) * segmentation;
+			ret.rhw = (rhs.rhw - lhs.rhw) * segmentation;
+			return ret;
+		}
+
+		static vertex intagral(const vertex& left, const vertex& differential) {
+			vertex ret;
+			ret.position = (left.position + differential.position);
+			ret.color = (left.color + differential.color);
+			ret.normal = (left.normal + differential.normal);
+			ret.uv = (left.uv + differential.uv);
+			ret.tangent = (left.tangent + differential.tangent);
+			ret.rhw = (left.rhw + differential.rhw);
 			return ret;
 		}
 

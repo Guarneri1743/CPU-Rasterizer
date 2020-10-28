@@ -101,7 +101,7 @@ namespace guarneri {
 				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
 				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
 			}
-			
+			scan_triangles(tris, material);
 			/*int n = trapezoid::generate_trapezoid(p1, p2, p3, trapezoids);
 
 			if (n >= 1) render_trapezoid(material, trapezoids[0]);
@@ -112,18 +112,53 @@ namespace guarneri {
 			line_drawer::bresenham(*this->frame_buffer, (int)s3.x, (int)s3.y, (int)s2.x, (int)s2.y, this->wire_frame_color);*/
 		}
 
-		void scan_triangles(std::vector<triangle> tris) {
+		void scan_triangles(std::vector<triangle>& tris, material& mat) {
 			scanline scanline;
-			int row = 0;
+			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
 				int top = CEIL(tri[0].position.y);
 				int bottom = CEIL(tri[2].position.y);
-				while (row >= 0 && row <= bottom && row < this->height) {
+				for (int row = top; row >= top && row <= bottom && row < this->height; row++) {
 					vertex lhs;
 					vertex rhs;
-					tri.interpolate((float)row + 0.5f, lhs, rhs);
-					row++;
+					tri.interpolate((float)row + 0.5f, lhs, rhs, flip);
+					for (int col = CEIL(lhs.position.x); col < CEIL(rhs.position.x) && col < this->width; col++) {
+						shading(lhs, row, col, mat);
+						auto& dx = vertex::differential(lhs, rhs);
+						lhs = vertex::intagral(lhs, dx);
+					}
+				}
+				flip = true;
+			}
+		}
+
+		void shading(vertex& v, const int& row, const int& col, material& mat) {
+			id_t id = mat.get_shader_id();
+			shader* s = shader_manager::singleton()->get_shader(id);
+			float rhw = v.rhw;
+			float depth = 0.0f;
+			if (zbuffer->read(row, col, depth)) {
+				// z-test pass
+				if (rhw >= depth) {
+					float original_w = 1.0f / rhw;
+					// write z buffer
+					zbuffer->write(row, col, rhw);
+					// fragment shader
+					if (s != nullptr) {
+						v_output v_out;
+						v_out.position = v.position;
+						v_out.color = v.color;
+						v_out.normal = v.normal;
+						v_out.uv = v.uv;
+						float4 ret = s->fragment_shader(v_out);
+						color_t c = encode_color(ret.x, ret.y, ret.z);
+						frame_buffer->write(row, col, c);
+					}
+					else {
+						color_t c = encode_color(v.color.x, v.color.y, v.color.z);
+						frame_buffer->write(row, col, c);
+					}
 				}
 			}
 		}
@@ -179,7 +214,7 @@ namespace guarneri {
 						}
 					}
 				}
-				scanline.v = vertex::add(scanline.v, scanline.step);
+				scanline.v = vertex::intagral(scanline.v, scanline.step);
 				if (col >= width) break;
 			}
 		}
