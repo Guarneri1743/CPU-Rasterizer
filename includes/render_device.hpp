@@ -117,13 +117,19 @@ namespace guarneri {
 			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
-				int top = CEIL(tri[0].position.y);
-				int bottom = CEIL(tri[2].position.y);
-				for (int row = top; row >= top && row <= bottom && row < this->height; row++) {
+				int top_idx = flip ? 2 : 0;
+				int bottom_idx = flip ? 0 : 2;
+				int top =  CEIL(tri[top_idx].position.y);
+				int bottom = CEIL(tri[bottom_idx].position.y);
+				assert(bottom >= top);
+				for (int row = top; row < bottom && row < this->height; row++) {
 					vertex lhs;
 					vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs, flip);
-					for (int col = CEIL(lhs.position.x); col < CEIL(rhs.position.x) && col < this->width; col++) {
+					int left = CEIL(lhs.position.x);
+					int right = CEIL(rhs.position.x);
+					assert(right >= left);
+					for (int col = left; col < right && col < this->width; col++) {
 						shading(lhs, row, col, mat);
 						auto& dx = vertex::differential(lhs, rhs);
 						lhs = vertex::intagral(lhs, dx);

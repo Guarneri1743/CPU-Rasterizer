@@ -26,11 +26,27 @@ namespace guarneri {
 
 	public:
 		// top-left-right | bottom-left-right(flipped)
+		//===================================================
+		//       top[0]
+		//        /\
+		//	   	 /  \
+		//----------------------------- scanline[screen_y]
+		//	   /	  \
+		//   left[1]  right[2]
+		//
+		//  left[1]  right[2]
+		//	   \      /
+		//----------------------------- scanline[screen_y]
+		//	     \  /
+		//        \/
+		//		 bottom[0]
+		//====================================================
 		void interpolate(const float& screen_y, vertex& lhs, vertex& rhs, bool flip) {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
 			len = flip ? len : -len;
-			float dy = flip ? this->vertices[0].position.y - screen_y : screen_y - this->vertices[0].position.y;
+			float dy = flip ? screen_y - this->vertices[2].position.y : screen_y - this->vertices[0].position.y;
 			float t = dy / len;
+			assert(t > 0 && dy > 0);
 			int l0, l1, r0, r1;
 			l0 = flip ? 1 : 0;
 			r0 = flip ? 2 : 0;
