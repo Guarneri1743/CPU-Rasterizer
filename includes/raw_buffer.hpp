@@ -58,5 +58,10 @@ namespace guarneri {
 			long long size = (long long)width * (long long)height * sizeof(*buffer);
 			std::memset(buffer, 0, static_cast<size_t>(size));
 		}
+
+		T* get_ptr(int& size) {
+			size = width * height * sizeof(T);
+			return buffer;
+		}
 	};
 }

@@ -12,9 +12,11 @@
 #include <line_drawer.hpp>
 
 namespace guarneri {
-	enum class render_state {
-		wire_frame,
-		shaded
+	enum class render_flag {
+		disable = 0,
+		wire_frame = 1 << 0,
+		shaded = 1 << 1,
+		depth = 1 << 2
 	};
 
 	class render_device {
@@ -24,7 +26,7 @@ namespace guarneri {
 			this->height = height;
 			this->background_color = 0;
 			this->wire_frame_color = encode_color(1.0f, 1.0f, 1.0f);
-			state = render_state::shaded;
+			r_flag = render_flag::shaded;
 			zbuffer = new raw_buffer<float>(width, height);
 			frame_buffer = new framebuffer(fb, width, height);
 		}
@@ -41,7 +43,7 @@ namespace guarneri {
 		int height;
 		color_t background_color;
 		color_t wire_frame_color;
-		render_state state;
+		render_flag r_flag;
 
 	private:
 		raw_buffer<float>* zbuffer;
@@ -89,16 +91,26 @@ namespace guarneri {
 			std::vector<triangle> tris = tri.horizontal_split();
 
 			// split triangles wireframe
-			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-				auto& tri = *iter;
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
+				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
+					auto& tri = *iter;
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+				}
 			}
-			scan_triangles(tris, material);
+
+			if (((int)r_flag & (int)render_flag::shaded) != 0) {
+				rasterize(tris, material);
+			}
+
+			if (((int)r_flag & (int)render_flag::depth) != 0) {
+				rasterize(tris, material);
+				blit_zbuffer2framebuffer();
+			}
 		}
 
-		void scan_triangles(std::vector<triangle>& tris, material& mat) {
+		void rasterize(std::vector<triangle>& tris, material& mat) {
 			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
@@ -115,42 +127,12 @@ namespace guarneri {
 					int right = CEIL(rhs.position.x);
 					assert(right >= left);
 					for (int col = left; col < right && col < this->width; col++) {
-						shading(lhs, row, col, mat);
+						process_fragment(lhs, row, col, mat);
 						auto& dx = vertex::differential(lhs, rhs);
 						lhs = vertex::intagral(lhs, dx);
 					}
 				}
 				flip = true;
-			}
-		}
-
-		void shading(vertex& v, const int& row, const int& col, material& mat) {
-			id_t id = mat.get_shader_id();
-			shader* s = shader_manager::singleton()->get_shader(id);
-			float rhw = v.rhw;
-			float depth = 0.0f;
-			if (zbuffer->read(row, col, depth)) {
-				// z-test pass
-				if (rhw >= depth) {
-					float original_w = 1.0f / rhw;
-					// write z buffer
-					zbuffer->write(row, col, rhw);
-					// fragment shader
-					if (s != nullptr) {
-						v_output v_out;
-						v_out.position = v.position;
-						v_out.color = v.color;
-						v_out.normal = v.normal;
-						v_out.uv = v.uv;
-						float4 ret = s->fragment_shader(v_out);
-						color_t c = encode_color(ret.x, ret.y, ret.z);
-						frame_buffer->write(row, col, c);
-					}
-					else {
-						color_t c = encode_color(v.color.x, v.color.y, v.color.z);
-						frame_buffer->write(row, col, c);
-					}
-				}
 			}
 		}
 
@@ -163,6 +145,66 @@ namespace guarneri {
 			shader.set_model_matrix(m);
 			shader.set_vp_matrix(v, p);
 			return shader.vertex_shader(input);
+		}
+
+		void process_fragment(vertex& v, const int& row, const int& col, material& mat) {
+			id_t id = mat.get_shader_id();
+			shader* s = shader_manager::singleton()->get_shader(id);
+			float rhw = v.rhw;
+			float depth = 0.0f;
+			if (zbuffer->read(row, col, depth)) {
+				// z-test pass
+				if (rhw >= depth) {
+					float original_w = 1.0f / rhw;
+					// write z buffer
+					zbuffer->write(row, col, rhw);
+
+					if (((int)r_flag & (int)render_flag::shaded) != 0) {
+						// fragment shader
+						if (s != nullptr) {
+							v_output v_out;
+							v_out.position = v.position;
+							v_out.color = v.color;
+							v_out.normal = v.normal;
+							v_out.uv = v.uv;
+							float4 ret = s->fragment_shader(v_out);
+							color_t c = encode_color(ret.x, ret.y, ret.z);
+							frame_buffer->write(row, col, c);
+						}
+						else {
+							color_t c = encode_color(v.color.x, v.color.y, v.color.z);
+							frame_buffer->write(row, col, c);
+						}
+					}
+				}
+			}
+		}
+
+		// tood
+		template<typename T>
+		void blit2framebuffer(raw_buffer<T> buffer) {
+
+		}
+		
+		// todo: linearize depth
+		void blit_zbuffer2framebuffer() {
+			/*int zlen;
+			int flen;
+			auto zbuffer_ptr = (void*)zbuffer->get_ptr(zlen);
+			auto framebuffer_ptr = frame_buffer->get_ptr(flen);
+			assert(zlen==flen);
+			memcpy(framebuffer_ptr, zbuffer_ptr, flen);*/
+
+			for (int col = 0; col < width; col++) {
+				for (int row = 0; row < height; row++)
+				{
+					float depth = 0.0f;
+					if (zbuffer->read(row, col, depth)) {
+						color_t c = encode_color(depth, depth, depth);
+						frame_buffer->write(row, col, c);
+					}
+				}
+			}
 		}
 
 		float4 clip2ndc(const float4& v) {
@@ -188,26 +230,27 @@ namespace guarneri {
 			float4 c2 = mvp * v2;
 			float4 c3 = mvp * v3;
 
-			if (cvv_culling(c1) != 0) return true;
-			if (cvv_culling(c2) != 0) return true;
-			if (cvv_culling(c3) != 0) return true;
+			if (!cvv_culling(c1)) return true;
+			if (!cvv_culling(c2)) return true;
+			if (!cvv_culling(c3)) return true;
 
 			return false;
 		}
 
-		int cvv_culling(const float4& v) {
-			float w = v.w;
-			int check = 0;
+		bool cvv_culling(const float4& v) {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
 			// y: [-w, w]
-			if (v.z < -w) check |= 1;
-			if (v.z > w) check |= 2;
-			if (v.x < -w) check |= 4;
-			if (v.x > w) check |= 8;
-			if (v.y < -w) check |= 16;
-			if (v.y > w) check |= 32;
-			return check;
+
+			float w = v.w;
+			if (v.z < -w) return false;
+			if (v.z > w)  return false;
+			if (v.x < -w) return false;
+			if (v.x > w)  return false;
+			if (v.y < -w)  return false;
+			if (v.y > w) return false;
+
+			return true;
 		}
 
 		void clear_zbuffer() {

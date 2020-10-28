@@ -154,3 +154,12 @@ build/release/SoftRasterizer.pdb
 build/release/SoftRasterizer.exe
 build/release/SoftRasterizer.pdb
 build/release/SoftRasterizer.exe
+build/release/SoftRasterizer.pdb
+build/release/SoftRasterizer.exe
+build/release/SoftRasterizer.pdb
+*.pdb
+*.exe
+build/release/SoftRasterizer.exe
+build/release/SoftRasterizer.pdb
+build/release/SoftRasterizer.pdb
+build/release/SoftRasterizer.exe
