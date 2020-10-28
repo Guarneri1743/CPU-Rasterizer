@@ -1,7 +1,6 @@
 #pragma once
 #include <common.hpp>
 #include <vertex.hpp>
-#include <aabb2d.hpp>
 
 namespace guarneri {
 	struct triangle {
@@ -10,21 +9,19 @@ namespace guarneri {
 			for (int i = 0; i < 3; i++) {
 				vertices[i] = verts[i];
 			}
-			cal_aabb();
 		}
 
 		triangle(const vertex& v1, const vertex& v2, const vertex& v3) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
-			cal_aabb();
 		}
 
 	public:
 		vertex vertices[3];
-		aabb2d aabb;
 
 	public:
+		// scan top/bottom triangle
 		// top-left-right | bottom-left-right(flipped)
 		//===================================================
 		//       top[0]
@@ -32,14 +29,18 @@ namespace guarneri {
 		//	   	 /  \
 		//----------------------------- scanline[screen_y]
 		//	   /	  \
-		//   left[1]  right[2]
+		//    /        \
+		//    ----------
+		// left[1]    right[2]
 		//
-		//  left[1]  right[2]
+		// left[1]    right[2]
+		//    ----------
+		//    \        /
 		//	   \      /
 		//----------------------------- scanline[screen_y]
 		//	     \  /
 		//        \/
-		//		 bottom[0]
+		//		bottom[0]
 		//====================================================
 		void interpolate(const float& screen_y, vertex& lhs, vertex& rhs, bool flip) {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
@@ -56,6 +57,24 @@ namespace guarneri {
 			rhs = vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
 		}
 
+		// split a triangle to 1-2 triangles
+		//===================================================
+		//       top[0]
+		//        /\
+		//	   	 /  \
+		//	    /	 \
+		//	   /      \
+		//     --------
+		// left[1]    right[2]
+		//
+		// left[1]    right[2]
+		//     --------
+		//	   \      /
+		//	    \    /
+		//	     \  /
+		//        \/
+		//	    bottom[0]
+		//====================================================
 		std::vector<triangle> horizontal_split() {
 			std::vector<triangle> ret;
 
@@ -135,28 +154,6 @@ namespace guarneri {
 			}
 
 			return ret;
-		}
-
-		aabb2d cal_aabb() {
-			float2 v_min = FLT_MAX;
-			float2 v_max = FLT_MIN;
-			for (int i = 0; i < 3; i++) {
-				float x = vertices[i].position.x;
-				float y = vertices[i].position.y;
-				if (x < v_min.x) {
-					v_min.x = x;
-				}
-				if (y < v_min.y) {
-					v_min.y = y;
-				}
-				if (x > v_max.x) {
-					v_max.x = x;
-				}
-				if (y > v_max.y) {
-					v_max.y = y;
-				}
-			}
-			return aabb2d((v_max + v_min) / 2.0f, v_max - v_min);
 		}
 
 		vertex& operator[](const unsigned int i) { return vertices[i]; }
