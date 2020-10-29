@@ -25,13 +25,30 @@ namespace guarneri{
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	
-
 	typedef unsigned int int32_t;
 	typedef unsigned int id_t;
 	typedef int color_t;
 	typedef std::string texture_id;
 	typedef std::string property_name;
 	typedef std::string shader_id;
+
+	typedef struct {
+		float camera_near;
+		float camera_far;
+		float camera_fov;
+		float screen_width;
+		float screen_height;
+	} misc;
+
+	static misc misc_params;
+
+	void update_misc_params(const float& width, const float& height, const float& near, const float& far, const float& fov) {
+		misc_params.screen_width = width;
+		misc_params.screen_height = height;
+		misc_params.camera_near = near;
+		misc_params.camera_far = far;
+		misc_params.camera_fov = fov;
+	}
 
 	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
 

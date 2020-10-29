@@ -12,6 +12,8 @@ namespace guarneri {
 	public:
 		material(shader* shader) {
 			this->target_shader = shader;
+			this->ztest_mode = ztest::less_equal;
+			this->zwrite_mode = zwrite::on;
 		}
 
 	public:
@@ -20,6 +22,8 @@ namespace guarneri {
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, texture<float>*> name2tex;
+		ztest ztest_mode;
+		zwrite zwrite_mode;
 
 	public:
 		void set_shader(shader* shader) {

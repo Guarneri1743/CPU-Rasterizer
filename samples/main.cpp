@@ -7,6 +7,9 @@
 #include <texture.hpp>
 #include <noise.hpp>
 
+#undef near;
+#undef far;
+
 using namespace guarneri;
 using namespace std;
 
@@ -61,7 +64,7 @@ int main(void)
 	render_device device(screen_fb, 800, 600);
 	float aspect = (float)w / (float)h;
 
-	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
+	float3 cam_pos = float3(3.5f, 3.5f, 3.5f);
 	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
 
 	camera cam(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
@@ -76,7 +79,11 @@ int main(void)
 		if (screen_keys['W']) device.r_flag = render_flag::wire_frame;
 		if (screen_keys['S']) device.r_flag = render_flag::shaded;
 		if (screen_keys['D']) device.r_flag = render_flag::depth;
+		if (screen_keys['U']) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
+		if (screen_keys['V']) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
 
+
+		update_misc_params(w, h, cam.near, cam.far, cam.fov);
 		device.flush();
 		cam.set_position(cam_pos);
 		cam.set_target(float3(0.0f, 0.0f, 0.0f));
@@ -84,7 +91,11 @@ int main(void)
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
 		mat4 m = t * r;
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
-		
+
+		mat4 pm = mat4::translation(box_pos);
+		mat4 scale = mat4::scale(float3(2.5f, 1.0f, 2.5f));
+		draw_plane(device, material, 2, 6, 7, 3, pm * scale, cam.view_matrix(), cam.get_projection_matrix());
+
 		screen_update();
 		Sleep(1);
 	}

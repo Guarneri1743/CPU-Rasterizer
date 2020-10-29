@@ -136,6 +136,9 @@ namespace guarneri {
 				ret.push_back(triangle(sorted[0], v, sorted[1]));
 			}
 
+			auto tri = ret[1];
+			assert(EQUALS(tri[1].position.y, tri[2].position.y));
+
 			// bottom triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
 				ret.push_back(triangle(sorted[2], sorted[1], v));
@@ -144,14 +147,8 @@ namespace guarneri {
 				ret.push_back(triangle(sorted[2], v, sorted[1]));
 			}
 
-			for (auto& iter = ret.begin(); iter != ret.end(); iter++) {
-				auto& tri = *iter;
-				bool valid = EQUALS(tri[0].position.y, tri[1].position.y) || EQUALS(tri[1].position.y, tri[2].position.y);
-				if (!valid) {
-					std::cerr << tri[0].position.y << ", " << tri[1].position.y << ", " << tri[2].position.y << std::endl;
-					std::cerr << std::to_string(EQUALS(tri[0].position.y, tri[1].position.y)) << ", " << std::to_string(EQUALS(tri[1].position.y, tri[2].position.y)) << std::endl;
-				}
-			}
+			tri = ret[2];
+			assert(EQUALS(tri[1].position.y, tri[2].position.y));
 
 			return ret;
 		}

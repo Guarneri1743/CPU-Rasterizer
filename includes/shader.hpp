@@ -8,6 +8,22 @@
 #include <texture.hpp>
 
 namespace guarneri {
+	enum class ztest {
+		always,
+		less,
+		less_equal,
+		equal,
+		greater_equal,
+		greater,
+		not_equal,
+		off
+	};
+
+	enum class zwrite {
+		on,
+		off
+	};
+
 	struct v_input {
 		float4 position;
 		float2 uv;
@@ -29,6 +45,8 @@ namespace guarneri {
 	public:
 		shader(const shader_id& id) {
 			this->id = id;
+			this->ztest_mode = ztest::less_equal;
+			this->zwrite_mode = zwrite::on;
 		}
 
 	private:
@@ -42,9 +60,15 @@ namespace guarneri {
 
 	public:
 		shader_id id;
-		
+		ztest ztest_mode;
+		zwrite zwrite_mode;
 
 	public:
+		void sync_ztest(ztest ztest, zwrite zwrite) {
+			this->ztest_mode = ztest;
+			this->zwrite_mode = zwrite;
+		}
+
 		void sync_uniforms(
 			const std::unordered_map<property_name, float>& float_uniforms,
 			const std::unordered_map<property_name, float4>& float4_uniforms,
