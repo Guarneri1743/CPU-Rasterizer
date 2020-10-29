@@ -7,6 +7,11 @@ namespace guarneri {
 		repeat,
 		clamp
 	};
+
+	enum class filtering {
+		point,
+		bilinear
+	};
 	template <typename T>
 	struct texture {
 	public:
@@ -22,12 +27,13 @@ namespace guarneri {
 	public:
 		texture_id id;
 		wrap_mode wrap_mode;
+		filtering filtering;
 
 	private:
 		raw_buffer<float>* buffer;
 
 	public:
-		bool read(const float& u, const float& v, T& ret) const {
+		bool sample(const float& u, const float& v, T& ret) const {
 			float wu = u;
 			float wv = v;
 			this->wrap(wu, wv);
@@ -41,8 +47,8 @@ namespace guarneri {
 			return buffer->write(wu, wv, ret);
 		}
 
-		bool read(const unsigned int& x, const unsigned int& y, T& ret) const {
-			return buffer->read(x, y, ret);
+		bool sample(const unsigned int& x, const unsigned int& y, T& ret) const {
+			return buffer->sample(x, y, ret);
 		}
 
 		bool write(const unsigned int& x, const unsigned int& y, const T& ret) {

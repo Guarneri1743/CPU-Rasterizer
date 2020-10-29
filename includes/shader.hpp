@@ -73,7 +73,7 @@ namespace guarneri {
 
 		float4 fragment_shader(const v_output& input) {
 			float noise;
-			if (name2tex["noise"]->read(input.uv.x, input.uv.y, noise)) {
+			if (name2tex["noise"]->sample(input.uv.x, input.uv.y, noise)) {
 				return float4(noise, noise, noise, 1);
 			}
 
