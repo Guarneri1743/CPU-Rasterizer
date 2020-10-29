@@ -76,6 +76,10 @@ namespace guarneri {
 			if (name2tex["noise"]->sample(input.uv.x, input.uv.y, noise)) {
 				return float4(noise, noise, noise, 1);
 			}
+			else {
+				//sample failed
+				return float4(0, 1, 0, 1);
+			}
 
 			// return vertex color;
 			return float4(input.uv, 0, 1);
