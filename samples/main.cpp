@@ -68,7 +68,6 @@ int main(void)
 
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
 		screen_dispatch();
-
 		if (screen_keys[VK_UP]) box_pos.z -= 0.2f;
 		if (screen_keys[VK_DOWN]) box_pos.z += 0.2f;
 		if (screen_keys[VK_LEFT]) box_pos.x += 0.2f;
@@ -77,19 +76,14 @@ int main(void)
 		if (screen_keys['W']) device.r_flag = render_flag::wire_frame;
 		if (screen_keys['S']) device.r_flag = render_flag::shaded;
 		if (screen_keys['D']) device.r_flag = render_flag::depth;
-
-		device.clear();
 		cam.set_position(cam_pos);
 		cam.set_target(float3(0.0f, 0.0f, 0.0f));
-
 		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
 		mat4 m = t * r;
-
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
-
+		device.flush();
 		screen_update();
-
 		Sleep(1);
 	}
 	return 0;

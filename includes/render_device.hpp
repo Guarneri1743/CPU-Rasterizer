@@ -275,7 +275,7 @@ namespace guarneri {
 			frame_buffer->clear();
 		}
 
-		void clear() {
+		void flush() {
 			zbuffer->clear();
 			frame_buffer->clear();
 		}
