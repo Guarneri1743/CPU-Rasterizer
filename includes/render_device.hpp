@@ -21,7 +21,7 @@ namespace guarneri {
 
 	class render_device {
 	public:
-		render_device(void* fb, int width, int height) {
+		render_device(void* fb, unsigned int width, unsigned int height) {
 			this->width = width;
 			this->height = height;
 			this->background_color = 0;
@@ -39,8 +39,8 @@ namespace guarneri {
 		}
 
 	public:
-		int width;
-		int height;
+		unsigned int width;
+		unsigned int height;
 		color_t background_color;
 		color_t wire_frame_color;
 		render_flag r_flag;
@@ -55,6 +55,9 @@ namespace guarneri {
 				return;
 			}
 			shader* shader = material.get_shader();
+
+			shader->set_mvp_matrix(m, v, p);
+			shader->sync_uniforms(material.name2float, material.name2float4, material.name2int, material.name2tex);
 
 			assert(shader != nullptr);
 
@@ -145,12 +148,10 @@ namespace guarneri {
 			input.uv = vert.uv;
 			input.color = vert.color;
 			input.normal = vert.normal;
-			shader.set_model_matrix(m);
-			shader.set_vp_matrix(v, p);
 			return shader.vertex_shader(input);
 		}
 
-		void process_fragment(vertex& v, const int& row, const int& col, material& mat) {
+		void process_fragment(vertex& v, const unsigned int& row, const unsigned int& col, material& mat) {
 			shader* s = mat.get_shader();
 			float rhw = v.rhw;
 			float depth = 0.0f;
@@ -196,8 +197,8 @@ namespace guarneri {
 			assert(zlen==flen);
 			memcpy(framebuffer_ptr, zbuffer_ptr, flen);*/
 
-			for (int col = 0; col < width; col++) {
-				for (int row = 0; row < height; row++)
+			for (unsigned int col = 0; col < width; col++) {
+				for (unsigned int row = 0; row < height; row++)
 				{
 					float depth = 0.0f;
 					if (zbuffer->read(row, col, depth)) {

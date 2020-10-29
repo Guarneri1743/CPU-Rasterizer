@@ -4,9 +4,10 @@
 #include <float3.hpp>
 #include <float4.hpp>
 #include <mat4.hpp>
+#include <unordered_map>
+#include <texture.hpp>
 
 namespace guarneri {
-	typedef std::string shader_id;
 	struct v_input {
 		float4 position;
 		float2 uv;
@@ -34,17 +35,31 @@ namespace guarneri {
 		mat4 v, p;
 		mat4 m;
 
+		std::unordered_map<property_name, float> name2float;
+		std::unordered_map<property_name, float4> name2float4;
+		std::unordered_map<property_name, int> name2int;
+		std::unordered_map<property_name, texture<float>*> name2tex;
+
 	public:
 		shader_id id;
+		
 
 	public:
-		void set_vp_matrix(const mat4& view, const mat4& proj) {
-			this->v = view;
-			this->p = proj;
+		void sync_uniforms(
+			const std::unordered_map<property_name, float>& float_uniforms,
+			const std::unordered_map<property_name, float4>& float4_uniforms,
+			const std::unordered_map<property_name, int>& int_uniforms,
+			const std::unordered_map<property_name, texture<float>*>& tex_uniforms) {
+			this->name2float = float_uniforms;
+			this->name2float4 = float4_uniforms;
+			this->name2int = int_uniforms;
+			this->name2tex = tex_uniforms;
 		}
 
-		void set_model_matrix(const mat4& model) {
+		void set_mvp_matrix(const mat4& model, const mat4& view, const mat4& proj) {
 			this->m = model;
+			this->v = view;
+			this->p = proj;
 		}
 
 		v_output vertex_shader(const v_input& input) {
@@ -57,6 +72,11 @@ namespace guarneri {
 		}
 
 		float4 fragment_shader(const v_output& input) {
+			float noise;
+			if (name2tex["noise"]->read(input.uv.x, input.uv.y, noise)) {
+				return float4(noise, noise, noise, 1);
+			}
+
 			// return vertex color;
 			return float4(input.uv, 0, 1);
 		}

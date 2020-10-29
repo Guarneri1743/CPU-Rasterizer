@@ -9,56 +9,48 @@ namespace guarneri {
 	const float G3 = 0.1666667;
 
 	struct noise {
-		static float3 random3(float3 c) {
-			float j = 4096.0 * sin(float3::dot(c, float3(17.0, 59.4, 15.0)));
-			float3 r;
-			r.z = FRAC(512.0f * j);
-			j *= .125;
-			r.x = FRAC(512.0 * j);
-			j *= .125;
-			r.y = FRAC(512.0 * j);
-			return r - 0.5;
-		}
+		static void generate_fractal_image(texture<float>& image, int w, int h) {
+            double    cr, ci;
+            double nextr, nexti;
+            double prevr, previ;
 
-		static float snoise(float3 p) {
+            const unsigned int max_iterations = 1000;
 
-			float3 s = float3::floor(p + float3::dot(p, float3(F3)));
-			float3 x = p - s + float3::dot(s, float3(G3));
+            for (unsigned int y = 0; y < h; ++y)
+            {
+                for (unsigned int x = 0; x < w; ++x)
+                {
+                    cr = 1.5 * (2.0 * x / w - 1.0) - 0.5;
+                    ci = (2.0 * y / h - 1.0);
 
-			float3 e = STEP(float3(0.0f), x - x.yzx());
-			float3 i1 = e * (1.0 - e.zxy());
-			float3 i2 = 1.0 - e.zxy() * (1.0 - e);
+                    nextr = nexti = 0;
+                    prevr = previ = 0;
 
-			float3 x1 = x - i1 + G3;
-			float3 x2 = x - i2 + 2.0 * G3;
-			float3 x3 = x - 1.0 + 3.0 * G3;
+                    for (unsigned int i = 0; i < max_iterations; ++i)
+                    {
+                        prevr = nextr;
+                        previ = nexti;
 
-			float4 w, d;
+                        nextr = prevr * prevr - previ * previ + cr;
+                        nexti = 2 * prevr * previ + ci;
 
-			w.x = float3::dot(x, x);
-			w.y = float3::dot(x1, x1);
-			w.z = float3::dot(x2, x2);
-			w.w = float3::dot(x3, x3);
+                        if (((nextr * nextr) + (nexti * nexti)) > 4)
+                        {
+                            using namespace std;
 
-			w = float3::maxf((0.6f - w).xyz(), 0.0f);
+                            const double z = sqrt(nextr * nextr + nexti * nexti);
 
-			d.x = float3::dot(random3(s), x);
-			d.y = float3::dot(random3(s + i1), x1);
-			d.z = float3::dot(random3(s + i2), x2);
-			d.w = float3::dot(random3(s + 1.0), x3);
+                            /*const unsigned int index = static_cast<unsigned int>
+                                (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
+                            float c = (float)(1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
 
-			w *= w;
-			w *= w;
-			d *= w;
+                            image.write(x, y, c);
 
-			return float4::dot(d, float4(52.0));
-		}
-
-		static float fractal_noise(float3 m) {
-			return   0.5333333 * snoise(m)
-				+ 0.2666667 * snoise(2.0 * m)
-				+ 0.1333333 * snoise(4.0 * m)
-				+ 0.0666667 * snoise(8.0 * m);
+                            break;
+                        }
+                    }
+                }
+            }
 		}
 	};
 }

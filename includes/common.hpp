@@ -29,6 +29,9 @@ namespace guarneri{
 	typedef unsigned int int32_t;
 	typedef unsigned int id_t;
 	typedef int color_t;
+	typedef std::string texture_id;
+	typedef std::string property_name;
+	typedef std::string shader_id;
 
 	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
 

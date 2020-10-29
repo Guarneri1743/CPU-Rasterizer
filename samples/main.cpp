@@ -5,6 +5,7 @@
 #include <camera.hpp>
 #include <screen.hpp>
 #include <texture.hpp>
+#include <noise.hpp>
 
 using namespace guarneri;
 using namespace std;
@@ -39,7 +40,15 @@ void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v
 
 int main(void)
 {
-	material material(new shader("default"));
+	shader s("default");
+
+	texture<float> noise("noise", 512, 512);
+
+	noise::generate_fractal_image(noise, 512, 512);
+
+	material material(&s);
+
+	material.set_texture("noise", &noise);
 
 	float alpha = 1;
 

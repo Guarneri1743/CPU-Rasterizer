@@ -168,3 +168,7 @@ vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/a95446b418e64645/MAIN.ipch
 vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/eda393c8b1d41b14/CAMERA.ipch
 build/release/SoftRasterizer.exe
 build/release/SoftRasterizer.pdb
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/29dca0be94364297/MAIN.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/58eb6f10581c1a40/MATERIAL.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/b5249480cced5f42/MATERIAL.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/d71df1fc4de4892c/SHADER.ipch
