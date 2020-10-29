@@ -4,6 +4,7 @@
 #include <material.hpp>
 #include <camera.hpp>
 #include <screen.hpp>
+#include <texture.hpp>
 
 using namespace guarneri;
 using namespace std;
@@ -38,15 +39,7 @@ void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v
 
 int main(void)
 {
-	shader* s = new shader();
-
-	id_t shader_id = 0;
-
-	if (!shader_manager::singleton()->add_shader(s, shader_id)) {
-		return 0;
-	}
-
-	material material(0);
+	material material(new shader("default"));
 
 	float alpha = 1;
 

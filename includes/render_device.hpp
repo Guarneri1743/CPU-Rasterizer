@@ -54,7 +54,7 @@ namespace guarneri {
 			if (culling(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
 			}
-			shader* shader = shader_manager::singleton()->get_shader(material.get_shader_id());
+			shader* shader = material.get_shader();
 
 			assert(shader != nullptr);
 
@@ -62,42 +62,45 @@ namespace guarneri {
 			v_output o2 = process_vertex(*shader, v2, m, v, p);
 			v_output o3 = process_vertex(*shader, v3, m, v, p);
 
-			float4 c1 = o1.position;
-			float4 c2 = o2.position;
-			float4 c3 = o3.position;
+			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent);
+			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent);
+			vertex c3(o3.position, o3.color, o3.normal, o3.uv, o3.tangent);
 
-			float4 n1 = clip2ndc(c1);
-			float4 n2 = clip2ndc(c2);
-			float4 n3 = clip2ndc(c3);
+			vertex n1 = clip2ndc(c1);
+			vertex n2 = clip2ndc(c2);
+			vertex n3 = clip2ndc(c3);
 
-			float4 s1 = ndc2viewport(n1);
-			float4 s2 = ndc2viewport(n2);
-			float4 s3 = ndc2viewport(n3);
+			vertex s1 = ndc2viewport(n1);
+			vertex s2 = ndc2viewport(n2);
+			vertex s3 = ndc2viewport(n3);
 
-			vertex p1 = v1;
-			p1.position = float4(s1.xyz(), c1.w);
-			p1 = p1.perspective_division();
+			s1.position.w = c1.position.w;
+			s1.rhw = c1.rhw;
+			//s1.uv *= c1.rhw;
 
-			vertex p2 = v2;
-			p2.position = float4(s2.xyz(), c2.w);
-			p2 = p2.perspective_division();
+			s2.position.w = c2.position.w;
+			s2.rhw = c2.rhw;
+			//s2.uv *= c2.rhw;
 
-			vertex p3 = v3;
-			p3.position = float4(s3.xyz(), c3.w);
-			p3 = p3.perspective_division();
+			s3.position.w = c3.position.w;
+			s3.rhw = c3.rhw;
+			//s3.uv *= s3.rhw;
 
-			triangle tri(p1, p2, p3);
+			triangle tri(s1, s2, s3);
 
 			std::vector<triangle> tris = tri.horizontal_split();
 
-			// split triangles wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
-				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
+				// split triangles wireframe
+				/*for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& tri = *iter;
 					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
 					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
 					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
-				}
+				}*/
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, this->wire_frame_color);
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, this->wire_frame_color);
 			}
 
 			if (((int)r_flag & (int)render_flag::shaded) != 0) {
@@ -148,8 +151,7 @@ namespace guarneri {
 		}
 
 		void process_fragment(vertex& v, const int& row, const int& col, material& mat) {
-			id_t id = mat.get_shader_id();
-			shader* s = shader_manager::singleton()->get_shader(id);
+			shader* s = mat.get_shader();
 			float rhw = v.rhw;
 			float depth = 0.0f;
 			if (zbuffer->read(row, col, depth)) {
@@ -158,7 +160,6 @@ namespace guarneri {
 					float original_w = 1.0f / rhw;
 					// write z buffer
 					zbuffer->write(row, col, rhw);
-
 					if (((int)r_flag & (int)render_flag::shaded) != 0) {
 						// fragment shader
 						if (s != nullptr) {
@@ -207,12 +208,24 @@ namespace guarneri {
 			}
 		}
 
+		vertex clip2ndc(const vertex& v) {
+			vertex ret = v;
+			ret.position = clip2ndc(v.position);
+			return ret;
+		}
+
 		float4 clip2ndc(const float4& v) {
 			float4 ndc_pos = v;
 			float rhw = 1.0f / v.w;
 			ndc_pos *= rhw;
 			ndc_pos.w = 1.0f;
 			return ndc_pos;
+		}
+
+		vertex ndc2viewport(const vertex& v) {
+			vertex ret = v;
+			ret.position = ndc2viewport(v.position);
+			return ret;
 		}
 
 		float4 ndc2viewport(const float4& v) {

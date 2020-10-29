@@ -22,13 +22,13 @@ namespace guarneri {
 		int height;
 
 	public:
-		bool read(const float& u, const float& v, T& out) {
+		bool read(const float& u, const float& v, T& out) const {
 			int x = CEIL(u * this->width);
 			int y = CEIL(v * this->height);
 			return read(x, y, out);
 		}
 
-		bool read(const int& row, const int& col, T& out) {
+		bool read(const int& row, const int& col, T& out) const {
 			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;

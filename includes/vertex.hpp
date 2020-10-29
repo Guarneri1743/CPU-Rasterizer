@@ -42,14 +42,6 @@ namespace guarneri {
 		float rhw;
 
 	public:
-		vertex perspective_division() {
-			vertex ret = *this;
-			ret.rhw = 1.0f / ret.position.w;
-			ret.uv *= rhw;
-			ret.color *= rhw;
-			return ret;
-		}
-
 		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
 			vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
@@ -92,13 +84,13 @@ namespace guarneri {
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const vertex& ray) {
-		stream << ray.str();
+	static std::ostream& operator << (std::ostream& stream, const vertex& v) {
+		stream << v.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const vertex& ray) {
-		stream << ray.str();
+	static std::stringstream& operator << (std::stringstream& stream, const vertex& v) {
+		stream << v.str();
 		return stream;
 	}
 }

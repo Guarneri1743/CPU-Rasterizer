@@ -22,6 +22,8 @@ namespace guarneri{
 	#define INVALID_TEXTURE_ID 0
 	#define FLOOR(val) (int)(val)
 	#define CEIL(val) (int)(val + 0.5f)
+	#define FRAC(val) val - (long)val
+	#define STEP(y, x) x >= y ? 1 : 0 
 	
 
 	typedef unsigned int int32_t;

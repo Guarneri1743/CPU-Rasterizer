@@ -27,7 +27,7 @@ namespace guarneri {
 			return true;
 		}
 
-		bool read(const int& row, const int& col, color_t& color) {
+		bool read(const int& row, const int& col, color_t& color) const {
 			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
 				std::cerr << "write pixel failed: index out of range" << std::endl;

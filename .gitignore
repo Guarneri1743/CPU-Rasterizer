@@ -163,3 +163,8 @@ build/release/SoftRasterizer.exe
 build/release/SoftRasterizer.pdb
 build/release/SoftRasterizer.pdb
 build/release/SoftRasterizer.exe
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/17400800bc791fb3/NOISE.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/a95446b418e64645/MAIN.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/eda393c8b1d41b14/CAMERA.ipch
+build/release/SoftRasterizer.exe
+build/release/SoftRasterizer.pdb

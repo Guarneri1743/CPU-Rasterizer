@@ -122,12 +122,57 @@ namespace guarneri {
 			return ret;
 		}
 
+
+		float4 operator +(const float4& other) {
+			float4 ret;
+			ret.x = this->x + other.x;
+			ret.y = this->y + other.y;
+			ret.z = this->z + other.z;
+			ret.w = this->w + other.w;
+			return ret;
+		}
+
+		float4 operator -(const float4& other) {
+			float4 ret;
+			ret.x = this->x - other.x;
+			ret.y = this->y - other.y;
+			ret.z = this->z - other.z;
+			ret.w = this->w - other.w;
+			return ret;
+		}
+
+		float4 operator +(const float& other) {
+			float4 ret;
+			ret.x = this->x + other;
+			ret.y = this->y + other;
+			ret.z = this->z + other;
+			ret.w = this->w + other;
+			return ret;
+		}
+
+		float4 operator -(const float& other) {
+			float4 ret;
+			ret.x = this->x - other;
+			ret.y = this->y - other;
+			ret.z = this->z - other;
+			ret.w = this->w - other;
+			return ret;
+		}
+
 		float4 operator -() const {
 			return float4(-x, -y, -z, -w);
 		}
 
 		float4 operator *(const float4& b) const {
 			return float4(x * b.x, y * b.y, z * b.z, w * b.w);
+		}
+
+		float4& operator *=(const float4& b) {
+			x *= b.x;
+			y *= b.y;
+			z *= b.z;
+			w *= b.w;
+			return *this;
 		}
 
 		static float dot(const float4& lhs, const float4& rhs) {
@@ -453,6 +498,18 @@ namespace guarneri {
 			float2 wz() const { return float2(w, z); }
 			float2 ww() const { return float2(w, w); }
 	};
+
+	static float4 maxf(const float4& lhs, const float4& rhs) {
+		return float4(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z), std::max(lhs.w, rhs.w));
+	}
+
+	static float4 operator +(const float& other, const float4& vec) {
+		return vec + other;
+	}
+
+	static float4 operator -(const float& other, const float4& vec) {
+		return -vec + other;
+	}
 
 	static float4 operator *(const float& val, const float4& vec) {
 		return vec * val;

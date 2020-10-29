@@ -86,6 +86,22 @@ namespace guarneri {
 			return ret;
 		}
 
+		float3 operator +(const float& other) const {
+			float3 ret;
+			ret.x = this->x + other;
+			ret.y = this->y + other;
+			ret.z = this->z + other;
+			return ret;
+		}
+
+		float3 operator -(const float& other) const {
+			float3 ret;
+			ret.x = this->x - other;
+			ret.y = this->y - other;
+			ret.z = this->z - other;
+			return ret;
+		}
+
 		float3 operator *(const float& scale) const {
 			float3 ret;
 			ret.x = this->x * scale;
@@ -108,6 +124,22 @@ namespace guarneri {
 			ret.y = this->y / val.y;
 			ret.z = this->z / val.z;
 			return ret;
+		}
+
+		bool operator <=(const float3& other) const {
+			return float3::magnitude(*this) <= float3::magnitude(other);
+		}
+
+		bool operator >=(const float3& other) const {
+			return float3::magnitude(*this) >= float3::magnitude(other);
+		}
+
+		bool operator >(const float3& other) const {
+			return float3::magnitude(*this) > float3::magnitude(other);
+		}
+
+		bool operator <(const float3& other) const {
+			return float3::magnitude(*this) < float3::magnitude(other);
 		}
 
 		float3 operator -() const {
@@ -157,6 +189,21 @@ namespace guarneri {
 				retult = float3();
 			}
 			return retult;
+		}
+
+		static float3 floor(const float3& val) {
+			return float3(std::floor(val.x), std::floor(val.y), std::floor(val.z));
+		}
+
+		static float3 lerp(const float3& lhs, const float3& rhs, float t) {
+			float x = lhs.x + (rhs.x - lhs.x) * t;
+			float y = lhs.y + (rhs.y - lhs.y) * t;
+			float z = lhs.z + (rhs.z - lhs.z) * t;
+			return float3(x, y, z);
+		}
+
+		static float3 maxf(const float3& lhs, const float3& rhs) {
+			return float3(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z));
 		}
 
 		std::string str() const {
@@ -213,6 +260,14 @@ namespace guarneri {
 		return vec * val;
 	}
 
+	float3 operator +(const float& other, const float3& vec) {
+		return vec + other;
+	}
+
+	float3 operator -(const float& other, const float3& vec) {
+		return -vec + other;
+	}
+
 	static std::ostream& operator << (std::ostream& stream, const float3& vec) {
 		stream << vec.str();
 		return stream;
@@ -221,13 +276,6 @@ namespace guarneri {
 	static std::stringstream& operator << (std::stringstream& stream, const float3& vec) {
 		stream << vec.str();
 		return stream;
-	}
-
-	static float3 lerp(const float3& lhs, const float3& rhs, float t) {
-		float x = lhs.x + (rhs.x - lhs.x) * t;
-		float y = lhs.y + (rhs.y - lhs.y) * t;
-		float z = lhs.z + (rhs.z - lhs.z) * t;
-		return float3(x, y, z);
 	}
 
 	const float3 float3::ZERO = float3(0.0f, 0.0f, 0.0f);

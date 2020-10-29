@@ -6,6 +6,7 @@
 #include <mat4.hpp>
 
 namespace guarneri {
+	typedef std::string shader_id;
 	struct v_input {
 		float4 position;
 		float2 uv;
@@ -18,12 +19,23 @@ namespace guarneri {
 		float2 uv;
 		float4 color;
 		float3 normal;
+		float3 tangent;
+		// todo: add userdata feature to vertex
+		float3 custom_data;
 	};
 
-	struct shader {
+	class shader {
+	public:
+		shader(const shader_id& id) {
+			this->id = id;
+		}
+
 	private:
 		mat4 v, p;
 		mat4 m;
+
+	public:
+		shader_id id;
 
 	public:
 		void set_vp_matrix(const mat4& view, const mat4& proj) {
