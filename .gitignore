@@ -187,3 +187,9 @@ vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/ef86245514c9179a/RENDER_DEVICE.ipch
 vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/651604fb6c119f1a/RENDER_DEVICE.ipch
 vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/4c872df109ce6cef/SCENE.ipch
 vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/345bc0fa4812f213/MAIN.ipch
+vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/link.write.1.tlog
+vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/link.read.1.tlog
+vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/link.command.1.tlog
+vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/CL.write.1.tlog
+vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/CL.read.1.tlog
+vs2019/obj/linux64/Debug/SoftRasterizer/main.obj

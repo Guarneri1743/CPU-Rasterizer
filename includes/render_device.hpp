@@ -19,6 +19,18 @@ namespace guarneri {
 		depth = 1 << 2
 	};
 
+	enum class blend_mode {
+		one,
+		src_alpha,
+		dst_alpha,
+		one_minus_src_alpha,
+		one_minus_dst_alpha,
+		src_color,
+		dst_colr,
+		one_minus_src_color,
+		one_minus_dst_color
+	};
+
 	class render_device {
 	public:
 		render_device(void* fb, unsigned int width, unsigned int height) {
@@ -44,6 +56,7 @@ namespace guarneri {
 		color_t background_color;
 		color_t wire_frame_color;
 		render_flag r_flag;
+		blend_mode blend_mode;
 
 	private:
 		raw_buffer<float>* zbuffer;
@@ -51,7 +64,7 @@ namespace guarneri {
 
 	public:
 		void draw_primitive(material& material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
-			if (culling(v1.position, v2.position, v3.position, m, v, p)) {
+			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
 			}
 			shader* shader = material.get_shader();
@@ -238,33 +251,18 @@ namespace guarneri {
 			return viewport_pos;
 		}
 
-		bool culling(const float4& v1, const float4& v2, const float4& v3, const mat4& m, const mat4& v, const mat4& p) {
+		bool clipping(const float4& v1, const float4& v2, const float4& v3, const mat4& m, const mat4& v, const mat4& p) {
 			auto& mvp = p * v * m;
-			float4 c1 = mvp * v1;
-			float4 c2 = mvp * v2;
-			float4 c3 = mvp * v3;
-
-			if (!cvv_culling(c1)) return true;
-			if (!cvv_culling(c2)) return true;
-			if (!cvv_culling(c3)) return true;
-
-			return false;
+			float4 c1 = mvp * v1; float4 c2 = mvp * v2; float4 c3 = mvp * v3;
+			return clipping(c1) || clipping(c2) || clipping(c3);
 		}
 
-		bool cvv_culling(const float4& v) {
+		bool clipping(const float4& v) {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
 			// y: [-w, w]
-
-			float w = v.w;
-			if (v.z < -w) return false;
-			if (v.z > w)  return false;
-			if (v.x < -w) return false;
-			if (v.x > w)  return false;
-			if (v.y < -w)  return false;
-			if (v.y > w) return false;
-
-			return true;
+			float w = v.w; float x = v.x; float y = v.y; float z = v.y;
+			return (z < -w) || (z > w) || (x < -w) || (x > w) || (y < -w) || (y > w);
 		}
 
 		void clear_zbuffer() {
