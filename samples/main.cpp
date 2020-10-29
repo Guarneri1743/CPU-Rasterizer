@@ -4,6 +4,8 @@
 #include <material.hpp>
 #include <camera.hpp>
 #include <screen.hpp>
+#include <texture.hpp>
+#include <noise.hpp>
 
 using namespace guarneri;
 using namespace std;
@@ -38,25 +40,23 @@ void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v
 
 int main(void)
 {
-	shader* s = new shader();
+	shader s("default");
 
-	id_t shader_id = 0;
+	texture<float> noise("noise", 512, 512);
 
-	if (!shader_manager::singleton()->add_shader(s, shader_id)) {
-		return 0;
-	}
+	noise::generate_fractal_image(noise, 512, 512);
 
-	material material(0);
+	material material(&s);
+
+	material.set_texture("noise", &noise);
 
 	float alpha = 1;
 
-	TCHAR* title = _T("SoftRasterizer");
-
-	if (screen_init(800, 600, title))
-		return -1;
-
 	int w = 800;
 	int h = 600;
+
+	if (screen_init(w, h, _T("SoftRasterizer")))
+		return -1;
 
 	render_device device(screen_fb, 800, 600);
 	float aspect = (float)w / (float)h;
@@ -68,7 +68,6 @@ int main(void)
 
 	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
 		screen_dispatch();
-
 		if (screen_keys[VK_UP]) box_pos.z -= 0.2f;
 		if (screen_keys[VK_DOWN]) box_pos.z += 0.2f;
 		if (screen_keys[VK_LEFT]) box_pos.x += 0.2f;
@@ -78,16 +77,15 @@ int main(void)
 		if (screen_keys['S']) device.r_flag = render_flag::shaded;
 		if (screen_keys['D']) device.r_flag = render_flag::depth;
 
-		device.clear();
+		device.flush();
 		cam.set_position(cam_pos);
 		cam.set_target(float3(0.0f, 0.0f, 0.0f));
-
 		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
 		mat4 m = t * r;
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
+		
 		screen_update();
-
 		Sleep(1);
 	}
 	return 0;

@@ -168,13 +168,13 @@ namespace guarneri {
 			}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const triangle& ray) {
-		stream << ray.str();
+	static std::ostream& operator << (std::ostream& stream, const triangle& tri) {
+		stream << tri.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const triangle& ray) {
-		stream << ray.str();
+	static std::stringstream& operator << (std::stringstream& stream, const triangle& tri) {
+		stream << tri.str();
 		return stream;
 	}
 }

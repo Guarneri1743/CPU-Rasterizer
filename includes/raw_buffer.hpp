@@ -5,7 +5,7 @@ namespace guarneri {
 	template<typename T>
 	struct raw_buffer {
 	public:
-		raw_buffer(int width, int height) {
+		raw_buffer(unsigned int width, unsigned int height) {
 			this->width = width;
 			this->height = height;
 			int size = static_cast<int>(width * height);
@@ -18,36 +18,34 @@ namespace guarneri {
 
 	private:
 		T* buffer;
-		int width;
-		int height;
+		unsigned int width;
+		unsigned int height;
 
 	public:
-		bool read(const float& u, const float& v, T& out) {
-			int x = CEIL(u * this->width);
-			int y = CEIL(v * this->height);
+		bool read(const float& u, const float& v, T& out) const {
+			unsigned int x = CEIL(u * this->width);
+			unsigned int y = CEIL(v * this->height);
 			return read(x, y, out);
 		}
 
-		bool read(const int& row, const int& col, T& out) {
+		bool read(const unsigned int& row, const unsigned int& col, T& out) const {
 			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
-				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;
 			}
 			out = buffer[pos];
 			return true;
 		}
 
-		bool write(float u, float v, T data) {
-			int x = CEIL(u * this->width);
-			int y = CEIL(v * this->height);
+		bool write(const float& u, const float& v, const T& data) {
+			unsigned int x = CEIL(u * this->width);
+			unsigned int y = CEIL(v * this->height);
 			return this->write(x, y, data);
 		}
 
-		bool write(int row, int col, T data) {
+		bool write(const unsigned int& row, const unsigned int& col, const T& data) {
 			int pos = static_cast<int>(row * width + col);
 			if (pos >= width * height) {
-				std::cerr << "write pixel failed: index out of range" << std::endl;
 				return false;
 			}
 			buffer[pos] = data;

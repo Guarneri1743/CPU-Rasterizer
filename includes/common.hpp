@@ -22,11 +22,16 @@ namespace guarneri{
 	#define INVALID_TEXTURE_ID 0
 	#define FLOOR(val) (int)(val)
 	#define CEIL(val) (int)(val + 0.5f)
+	#define FRAC(val) val - (long)val
+	#define STEP(y, x) x >= y ? 1 : 0 
 	
 
 	typedef unsigned int int32_t;
 	typedef unsigned int id_t;
 	typedef int color_t;
+	typedef std::string texture_id;
+	typedef std::string property_name;
+	typedef std::string shader_id;
 
 	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
 

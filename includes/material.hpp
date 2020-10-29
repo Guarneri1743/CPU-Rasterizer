@@ -4,41 +4,77 @@
 #include <float4.hpp>
 #include <texture.hpp>
 #include <unordered_map>
+#include <shader_manager.hpp>
+#include <texture_manager.hpp>
 
 namespace guarneri {
-	typedef std::string texture_name;
 	class material {
 	public:
-		material(id_t shader_id) {
-			this->shader_id = shader_id;
+		material(shader* shader) {
+			this->target_shader = shader;
 		}
 
-	private:
-		id_t shader_id;
-		std::unordered_map<texture_name, id_t> name2id;
+	public:
+		shader* target_shader;
+		std::unordered_map<property_name, float> name2float;
+		std::unordered_map<property_name, float4> name2float4;
+		std::unordered_map<property_name, int> name2int;
+		std::unordered_map<property_name, texture<float>*> name2tex;
 
 	public:
-		float4 albedo;
-		float4 roughness;
-
-	public:
-		id_t get_shader_id() {
-			return shader_id;
+		void set_shader(shader* shader) {
+			this->target_shader = shader;
 		}
 
-		void set_texture(texture_name name, texture* tex) {
+		shader* get_shader() {
+			return target_shader;
+		}
+
+		void set_int(const property_name& name, const int& val) {
+			name2int[name] = val;
+		}
+
+		void set_float4(const property_name& name, const float4& val) {
+			name2float4[name] = val;
+		}
+
+		void set_float(const property_name& name, const float& val) {
+			name2float[name] = val;
+		}
+		
+		void set_texture(const property_name& name, texture<float>* tex) {
 			if (tex == nullptr) {
 				return;
 			}
-			name2id[name] = tex->get_id();
+			name2tex[name] = tex;
 		}
 
-		id_t get_texture(texture_name name) {
-			if (name2id.count(name) > 0) {
-				auto id = name2id[name];
-				return id;
+		int get_int(const property_name& name) const {
+			if (name2int.count(name) > 0) {
+				return name2int.at(name);
 			}
-			return INVALID_TEXTURE_ID;
+			return 0;
+		}
+
+		float4 get_float4(const property_name& name) const {
+			if (name2float4.count(name) > 0) {
+				return name2float4.at(name);
+			}
+			return 0;
+		}
+
+		float get_float(const property_name& name) const {
+			if (name2float.count(name) > 0) {
+				return name2float.at(name);
+			}
+			return 0;
+		}
+
+		texture<float>* get_texture(const property_name& name) const {
+			if (name2tex.count(name) > 0) {
+				return name2tex.at(name);
+			}
+			return nullptr;
 		}
 	};
 }
