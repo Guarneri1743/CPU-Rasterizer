@@ -19,7 +19,7 @@ namespace guarneri {
 	public:
 		bool write(const unsigned int& row, const unsigned int& col, const color_t& color) {
 			int pos = static_cast<int>(row * width + col);
-			if (pos >= width * height) {
+			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
  			this->buffer[pos] = color;
@@ -28,7 +28,7 @@ namespace guarneri {
 
 		bool read(const unsigned int& row, const unsigned int& col, color_t& color) const {
 			int pos = static_cast<int>(row * width + col);
-			if (pos >= width * height) {
+			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
 			color = this->buffer[pos];

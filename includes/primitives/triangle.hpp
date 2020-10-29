@@ -78,7 +78,8 @@ namespace guarneri {
 		std::vector<triangle> horizontal_split() {
 			std::vector<triangle> ret;
 
-			int max_idx, min_idx;
+			int max_idx = -1;
+			int min_idx = -1;
 			float max_y = FLT_MIN;
 			float min_y = FLT_MAX;
 
@@ -89,6 +90,10 @@ namespace guarneri {
 					min_y = p.y;
 					min_idx = i;
 				}
+			}
+
+			for (int i = 0; i < 3; i++) {
+				float4 p = vertices[i].position;
 				if (p.y > max_y) {
 					max_y = p.y;
 					max_idx = i;
@@ -136,7 +141,7 @@ namespace guarneri {
 				ret.push_back(triangle(sorted[0], v, sorted[1]));
 			}
 
-			auto tri = ret[1];
+			auto tri = ret[0];
 			assert(EQUALS(tri[1].position.y, tri[2].position.y));
 
 			// bottom triangle: bottom-left-right
@@ -147,7 +152,7 @@ namespace guarneri {
 				ret.push_back(triangle(sorted[2], v, sorted[1]));
 			}
 
-			tri = ret[2];
+			tri = ret[1];
 			assert(EQUALS(tri[1].position.y, tri[2].position.y));
 
 			return ret;

@@ -86,9 +86,10 @@ namespace guarneri {
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(material& material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
 			// early clip
-			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
+			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
-			}
+			}*/
+
 			shader* shader = material.get_shader();
 
 			shader->set_mvp_matrix(m, v, p);
@@ -148,7 +149,6 @@ namespace guarneri {
 
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				rasterize(tris, material);
-				blit_zbuffer2framebuffer();
 			}
 		}
 
@@ -169,15 +169,19 @@ namespace guarneri {
 				int bottom_idx = flip ? 0 : 2;
 				int top = CEIL(tri[top_idx].position.y);
 				int bottom = CEIL(tri[bottom_idx].position.y);
+				top = CLAMP(top, 0, this->height);
+				bottom = CLAMP(bottom, 0, this->height);
 				assert(bottom >= top);
-				for (int row = top; row < bottom && row < this->height; row++) {
+				for (int row = top; row < bottom; row++) {
 					vertex lhs;
 					vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs, flip);
 					int left = CEIL(lhs.position.x);
 					int right = CEIL(rhs.position.x);
+					left = CLAMP(left, 0, this->width);
+					right = CLAMP(right, 0, this->width);
 					assert(right >= left);
-					for (int col = left; col < right && col < this->width; col++) {
+					for (int col = left; col < right; col++) {
 						process_fragment(lhs, row, col, mat);
 						auto& dx = vertex::differential(lhs, rhs);
 						lhs = vertex::intagral(lhs, dx);
@@ -224,31 +228,8 @@ namespace guarneri {
 							frame_buffer->write(row, col, c);
 						}
 					}
-				}
-			}
-		}
-
-		// tood
-		template<typename T>
-		void blit2framebuffer(raw_buffer<T> buffer) {
-
-		}
-		
-		// todo: linearize depth
-		void blit_zbuffer2framebuffer() {
-			/*int zlen;
-			int flen;
-			auto zbuffer_ptr = (void*)zbuffer->get_ptr(zlen);
-			auto framebuffer_ptr = frame_buffer->get_ptr(flen);
-			assert(zlen==flen);
-			memcpy(framebuffer_ptr, zbuffer_ptr, flen);*/
-
-			for (unsigned int col = 0; col < width; col++) {
-				for (unsigned int row = 0; row < height; row++)
-				{
-					float depth = 0.0f;
-					if (zbuffer->read(row, col, depth)) {
-						float ld = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far);
+					else if(((int)r_flag & (int)render_flag::depth) != 0) {
+						float ld = linearize_depth(rhw, misc_params.camera_near, misc_params.camera_far) / 2.0f; // depth visualization
 						color_t c = encode_color(ld, ld, ld);
 						frame_buffer->write(row, col, c);
 					}
@@ -303,6 +284,16 @@ namespace guarneri {
 			// y: [-w, w]
 			float w = v.w; float x = v.x; float y = v.y; float z = v.y;
 			return (z < -w) || (z > w) || (x < -w) || (x > w) || (y < -w) || (y > w);
+		}
+
+		// todo
+		void generate_frustum(mat4 v, mat4 p)
+		{
+			
+		}
+
+		bool in_frustum(const triangle& tri) {
+			return false;
 		}
 
 		void clear_zbuffer() {

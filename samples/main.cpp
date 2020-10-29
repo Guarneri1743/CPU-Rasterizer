@@ -92,8 +92,8 @@ int main(void)
 		mat4 m = t * r;
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
 
-		mat4 pm = mat4::translation(box_pos);
-		mat4 scale = mat4::scale(float3(2.5f, 1.0f, 2.5f));
+		mat4 pm = mat4::translation(box_pos-float3(0.0f, 1.0f, 0.0f));
+		mat4 scale = mat4::scale(float3(3.0f, 1.0f, 3.0f));
 		draw_plane(device, material, 2, 6, 7, 3, pm * scale, cam.view_matrix(), cam.get_projection_matrix());
 
 		screen_update();

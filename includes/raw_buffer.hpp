@@ -30,7 +30,7 @@ namespace guarneri {
 
 		bool read(const unsigned int& row, const unsigned int& col, T& out) const {
 			int pos = static_cast<int>(row * width + col);
-			if (pos >= width * height) {
+			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
 			out = buffer[pos];
@@ -45,7 +45,7 @@ namespace guarneri {
 
 		bool write(const unsigned int& row, const unsigned int& col, const T& data) {
 			int pos = static_cast<int>(row * width + col);
-			if (pos >= width * height) {
+			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
 			buffer[pos] = data;
