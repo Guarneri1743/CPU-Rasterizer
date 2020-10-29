@@ -5,9 +5,6 @@
 #include <algorithm>
 
 namespace guarneri {
-	const float F3 = 0.3333333;
-	const float G3 = 0.1666667;
-
 	struct noise {
 		static void generate_fractal_image(texture<float>& image, int w, int h) {
             double    cr, ci;

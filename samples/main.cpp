@@ -52,13 +52,11 @@ int main(void)
 
 	float alpha = 1;
 
-	TCHAR* title = _T("SoftRasterizer");
-
-	if (screen_init(800, 600, title))
-		return -1;
-
 	int w = 800;
 	int h = 600;
+
+	if (screen_init(w, h, _T("SoftRasterizer")))
+		return -1;
 
 	render_device device(screen_fb, 800, 600);
 	float aspect = (float)w / (float)h;
@@ -87,7 +85,9 @@ int main(void)
 		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
 		mat4 m = t * r;
+
 		draw_box(device, material, m, cam.view_matrix(), cam.get_projection_matrix());
+
 		screen_update();
 
 		Sleep(1);
