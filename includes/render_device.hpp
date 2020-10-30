@@ -50,6 +50,7 @@ namespace guarneri {
 			dst_factor = blend_mode::one_minus_src_alpha;
 			blend_op = blend_op::add;
 			zbuffer = new raw_buffer<float>(width, height);
+			zbuffer->clear(1.0f);
 			frame_buffer = new framebuffer(fb, width, height);
 		}
 
@@ -115,13 +116,13 @@ namespace guarneri {
 			vertex s3 = ndc2viewport(n3);
 
 			s1.position.w = c1.position.w;
-			//s1.rhw = c1.rhw;
+			s1.rhw = c1.rhw;
 
 			s2.position.w = c2.position.w;
-			//s2.rhw = c2.rhw;
+			s2.rhw = c2.rhw;
 
 			s3.position.w = c3.position.w;
-			//s3.rhw = c3.rhw;
+			s3.rhw = c3.rhw;
 
 			triangle tri(s1, s2, s3);
 
@@ -149,6 +150,16 @@ namespace guarneri {
 
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				rasterize(tris, material);
+				for (unsigned int row = 0; row < this->height; row ++) {
+					for (unsigned int col = 0; col < this->width; col++) {
+						float depth;
+						if (zbuffer->read(row, col, depth)) {
+							float ld = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far) / 20.0f;// depth visualization
+							color_t c = encode_color(ld, ld, ld);
+							frame_buffer->write(row, col, c);
+						}
+					}
+				}
 			}
 		}
 
@@ -194,13 +205,14 @@ namespace guarneri {
 		void process_fragment(vertex& v, const unsigned int& row, const unsigned int& col, material& mat) {
 			shader* s = mat.get_shader();
 			float rhw = v.rhw;
-			float depth = 0.0f;
+			float z = v.position.z;
+			//std::cerr << v.position.z << "   " << v.position.w << "   " << v.rhw << std::endl;
+			float depth;
 			if (zbuffer->read(row, col, depth)) {
 				// z-test pass
-				if (rhw >= depth) {
-					float original_w = 1.0f / rhw;
-					// write z buffer
-					zbuffer->write(row, col, rhw);
+				if (z <= depth) {
+					// write z buffer 
+					zbuffer->write(row, col, z);
 					if (((int)r_flag & (int)render_flag::shaded) != 0) {
 						// fragment shader
 						if (s != nullptr) {
@@ -228,11 +240,6 @@ namespace guarneri {
 							frame_buffer->write(row, col, c);
 						}
 					}
-					else if(((int)r_flag & (int)render_flag::depth) != 0) {
-						float ld = linearize_depth(rhw, misc_params.camera_near, misc_params.camera_far) / 2.0f; // depth visualization
-						color_t c = encode_color(ld, ld, ld);
-						frame_buffer->write(row, col, c);
-					}
 				}
 			}
 		}
@@ -240,6 +247,7 @@ namespace guarneri {
 		vertex clip2ndc(const vertex& v) {
 			vertex ret = v;
 			ret.position = clip2ndc(v.position);
+			ret.rhw = 1.0f / ret.position.w;
 			return ret;
 		}
 
@@ -254,6 +262,7 @@ namespace guarneri {
 		vertex ndc2viewport(const vertex& v) {
 			vertex ret = v;
 			ret.position = ndc2viewport(v.position);
+			ret.rhw = 1.0f;
 			return ret;
 		}
 
@@ -296,16 +305,8 @@ namespace guarneri {
 			return false;
 		}
 
-		void clear_zbuffer() {
-			zbuffer->clear();
-		}
-
-		void clear_color_buffer() {
-			frame_buffer->clear();
-		}
-
 		void flush() {
-			zbuffer->clear();
+			zbuffer->clear(1.0f);
 			frame_buffer->clear();
 		}
 	};

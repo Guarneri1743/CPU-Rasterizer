@@ -52,9 +52,10 @@ namespace guarneri {
 			return true;
 		}
 
-		void clear() {
-			long long size = (long long)width * (long long)height * sizeof(*buffer);
-			std::memset(buffer, 0, static_cast<size_t>(size));
+		void clear(const T& val = 0) {
+			long long size = (long long)width * (long long)height;
+			//std::memset(buffer, val, static_cast<size_t>(size));
+			std::fill(buffer, buffer + size, val);
 		}
 
 		T* get_ptr(int& size) {
