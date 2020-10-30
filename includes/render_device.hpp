@@ -9,6 +9,7 @@
 #include <shader_manager.hpp>
 #include <texture_manager.hpp>
 #include <line_drawer.hpp>
+#include <color.hpp>
 
 namespace guarneri {
 	enum class render_flag {
@@ -21,34 +22,14 @@ namespace guarneri {
 		scanline = 1 << 5
 	};
 
-	enum class blend_mode {
-		one,
-		src_alpha,
-		dst_alpha,
-		one_minus_src_alpha,
-		one_minus_dst_alpha,
-		src_color,
-		dst_colr,
-		one_minus_src_color,
-		one_minus_dst_color
-	};
-
-	enum class blend_op {
-		add,
-		sub
-	};
-
 	class render_device {
 	public:
 		render_device(void* fb, unsigned int width, unsigned int height) {
 			this->width = width;
 			this->height = height;
 			this->background_color = 0;
-			this->wire_frame_color = encode_color(1.0f, 1.0f, 1.0f);
+			this->wire_frame_color = color::encode(1.0f, 1.0f, 1.0f, 1.0f);
 			r_flag = render_flag::shaded;
-			src_factor = blend_mode::src_alpha;
-			dst_factor = blend_mode::one_minus_src_alpha;
-			blend_op = blend_op::add;
 			zbuffer = new raw_buffer<float>(width, height);
 			zbuffer->clear(1.0f);
 			frame_buffer = new raw_buffer<color_t>(fb, width, height);
@@ -67,9 +48,6 @@ namespace guarneri {
 		color_t background_color;
 		color_t wire_frame_color;
 		render_flag r_flag;
-		blend_mode src_factor;
-		blend_mode dst_factor;
-		blend_op blend_op;
 
 	private:
 		raw_buffer<float>* zbuffer;
@@ -87,21 +65,22 @@ namespace guarneri {
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(material& material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
 			// early clip
-			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
+			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
-			}*/
+			}
 
 			shader* shader = material.get_shader();
 
 			shader->set_mvp_matrix(m, v, p);
-			shader->sync_uniforms(material.name2float, material.name2float4, material.name2int, material.name2tex);
-			shader->sync_ztest(material.ztest_mode, material.zwrite_mode);
+			shader->sync(material.name2float, material.name2float4, material.name2int, material.name2tex);
+			shader->sync(material.ztest_mode, material.zwrite_mode);
+			shader->sync(material.transparent, material.src_factor, material.dst_factor, material.blend_op);
 
 			assert(shader != nullptr);
 
-			v_output o1 = process_vertex(*shader, v1, m, v, p);
-			v_output o2 = process_vertex(*shader, v2, m, v, p);
-			v_output o3 = process_vertex(*shader, v3, m, v, p);
+			v2f o1 = process_vertex(*shader, v1, m, v, p);
+			v2f o2 = process_vertex(*shader, v2, m, v, p);
+			v2f o3 = process_vertex(*shader, v3, m, v, p);
 
 			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent);
 			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent);
@@ -132,9 +111,9 @@ namespace guarneri {
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
 			
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, encode_color(1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
@@ -142,9 +121,9 @@ namespace guarneri {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& tri = *iter;
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, encode_color(1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 
@@ -154,8 +133,8 @@ namespace guarneri {
 			}
 		}
 
-		v_output process_vertex(shader& shader, const vertex& vert, const mat4& m, const mat4& v, const mat4& p) {
-			v_input input;
+		v2f process_vertex(shader& shader, const vertex& vert, const mat4& m, const mat4& v, const mat4& p) {
+			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
 			input.color = vert.color;
@@ -199,49 +178,103 @@ namespace guarneri {
 			float z = v.position.z;
 			float depth;
 
-			if (zbuffer->read(row, col, depth)) {
-				// z-test pass
-				if (z <= depth) {
-					// write z buffer 
-					zbuffer->write(row, col, z);
-					if (((int)r_flag & (int)render_flag::shaded) != 0) {
-						// fragment shader
-						if (s != nullptr) {
-							v_output v_out;
-							v_out.position = v.position;
-							v_out.color = v.color;
-							v_out.normal = v.normal;
-							v_out.uv = v.uv;
-							if (((int)r_flag & (int)render_flag::uv) != 0) {
-								color_t c = encode_color(v.uv.x, v.uv.y, 0.0f);
-								frame_buffer->write(row, col, c);
-							}
-							else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
-								color_t c = encode_color(v.color.x, v.color.y, v.color.w);
-								frame_buffer->write(row, col, c);
-							}
-							else {
-								float4 ret = s->fragment_shader(v_out);
-								color_t c = encode_color(ret.x, ret.y, ret.z);
-								frame_buffer->write(row, col, c);
-							}
-						}
-						else {
-							color_t c = encode_color(v.color.x, v.color.y, v.color.z);
-							frame_buffer->write(row, col, c);
-						}
-					}
+			ztest ztest_mode = s->ztest_mode;
+			zwrite zwrite_mode = s->zwrite_mode;
+			blend_factor src_factor = s->src_factor;
+			blend_factor dst_factor = s->dst_factor;
+			blend_operator blend_op = s->blend_op;
+
+			color_t pixel_color = 0;
+
+			// fragment shader
+			float4 fragment_result;
+			if (((int)r_flag & (int)render_flag::shaded) != 0 && s != nullptr) {
+				v2f v_out;
+				v_out.position = v.position;
+				v_out.color = v.color;
+				v_out.normal = v.normal;
+				v_out.uv = v.uv;
+				fragment_result = s->fragment_shader(v_out);
+				pixel_color = color::encode(fragment_result);
+			}else if (((int)r_flag & (int)render_flag::uv) != 0) {
+				pixel_color = color::encode(v.uv);
+			}
+			else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
+				pixel_color = color::encode(v.color);
+			}
+
+			// todo: scissor test
+
+			// alpha blend
+			if (s != nullptr && s->transparent) {
+				color_t dst;
+				if (frame_buffer->read(row, col, dst)) {
+					color dst_color = color::decode(dst);
+					color src_color = fragment_result;
+					color blended_color = color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+					pixel_color = color::encode(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 				}
 			}
 
+			// todo: stencil test
+
+			// depth-test
+			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
+
+			if (z_pass) {
+				// write to color buffer
+				frame_buffer->write(row, col, pixel_color);
+			}
+
+			// depth buffer visualization
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				float depth;
 				if (zbuffer->read(row, col, depth)) {
-					float ld = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far) / 10.0f;// depth visualization
-					color_t c = encode_color(ld, ld, ld);
+					float linear_depth = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far);
+					float3 depth_color = float3::ONE * linear_depth / 20.0f;
+					color_t c = color::encode(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					frame_buffer->write(row, col, c);
 				}
 			}
+		}
+
+		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const unsigned int& row, const unsigned int& col,const float& z) {
+			float depth;
+			bool pass = false;
+			if (zbuffer->read(row, col, depth)) {
+				pass = z <= depth;
+				switch (ztest_mode) {
+				case ztest::always:
+					pass = true;
+					break;
+				case ztest::equal:
+					pass = EQUALS(z, depth); // percision concern
+					break;
+				case ztest::greater:
+					pass = z > depth;
+					break;
+				case ztest::less_equal:
+					pass = z <= depth;
+					break;
+				case ztest::not_equal:
+					pass = z != depth;
+					break;
+				case ztest::greater_equal:
+					pass = z >= depth;
+					break;
+				case ztest::less:
+					pass = z < depth;
+					break;
+				}
+
+				if (pass) {
+					// write z buffer 
+					if (zwrite_mode == zwrite::on) {
+						zbuffer->write(row, col, z);
+					}
+				}
+			}
+			return pass;
 		}
 
 		vertex clip2ndc(const vertex& v) {
@@ -309,7 +342,7 @@ namespace guarneri {
 			zbuffer->clear(1.0f);
 			if (((int)r_flag & (int)render_flag::depth) != 0)
 			{
-				frame_buffer->clear(encode_color(1.0f, 1.0f, 1.0f));
+				frame_buffer->clear(color::encode(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			else {
 				frame_buffer->clear();

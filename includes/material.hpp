@@ -14,6 +14,10 @@ namespace guarneri {
 			this->target_shader = shader;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
+			this->src_factor = blend_factor::alpha;
+			this->dst_factor = blend_factor::one_minus_alpha;
+			this->blend_op = blend_operator::add;
+			this->transparent = false;
 		}
 
 	public:
@@ -24,6 +28,10 @@ namespace guarneri {
 		std::unordered_map<property_name, texture<float>*> name2tex;
 		ztest ztest_mode;
 		zwrite zwrite_mode;
+		blend_factor src_factor;
+		blend_factor dst_factor;
+		blend_operator blend_op;
+		bool transparent;
 
 	public:
 		void set_shader(shader* shader) {
