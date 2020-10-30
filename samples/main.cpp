@@ -3,7 +3,7 @@
 #include <render_device.hpp>
 #include <material.hpp>
 #include <camera.hpp>
-#include <screen.hpp>
+#include <gdi_window.hpp>
 #include <texture.hpp>
 #include <noise.hpp>
 
@@ -60,15 +60,15 @@ int main(void)
 
 	plane_material.set_texture("noise", &noise);
 
-	float alpha = 1;
+	float angle = 1;
 
 	int w = 800;
 	int h = 600;
 
-	if (screen_init(w, h, _T("SoftRasterizer")))
-		return -1;
+	gdi_window gdiwin(w, h, _T("SoftRasterizerTitle"), _T("SoftRasterizer"));
 
-	render_device device(screen_fb, 800, 600);
+	render_device device(gdiwin.framebuffer, 800, 600);
+
 	float aspect = (float)w / (float)h;
 
 	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
@@ -76,27 +76,25 @@ int main(void)
 
 	camera cam(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
-	while (screen_exit == 0 && screen_keys[VK_ESCAPE] == 0) {
-		screen_dispatch();
-		if (screen_keys[VK_UP]) box_pos.z -= 0.2f;
-		if (screen_keys[VK_DOWN]) box_pos.z += 0.2f;
-		if (screen_keys[VK_LEFT]) box_pos.x += 0.2f;
-		if (screen_keys[VK_RIGHT]) box_pos.x -= 0.2f;
-		if (screen_keys[VK_SPACE]) alpha += 1.0f;
-		if (screen_keys['W']) device.r_flag = render_flag::wire_frame;
-		if (screen_keys['L']) device.r_flag = render_flag::scanline;
-		if (screen_keys['S']) device.r_flag = render_flag::shaded;
-		if (screen_keys['D']) device.r_flag = render_flag::depth;
-		if (screen_keys['U']) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
-		if (screen_keys['V']) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
-
+	while (gdiwin.is_valid()) {
+		if (IS_ON('W')) device.r_flag = render_flag::wire_frame;
+		if (IS_ON('L')) device.r_flag = render_flag::scanline;
+		if (IS_ON('S')) device.r_flag = render_flag::shaded;
+		if (IS_ON('D')) device.r_flag = render_flag::depth;
+		if (IS_ON('U')) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
+		if (IS_ON('V')) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
+		if (IS_ON(VK_UP)) box_pos.z -= 0.2f;
+		if (IS_ON(VK_DOWN)) box_pos.z += 0.2f;
+		if (IS_ON(VK_LEFT)) box_pos.x += 0.2f;
+		if (IS_ON(VK_RIGHT)) box_pos.x -= 0.2f;
+		if (IS_ON(VK_SPACE)) angle += 1.0f;
 
 		update_misc_params(w, h, cam.near, cam.far, cam.fov);
 		device.flush();
 		cam.set_position(cam_pos);
 		cam.set_target(float3(0.0f, 0.0f, 0.0f));
 		mat4 t = mat4::translation(box_pos);
-		mat4 r = mat4::rotation(float3(-1, -0.5, -1), alpha);
+		mat4 r = mat4::rotation(float3(-1, -0.5, -1), angle);
 		mat4 m = t * r;
 		draw_box(device, box_material, m, cam.view_matrix(), cam.get_projection_matrix());
 
@@ -104,8 +102,9 @@ int main(void)
 		mat4 scale = mat4::scale(float3(3.0f, 1.0f, 3.0f));
 		draw_plane(device, plane_material, 2, 6, 7, 3, pm * scale, cam.view_matrix(), cam.get_projection_matrix());
 
-		screen_update();
-		Sleep(1);
+		gdiwin.flush();
+		Sleep(0);
 	}
+
 	return 0;
 }
