@@ -1,6 +1,5 @@
 #pragma once
 #include <raw_buffer.hpp>
-#include <framebuffer.hpp>
 #include <float4.hpp>
 #include <transform.hpp>
 #include <shader.hpp>
@@ -18,7 +17,8 @@ namespace guarneri {
 		shaded = 1 << 1,
 		depth = 1 << 2,
 		uv = 1 << 3,
-		vertex_color = 1 << 4
+		vertex_color = 1 << 4,
+		scanline = 1 << 5
 	};
 
 	enum class blend_mode {
@@ -51,7 +51,7 @@ namespace guarneri {
 			blend_op = blend_op::add;
 			zbuffer = new raw_buffer<float>(width, height);
 			zbuffer->clear(1.0f);
-			frame_buffer = new framebuffer(fb, width, height);
+			frame_buffer = new raw_buffer<color_t>(fb, width, height);
 		}
 
 		~render_device() {
@@ -73,7 +73,7 @@ namespace guarneri {
 
 	private:
 		raw_buffer<float>* zbuffer;
-		framebuffer* frame_buffer;
+		raw_buffer<color_t>* frame_buffer;
 
 	public:
 		// =============================================================================================================Pipeline======================================================================================================================
@@ -126,40 +126,31 @@ namespace guarneri {
 
 			triangle tri(s1, s2, s3);
 
-			//std::cerr << tri.vertices[0].position << ", " << tri.vertices[1].position << ", " << tri.vertices[2].position << std::endl;
-
 			// primitive assembly
 			std::vector<triangle> tris = tri.horizontal_split();
 
+			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
-				// debug triangles wireframe
+			
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, encode_color(1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
+			}
+
+			// wireframe & scanline
+			if (((int)r_flag & (int)render_flag::scanline) != 0) {
+
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& tri = *iter;
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, (255 << 16 | 0 << 8 | 0));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, (0 << 16 | 255 << 8 | 0));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, (0 << 16 | 0 << 8 | 255));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, encode_color(1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, encode_color(1.0f, 1.0f, 1.0f));
 				}
-				/*line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, (255 << 16 | 0 << 8 | 0));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, (0 << 16 | 255 << 8 | 0));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, (0 << 16 | 0 << 8 | 255));*/
 			}
 
-			if (((int)r_flag & (int)render_flag::shaded) != 0) {
+			// rasterization
+			if (((int)r_flag & (int)render_flag::shaded) != 0 || ((int)r_flag & (int)render_flag::depth) != 0) {
 				rasterize(tris, material);
-			}
-
-			if (((int)r_flag & (int)render_flag::depth) != 0) {
-				rasterize(tris, material);
-				for (unsigned int row = 0; row < this->height; row ++) {
-					for (unsigned int col = 0; col < this->width; col++) {
-						float depth;
-						if (zbuffer->read(row, col, depth)) {
-							float ld = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far) / 20.0f;// depth visualization
-							color_t c = encode_color(ld, ld, ld);
-							frame_buffer->write(row, col, c);
-						}
-					}
-				}
 			}
 		}
 
@@ -206,8 +197,8 @@ namespace guarneri {
 			shader* s = mat.get_shader();
 			float rhw = v.rhw;
 			float z = v.position.z;
-			//std::cerr << v.position.z << "   " << v.position.w << "   " << v.rhw << std::endl;
 			float depth;
+
 			if (zbuffer->read(row, col, depth)) {
 				// z-test pass
 				if (z <= depth) {
@@ -240,6 +231,15 @@ namespace guarneri {
 							frame_buffer->write(row, col, c);
 						}
 					}
+				}
+			}
+
+			if (((int)r_flag & (int)render_flag::depth) != 0) {
+				float depth;
+				if (zbuffer->read(row, col, depth)) {
+					float ld = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far) / 10.0f;// depth visualization
+					color_t c = encode_color(ld, ld, ld);
+					frame_buffer->write(row, col, c);
 				}
 			}
 		}
@@ -307,7 +307,13 @@ namespace guarneri {
 
 		void flush() {
 			zbuffer->clear(1.0f);
-			frame_buffer->clear();
+			if (((int)r_flag & (int)render_flag::depth) != 0)
+			{
+				frame_buffer->clear(encode_color(1.0f, 1.0f, 1.0f));
+			}
+			else {
+				frame_buffer->clear();
+			}
 		}
 	};
 }

@@ -1,11 +1,12 @@
 #pragma once
 #include <common.hpp>
-#include <framebuffer.hpp>
+#include <raw_buffer.hpp>
 
 namespace guarneri {
 	class line_drawer {
 	public:
-		static void dda(framebuffer& buffer, int x0, int y0, int x1, int y1, color_t c){
+		template<typename T>
+		static void dda(raw_buffer<T>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
 			int dx = std::abs(x1 - x0);
 			int dy = std::abs(y1 - y0);
 			float sx, sy, length;
@@ -24,7 +25,8 @@ namespace guarneri {
 			}
 		}
 
-		static void bresenham(framebuffer& buffer, int x0, int y0, int x1, int y1, color_t c){
+		template<typename T>
+		static void bresenham(raw_buffer<T>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
 			int dx = std::abs(x1 - x0);
 			int dy = std::abs(y1 - y0);
 			int sx = x0 < x1 ? 1 : -1;
@@ -32,10 +34,12 @@ namespace guarneri {
 			int bias = dx > dy ? dx : -dy;
 			int dx2 = 2 * dx;
 			int dy2 = 2 * dy;
-			while (buffer.write(y0, x0, c), x0 != x1 || y0 != y1) {
+			unsigned int xi = x0;
+			unsigned int yi = y0;
+			while (buffer.write(yi, xi, c), xi != x1 || yi != y1) {
 				int e = bias;
-				if (e > -dx2) { bias -= dy2; x0 += sx; }
-				if (e < dy2)  { bias += dx2; y0 += sy; }
+				if (e > -dx2) { bias -= dy2; xi += sx; }
+				if (e < dy2)  { bias += dx2; yi += sy; }
 			}
 		}
 	};

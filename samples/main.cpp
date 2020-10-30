@@ -77,6 +77,7 @@ int main(void)
 		if (screen_keys[VK_RIGHT]) box_pos.x -= 0.2f;
 		if (screen_keys[VK_SPACE]) alpha += 1.0f;
 		if (screen_keys['W']) device.r_flag = render_flag::wire_frame;
+		if (screen_keys['L']) device.r_flag = render_flag::scanline;
 		if (screen_keys['S']) device.r_flag = render_flag::shaded;
 		if (screen_keys['D']) device.r_flag = render_flag::depth;
 		if (screen_keys['U']) device.r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);

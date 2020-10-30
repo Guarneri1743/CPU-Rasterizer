@@ -10,13 +10,25 @@ namespace guarneri {
 			this->height = height;
 			int size = static_cast<int>(width * height);
 			buffer = new T[size];
+			managed_buffer = true;
 		}		
+
+		raw_buffer(void* buffer, unsigned int width, unsigned int height) {
+			this->width = width;
+			this->height = height;
+			this->buffer = (T*)buffer;
+			managed_buffer = false;
+		}
 		
 		~raw_buffer() {
-			delete[] buffer;
+			if(managed_buffer)
+			{
+				delete[] buffer;
+			}
 		}
 
 	private:
+		bool managed_buffer;
 		T* buffer;
 		unsigned int width;
 		unsigned int height;
