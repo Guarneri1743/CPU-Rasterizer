@@ -213,6 +213,9 @@ namespace guarneri {
 					color src_color = fragment_result;
 					color blended_color = color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
 					pixel_color = color::encode(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+					if (dst != 0 && dst != -1) {
+						int a = 0;
+					}
 				}
 			}
 
