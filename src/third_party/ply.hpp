@@ -315,7 +315,7 @@ Exit:
 ******************************************************************************/
 
 PlyFile* ply_open_for_writing(
-    char* filename,
+    const char* filename,
     int nelems,
     char** elem_names,
     int file_type,
@@ -929,7 +929,7 @@ Exit:
 ******************************************************************************/
 
 PlyFile* ply_open_for_reading(
-    char* filename,
+    const char* filename,
     int* nelems,
     char*** elem_names,
     int* file_type,
@@ -2629,7 +2629,7 @@ Entry:
   fname - file name from which memory was requested
 ******************************************************************************/
 
-static char* my_alloc(int size, int lnum, char* fname)
+static char* my_alloc(int size, int lnum, const char* fname)
 {
     char* ptr;
 
@@ -2642,3 +2642,65 @@ static char* my_alloc(int size, int lnum, char* fname)
     return (ptr);
 }
 
+typedef struct PlyVertex {
+    float x, y, z;             /* the usual 3-space position of a vertex */
+} PlyVertex;
+
+typedef struct PlyFace {
+    unsigned char intensity; /* this user attaches intensity to faces */
+    unsigned char nverts;    /* number of vertex indices in list */
+    int* verts;              /* vertex index list */
+} PlyFace;
+
+/* polygon description of an object (a cube) */
+
+PlyVertex verts[] = {  /* vertices */
+  { 0.0, 0.0, 0.0},
+  { 1.0, 0.0, 0.0},
+  { 1.0, 1.0, 0.0},
+  { 0.0, 1.0, 0.0},
+  { 0.0, 0.0, 1.0},
+  { 1.0, 0.0, 1.0},
+  { 1.0, 1.0, 1.0},
+  { 0.0, 1.0, 1.0},
+};
+
+PlyFace faces[] = {  /* faces */
+  { '\001', 4, NULL },  /* intensity, vertex list count, vertex list (empty) */
+  { '\004', 4, NULL },
+  { '\010', 4, NULL },
+  { '\020', 4, NULL },
+  { '\144', 4, NULL },
+  { '\377', 4, NULL },
+};
+
+/* list of vertices for each face */
+/* (notice that indices begin at zero) */
+
+typedef int Vertex_Indices[4];
+Vertex_Indices vert_ptrs[] = {
+  { 0, 1, 2, 3 },
+  { 7, 6, 5, 4 },
+  { 0, 4, 5, 1 },
+  { 1, 5, 6, 2 },
+  { 2, 6, 7, 3 },
+  { 3, 7, 4, 0 },
+};
+
+/* information needed to describe the user's data to the PLY routines */
+
+char* elem_names[] = { /* list of the kinds of elements in the user's object */
+  "vertex", "face"
+};
+
+PlyProperty vert_props[] = { /* list of property information for a vertex */
+  {"x", PLY_FLOAT, PLY_FLOAT, offsetof(PlyVertex,x), 0, 0, 0, 0},
+  {"y", PLY_FLOAT, PLY_FLOAT, offsetof(PlyVertex,y), 0, 0, 0, 0},
+  {"z", PLY_FLOAT, PLY_FLOAT, offsetof(PlyVertex,z), 0, 0, 0, 0},
+};
+
+PlyProperty face_props[] = { /* list of property information for a vertex */
+  {"intensity", PLY_UCHAR, PLY_UCHAR, offsetof(PlyFace,intensity), 0, 0, 0, 0},
+  {"vertex_indices", PLY_INT, PLY_INT, offsetof(PlyFace,verts),
+   1, PLY_UCHAR, PLY_UCHAR, offsetof(PlyFace,nverts)},
+};

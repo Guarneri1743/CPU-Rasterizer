@@ -10,72 +10,6 @@ Greg Turk, March 1994
 #include <math.h>
 #include <ply.hpp>
 
-/* user's vertex and face definitions for a polygonal object */
-
-typedef struct Vertex {
-  float x,y,z;             /* the usual 3-space position of a vertex */
-} Vertex;
-
-typedef struct Face {
-  unsigned char intensity; /* this user attaches intensity to faces */
-  unsigned char nverts;    /* number of vertex indices in list */
-  int *verts;              /* vertex index list */
-} Face;
-
-/* polygon description of an object (a cube) */
-
-Vertex verts[] = {  /* vertices */
-  { 0.0, 0.0, 0.0},
-  { 1.0, 0.0, 0.0},
-  { 1.0, 1.0, 0.0},
-  { 0.0, 1.0, 0.0},
-  { 0.0, 0.0, 1.0},
-  { 1.0, 0.0, 1.0},
-  { 1.0, 1.0, 1.0},
-  { 0.0, 1.0, 1.0},
-};
-
-Face faces[] = {  /* faces */
-  { '\001', 4, NULL },  /* intensity, vertex list count, vertex list (empty) */
-  { '\004', 4, NULL },
-  { '\010', 4, NULL },
-  { '\020', 4, NULL },
-  { '\144', 4, NULL },
-  { '\377', 4, NULL },
-};
-
-/* list of vertices for each face */
-/* (notice that indices begin at zero) */
-
-typedef int Vertex_Indices[4];
-Vertex_Indices vert_ptrs[] = {
-  { 0, 1, 2, 3 },
-  { 7, 6, 5, 4 },
-  { 0, 4, 5, 1 },
-  { 1, 5, 6, 2 },
-  { 2, 6, 7, 3 },
-  { 3, 7, 4, 0 },
-};
-
-/* information needed to describe the user's data to the PLY routines */
-
-char *elem_names[] = { /* list of the kinds of elements in the user's object */
-  "vertex", "face"
-};
-
-PlyProperty vert_props[] = { /* list of property information for a vertex */
-  {"x", PLY_FLOAT, PLY_FLOAT, offsetof(Vertex,x), 0, 0, 0, 0},
-  {"y", PLY_FLOAT, PLY_FLOAT, offsetof(Vertex,y), 0, 0, 0, 0},
-  {"z", PLY_FLOAT, PLY_FLOAT, offsetof(Vertex,z), 0, 0, 0, 0},
-};
-
-PlyProperty face_props[] = { /* list of property information for a vertex */
-  {"intensity", PLY_UCHAR, PLY_UCHAR, offsetof(Face,intensity), 0, 0, 0, 0},
-  {"vertex_indices", PLY_INT, PLY_INT, offsetof(Face,verts),
-   1, PLY_UCHAR, PLY_UCHAR, offsetof(Face,nverts)},
-};
-
-
 
 /******************************************************************************
 The main routine just creates and then reads a PLY file.
@@ -109,8 +43,8 @@ write_test()
   char **elist;
   int file_type;
   float version;
-  int nverts = sizeof (verts) / sizeof (Vertex);
-  int nfaces = sizeof (faces) / sizeof (Face);
+  int nverts = sizeof (verts) / sizeof (PlyVertex);
+  int nfaces = sizeof (faces) / sizeof (PlyFace);
 
   /* create the vertex index lists for the faces */
   for (i = 0; i < nfaces; i++)
@@ -175,8 +109,8 @@ read_test()
   int nprops;
   int num_elems;
   PlyProperty **plist;
-  Vertex **vlist;
-  Face **flist;
+  PlyVertex**vlist;
+  PlyFace **flist;
   char *elem_name;
   int num_comments;
   char **comments;
@@ -206,8 +140,8 @@ read_test()
     if (equal_strings ("vertex", elem_name)) {
 
       /* create a vertex list to hold all the vertices */
-      int size = sizeof(Vertex*) * num_elems;
-      vlist = (Vertex **) malloc (size);
+      int size = sizeof(PlyVertex*) * num_elems;
+      vlist = (PlyVertex **) malloc (size);
 
       /* set up for getting vertex elements */
 
@@ -219,11 +153,11 @@ read_test()
       for (j = 0; j < num_elems; j++) {
 
         /* grab and element from the file */
-        vlist[j] = (Vertex *) malloc (sizeof (Vertex));
+        vlist[j] = (PlyVertex *) malloc (sizeof (PlyVertex));
         ply_get_element (ply, (void *) vlist[j]);
 
         /* print out vertex x,y,z for debugging */
-        printf ("vertex: %g %g %g\n", vlist[j]->x, vlist[j]->y, vlist[j]->z);
+        //printf ("vertex: %g %g %g\n", vlist[j]->x, vlist[j]->y, vlist[j]->z);
       }
     }
 
@@ -231,7 +165,7 @@ read_test()
     if (equal_strings ("face", elem_name)) {
 
       /* create a list to hold all the face elements */
-      flist = (Face **) malloc (sizeof (Face *) * num_elems);
+      flist = (PlyFace **) malloc (sizeof (PlyFace *) * num_elems);
 
       /* set up for getting face elements */
 
@@ -242,7 +176,7 @@ read_test()
       for (j = 0; j < num_elems; j++) {
 
         /* grab and element from the file */
-        flist[j] = (Face *) malloc (sizeof (Face));
+        flist[j] = (PlyFace *) malloc (sizeof (PlyFace));
         ply_get_element (ply, (void *) flist[j]);
 
         /* print out face info, for debugging */

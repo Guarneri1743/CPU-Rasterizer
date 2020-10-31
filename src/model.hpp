@@ -1,3 +1,109 @@
+#pragma once
+#include <common.hpp>
+#include <mesh.hpp>
+#include <texture.hpp>
+#include <vertex.hpp>
+#include <float3.hpp>
+#include <unordered_set>
+#include <ply.hpp>
+
+namespace guarneri {
+	class model {
+	public:
+		model() {
+			root_dir = "";
+		}
+
+	public:
+		std::string root_dir;
+
+	public:
+		void load_from_file(std::string path) {
+            int i, j, k;
+            PlyFile* ply;
+            int nelems;
+            char** elist;
+            int file_type;
+            float version;
+            int nprops;
+            int num_elems;
+            PlyProperty** plist;
+            PlyVertex** vlist;
+            PlyFace** flist;
+            char* elem_name;
+            int num_comments;
+            char** comments;
+            int num_obj_info;
+            char** obj_info;
+
+            ply = ply_open_for_reading(path.c_str(), &nelems, &elist, &file_type, &version);
+
+            printf("ply version %f\n", version);
+            printf("ply type %d\n", file_type);
+
+
+            for (i = 0; i < nelems; i++) {
+
+                elem_name = elist[i];
+                plist = ply_get_element_description(ply, elem_name, &num_elems, &nprops);
+
+                printf("element %s %d\n", elem_name, num_elems);
+
+                if (equal_strings("vertex", elem_name)) {
+
+                    int size = sizeof(PlyVertex*) * num_elems;
+                    vlist = (PlyVertex**)malloc(size);
+
+                    ply_get_property(ply, elem_name, &vert_props[0]);
+                    ply_get_property(ply, elem_name, &vert_props[1]);
+                    ply_get_property(ply, elem_name, &vert_props[2]);
+
+                    for (j = 0; j < num_elems; j++) {
+
+                        vlist[j] = (PlyVertex*)malloc(sizeof(PlyVertex));
+                        ply_get_element(ply, (void*)vlist[j]);
+
+                        //printf("vertex: %g %g %g\n", vlist[j]->x, vlist[j]->y, vlist[j]->z);
+                    }
+                }
+
+                if (equal_strings("face", elem_name)) {
+
+                    flist = (PlyFace**)malloc(sizeof(PlyFace*) * num_elems);
+
+                    ply_get_property(ply, elem_name, &face_props[0]);
+                    ply_get_property(ply, elem_name, &face_props[1]);
+
+                    for (j = 0; j < num_elems; j++) {
+
+                        flist[j] = (PlyFace*)malloc(sizeof(PlyFace));
+                        ply_get_element(ply, (void*)flist[j]);
+
+                        printf("face: %d, list = ", flist[j]->intensity);
+                        for (k = 0; k < flist[j]->nverts; k++)
+                            printf("%d ", flist[j]->verts[k]);
+                        printf("\n");
+                    }
+                }
+
+                for (j = 0; j < nprops; j++)
+                    printf("property %s\n", plist[j]->name);
+            }
+
+            comments = ply_get_comments(ply, &num_comments);
+            for (i = 0; i < num_comments; i++)
+                printf("comment = '%s'\n", comments[i]);
+
+            obj_info = ply_get_obj_info(ply, &num_obj_info);
+            for (i = 0; i < num_obj_info; i++)
+                printf("obj_info = '%s'\n", obj_info[i]);
+
+            ply_close(ply);
+		}
+	};
+}
+
+
 //#pragma once
 //#include <common.hpp>
 //#include <mesh.hpp>
