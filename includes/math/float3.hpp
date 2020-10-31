@@ -3,6 +3,11 @@
 #include <float2.hpp>
 
 namespace guarneri {
+	struct float3;
+	static float3 operator +(const float& other, const float3& vec);
+	static float3 operator -(const float& other, const float3& vec);
+	static float3 operator *(const float& other, const float3& vec);
+
 	struct float3 {
 	public:
 		static const float3 ZERO;
@@ -102,12 +107,20 @@ namespace guarneri {
 			return ret;
 		}
 
+		float3 operator -() const {
+			return float3(-x, -y, -z);
+		}
+
 		float3 operator *(const float& scale) const {
 			float3 ret;
 			ret.x = this->x * scale;
 			ret.y = this->y * scale;
 			ret.z = this->z * scale;
 			return ret;
+		}
+
+		float3 operator *(const float3& b) const {
+			return float3(x * b.x, y * b.y, z * b.z);
 		}
 
 		float3 operator /(const float& val) const {
@@ -140,14 +153,6 @@ namespace guarneri {
 
 		bool operator <(const float3& other) const {
 			return float3::magnitude(*this) < float3::magnitude(other);
-		}
-
-		float3 operator -() const {
-			return float3(-x, -y, -z);
-		}
-
-		float3 operator *(const float3& b) const {
-			return float3(x * b.x, y * b.y, z * b.z);
 		}
 
 		static float dot(const float3& lhs, const float3& rhs) {
@@ -256,16 +261,16 @@ namespace guarneri {
 			float2 zy() const { return float2(z, y); }
 	};
 
-	static float3 operator *(const float& val, const float3& vec) {
-		return vec * val;
-	}
-
-	float3 operator +(const float& other, const float3& vec) {
+	static float3 operator +(const float& other, const float3& vec) {
 		return vec + other;
 	}
 
-	float3 operator -(const float& other, const float3& vec) {
+	static float3 operator -(const float& other, const float3& vec) {
 		return -vec + other;
+	}
+
+	static float3 operator *(const float& val, const float3& vec) {
+		return vec * val;
 	}
 
 	static std::ostream& operator << (std::ostream& stream, const float3& vec) {

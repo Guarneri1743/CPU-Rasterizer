@@ -7,10 +7,14 @@ namespace guarneri {
 
 	enum class blend_factor {
 		one,
-		color,
-		alpha,
-		one_minus_color,
-		one_minus_alpha
+		src_color,
+		src_alpha,
+		one_minus_src_alpha,
+		one_minus_src_color,
+		dst_color,
+		dst_alpha,
+		one_minus_dst_alpha,
+		one_minus_dst_color
 	};
 
 	enum class blend_operator {
@@ -19,6 +23,11 @@ namespace guarneri {
 	};
 
 	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
+
+	struct color;
+	static color operator +(const float& other, const color& c);
+	static color operator -(const float& other, const color& c);
+	static color operator *(const float& other, const color& c);
 
 	struct color {
 	public:
@@ -142,26 +151,7 @@ namespace guarneri {
 			return ret;
 		}
 
-
-		color operator +(const color& other) {
-			color ret;
-			ret.r = this->r + other.r;
-			ret.g = this->g + other.g;
-			ret.b = this->b + other.b;
-			ret.a = this->a + other.a;
-			return ret;
-		}
-
-		color operator -(const color& other) {
-			color ret;
-			ret.r = this->r - other.r;
-			ret.g = this->g - other.g;
-			ret.b = this->b - other.b;
-			ret.a = this->a - other.a;
-			return ret;
-		}
-
-		color operator +(const float& other) {
+		color operator +(const float& other) const {
 			color ret;
 			ret.r = this->r + other;
 			ret.g = this->g + other;
@@ -170,7 +160,7 @@ namespace guarneri {
 			return ret;
 		}
 
-		color operator -(const float& other) {
+		color operator -(const float& other) const {
 			color ret;
 			ret.r = this->r - other;
 			ret.g = this->g - other;
@@ -195,25 +185,51 @@ namespace guarneri {
 			return *this;
 		}
 
-		color apply_blend_factor(blend_factor factor) {
-			switch (factor) {
-			case blend_factor::one:
-				return *this;
-			case blend_factor::alpha:
-				return color(r * a, g * a, b * a);
-			case blend_factor::color:
-				return color(r * r, g * g, b * b);
-			case blend_factor::one_minus_color:
-				return color(1.0f - r, 1.0f - g, 1.0f - b);
-			case blend_factor::one_minus_alpha:
-				return color(1.0f - a, 1.0f - a, 1.0f - a);
-			}
-			return *this;
-		}
-
+		// todo: alpha factor
 		static color blend(color src_color, color dst_color, blend_factor src_factor, blend_factor dst_factor, blend_operator op) {
-			color lhs = src_color.apply_blend_factor(src_factor);
-			color rhs = dst_color.apply_blend_factor(dst_factor);
+			color lhs, rhs;
+			switch (src_factor) {
+			case blend_factor::one:
+				lhs = src_color;
+			case blend_factor::src_alpha:
+				lhs = src_color * src_color.a;
+			case blend_factor::src_color:
+				lhs = src_color * src_color;
+			case blend_factor::one_minus_src_alpha:
+				lhs = src_color * (1.0f - src_color);
+			case blend_factor::one_minus_src_color:
+				lhs = src_color * (1.0f - dst_color);
+			case blend_factor::dst_alpha:
+				lhs = src_color * dst_color.a;
+			case blend_factor::dst_color:
+				lhs = src_color * dst_color;
+			case blend_factor::one_minus_dst_alpha:
+				lhs = src_color * (1.0f - dst_color.a);
+			case blend_factor::one_minus_dst_color:
+				lhs = src_color * (1.0f - dst_color);
+			}
+
+			switch (src_factor) {
+			case blend_factor::one:
+				rhs = src_color;
+			case blend_factor::src_alpha:
+				rhs = dst_color * src_color.a;
+			case blend_factor::src_color:
+				rhs = dst_color * src_color;
+			case blend_factor::one_minus_src_alpha:
+				rhs = dst_color * (1.0f - src_color);
+			case blend_factor::one_minus_src_color:
+				rhs = dst_color * (1.0f - dst_color);
+			case blend_factor::dst_alpha:
+				rhs = dst_color * dst_color.a;
+			case blend_factor::dst_color:
+				rhs = dst_color * dst_color;
+			case blend_factor::one_minus_dst_alpha:
+				rhs = dst_color * (1.0f - dst_color.a);
+			case blend_factor::one_minus_dst_color:
+				rhs = dst_color * (1.0f - dst_color);
+			}
+
 			switch (op) {
 			case blend_operator::add:
 				return lhs + rhs;
@@ -221,6 +237,14 @@ namespace guarneri {
 				return lhs - rhs;
 			}
 			return lhs + rhs;
+		}
+
+		static color lerp(const color& lhs, const color& rhs, float t) {
+			float r = lhs.r + (rhs.r - lhs.r) * t;
+			float g = lhs.g + (rhs.g - lhs.g) * t;
+			float b = lhs.b + (rhs.b - lhs.b) * t;
+			float w = lhs.a + (rhs.a - lhs.a) * t;
+			return color(r, g, b, w);
 		}
 
 		static color_t encode(const color& c) {
@@ -313,8 +337,8 @@ namespace guarneri {
 		return -c + other;
 	}
 
-	static color operator *(const float& val, const color& c) {
-		return c * val;
+	static color operator *(const float& other, const color& c) {
+		return c * other;
 	}
 
 	static std::ostream& operator << (std::ostream& stream, const color& c) {
@@ -325,14 +349,6 @@ namespace guarneri {
 	static std::stringstream& operator << (std::stringstream& stream, const color& c) {
 		stream << c.str();
 		return stream;
-	}
-
-	static color lerp(const color& lhs, const color& rhs, float t) {
-		float r = lhs.r + (rhs.r - lhs.r) * t;
-		float g = lhs.g + (rhs.g - lhs.g) * t;
-		float b = lhs.b + (rhs.b - lhs.b) * t;
-		float w = lhs.a + (rhs.a - lhs.a) * t;
-		return color(r, g, b, w);
 	}
 
 	const color color::BLACK = color(0.0f, 0.0f, 0.0f, 1.0f);

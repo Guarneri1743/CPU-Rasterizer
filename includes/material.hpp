@@ -14,8 +14,8 @@ namespace guarneri {
 			this->target_shader = shader;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
-			this->src_factor = blend_factor::alpha;
-			this->dst_factor = blend_factor::one_minus_alpha;
+			this->src_factor = blend_factor::src_alpha;
+			this->dst_factor = blend_factor::one_minus_src_alpha;
 			this->blend_op = blend_operator::add;
 			this->transparent = false;
 		}

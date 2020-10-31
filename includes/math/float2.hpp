@@ -2,6 +2,9 @@
 #include <common.hpp>
 
 namespace guarneri {
+	struct float2;
+	static float2 operator *(const float& val, const float2& vec);
+
 	struct float2 {
 	public:
 		static const float2 ZERO;
@@ -133,6 +136,12 @@ namespace guarneri {
 			return retult;
 		}
 
+		static float2 lerp(const float2& lhs, const float2& rhs, float t) {
+			float x = lhs.x + (rhs.x - lhs.x) * t;
+			float y = lhs.y + (rhs.y - lhs.y) * t;
+			return float2(x, y);
+		}
+
 		std::string str() const {
 			std::stringstream ss;
 			ss << "(" << std::setprecision(FLOAT_LOG_PRECISION) << this->x << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->y << ")";
@@ -158,12 +167,6 @@ namespace guarneri {
 	static std::stringstream& operator << (std::stringstream& stream, const float2& vec) {
 		stream << vec.str();
 		return stream;
-	}
-
-	static float2 lerp(const float2& lhs, const float2& rhs, float t) {
-		float x = lhs.x + (rhs.x - lhs.x) * t;
-		float y = lhs.y + (rhs.y - lhs.y) * t;
-		return float2(x, y);
 	}
 
 	const float2 float2::ZERO = float2(0.0f, 0.0f);

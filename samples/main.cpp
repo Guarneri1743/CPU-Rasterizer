@@ -55,8 +55,9 @@ int main(void)
 	material box_material(&s);
 	box_material.transparent = true;
 	box_material.blend_op = blend_operator::add;
-	box_material.src_factor = blend_factor::alpha;
-	box_material.dst_factor = blend_factor::one_minus_alpha;
+	box_material.src_factor = blend_factor::src_alpha;
+	box_material.dst_factor = blend_factor::one_minus_src_alpha;
+	box_material.zwrite_mode = zwrite::off;
 
 	plane_material.set_texture("noise", &noise);
 
@@ -96,11 +97,12 @@ int main(void)
 		mat4 t = mat4::translation(box_pos);
 		mat4 r = mat4::rotation(float3(-1, -0.5, -1), angle);
 		mat4 m = t * r;
-		draw_box(device, box_material, m, cam.view_matrix(), cam.get_projection_matrix());
 
 		mat4 pm = mat4::translation(float3(0.0f, -1.0f, 0.0f));
 		mat4 scale = mat4::scale(float3(3.0f, 1.0f, 3.0f));
 		draw_plane(device, plane_material, 2, 6, 7, 3, pm * scale, cam.view_matrix(), cam.get_projection_matrix());
+
+		draw_box(device, box_material, m, cam.view_matrix(), cam.get_projection_matrix());
 
 		gdiwin.flush();
 		Sleep(0);

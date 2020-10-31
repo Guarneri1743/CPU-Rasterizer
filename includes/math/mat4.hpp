@@ -200,7 +200,7 @@ namespace guarneri {
 			return ret;
 		}
 
-		mat4 transpose() {
+		mat4 transpose() const {
 			mat4 ret = mat4(*this);
 			std::swap(ret.at(0, 1), ret.at(1, 0));
 			std::swap(ret.at(0, 2), ret.at(2, 0));
@@ -213,7 +213,7 @@ namespace guarneri {
 
 		// Gaussian Elimination with Partial Pivoting https://stuff.mit.edu/afs/athena/course/10/10.001/Web/Course_Notes/GaussElimPivoting.html
 		// Cramer's rule is O(N^4) where Gaussian Elimination is O(N^3) https://www.reddit.com/r/math/comments/fkec7/why_would_you_use_gaussian_elimination_instead_of/
-		mat4 inverse()
+		mat4 inverse() const
 		{
 			float r0[8];
 			float r1[8];
