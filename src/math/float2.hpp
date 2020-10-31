@@ -21,9 +21,9 @@ namespace guarneri {
 		float y;
 
 	public:
-		float& operator[](const unsigned int i) { return (&x)[i]; }
+		float& operator[](const uint32_t i) { return (&x)[i]; }
 
-		const float& operator[](const unsigned int i) const { return (&x)[i]; }
+		const float& operator[](const uint32_t i) const { return (&x)[i]; }
 
 		bool operator == (const float2& other) {
 			return EQUALS(x, other.x) && EQUALS(y, other.y);

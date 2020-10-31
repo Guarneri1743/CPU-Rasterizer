@@ -10,9 +10,9 @@ namespace guarneri {
 			inversed_direction = guarneri::float3();
 		}
 
-		ray(const guarneri::float3& origin, const guarneri::float3& dir){
-			this->origin = origin;
-			this->direction = dir;
+		ray(const guarneri::float3& origin_t, const guarneri::float3& direction_t){
+			this->origin = origin_t;
+			this->direction = direction_t;
 			this->inversed_direction = guarneri::float3(1 / dir.x, 1 / dir.y, 1 / dir.z);
 		}
 

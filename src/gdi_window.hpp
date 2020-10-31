@@ -3,11 +3,6 @@
 #include <windows.h>
 #include <tchar.h>
 
-#ifdef _MSC_VER
-#pragma comment(lib, "gdi32.lib")
-#pragma comment(lib, "user32.lib")
-#endif
-
 namespace guarneri {
 	class gdi_window;
 	static LRESULT event_callback(HWND, UINT, WPARAM, LPARAM);

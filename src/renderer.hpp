@@ -30,7 +30,7 @@ namespace guarneri {
 				for (auto iter = meshes.begin(); iter != meshes.end(); iter++) {
 					auto mesh = *iter;
 					for (auto iiter = mesh.indices.begin(); iiter != mesh.indices.end(); iiter++) {
-						uint index = *iiter;
+						uint32_t index = *iiter;
 						if (mesh.vertices.size() > index) {
 
 						}

@@ -10,10 +10,10 @@ namespace guarneri {
 			height = 0;
 		}
 
-		cylinder(const line& axis, const float& radius, const float& height) {
-			this->axis = axis;
-			this->radius = radius;
-			this->height = height;
+		cylinder(const line& axis_t, const float& radius_t, const float& height_t) {
+			this->axis = axis_t;
+			this->radius = radius_t;
+			this->height = height_t;
 		}
 
 		cylinder(const cylinder& other) {

@@ -9,9 +9,9 @@ namespace guarneri {
 			constant = 0;
 		}
 
-		plane(const guarneri::float3& normal, const float& constant) {
-			this->normal = normal;
-			this->constant = constant;
+		plane(const guarneri::float3& normal_t, const float& constant_t) {
+			this->normal = normal_t;
+			this->constant = constant_t;
 		}
 
 		plane(const guarneri::float3& normal, const guarneri::float3& p) {

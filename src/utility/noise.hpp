@@ -38,7 +38,7 @@ namespace guarneri {
                         {
                             const double z = sqrt(nextr * nextr + nexti * nexti);
 
-                            /*const unsigned int index = static_cast<unsigned int>
+                            /*const uint32_t index = static_cast<uint32_t>
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
                             //float n = (float)(10 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
                             c = float4(0.2f, 0.4f, 0.6f, 1.0f);

@@ -9,9 +9,9 @@ namespace guarneri {
 			direction = guarneri::float3();
 		}
 
-		line(const guarneri::float3& origin, const guarneri::float3& direction) {
-			this->origin = origin;
-			this->direction = direction;
+		line(const guarneri::float3& origin_t, const guarneri::float3& direction_t) {
+			this->origin = origin_t;
+			this->direction = direction_t;
 		}
 
 		line(const line& other) {

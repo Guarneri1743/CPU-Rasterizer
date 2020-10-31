@@ -36,7 +36,7 @@ namespace guarneri {
 			int dy2 = 2 * dy;
 			int xi = x0;
 			int yi = y0;
-			while (buffer.write((unsigned int)yi, (unsigned int)xi, c), xi != x1 || yi != y1) {
+			while (buffer.write((uint32_t)yi, (uint32_t)xi, c), xi != x1 || yi != y1) {
 				int e = bias;
 				if (e > -dx2) { bias -= dy2; xi += sx; }
 				if (e < dy2)  { bias += dx2; yi += sy; }

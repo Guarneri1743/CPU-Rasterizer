@@ -10,8 +10,8 @@ namespace guarneri {
 			extents = guarneri::float3();
 		}
 
-		aabb(const guarneri::float3& center, const guarneri::float3& size) {
-			this->center = center;
+		aabb(const guarneri::float3& center_t, const guarneri::float3& size) {
+			this->center = center_t;
 			this->extents = size / 2;
 		}
 

@@ -13,20 +13,6 @@ namespace guarneri {
 		};
 
 	public:
-		camera(const float3& position, const float& aspect, const float& fov, const float& near, const float& far, const projection& proj_type) {
-			this->position = position;
-			this->aspect = aspect;
-			this->fov = fov;
-			this->near = near;
-			this->far = far;
-			this->yaw = -90.0f;
-			this->pitch = 0.0f;
-			this->proj_type = proj_type;
-			update_camera();
-			update_proj_mode();
-		}
-
-	public:
 		float fov;
 		float aspect;
 		float near;
@@ -44,6 +30,19 @@ namespace guarneri {
 		projection proj_type;
 
 	public:
+		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+			this->position = position_t;
+			this->aspect = aspect_t;
+			this->fov = fov_t;
+			this->near = near_t;
+			this->far = far_t;
+			this->yaw = -90.0f;
+			this->pitch = 0.0f;
+			this->proj_type = proj_type_t;
+			update_camera();
+			update_proj_mode();
+		}
+
 		mat4 view_matrix() {
 			return mat4::lookat_matrix(this->position, this->lookat_target, float3::UP);
 		}

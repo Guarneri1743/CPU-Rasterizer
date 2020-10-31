@@ -78,14 +78,16 @@ int main(void)
 
 	gdi_window gdiwin(w, h, _T("SoftRasterizerTitle"), _T("SoftRasterizer"));
 
-	render_device device(gdiwin.framebuffer, w, h);
+	auto& device = singleton<render_device>::instance();
+	device.initialize(gdiwin.framebuffer, w, h);
 
 	float aspect = (float)w / (float)h;
 
 	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
 	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
 
-	camera cam(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
+	camera cam = singleton<camera>::instance();
+	cam.initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
 
 	while (gdiwin.is_valid()) {
@@ -105,7 +107,6 @@ int main(void)
 
 		cam.set_position(cam_pos);
 		cam.set_target(float3(0.0f, 0.0f, 0.0f));
-		update_misc_params(w, h, cam.near, cam.far, cam.fov);
 
 		device.clear_buffer();
 

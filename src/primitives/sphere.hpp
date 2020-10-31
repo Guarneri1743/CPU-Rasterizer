@@ -9,9 +9,9 @@ namespace guarneri {
 			radius = 0;
 		}
 
-		sphere(const guarneri::float3& center, const float& radius) {
-			this->center = center;
-			this->radius = radius;
+		sphere(const guarneri::float3& center_t, const float& radius_t) {
+			this->center = center_t;
+			this->radius = radius_t;
 		}
 
 		sphere(const sphere& other) {

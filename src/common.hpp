@@ -11,6 +11,7 @@
 #include <vector>
 #include <stack>
 #include <filesystem>
+#include <singleton.hpp>
 
 namespace guarneri{
 	#define EPSILON 1e-04f
@@ -33,24 +34,6 @@ namespace guarneri{
 	typedef std::string property_name;
 	typedef std::string shader_id;
 
-	typedef struct {
-		float camera_near;
-		float camera_far;
-		float camera_fov;
-		uint32_t screen_width;
-		uint32_t screen_height;
-	} misc;
-
-	static misc misc_params;
-
-	static void update_misc_params(const uint32_t& width, const uint32_t& height, const float& near, const float& far, const float& fov) {
-		misc_params.screen_width = width;
-		misc_params.screen_height = height;
-		misc_params.camera_near = near;
-		misc_params.camera_far = far;
-		misc_params.camera_fov = fov;
-	}
-
 	static std::string replace(std::string str, std::string pattern, std::string content) {
 		while (str.find(pattern) != std::string::npos) {
 			str.replace(str.find(pattern), 1, content);
@@ -66,4 +49,9 @@ namespace guarneri{
 	static std::string res_path() {
 		return cur_path() + "/res";
 	}
+
+	template <class T>
+	inline void unused(T const&){}
+
+	#define REF(obj) unused(obj)
 }

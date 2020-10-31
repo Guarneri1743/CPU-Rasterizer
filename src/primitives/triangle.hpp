@@ -158,9 +158,9 @@ namespace guarneri {
 			return ret;
 		}
 
-		vertex& operator[](const unsigned int i) { return vertices[i]; }
+		vertex& operator[](const uint32_t i) { return vertices[i]; }
 
-		const vertex& operator[](const unsigned int i) const { return vertices[i]; }
+		const vertex& operator[](const uint32_t i) const { return vertices[i]; }
 
 		public:
 			std::string str() const {

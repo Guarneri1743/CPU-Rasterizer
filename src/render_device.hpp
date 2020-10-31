@@ -8,6 +8,7 @@
 #include <triangle.hpp>
 #include <line_drawer.hpp>
 #include <color.hpp>
+#include <camera.hpp>
 
 namespace guarneri {
 	enum class render_flag {
@@ -22,32 +23,24 @@ namespace guarneri {
 
 	class render_device {
 	public:
-		render_device(void* fb, uint32_t width, uint32_t height) {
-			this->width = width;
-			this->height = height;
-			r_flag = render_flag::shaded;
-			zbuffer = new raw_buffer<float>(width, height);
-			zbuffer->clear(1.0f);
-			frame_buffer = new raw_buffer<color_bgra>(fb, width, height);
-		}
-
-		~render_device() {
-			delete zbuffer;
-			delete frame_buffer;
-			zbuffer = nullptr;
-			frame_buffer = nullptr;
-		}
-
-	public:
 		uint32_t width;
 		uint32_t height;
 		render_flag r_flag;
 
 	private:
 		raw_buffer<float>* zbuffer;
-		raw_buffer<color_bgra>* frame_buffer;
+		raw_buffer<color_bgra>* framebuffer;
 
 	public:
+		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
+			this->width = width_t;
+			this->height = height_t;
+			r_flag = render_flag::shaded;
+			zbuffer = new raw_buffer<float>(width_t, height_t);
+			zbuffer->clear(1.0f);
+			framebuffer = new raw_buffer<color_bgra>(bitmap_handle_t, width_t, height_t);
+		}
+
 		// =============================================================================================================Pipeline======================================================================================================================
 		// *																																																										*
 	    // *												 model matrix					view matrix							projection matrix                clipping, clip2ndc					    screen mapping								*
@@ -105,9 +98,9 @@ namespace guarneri {
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
 			
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->framebuffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
@@ -115,9 +108,9 @@ namespace guarneri {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
-					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->framebuffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 
@@ -200,7 +193,7 @@ namespace guarneri {
 			// alpha blend
 			if (s != nullptr && s->transparent) {
 				color_bgra dst;
-				if (frame_buffer->read(row, col, dst)) {
+				if (framebuffer->read(row, col, dst)) {
 					color dst_color = color::decode(dst);
 					color src_color = fragment_result;
 					color blended_color = color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
@@ -215,17 +208,17 @@ namespace guarneri {
 
 			if (z_pass) {
 				// write to color buffer
-				frame_buffer->write(row, col, pixel_color);
+				framebuffer->write(row, col, pixel_color);
 			}
 
 			// depth buffer visualization
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
-					float linear_depth = linearize_depth(cur_depth, misc_params.camera_near, misc_params.camera_far);
+					float linear_depth = linearize_depth(cur_depth, singleton<camera>::instance().near, singleton<camera>::instance().far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
 					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
-					frame_buffer->write(row, col, c);
+					framebuffer->write(row, col, c);
 				}
 			}
 		}
@@ -323,10 +316,12 @@ namespace guarneri {
 		// todo
 		void generate_frustum(mat4 v, mat4 p)
 		{
-			
+			REF(p);
+			REF(v);
 		}
 
 		bool in_frustum(const triangle& tri) {
+			REF(tri);
 			return false;
 		}
 
@@ -334,10 +329,10 @@ namespace guarneri {
 			zbuffer->clear(1.0f);
 			if (((int)r_flag & (int)render_flag::depth) != 0)
 			{
-				frame_buffer->clear(color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				framebuffer->clear(color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			else {
-				frame_buffer->clear(color::encode_bgra(0.0f, 0.0f, 0.0f, 0.0f));
+				framebuffer->clear(color::encode_bgra(0.0f, 0.0f, 0.0f, 0.0f));
 			}
 		}
 	};

@@ -10,9 +10,9 @@ namespace guarneri {
 			radius = 0;
 		}
 
-		capsule(const guarneri::float3& center, const guarneri::float3& dir, const float& extent, const float& radius) {
+		capsule(const guarneri::float3& center, const guarneri::float3& dir, const float& extent, const float& radius_t) {
 			this->segment = segment::segment(center, dir, extent);
-			this->radius = radius;
+			this->radius = radius_t;
 		}
 
 		capsule(const guarneri::float3& start, const guarneri::float3& end, const float& radius) {
