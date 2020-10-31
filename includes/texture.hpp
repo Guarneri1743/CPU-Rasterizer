@@ -15,6 +15,12 @@ namespace guarneri {
 	template <typename T>
 	struct texture {
 	public:
+		texture(const texture_id& id, const unsigned int& width, const unsigned int& height, const T& c) {
+			this->id = id;
+			buffer = new raw_buffer<T>(width, height);
+			buffer->clear(c);
+		}
+
 		texture(const texture_id& id, const unsigned int& width, const unsigned int& height) {
 			this->id = id;
 			buffer = new raw_buffer<T>(width, height);

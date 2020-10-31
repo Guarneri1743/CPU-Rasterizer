@@ -191,43 +191,61 @@ namespace guarneri {
 			switch (src_factor) {
 			case blend_factor::one:
 				lhs = src_color;
+				break;
 			case blend_factor::src_alpha:
 				lhs = src_color * src_color.a;
+				break;
 			case blend_factor::src_color:
 				lhs = src_color * src_color;
+				break;
 			case blend_factor::one_minus_src_alpha:
 				lhs = src_color * (1.0f - src_color);
+				break;
 			case blend_factor::one_minus_src_color:
 				lhs = src_color * (1.0f - dst_color);
+				break;
 			case blend_factor::dst_alpha:
 				lhs = src_color * dst_color.a;
+				break;
 			case blend_factor::dst_color:
 				lhs = src_color * dst_color;
+				break;
 			case blend_factor::one_minus_dst_alpha:
 				lhs = src_color * (1.0f - dst_color.a);
+				break;
 			case blend_factor::one_minus_dst_color:
 				lhs = src_color * (1.0f - dst_color);
+				break;
 			}
 
 			switch (src_factor) {
 			case blend_factor::one:
 				rhs = src_color;
+				break;
 			case blend_factor::src_alpha:
 				rhs = dst_color * src_color.a;
+				break;
 			case blend_factor::src_color:
 				rhs = dst_color * src_color;
+				break;
 			case blend_factor::one_minus_src_alpha:
 				rhs = dst_color * (1.0f - src_color);
+				break;
 			case blend_factor::one_minus_src_color:
 				rhs = dst_color * (1.0f - dst_color);
+				break;
 			case blend_factor::dst_alpha:
 				rhs = dst_color * dst_color.a;
+				break;
 			case blend_factor::dst_color:
 				rhs = dst_color * dst_color;
+				break;
 			case blend_factor::one_minus_dst_alpha:
 				rhs = dst_color * (1.0f - dst_color.a);
+				break;
 			case blend_factor::one_minus_dst_color:
 				rhs = dst_color * (1.0f - dst_color);
+				break;
 			}
 
 			switch (op) {

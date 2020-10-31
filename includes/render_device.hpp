@@ -341,7 +341,7 @@ namespace guarneri {
 			return false;
 		}
 
-		void flush() {
+		void clear_buffer() {
 			zbuffer->clear(1.0f);
 			if (((int)r_flag & (int)render_flag::depth) != 0)
 			{
