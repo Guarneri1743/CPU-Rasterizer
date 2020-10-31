@@ -19,14 +19,14 @@ using namespace std;
 #endif
 
 vertex mesh[8] = {
-	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3()),
-	 vertex(float4(1, -1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f),float3::ONE,  float2(0.0f, 1.0f), float3()),
-	 vertex(float4(1, 1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3()),
-	 vertex(float4(-1,  1,  1, 1), float4(1.0f, 0.2f, 1.0f, 0.3f),  float3::ONE, float2(1.0f, 0.0f), float3()),
-	 vertex(float4(-1, -1, -1, 1), float4(1.0f, 1.0f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3()),
-	 vertex(float4(1, -1, -1, 1),float4(0.2f, 1.0f, 1.0f, 0.3f),  float3::ONE, float2(0.0f, 1.0f), float3()),
-	 vertex(float4(1,  1, -1, 1), float4(1.0f, 0.3f, 0.3f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3()),
-	 vertex(float4(-1,  1, -1, 1),  float4(0.2f, 1.0f, 0.3f, 0.3f), float3::ONE,float2(1.0f, 0.0f), float3()),
+	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3(), float3()),
+	 vertex(float4(1, -1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f),float3::ONE,  float2(0.0f, 1.0f), float3(), float3()),
+	 vertex(float4(1, 1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3(), float3()),
+	 vertex(float4(-1,  1,  1, 1), float4(1.0f, 0.2f, 1.0f, 0.3f),  float3::ONE, float2(1.0f, 0.0f), float3(), float3()),
+	 vertex(float4(-1, -1, -1, 1), float4(1.0f, 1.0f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3(), float3()),
+	 vertex(float4(1, -1, -1, 1),float4(0.2f, 1.0f, 1.0f, 0.3f),  float3::ONE, float2(0.0f, 1.0f), float3(), float3()),
+	 vertex(float4(1,  1, -1, 1), float4(1.0f, 0.3f, 0.3f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3(), float3()),
+	 vertex(float4(-1,  1, -1, 1),  float4(0.2f, 1.0f, 0.3f, 0.3f), float3::ONE,float2(1.0f, 0.0f), float3(), float3()),
 };
 
 void draw_plane(render_device& device, material& mat, int a, int b, int c, int d, const mat4& m, const mat4& v, const mat4& p) {
@@ -73,8 +73,8 @@ int main(void)
 
 	float angle = 1;
 
-	unsigned int w = 800;
-	unsigned int h = 600;
+	uint32_t w = 800;
+	uint32_t h = 600;
 
 	gdi_window gdiwin(w, h, _T("SoftRasterizerTitle"), _T("SoftRasterizer"));
 

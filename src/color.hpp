@@ -4,6 +4,9 @@
 #include <float4.hpp>
 
 namespace guarneri {
+	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
+	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
+	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 
 	enum class blend_factor {
 		one,
@@ -23,7 +26,7 @@ namespace guarneri {
 	};
 
 	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
-	unsigned int CLAMP_UINT(unsigned int x, unsigned int min, unsigned int max) { return (x < min) ? min : ((x > max) ? max : x); }
+	uint32_t CLAMP_UINT(uint32_t x, uint32_t min, uint32_t max) { return (x < min) ? min : ((x > max) ? max : x); }
 	int CLAMP_INT(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
 	float CLAMP_FLT(float x, float min, float max) { return (x < min) ? min : ((x > max) ? max : x); }
 
@@ -65,9 +68,9 @@ namespace guarneri {
 			return color::normalize(*this);
 		}
 
-		float& operator[](const unsigned int& i) { return (&r)[i]; }
+		float& operator[](const uint32_t& i) { return (&r)[i]; }
 
-		const float& operator[](const unsigned int& i) const { return (&r)[i]; }
+		const float& operator[](const uint32_t& i) const { return (&r)[i]; }
 
 		bool operator == (const color& other) {
 			return EQUALS(r, other.r) && EQUALS(g, other.g) && EQUALS(b, other.b) && EQUALS(a, other.a);

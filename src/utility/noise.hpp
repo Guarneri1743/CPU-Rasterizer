@@ -41,7 +41,7 @@ namespace guarneri {
                             /*const unsigned int index = static_cast<unsigned int>
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
                             //float n = (float)(10 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
-                            float4 c = float4(0.2f, 0.4f, 0.6f, 1.0f);
+                            c = float4(0.2f, 0.4f, 0.6f, 1.0f);
                             image.write(x, y, c);
 
                             break;

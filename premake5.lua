@@ -72,6 +72,8 @@ solution "SoftRasterizer"
    includedirs {
       "src",
       "src/third_party",
+      "src/third_party/assimp",
+      "src/utility",
       "src/math",
       "src/primitives"
    }
@@ -84,6 +86,8 @@ project "SoftRasterizer"
    { 
       "src/*.*", 
       "src/third_party/*.*",
+      "src/third_party/assimp/*.*",
+      "src/utility/*.*",
       "src/math/*.*",
       "src/primitives/*.*",
       "samples/*.*"
@@ -103,6 +107,8 @@ project "UnitTest"
    { 
       "src/*.*",
       "src/third_party/*.*",
+      "src/third_party/assimp/*.*",
+      "src/utility/*.*",
       "src/math/*.*",
       "src/primitives/*.*",
       "unit_test/*.*"

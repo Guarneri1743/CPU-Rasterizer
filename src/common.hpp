@@ -23,16 +23,12 @@ namespace guarneri{
 	#define INVALID_TEXTURE_ID 0
 	#define FLOOR(val) (int)(val)
 	#define CEIL(val) (int)(val + 0.5f)
-	#define FLOOR_UINT(val) (unsigned int)(val)
-	#define CEIL_UINT(val) (unsigned int)(val + 0.5f)
+	#define FLOOR_UINT(val) (uint32_t)(val)
+	#define CEIL_UINT(val) (uint32_t)(val + 0.5f)
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	#define FS std::filesystem
 	
-	typedef unsigned int id_t;
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
-	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef std::string texture_id;
 	typedef std::string property_name;
 	typedef std::string shader_id;
@@ -41,13 +37,13 @@ namespace guarneri{
 		float camera_near;
 		float camera_far;
 		float camera_fov;
-		unsigned int screen_width;
-		unsigned int screen_height;
+		uint32_t screen_width;
+		uint32_t screen_height;
 	} misc;
 
 	static misc misc_params;
 
-	static void update_misc_params(const unsigned int& width, const unsigned int& height, const float& near, const float& far, const float& fov) {
+	static void update_misc_params(const uint32_t& width, const uint32_t& height, const float& near, const float& far, const float& fov) {
 		misc_params.screen_width = width;
 		misc_params.screen_height = height;
 		misc_params.camera_near = near;

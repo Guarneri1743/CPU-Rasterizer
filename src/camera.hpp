@@ -4,7 +4,7 @@
 #include <mat4.hpp>
 
 namespace guarneri {
-	struct camera
+	class camera
 	{
 	public:
 		enum class projection {

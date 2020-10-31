@@ -4,8 +4,6 @@
 #include <float4.hpp>
 #include <texture.hpp>
 #include <unordered_map>
-#include <shader_manager.hpp>
-#include <texture_manager.hpp>
 
 namespace guarneri {
 	class material {

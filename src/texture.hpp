@@ -17,15 +17,16 @@ namespace guarneri {
 		bilinear
 	};
 
+	// todo: support other formats
 	enum class texture_format {
 		invalid,
 		rgb,
 		rgba
 	};
 
-	struct texture {
+	class texture {
 	public:
-		texture(const texture_id& id, const unsigned int& width, const unsigned int& height, const texture_format& fmt) {
+		texture(const texture_id& id, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->id = id;
 			this->fmt = fmt;
 			this->rgba_buffer = nullptr;
@@ -41,7 +42,7 @@ namespace guarneri {
 			}
 		}
 
-		texture(void* tex_buffer, const texture_id& id, const unsigned int& width, const unsigned int& height, const texture_format& fmt) {
+		texture(void* tex_buffer, const texture_id& id, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->id = id;
 			this->fmt = fmt;
 			this->rgba_buffer = nullptr;
@@ -134,7 +135,7 @@ namespace guarneri {
 			return false;
 		}
 
-		bool sample(const unsigned int& row, const unsigned int& col, color& ret) const {
+		bool sample(const uint32_t& row, const uint32_t& col, color& ret) const {
 			switch (fmt) {
 				case texture_format::rgb:
 				{
@@ -156,7 +157,7 @@ namespace guarneri {
 			return false;
 		}
 
-		bool write(const unsigned int& x, const unsigned int& y, const color& data) {
+		bool write(const uint32_t& x, const uint32_t& y, const color& data) {
 			switch (fmt) {
 				case texture_format::rgb:
 					if (rgba_buffer == nullptr) return false;
@@ -168,6 +169,20 @@ namespace guarneri {
 					}
 			}
 			return false;
+		}
+
+		void save2file() {
+			switch (fmt) {
+			case texture_format::rgb:
+				break;
+			case texture_format::rgba:
+				break;
+			}
+		}
+
+		// todo
+		void resize() {
+
 		}
 
 	private:

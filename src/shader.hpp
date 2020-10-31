@@ -39,6 +39,7 @@ namespace guarneri {
 		float4 color;
 		float3 normal;
 		float3 tangent;
+		float3 bitangent;
 		// todo: add userdata feature to vertex
 		float3 custom_data;
 	};

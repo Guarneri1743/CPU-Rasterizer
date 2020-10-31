@@ -12,15 +12,17 @@ namespace guarneri {
 			uv = float2();
 			normal = float3();
 			tangent = float3();
+			bitangent = float3();
 			this->rhw = 1.0f;
 		}
 
-		vertex(const float4& position, const float4& color, const float3& normal, const float2& uv, const float3& tangent) {
+		vertex(const float4& position, const float4& color, const float3& normal, const float2& uv, const float3& tangent, const float3& bitangent) {
 			this->position = position;
 			this->color = color;
 			this->normal = normal;
 			this->uv = uv;
 			this->tangent = tangent;
+			this->bitangent = bitangent;
 			this->rhw = 1.0f / this->position.w;
 		}
 
@@ -30,6 +32,7 @@ namespace guarneri {
 			this->uv = other.uv;
 			this->normal = other.normal;
 			this->tangent = other.tangent;
+			this->bitangent = other.bitangent;
 			this->rhw = other.rhw;
 		}
 
@@ -39,6 +42,7 @@ namespace guarneri {
 		float3 normal;
 		float2 uv;
 		float3 tangent;
+		float3 bitangent;
 		float rhw;
 
 	public:
@@ -50,6 +54,7 @@ namespace guarneri {
 			ret.normal = left.normal + (right.normal - left.normal) * t;
 			ret.uv = left.uv + (right.uv - left.uv) * t;
 			ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
+			ret.bitangent = left.bitangent + (right.bitangent - left.bitangent) * t;
 			ret.rhw = left.rhw + (right.rhw - left.rhw) * t;
 			return ret;
 		}
@@ -61,6 +66,9 @@ namespace guarneri {
 			ret.position = (rhs.position - lhs.position) * segmentation;
 			ret.color = (rhs.color - lhs.color) * segmentation;
 			ret.uv = (rhs.uv - lhs.uv) * segmentation;
+			ret.normal = (rhs.normal - lhs.normal) * segmentation;
+			ret.tangent = (rhs.tangent - lhs.tangent) * segmentation;
+			ret.bitangent = (rhs.bitangent - lhs.bitangent) * segmentation;
 			ret.rhw = (rhs.rhw - lhs.rhw) * segmentation;
 			return ret;
 		}
@@ -72,6 +80,7 @@ namespace guarneri {
 			ret.normal = (left.normal + differential.normal);
 			ret.uv = (left.uv + differential.uv);
 			ret.tangent = (left.tangent + differential.tangent);
+			ret.bitangent = (left.bitangent + differential.bitangent);
 			ret.rhw = (left.rhw + differential.rhw);
 			return ret;
 		}

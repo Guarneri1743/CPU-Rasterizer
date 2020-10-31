@@ -6,8 +6,6 @@
 #include <material.hpp>
 #include <aabb2d.hpp>
 #include <triangle.hpp>
-#include <shader_manager.hpp>
-#include <texture_manager.hpp>
 #include <line_drawer.hpp>
 #include <color.hpp>
 
@@ -24,7 +22,7 @@ namespace guarneri {
 
 	class render_device {
 	public:
-		render_device(void* fb, unsigned int width, unsigned int height) {
+		render_device(void* fb, uint32_t width, uint32_t height) {
 			this->width = width;
 			this->height = height;
 			r_flag = render_flag::shaded;
@@ -41,8 +39,8 @@ namespace guarneri {
 		}
 
 	public:
-		unsigned int width;
-		unsigned int height;
+		uint32_t width;
+		uint32_t height;
 		render_flag r_flag;
 
 	private:
@@ -78,9 +76,9 @@ namespace guarneri {
 			v2f o2 = process_vertex(*shader, v2);
 			v2f o3 = process_vertex(*shader, v3);
 
-			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent);
-			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent);
-			vertex c3(o3.position, o3.color, o3.normal, o3.uv, o3.tangent);
+			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
+			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
+			vertex c3(o3.position, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			vertex n1 = clip2ndc(c1);
 			vertex n2 = clip2ndc(c2);
@@ -168,7 +166,7 @@ namespace guarneri {
 			}
 		}
 
-		void process_fragment(vertex& v, const unsigned int& row, const unsigned int& col, material& mat) {
+		void process_fragment(vertex& v, const uint32_t& row, const uint32_t& col, material& mat) {
 			shader* s = mat.get_shader();
 			float z = v.position.z;
 
@@ -232,7 +230,7 @@ namespace guarneri {
 			}
 		}
 
-		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const unsigned int& row, const unsigned int& col,const float& z) {
+		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const uint32_t& row, const uint32_t& col,const float& z) {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {

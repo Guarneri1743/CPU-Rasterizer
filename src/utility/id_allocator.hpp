@@ -3,7 +3,7 @@
 #include <set>
 
 namespace guarneri {
-	class id_spin {
+	struct id_spin {
 	public:
 		id_spin(int left, int right) :left_id(left), right_id(right) {}
 		int left()const { return left_id; }
