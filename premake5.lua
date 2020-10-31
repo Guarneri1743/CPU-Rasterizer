@@ -1,9 +1,7 @@
 local solution_folder = _ACTION
-local proj_folder = _ACTION .. "/../"
 
 solution "SoftRasterizer"
-   configurations 
-   {
+   configurations {
       "Debug", 
       "Release"
    }
@@ -24,12 +22,12 @@ solution "SoftRasterizer"
 
    configuration "Debug*"
       defines { "DEBUG", "_DEBUG" }
-      targetdir ( proj_folder .. "/lib/Debug" )
+      targetdir ( solution_folder .. "/lib/Debug" )
 
    configuration "Release*"
       defines { "NDEBUG" }
       optimize "On"
-      targetdir ( proj_folder .. "/lib/Release" )
+      targetdir ( solution_folder .. "/lib/Release" )
 
    filter { "platforms:Win*" }
       defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
@@ -42,20 +40,21 @@ solution "SoftRasterizer"
    filter { "platforms:Win*", "configurations:Release*" }
       links { }
 
-   includedirs {
-      "src",
-      "src/third_party",
-      "src/utility",
-      "src/math",
-      "src/primitives"
-   }
+   filter { }
+
+includedirs {
+   "src",
+   "src/third_party",
+   "src/utility",
+   "src/math",
+   "src/primitives"
+}
 
 project "SoftRasterizer"
    kind "ConsoleApp"
    language "C++"
 
-   files 
-   { 
+   files { 
       "src/*.*", 
       "src/third_party/*.*",
       "src/utility/*.*",
@@ -75,8 +74,7 @@ project "StanfordPLY"
    kind "ConsoleApp"
    language "C++"
 
-   files 
-   { 
+   files { 
       "src/*.*", 
       "src/third_party/*.*",
       "src/utility/*.*",
@@ -96,8 +94,7 @@ project "UnitTest"
    kind "ConsoleApp"
    language "C++"
 
-   files 
-   { 
+   files { 
       "src/*.*",
       "src/third_party/*.*",
       "src/utility/*.*",
