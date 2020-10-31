@@ -36,7 +36,7 @@ namespace guarneri {
 		filtering filtering;
 
 	private:
-		raw_buffer<float>* buffer;
+		raw_buffer<T>* buffer;
 
 	public:
 		bool sample(const float& u, const float& v, T& ret) const {

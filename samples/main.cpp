@@ -45,7 +45,7 @@ int main(void)
 {
 	shader s("default");
 
-	texture<float> noise("MainTex", 512, 512);
+	texture<color> noise("MainTex", 512, 512);
 
 	noise::generate_fractal_image(noise, 512, 512);
 

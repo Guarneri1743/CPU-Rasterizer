@@ -6,7 +6,18 @@
 
 namespace guarneri {
 	struct noise {
-		static void generate_fractal_image(texture<float>& image, int w, int h) {
+        static void generate_tiles(texture<color>& image, int w, int h) {
+            float c = 1.0f;
+            for (unsigned int y = 0; y < h; ++y)
+            {
+                for (unsigned int x = 0; x < w; ++x)
+                {
+
+                }
+            }
+        }
+
+		static void generate_fractal_image(texture<color>& image, int w, int h) {
             double    cr, ci;
             double nextr, nexti;
             double prevr, previ;
@@ -39,8 +50,8 @@ namespace guarneri {
 
                             /*const unsigned int index = static_cast<unsigned int>
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
-                            float c = (float)(1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
-
+                            float n = (float)(100 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
+                            color c = color(n, 1 - n, n * 0.5f, 1.0f);
                             image.write(x, y, c);
 
                             break;

@@ -187,7 +187,7 @@ namespace guarneri {
 			color_t pixel_color = 0;
 
 			// fragment shader
-			float4 fragment_result;
+			color fragment_result;
 			if (((int)r_flag & (int)render_flag::shaded) != 0 && s != nullptr) {
 				v2f v_out;
 				v_out.position = v.position;

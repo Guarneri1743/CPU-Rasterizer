@@ -64,7 +64,7 @@ namespace guarneri {
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, texture<float>*> name2tex;
+		std::unordered_map<property_name, texture<color>*> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
@@ -93,7 +93,7 @@ namespace guarneri {
 			const std::unordered_map<property_name, float>& float_uniforms,
 			const std::unordered_map<property_name, float4>& float4_uniforms,
 			const std::unordered_map<property_name, int>& int_uniforms,
-			const std::unordered_map<property_name, texture<float>*>& tex_uniforms) {
+			const std::unordered_map<property_name, texture<color>*>& tex_uniforms) {
 			this->name2float = float_uniforms;
 			this->name2float4 = float4_uniforms;
 			this->name2int = int_uniforms;
@@ -115,10 +115,10 @@ namespace guarneri {
 			return o;
 		}
 
-		float4 fragment_shader(const v2f& input) {
-			float noise;
+		color fragment_shader(const v2f& input) {
+			color noise;
 			if (name2tex["MainTex"] != nullptr && name2tex["MainTex"]->sample(input.uv.x, input.uv.y, noise)) {
-				return float4(noise, noise, noise, 1);
+				return noise;
 			}
 			else {
 				//sample failed
@@ -126,7 +126,7 @@ namespace guarneri {
 			}
 
 			// return vertex color;
-			return float4(input.uv, 0, 1);
+			return color(input.uv, 0, 1);
 		}
 	};
 }
