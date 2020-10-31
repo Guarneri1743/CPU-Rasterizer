@@ -1,6 +1,7 @@
 #pragma once
 #include <common.hpp>
 #include <raw_buffer.hpp>
+#include <color.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>
@@ -67,7 +68,7 @@ namespace guarneri {
 				std::cerr << "path does not exist" << std::endl;
 			}
 			else {
-				unsigned char* tex = stbi_load(path, &width, &height, &channels, 4);
+				unsigned char* tex = stbi_load(path, &width, &height, &channels, 0);
 				this->stb_data = tex;
 				if (channels == 3) {
 					this->rgb_buffer = new raw_buffer<color_rgb>(tex, width, height);
@@ -108,58 +109,62 @@ namespace guarneri {
 		unsigned char* stb_data;
 
 	public:
-		bool sample(const float& u, const float& v, color_rgba& ret) const {
+		bool sample(const float& u, const float& v, color& ret) const {
 			float wu = u;
 			float wv = v;
 			this->wrap(wu, wv);
 			switch (fmt) {
 				case texture_format::rgb:
 				{
+					if (rgb_buffer == nullptr) return false;
 					color_rgb pixel;
-					bool ok = false;
-					if(rgb_buffer == nullptr) return ok;
-					rgb_buffer->read(wu, wv, pixel);
-					ret.r = pixel.r; ret.g = pixel.g; ret.b = pixel.b; ret.a = 0;
+					bool ok = rgb_buffer->read(wu, wv, pixel);
+					ret = color::decode(pixel);
 					return ok;
 				}
 				case texture_format::rgba:
 				{
 					if(rgba_buffer == nullptr) return false;
-					return rgba_buffer->read(wu, wv, ret);
+					color_rgba pixel;
+					bool ok =rgba_buffer->read(wu, wv, pixel);
+					ret = color::decode(pixel);
+					return ok;
 				}
 			}
 			return false;
 		}
 
-		bool sample(const unsigned int& x, const unsigned int& y, color_rgba& ret) const {
+		bool sample(const unsigned int& row, const unsigned int& col, color& ret) const {
 			switch (fmt) {
 				case texture_format::rgb:
-					{
-						color_rgb pixel;
-						bool ok = false;
-						if(rgb_buffer == nullptr) return ok;
-						rgb_buffer->read(x, y, pixel);
-						ret.r = pixel.r; ret.g = pixel.g; ret.b = pixel.b; ret.a = 0;
-						return ok;
-					}
+				{
+					if (rgb_buffer == nullptr) return false;
+					color_rgb pixel;
+					bool ok = rgb_buffer->read(row, col, pixel);
+					ret = color::decode(pixel);
+					return ok;
+				}
 				case texture_format::rgba:
-					{
-						if (rgba_buffer == nullptr) return false;
-						return rgba_buffer->read(x, y, ret);
-					}
+				{
+					if (rgba_buffer == nullptr) return false;
+					color_rgba pixel;
+					bool ok = rgba_buffer->read(row, col, pixel);
+					ret = color::decode(pixel);
+					return ok;
+				}
 			}
 			return false;
 		}
 
-		bool write(const unsigned int& x, const unsigned int& y, const color_rgba& data) {
+		bool write(const unsigned int& x, const unsigned int& y, const color& data) {
 			switch (fmt) {
 				case texture_format::rgb:
 					if (rgba_buffer == nullptr) return false;
-					return rgb_buffer->write(x, y, { data.r, data.g, data.b});
+					return rgb_buffer->write(x, y, color::encode_rgb(data));
 				case texture_format::rgba:
 					{
 						if (rgba_buffer == nullptr) return false;
-						return rgba_buffer->write(x, y, data);
+						return rgba_buffer->write(x, y, color::encode_rgba(data));
 					}
 			}
 			return false;

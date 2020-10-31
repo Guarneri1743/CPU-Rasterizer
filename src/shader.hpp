@@ -43,8 +43,6 @@ namespace guarneri {
 		float3 custom_data;
 	};
 
-
-
 	class shader {
 	public:
 		shader(const shader_id& id) {
@@ -116,9 +114,9 @@ namespace guarneri {
 		}
 
 		color fragment_shader(const v2f& input) {
-			color_rgba noise;
-			if (name2tex["MainTex"] != nullptr && name2tex["MainTex"]->sample(input.uv.x, input.uv.y, noise)) {
-				return color::decode(noise);
+			color tex;
+			if (name2tex["MainTex"] != nullptr && name2tex["MainTex"]->sample(input.uv.x, input.uv.y, tex)) {
+				return tex;
 			}
 			else {
 				//sample failed

@@ -193,3 +193,15 @@ vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/link.command.1.tlog
 vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/CL.write.1.tlog
 vs2019/obj/linux64/Debug/SoftRasterizer/SoftRasterizer.tlog/CL.read.1.tlog
 vs2019/obj/linux64/Debug/SoftRasterizer/main.obj
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/f805165c14bc60c7/RENDERER.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/debd8a82a2950d60/DEBUG_HEAP.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/c7faef7dfc724678/MATERIAL.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/ade0e6e7a09f4f3f/MODEL_IMPORTER.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/a274de85c00be2/MATERIAL.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/87c542d28e158924/FREE.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/8461079bda4e6e39/TEXTURE_IMPORTER.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/76dc3fe9f1806c72/FREE_BASE.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/76da64dcf7705a88/RENDERER.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/6c1381af842d7dc8/XTHROW.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/64753fe05ecbaa7a/RENDER_DEVICE.ipch
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/28a232b54646acf6/MATERIAL.ipch

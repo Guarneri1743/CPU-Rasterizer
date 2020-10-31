@@ -23,8 +23,11 @@ namespace guarneri {
                     nextr = nexti = 0;
                     prevr = previ = 0;
 
+                    float4 c = float4(0.4f, 0.6f, 0.8f, 1.0f);
+                    image.write(x, y, c);
+
                     for (int i = 0; i < max_iterations; ++i)
-                    {
+                    { 
                         prevr = nextr;
                         previ = nexti;
 
@@ -37,9 +40,9 @@ namespace guarneri {
 
                             /*const unsigned int index = static_cast<unsigned int>
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
-                            float n = (float)(100 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
-                            float4 c = float4(n, 1 - n, n * 0.5f, 1.0f);
-                            image.write(x, y, color::encode_rgba(c));
+                            //float n = (float)(10 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
+                            float4 c = float4(0.2f, 0.4f, 0.6f, 1.0f);
+                            image.write(x, y, c);
 
                             break;
                         }

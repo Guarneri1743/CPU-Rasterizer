@@ -23,6 +23,8 @@ namespace guarneri{
 	#define INVALID_TEXTURE_ID 0
 	#define FLOOR(val) (int)(val)
 	#define CEIL(val) (int)(val + 0.5f)
+	#define FLOOR_UINT(val) (unsigned int)(val)
+	#define CEIL_UINT(val) (unsigned int)(val + 0.5f)
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	#define FS std::filesystem
@@ -30,6 +32,7 @@ namespace guarneri{
 	typedef unsigned int id_t;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
+	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef std::string texture_id;
 	typedef std::string property_name;
 	typedef std::string shader_id;

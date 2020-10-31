@@ -268,6 +268,38 @@ namespace guarneri {
 			return color(r, g, b, w);
 		}
 
+		static color_rgb encode_rgb(const color& c) {
+			return encode_rgb(c.r, c.g, c.b);
+		}
+
+		static color_rgb encode_rgb(const float4& c) {
+			return encode_rgb(c.x, c.y, c.z);
+		}
+
+		static color_rgb encode_rgb(const float3& c) {
+			return encode_rgb(c.x, c.y, c.z);
+		}
+
+		static color_rgb encode_rgb(const float2& c) {
+			return encode_rgb(c.x, c.y, 0.0f);
+		}
+
+		static color_bgra encode_bgra(const color& c) {
+			return encode_bgra(c.r, c.g, c.b, c.a);
+		}
+
+		static color_bgra encode_bgra(const float4& c) {
+			return encode_bgra(c.x, c.y, c.z, c.w);
+		}
+
+		static color_bgra encode_bgra(const float3& c) {
+			return encode_bgra(c.x, c.y, c.z, 1.0f);
+		}
+
+		static color_bgra encode_bgra(const float2& c) {
+			return encode_bgra(c.x, c.y, 0.0f, 1.0f);
+		}
+
 		static color_rgba encode_rgba(const color& c) {
 			return encode_rgba(c.r, c.g, c.b, c.a);
 		}
@@ -293,8 +325,25 @@ namespace guarneri {
 			return c;
 		}
 
+		static color_rgb encode_rgb(const float& r, const float& g, const float& b) {
+			color_rgb c;
+			c.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+			c.g = CLAMP((unsigned char)(g * 255.0f), 0, 255);
+			c.b = CLAMP((unsigned char)(b * 255.0f), 0, 255);
+			return c;
+		}
+
 		static color_rgba encode_rgba(const float& r, const float& g, const float& b, const float& alpha) {
 			color_rgba c;
+			c.a = CLAMP((unsigned char)(alpha * 255.0f), 0, 255);
+			c.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+			c.g = CLAMP((unsigned char)(g * 255.0f), 0, 255);
+			c.b = CLAMP((unsigned char)(b * 255.0f), 0, 255);
+			return c;
+		}
+
+		static color_bgra encode_bgra(const float& r, const float& g, const float& b, const float& alpha) {
+			color_bgra c;
 			c.a = CLAMP((unsigned char)(alpha * 255.0f), 0, 255);
 			c.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
 			c.g = CLAMP((unsigned char)(g * 255.0f), 0, 255);
@@ -311,7 +360,15 @@ namespace guarneri {
 			return color((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
 		}
 
+		static color decode(const color_rgb& c) {
+			return color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, 255.0f);
+		}
+
 		static color decode(const color_rgba& c) {
+			return color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, (float)c.a / 255.0f);
+		}
+
+		static color decode(const color_bgra& c) {
 			return color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, (float)c.a / 255.0f);
 		}
 

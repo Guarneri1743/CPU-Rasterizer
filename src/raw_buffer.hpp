@@ -35,9 +35,9 @@ namespace guarneri {
 
 	public:
 		bool read(const float& u, const float& v, T& out) const {
-			unsigned int x = CEIL(u * this->width);
-			unsigned int y = CEIL(v * this->height);
-			return read(x, y, out);
+			unsigned int row, col;
+			uv2pixel(u, v, row, col);
+			return read(row, col, out);
 		}
 
 		bool read(const unsigned int& row, const unsigned int& col, T& out) const {
@@ -50,8 +50,8 @@ namespace guarneri {
 		}
 
 		bool write(const float& u, const float& v, const T& data) {
-			unsigned int x = CEIL(u * this->width);
-			unsigned int y = CEIL(v * this->height);
+			unsigned int row, col;
+			uv2pixel(u, v, row, col);
 			return this->write(x, y, data);
 		}
 
@@ -64,9 +64,14 @@ namespace guarneri {
 			return true;
 		}
 
+		void uv2pixel(const float& u, const float& v, unsigned int& row, unsigned int& col) const {
+			// [0.0, 1.0) -> [0, width-1]
+			row = FLOOR_UINT(u * this->width - EPSILON);
+			col = FLOOR_UINT(v * this->height - EPSILON);
+		}
+
 		void clear(const T& val) {
 			unsigned int size = width * height;
-			//std::memset(buffer, val, static_cast<size_t>(size));
 			std::fill(buffer, buffer + size, val);
 		}
 

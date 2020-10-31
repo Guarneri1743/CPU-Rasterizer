@@ -30,7 +30,7 @@ namespace guarneri {
 			r_flag = render_flag::shaded;
 			zbuffer = new raw_buffer<float>(width, height);
 			zbuffer->clear(1.0f);
-			frame_buffer = new raw_buffer<color_rgba>(fb, width, height);
+			frame_buffer = new raw_buffer<color_bgra>(fb, width, height);
 		}
 
 		~render_device() {
@@ -47,7 +47,7 @@ namespace guarneri {
 
 	private:
 		raw_buffer<float>* zbuffer;
-		raw_buffer<color_rgba>* frame_buffer;
+		raw_buffer<color_bgra>* frame_buffer;
 
 	public:
 		// =============================================================================================================Pipeline======================================================================================================================
@@ -107,9 +107,9 @@ namespace guarneri {
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
 			
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
@@ -117,9 +117,9 @@ namespace guarneri {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
-					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 
@@ -178,7 +178,7 @@ namespace guarneri {
 			blend_factor dst_factor = s->dst_factor;
 			blend_operator blend_op = s->blend_op;
 
-			color_rgba pixel_color;
+			color_bgra pixel_color;
 
 			// fragment shader
 			color fragment_result;
@@ -189,24 +189,24 @@ namespace guarneri {
 				v_out.normal = v.normal;
 				v_out.uv = v.uv;
 				fragment_result = s->fragment_shader(v_out);
-				pixel_color = color::encode_rgba(fragment_result);
+				pixel_color = color::encode_bgra(fragment_result);
 			}else if (((int)r_flag & (int)render_flag::uv) != 0) {
-				pixel_color = color::encode_rgba(v.uv);
+				pixel_color = color::encode_bgra(v.uv);
 			}
 			else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
-				pixel_color = color::encode_rgba(v.color);
+				pixel_color = color::encode_bgra(v.color);
 			}
 
 			// todo: scissor test
 
 			// alpha blend
 			if (s != nullptr && s->transparent) {
-				color_rgba dst;
+				color_bgra dst;
 				if (frame_buffer->read(row, col, dst)) {
 					color dst_color = color::decode(dst);
 					color src_color = fragment_result;
 					color blended_color = color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-					pixel_color = color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+					pixel_color = color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 				}
 			}
 
@@ -226,7 +226,7 @@ namespace guarneri {
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_params.camera_near, misc_params.camera_far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
-					color_rgba c = color::encode_rgba(depth_color.x, depth_color.y, depth_color.z, 1.0f);
+					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					frame_buffer->write(row, col, c);
 				}
 			}
@@ -336,10 +336,10 @@ namespace guarneri {
 			zbuffer->clear(1.0f);
 			if (((int)r_flag & (int)render_flag::depth) != 0)
 			{
-				frame_buffer->clear(color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+				frame_buffer->clear(color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			else {
-				frame_buffer->clear(color::encode_rgba(0.0f, 0.0f, 0.0f, 0.0f));
+				frame_buffer->clear(color::encode_bgra(0.0f, 0.0f, 0.0f, 0.0f));
 			}
 		}
 	};

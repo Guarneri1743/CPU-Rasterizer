@@ -69,7 +69,7 @@ int main(void)
 	box_material.dst_factor = blend_factor::one_minus_src_alpha;
 	box_material.zwrite_mode = zwrite::off;
 
-	plane_material.set_texture("MainTex", &noise);
+	plane_material.set_texture("MainTex", &plane_tex);
 
 	float angle = 1;
 
