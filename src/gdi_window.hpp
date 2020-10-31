@@ -22,7 +22,7 @@ namespace guarneri {
 			this->height = h;
 			this->title = title;
 			this->name = name;
-			buffer_size = width * height * sizeof(color_t);
+			buffer_size = width * height * sizeof(color_rgba);
 			window_handle = nullptr;
 			window_device_context = nullptr;
 			framebuffer = nullptr;

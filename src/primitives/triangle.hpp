@@ -109,7 +109,7 @@ namespace guarneri {
 			sorted[2] = vertices[max_idx];
 
 			// line
-			if (sorted[0].position.y == sorted[1].position.y == sorted[2].position.y) {
+			if (sorted[0].position.y == sorted[1].position.y && sorted[1].position.y == sorted[2].position.y) {
 				return ret;
 			}
 

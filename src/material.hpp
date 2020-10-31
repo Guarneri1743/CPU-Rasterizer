@@ -25,7 +25,7 @@ namespace guarneri {
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, texture<color>*> name2tex;
+		std::unordered_map<property_name, texture*> name2tex;
 		ztest ztest_mode;
 		zwrite zwrite_mode;
 		blend_factor src_factor;
@@ -54,7 +54,7 @@ namespace guarneri {
 			name2float[name] = val;
 		}
 		
-		void set_texture(const property_name& name, texture<color>* tex) {
+		void set_texture(const property_name& name, texture* tex) {
 			if (tex == nullptr) {
 				return;
 			}
@@ -82,7 +82,7 @@ namespace guarneri {
 			return 0;
 		}
 
-		texture<color>* get_texture(const property_name& name) const {
+		texture* get_texture(const property_name& name) const {
 			if (name2tex.count(name) > 0) {
 				return name2tex.at(name);
 			}

@@ -22,7 +22,10 @@ namespace guarneri {
 		sub
 	};
 
-	color_t CLAMP(color_t x, color_t min, color_t max) { return (x < min) ? min : ((x > max) ? max : x); }
+	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
+	unsigned int CLAMP_UINT(unsigned int x, unsigned int min, unsigned int max) { return (x < min) ? min : ((x > max) ? max : x); }
+	int CLAMP_INT(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
+	float CLAMP_FLT(float x, float min, float max) { return (x < min) ? min : ((x > max) ? max : x); }
 
 	struct color;
 	static color operator +(const float& other, const color& c);
@@ -218,7 +221,7 @@ namespace guarneri {
 				break;
 			}
 
-			switch (src_factor) {
+			switch (dst_factor) {
 			case blend_factor::one:
 				rhs = src_color;
 				break;
@@ -265,39 +268,51 @@ namespace guarneri {
 			return color(r, g, b, w);
 		}
 
-		static color_t encode(const color& c) {
-			return encode(c.r, c.g, c.b, c.a);
+		static color_rgba encode_rgba(const color& c) {
+			return encode_rgba(c.r, c.g, c.b, c.a);
 		}
 
-		static color_t encode(const float4& c) {
-			return encode(c.x, c.y, c.z, c.w);
+		static color_rgba encode_rgba(const float4& c) {
+			return encode_rgba(c.x, c.y, c.z, c.w);
 		}
 
-		static color_t encode(const float3& c) {
-			return encode(c.x, c.y, c.z, 1.0f);
+		static color_rgba encode_rgba(const float3& c) {
+			return encode_rgba(c.x, c.y, c.z, 1.0f);
 		}
 
-		static color_t encode(const float2& c) {
-			return encode(c.x, c.y, 0.0f, 1.0f);
+		static color_rgba encode_rgba(const float2& c) {
+			return encode_rgba(c.x, c.y, 0.0f, 1.0f);
 		}
 
-		static color_t encode(const float& r, const float& g, const float& b, const float& alpha) {
-			color_t c = 0;
-			// bitmap A-R-G-B
-			c |= (CLAMP((int)(alpha * 255.0f), 0, 255) << 24) & 0xff000000;
-			c |= (CLAMP((int)(r * 255.0f), 0, 255) << 16) & 0xff0000;
-			c |= (CLAMP((int)(g * 255.0f), 0, 255) << 8) & 0xff00;
-			c |= (CLAMP((int)(b * 255.0f), 0, 255)) & 0xff;
+		static int encode(const float& r, const float& g, const float& b, const float& alpha) {
+			int c = 0;
+			c |= (CLAMP((unsigned char)(alpha * 255.0f), 0, 255) << 24) & 0xff000000;
+			c |= (CLAMP((unsigned char)(r * 255.0f), 0, 255) << 16) & 0xff0000;
+			c |= (CLAMP((unsigned char)(g * 255.0f), 0, 255) << 8) & 0xff00;
+			c |= (CLAMP((unsigned char)(b * 255.0f), 0, 255)) & 0xff;
 			return c;
 		}
 
-		static color decode(const color_t& c) {
+		static color_rgba encode_rgba(const float& r, const float& g, const float& b, const float& alpha) {
+			color_rgba c;
+			c.a = CLAMP((unsigned char)(alpha * 255.0f), 0, 255);
+			c.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+			c.g = CLAMP((unsigned char)(g * 255.0f), 0, 255);
+			c.b = CLAMP((unsigned char)(b * 255.0f), 0, 255);
+			return c;
+		}
+
+		static color decode(const int& c) {
 			int mask = 0xff;
 			int a = (c >> 24) & mask;
 			int r = (c >> 16) & mask;
 			int g = (c >> 8) & mask;
 			int b = c & mask;
 			return color((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
+		}
+
+		static color decode(const color_rgba& c) {
+			return color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, (float)c.a / 255.0f);
 		}
 
 		static float dot(const color& lhs, const color& rhs) {

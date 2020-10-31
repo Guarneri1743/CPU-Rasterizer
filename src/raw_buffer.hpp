@@ -8,7 +8,7 @@ namespace guarneri {
 		raw_buffer(unsigned int width, unsigned int height) {
 			this->width = width;
 			this->height = height;
-			int size = static_cast<int>(width * height);
+			int size = width * height;
 			buffer = new T[size];
 			managed_buffer = true;
 		}		
@@ -23,7 +23,7 @@ namespace guarneri {
 		~raw_buffer() {
 			if(managed_buffer)
 			{
-				delete[] buffer;
+				if (buffer) delete[] buffer;
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace guarneri {
 		}
 
 		bool read(const unsigned int& row, const unsigned int& col, T& out) const {
-			int pos = static_cast<int>(row * width + col);
+			unsigned int pos = row * width + col;
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
@@ -56,7 +56,7 @@ namespace guarneri {
 		}
 
 		bool write(const unsigned int& row, const unsigned int& col, const T& data) {
-			int pos = static_cast<int>(row * width + col);
+			unsigned int pos = row * width + col;
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
@@ -64,8 +64,8 @@ namespace guarneri {
 			return true;
 		}
 
-		void clear(const T& val = 0) {
-			long long size = (long long)width * (long long)height;
+		void clear(const T& val) {
+			unsigned int size = width * height;
 			//std::memset(buffer, val, static_cast<size_t>(size));
 			std::fill(buffer, buffer + size, val);
 		}

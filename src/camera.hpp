@@ -35,7 +35,7 @@ namespace guarneri {
 	private:
 		mat4 projection_matrix;
 		float3 position;
-		float3 target;
+		float3 lookat_target;
 		float3 front;
 		float3 right;
 		float3 up;
@@ -45,11 +45,11 @@ namespace guarneri {
 
 	public:
 		mat4 view_matrix() {
-			return mat4::lookat_matrix(this->position, this->target, float3::UP);
+			return mat4::lookat_matrix(this->position, this->lookat_target, float3::UP);
 		}
 
 		void set_target(const float3& target) {
-			this->target = target;
+			this->lookat_target = target;
 		}
 
 		const mat4& get_projection_matrix() const{

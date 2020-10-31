@@ -28,11 +28,11 @@ namespace guarneri {
 		}
 	private:
 		static texture_manager* instance;
-		std::unordered_map<id_t, texture<float>*> textures;
+		std::unordered_map<id_t, texture*> textures;
 		id_allocator* allocator;
 
 	public:
-		bool bind_texture(texture<float>* texture, id_t& id) {
+		bool bind_texture(texture* texture, id_t& id) {
 			int free_id = 0;
 			if (allocator->alloc(free_id)) {
 				id = static_cast<id_t>(free_id);
@@ -45,7 +45,7 @@ namespace guarneri {
 			}
 		}
 
-		texture<float>* get_texture(const id_t& id) {
+		texture* get_texture(const id_t& id) {
 			if (textures.count(id) > 0) {
 				return textures[id];
 			}

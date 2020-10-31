@@ -7,11 +7,16 @@
 #include <texture.hpp>
 #include <noise.hpp>
 
-#undef near;
-#undef far;
-
 using namespace guarneri;
 using namespace std;
+
+#ifdef near
+#undef near
+#endif
+
+#ifdef far
+#undef far
+#endif
 
 vertex mesh[8] = {
 	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3()),
@@ -45,7 +50,12 @@ int main(void)
 {
 	shader s("default");
 
-	texture<color> noise("MainTex", 512, 512);
+	auto dir = guarneri::res_path();
+	auto tex_path = dir + "/pavingstones_decorative2_2k_h_1.jpg";
+	
+	texture plane_tex(tex_path.c_str(), "MainTex");
+
+	texture noise("MainTex", 512, 512, texture_format::rgba);
 
 	noise::generate_fractal_image(noise, 512, 512);
 
@@ -63,12 +73,12 @@ int main(void)
 
 	float angle = 1;
 
-	int w = 800;
-	int h = 600;
+	unsigned int w = 800;
+	unsigned int h = 600;
 
 	gdi_window gdiwin(w, h, _T("SoftRasterizerTitle"), _T("SoftRasterizer"));
 
-	render_device device(gdiwin.framebuffer, 800, 600);
+	render_device device(gdiwin.framebuffer, w, h);
 
 	float aspect = (float)w / (float)h;
 
@@ -76,6 +86,7 @@ int main(void)
 	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
 
 	camera cam(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
+
 
 	while (gdiwin.is_valid()) {
 		if (IS_ON(VK_F3)) device.r_flag = render_flag::wire_frame;

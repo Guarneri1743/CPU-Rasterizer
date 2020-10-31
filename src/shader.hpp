@@ -64,7 +64,7 @@ namespace guarneri {
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, texture<color>*> name2tex;
+		std::unordered_map<property_name, texture*> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
@@ -82,18 +82,18 @@ namespace guarneri {
 			this->zwrite_mode = zwrite;
 		}
 
-		void sync(bool transparent, blend_factor src_factor, blend_factor dst_factor, blend_operator blend_op) {
-			this->transparent = transparent;
-			this->src_factor = src_factor;
-			this->dst_factor = dst_factor;
-			this->blend_op = blend_op;
+		void sync(bool semi_trans, blend_factor src, blend_factor dst, blend_operator op) {
+			this->transparent = semi_trans;
+			this->src_factor = src;
+			this->dst_factor = dst;
+			this->blend_op = op;
 		}
 
 		void sync(
 			const std::unordered_map<property_name, float>& float_uniforms,
 			const std::unordered_map<property_name, float4>& float4_uniforms,
 			const std::unordered_map<property_name, int>& int_uniforms,
-			const std::unordered_map<property_name, texture<color>*>& tex_uniforms) {
+			const std::unordered_map<property_name, texture*>& tex_uniforms) {
 			this->name2float = float_uniforms;
 			this->name2float4 = float4_uniforms;
 			this->name2int = int_uniforms;
@@ -116,17 +116,14 @@ namespace guarneri {
 		}
 
 		color fragment_shader(const v2f& input) {
-			color noise;
+			color_rgba noise;
 			if (name2tex["MainTex"] != nullptr && name2tex["MainTex"]->sample(input.uv.x, input.uv.y, noise)) {
-				return noise;
+				return color::decode(noise);
 			}
 			else {
 				//sample failed
 				return input.color;
 			}
-
-			// return vertex color;
-			return color(input.uv, 0, 1);
 		}
 	};
 }

@@ -27,12 +27,10 @@ namespace guarneri {
 		render_device(void* fb, unsigned int width, unsigned int height) {
 			this->width = width;
 			this->height = height;
-			this->background_color = 0;
-			this->wire_frame_color = color::encode(1.0f, 1.0f, 1.0f, 1.0f);
 			r_flag = render_flag::shaded;
 			zbuffer = new raw_buffer<float>(width, height);
 			zbuffer->clear(1.0f);
-			frame_buffer = new raw_buffer<color_t>(fb, width, height);
+			frame_buffer = new raw_buffer<color_rgba>(fb, width, height);
 		}
 
 		~render_device() {
@@ -45,13 +43,11 @@ namespace guarneri {
 	public:
 		unsigned int width;
 		unsigned int height;
-		color_t background_color;
-		color_t wire_frame_color;
 		render_flag r_flag;
 
 	private:
 		raw_buffer<float>* zbuffer;
-		raw_buffer<color_t>* frame_buffer;
+		raw_buffer<color_rgba>* frame_buffer;
 
 	public:
 		// =============================================================================================================Pipeline======================================================================================================================
@@ -78,9 +74,9 @@ namespace guarneri {
 
 			assert(shader != nullptr);
 
-			v2f o1 = process_vertex(*shader, v1, m, v, p);
-			v2f o2 = process_vertex(*shader, v2, m, v, p);
-			v2f o3 = process_vertex(*shader, v3, m, v, p);
+			v2f o1 = process_vertex(*shader, v1);
+			v2f o2 = process_vertex(*shader, v2);
+			v2f o3 = process_vertex(*shader, v3);
 
 			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent);
 			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent);
@@ -111,19 +107,19 @@ namespace guarneri {
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
 			
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
 			if (((int)r_flag & (int)render_flag::scanline) != 0) {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-					auto& tri = *iter;
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->frame_buffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+					auto& t = *iter;
+					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(*this->frame_buffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 
@@ -133,7 +129,7 @@ namespace guarneri {
 			}
 		}
 
-		v2f process_vertex(shader& shader, const vertex& vert, const mat4& m, const mat4& v, const mat4& p) {
+		v2f process_vertex(shader& shader, const vertex& vert) {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
@@ -150,8 +146,8 @@ namespace guarneri {
 				int bottom_idx = flip ? 0 : 2;
 				int top = CEIL(tri[top_idx].position.y);
 				int bottom = CEIL(tri[bottom_idx].position.y);
-				top = CLAMP(top, 0, this->height);
-				bottom = CLAMP(bottom, 0, this->height);
+				top = CLAMP_INT(top, 0, this->height);
+				bottom = CLAMP_INT(bottom, 0, this->height);
 				assert(bottom >= top);
 				for (int row = top; row < bottom; row++) {
 					vertex lhs;
@@ -159,12 +155,12 @@ namespace guarneri {
 					tri.interpolate((float)row + 0.5f, lhs, rhs, flip);
 					int left = CEIL(lhs.position.x);
 					int right = CEIL(rhs.position.x);
-					left = CLAMP(left, 0, this->width);
-					right = CLAMP(right, 0, this->width);
+					left = CLAMP_INT(left, 0, this->width);
+					right = CLAMP_INT(right, 0, this->width);
 					assert(right >= left);
 					for (int col = left; col < right; col++) {
 						process_fragment(lhs, row, col, mat);
-						auto& dx = vertex::differential(lhs, rhs);
+						auto dx = vertex::differential(lhs, rhs);
 						lhs = vertex::intagral(lhs, dx);
 					}
 				}
@@ -174,9 +170,7 @@ namespace guarneri {
 
 		void process_fragment(vertex& v, const unsigned int& row, const unsigned int& col, material& mat) {
 			shader* s = mat.get_shader();
-			float rhw = v.rhw;
 			float z = v.position.z;
-			float depth;
 
 			ztest ztest_mode = s->ztest_mode;
 			zwrite zwrite_mode = s->zwrite_mode;
@@ -184,7 +178,7 @@ namespace guarneri {
 			blend_factor dst_factor = s->dst_factor;
 			blend_operator blend_op = s->blend_op;
 
-			color_t pixel_color = 0;
+			color_rgba pixel_color;
 
 			// fragment shader
 			color fragment_result;
@@ -195,27 +189,24 @@ namespace guarneri {
 				v_out.normal = v.normal;
 				v_out.uv = v.uv;
 				fragment_result = s->fragment_shader(v_out);
-				pixel_color = color::encode(fragment_result);
+				pixel_color = color::encode_rgba(fragment_result);
 			}else if (((int)r_flag & (int)render_flag::uv) != 0) {
-				pixel_color = color::encode(v.uv);
+				pixel_color = color::encode_rgba(v.uv);
 			}
 			else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
-				pixel_color = color::encode(v.color);
+				pixel_color = color::encode_rgba(v.color);
 			}
 
 			// todo: scissor test
 
 			// alpha blend
 			if (s != nullptr && s->transparent) {
-				color_t dst;
+				color_rgba dst;
 				if (frame_buffer->read(row, col, dst)) {
 					color dst_color = color::decode(dst);
 					color src_color = fragment_result;
 					color blended_color = color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-					pixel_color = color::encode(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
-					if (dst != 0 && dst != -1) {
-						int a = 0;
-					}
+					pixel_color = color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 				}
 			}
 
@@ -231,11 +222,11 @@ namespace guarneri {
 
 			// depth buffer visualization
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
-				float depth;
-				if (zbuffer->read(row, col, depth)) {
-					float linear_depth = linearize_depth(depth, misc_params.camera_near, misc_params.camera_far);
+				float cur_depth;
+				if (zbuffer->read(row, col, cur_depth)) {
+					float linear_depth = linearize_depth(cur_depth, misc_params.camera_near, misc_params.camera_far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
-					color_t c = color::encode(depth_color.x, depth_color.y, depth_color.z, 1.0f);
+					color_rgba c = color::encode_rgba(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					frame_buffer->write(row, col, c);
 				}
 			}
@@ -318,7 +309,7 @@ namespace guarneri {
 		}
 
 		bool clipping(const float4& v1, const float4& v2, const float4& v3, const mat4& m, const mat4& v, const mat4& p) {
-			auto& mvp = p * v * m;
+			auto mvp = p * v * m;
 			float4 c1 = mvp * v1; float4 c2 = mvp * v2; float4 c3 = mvp * v3;
 			return clipping(c1) && clipping(c2) && clipping(c3);
 		}
@@ -345,10 +336,10 @@ namespace guarneri {
 			zbuffer->clear(1.0f);
 			if (((int)r_flag & (int)render_flag::depth) != 0)
 			{
-				frame_buffer->clear(color::encode(1.0f, 1.0f, 1.0f, 1.0f));
+				frame_buffer->clear(color::encode_rgba(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			else {
-				frame_buffer->clear();
+				frame_buffer->clear(color::encode_rgba(0.0f, 0.0f, 0.0f, 0.0f));
 			}
 		}
 	};

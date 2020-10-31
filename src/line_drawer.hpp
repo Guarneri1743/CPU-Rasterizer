@@ -34,9 +34,9 @@ namespace guarneri {
 			int bias = dx > dy ? dx : -dy;
 			int dx2 = 2 * dx;
 			int dy2 = 2 * dy;
-			unsigned int xi = x0;
-			unsigned int yi = y0;
-			while (buffer.write(yi, xi, c), xi != x1 || yi != y1) {
+			int xi = x0;
+			int yi = y0;
+			while (buffer.write((unsigned int)yi, (unsigned int)xi, c), xi != x1 || yi != y1) {
 				int e = bias;
 				if (e > -dx2) { bias -= dy2; xi += sx; }
 				if (e < dy2)  { bias += dx2; yi += sy; }

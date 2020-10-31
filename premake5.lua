@@ -70,9 +70,10 @@ solution "SoftRasterizer"
    filter { }
 
    includedirs {
-      "includes",
-      "includes/math",
-      "includes/primitives"
+      "src",
+      "src/third_party",
+      "src/math",
+      "src/primitives"
    }
 
 project "SoftRasterizer"
@@ -81,10 +82,10 @@ project "SoftRasterizer"
 
    files 
    { 
-      "includes/*.*",
-      "includes/math/*.*",
-      "includes/primitives/*.*",
-      "src/*.*",
+      "src/*.*", 
+      "src/third_party/*.*",
+      "src/math/*.*",
+      "src/primitives/*.*",
       "samples/*.*"
    }
 
@@ -100,10 +101,10 @@ project "UnitTest"
 
    files 
    { 
-      "includes/*.*",
-      "includes/math/*.*",
-      "includes/primitives/*.*",
       "src/*.*",
+      "src/third_party/*.*",
+      "src/math/*.*",
+      "src/primitives/*.*",
       "unit_test/*.*"
    }
 
