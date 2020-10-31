@@ -1,4 +1,5 @@
-local proj_folder = _ACTION
+local solution_folder = _ACTION
+local proj_folder = _ACTION .. "/../"
 
 solution "SoftRasterizer"
    configurations 
@@ -6,9 +7,9 @@ solution "SoftRasterizer"
       "Debug", 
       "Release"
    }
-   platforms { "Win64", "linux64", "Mac64" }
+   platforms { "Win64" }
 
-   location (proj_folder)
+   location (solution_folder)
 
    warnings "Extra"
 
@@ -41,38 +42,9 @@ solution "SoftRasterizer"
    filter { "platforms:Win*", "configurations:Release*" }
       links { }
 
-   filter { "platforms:linux64" }
-      architecture "x86_64"
-      buildoptions {"-lstdc++fs"}
-      links { }
-      libdirs { }
-      defines { "LINUX" }
-   filter { "platforms:linux64", "configurations:Debug*" }
-      links { "stdc++fs" }
-   filter { "platforms:linux64", "configurations:Release*" }
-      links { "stdc++fs" }
-
-   filter {"platforms:Mac64", "configurations:Debug*"}
-      architecture "x86_64"
-      system "macosx"
-      buildoptions {"-glldb"}
-      libdirs { }
-      links { }
-
-   filter {"platforms:Mac64", "configurations:Release*"}
-      architecture "x86_64"
-      system "macosx"
-      buildoptions {"-glldb"}
-      libdirs { }
-      links { }
-
-
-   filter { }
-
    includedirs {
       "src",
       "src/third_party",
-      "src/third_party/assimp",
       "src/utility",
       "src/math",
       "src/primitives"
@@ -86,11 +58,10 @@ project "SoftRasterizer"
    { 
       "src/*.*", 
       "src/third_party/*.*",
-      "src/third_party/assimp/*.*",
       "src/utility/*.*",
       "src/math/*.*",
       "src/primitives/*.*",
-      "samples/*.*"
+      "samples/simple_scene/*.*"
    }
 
    filter { "configurations:Debug*" }
@@ -98,6 +69,28 @@ project "SoftRasterizer"
 
    filter { "configurations:Release*" }
       targetdir "build/release"
+
+
+project "StanfordPLY"
+   kind "ConsoleApp"
+   language "C++"
+
+   files 
+   { 
+      "src/*.*", 
+      "src/third_party/*.*",
+      "src/utility/*.*",
+      "src/math/*.*",
+      "src/primitives/*.*",
+      "samples/ply/*.*"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir "build/debug"
+
+   filter { "configurations:Release*" }
+      targetdir "build/release" 
+
 
 project "UnitTest"
    kind "ConsoleApp"
@@ -107,7 +100,6 @@ project "UnitTest"
    { 
       "src/*.*",
       "src/third_party/*.*",
-      "src/third_party/assimp/*.*",
       "src/utility/*.*",
       "src/math/*.*",
       "src/primitives/*.*",

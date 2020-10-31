@@ -9,7 +9,7 @@ namespace guarneri {
 			local2world = mat4::IDENTITY;
 		}
 
-	private:
+	public:
 		mat4 local2world;
 
 	public:
