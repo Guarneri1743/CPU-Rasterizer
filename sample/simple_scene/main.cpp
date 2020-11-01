@@ -1,26 +1,10 @@
 #include <iostream>
-#include <vertex.hpp>
-#include <render_device.hpp>
-#include <material.hpp>
-#include <camera.hpp>
-#include <gdi_window.hpp>
-#include <texture.hpp>
-#include <noise.hpp>
-#include <renderer.hpp>
-#include <model.hpp>
+#include <guarneri.hpp>
 
 using namespace guarneri;
 using namespace std;
 
-#ifdef near
-#undef near
-#endif
-
-#ifdef far
-#undef far
-#endif
-
-vertex cube[8] = {
+vertex cube_verts[8] = {
 	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3(), float3()),
 	 vertex(float4(1, -1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f),float3::ONE,  float2(0.0f, 1.0f), float3(), float3()),
 	 vertex(float4(1, 1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3(), float3()),
@@ -32,7 +16,7 @@ vertex cube[8] = {
 };
 
 void draw_plane(render_device& device, material& mat, int a, int b, int c, int d, const mat4& m, const mat4& v, const mat4& p) {
-	vertex p1 = cube[a], p2 = cube[b], p3 = cube[c], p4 = cube[d];
+	vertex p1 = cube_verts[a], p2 = cube_verts[b], p3 = cube_verts[c], p4 = cube_verts[d];
 	p1.uv.x = 0, p1.uv.y = 0, p2.uv.x = 0, p2.uv.y = 1;
 	p3.uv.x = 1, p3.uv.y = 1, p4.uv.x = 1, p4.uv.y = 0;
 	device.draw_primitive(mat, p1, p2, p3, m, v, p);
@@ -48,12 +32,10 @@ void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v
 	draw_plane(device, mat, 3, 7, 4, 0, m, v, p);
 }
 
-int main(void)
-{
-	shader s("default");
 
-	auto dir = guarneri::res_path();
-	auto tex_path = dir + "/pavingstones_decorative2_2k_h_1.jpg";
+int main()
+{
+	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	
 	texture plane_tex(tex_path.c_str(), "MainTex");
 
@@ -61,10 +43,10 @@ int main(void)
 
 	noise::generate_fractal_image(noise, 512, 512);
 
-	material plane_material(&s);
+	material plane_material;
 	plane_material.transparent = false;
 
-	material box_material(&s);
+	material box_material;
 	box_material.transparent = true;
 	box_material.blend_op = blend_operator::add;
 	box_material.src_factor = blend_factor::src_alpha;
@@ -82,7 +64,7 @@ int main(void)
 
 	gdi_window gdiwin(w, h, _T("SoftRasterizerTitle"), _T("SoftRasterizer"));
 
-	auto& device = singleton<render_device>::instance();
+	auto& device = singleton<render_device>::get();
 	device.initialize(gdiwin.framebuffer, w, h);
 
 	float aspect = (float)w / (float)h;
@@ -90,11 +72,12 @@ int main(void)
 	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
 	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
 
-	camera cam = singleton<camera>::instance();
-	cam.initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
+	singleton<camera>::get().initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
 	model model;
-	model.load_from_file(res_path() + "backpack/backpack.obj");
+	model.load_from_file(res_path() + "/backpack/backpack.obj");
+
+	renderer model_renderer(model);
 
 	while (gdiwin.is_valid()) {
 		if (IS_ON(VK_F3)) device.r_flag = render_flag::wire_frame;
@@ -111,8 +94,8 @@ int main(void)
 		if (IS_ON('S')) box_pos.y -= 0.1f;
 		if (IS_ON('R')) angle += 1.0f;
 
-		cam.set_position(cam_pos);
-		cam.set_target(float3(0.0f, 0.0f, 0.0f));
+		singleton<camera>::get().set_position(cam_pos);
+		singleton<camera>::get().set_target(float3(0.0f, 0.0f, 0.0f));
 
 		device.clear_buffer();
 
@@ -122,9 +105,11 @@ int main(void)
 		mat4 pm = mat4::translation(float3(0.0f, -1.0f, 0.0f));
 		mat4 scale = mat4::scale(float3(3.0f, 1.0f, 3.0f));
 
-		draw_plane(device, plane_material, 2, 6, 7, 3, pm * scale, cam.view_matrix(), cam.get_projection_matrix());
+		draw_plane(device, plane_material, 2, 6, 7, 3, pm * scale, singleton<camera>::get().view_matrix(), singleton<camera>::get().projection_matrix());
 
-		draw_box(device, box_material, m, cam.view_matrix(), cam.get_projection_matrix());
+		draw_box(device, box_material, m, singleton<camera>::get().view_matrix(), singleton<camera>::get().projection_matrix());
+
+		model_renderer.render();
 
 		gdiwin.flush();
 

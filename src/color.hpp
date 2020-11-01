@@ -1,13 +1,7 @@
 #pragma once
-#include <common.hpp>
-#include <float3.hpp>
-#include <float4.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
-	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
-
 	enum class blend_factor {
 		one,
 		src_color,
@@ -30,7 +24,6 @@ namespace guarneri {
 	int CLAMP_INT(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
 	float CLAMP_FLT(float x, float min, float max) { return (x < min) ? min : ((x > max) ? max : x); }
 
-	struct color;
 	static color operator +(const float& other, const color& c);
 	static color operator -(const float& other, const color& c);
 	static color operator *(const float& other, const color& c);

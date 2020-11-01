@@ -1,6 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <set>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct id_spin {

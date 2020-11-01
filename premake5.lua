@@ -1,5 +1,6 @@
 local solution_dir = _ACTION
 local lib_dir = "lib"
+local res_dir = "res"
 local src_dir = "src"
 local third_party_dir = "third_party"
 local unit_test_dir = "unit_test"
@@ -49,11 +50,14 @@ function setupSlotion()
          architecture "x86_64"
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Debug" }
-         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)assimpd.dll\""
+         local createResFolder = "mkdir \"$(OutDir)res\""
+         local copyAssimp = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)\""
+         local copyRes = "xcopy /y /d /s \"../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
-           postBuildCMD
+            createResFolder,
+            copyAssimp,
+            copyRes
          }
-         print("pbcmd: " .. postBuildCMD)
 
       filter { "platforms:Win*", "configurations:Release*" }
          defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
@@ -61,11 +65,14 @@ function setupSlotion()
          architecture "x86_64"
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Release" }
-         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)assimp.dll\""
+         local createResFolder = "mkdir \"$(OutDir)res\""
+         local copyAssimp = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)\""
+         local copyRes = "xcopy /y /d /s \"../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
-           postBuildCMD
+            createResFolder,
+            copyAssimp,
+            copyRes
          }
-         print("pbcmd: " .. postBuildCMD)
 
       filter { "platforms:Win*", "configurations:Debug*" }
          links { "assimpd" }

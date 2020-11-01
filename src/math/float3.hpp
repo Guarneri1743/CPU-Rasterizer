@@ -1,9 +1,7 @@
 #pragma once
-#include <common.hpp>
-#include <float2.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
-	struct float3;
 	static float3 operator +(const float& other, const float3& vec);
 	static float3 operator -(const float& other, const float3& vec);
 	static float3 operator *(const float& other, const float3& vec);

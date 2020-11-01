@@ -1,5 +1,4 @@
 #pragma once
-#include <common.hpp>
 #include <windows.h>
 #include <tchar.h>
 
@@ -10,6 +9,7 @@ namespace guarneri {
 	static bool closed;
 	#define IS_ON(key_code) keys[key_code] == 1
 
+
 	class gdi_window {
 	public:
 		gdi_window(int w, int h, LPCSTR title, LPCSTR name) {
@@ -17,7 +17,7 @@ namespace guarneri {
 			this->height = h;
 			this->title = title;
 			this->name = name;
-			buffer_size = width * height * sizeof(color_rgba);
+			buffer_size = width * height * 4;
 			window_handle = nullptr;
 			window_device_context = nullptr;
 			framebuffer = nullptr;

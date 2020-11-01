@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include <common.hpp>
-#include <float3.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct aabb {

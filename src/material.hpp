@@ -1,13 +1,19 @@
 #pragma once
-#include <common.hpp>
-#include <shader.hpp>
-#include <float4.hpp>
-#include <texture.hpp>
-#include <unordered_map>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	class material {
 	public:
+		material() {
+			this->target_shader = &shader::default_shader;
+			this->ztest_mode = ztest::less_equal;
+			this->zwrite_mode = zwrite::on;
+			this->src_factor = blend_factor::src_alpha;
+			this->dst_factor = blend_factor::one_minus_src_alpha;
+			this->blend_op = blend_operator::add;
+			this->transparent = false;
+		}
+
 		material(shader* shader) {
 			this->target_shader = shader;
 			this->ztest_mode = ztest::less_equal;

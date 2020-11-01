@@ -1,7 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <float4.hpp>
-#include <float3.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct mat4 {

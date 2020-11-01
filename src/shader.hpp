@@ -1,12 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <float2.hpp>
-#include <float3.hpp>
-#include <float4.hpp>
-#include <mat4.hpp>
-#include <unordered_map>
-#include <texture.hpp>
-#include <color.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	enum class ztest {
@@ -74,6 +67,7 @@ namespace guarneri {
 		blend_factor dst_factor;
 		blend_operator blend_op;
 		bool transparent;
+		static shader default_shader;
 
 	public:
 		void sync(ztest ztest, zwrite zwrite) {
@@ -115,14 +109,27 @@ namespace guarneri {
 		}
 
 		color fragment_shader(const v2f& input) {
-			color tex;
-			if (name2tex["MainTex"] != nullptr && name2tex["MainTex"]->sample(input.uv.x, input.uv.y, tex)) {
-				return tex;
+			color main_tex;
+			if (name2tex[albedo_prop] != nullptr && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+				
 			}
-			else {
-				//sample failed
-				return input.color;
+
+			if (name2tex[normal_prop] != nullptr && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+
 			}
+
+			if (name2tex[specular_prop] != nullptr && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+
+			}
+
+			if (name2tex[height_prop] != nullptr && name2tex[height_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+
+			}
+
+			// fallback
+			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f);
 		}
 	};
+
+	shader shader::default_shader("default");
 }

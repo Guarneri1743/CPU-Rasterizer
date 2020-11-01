@@ -1,14 +1,5 @@
 #pragma once
-#include <raw_buffer.hpp>
-#include <float4.hpp>
-#include <transform.hpp>
-#include <shader.hpp>
-#include <material.hpp>
-#include <aabb2d.hpp>
-#include <triangle.hpp>
-#include <line_drawer.hpp>
-#include <color.hpp>
-#include <camera.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	enum class render_flag {
@@ -21,7 +12,7 @@ namespace guarneri {
 		scanline = 1 << 5
 	};
 
-	class render_device {
+	class render_device : public singleton<render_device> { 
 	public:
 		uint32_t width;
 		uint32_t height;
@@ -215,7 +206,7 @@ namespace guarneri {
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
-					float linear_depth = linearize_depth(cur_depth, singleton<camera>::instance().near, singleton<camera>::instance().far);
+					float linear_depth = linearize_depth(cur_depth, singleton<camera>::get().near, singleton<camera>::get().far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
 					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					framebuffer->write(row, col, c);

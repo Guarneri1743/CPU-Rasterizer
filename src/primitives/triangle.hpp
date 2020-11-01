@@ -1,6 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <vertex.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct triangle {

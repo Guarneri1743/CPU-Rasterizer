@@ -1,8 +1,5 @@
 #pragma once 
-#include <common.hpp>
-#include <float3.hpp>
-#include <float4.hpp>
-#include <algorithm>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct noise {

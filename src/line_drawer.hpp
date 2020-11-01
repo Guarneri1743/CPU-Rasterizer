@@ -1,6 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <raw_buffer.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	class line_drawer {

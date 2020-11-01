@@ -1,10 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <mesh.hpp>
-#include <texture.hpp>
-#include <vertex.hpp>
-#include <float3.hpp>
-#include <unordered_set>
+#include <guarneri.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -13,21 +8,20 @@ namespace guarneri {
 	class model {
 	public:
 		model() {
-            root_dir = "";
+            parent_dir = "";
 		}
 
         ~model() {
-            for (auto iter = textures.begin(); iter != textures.end(); iter++) {
-                delete &(*iter);
-            }
+           
         }
 
     public:
         std::vector<mesh> meshes;
-        std::vector<texture> textures;
+        std::unordered_map<std::string, texture*> texture_cache;
+        transform transform;
 
     private:
-        std::string root_dir;
+        std::string parent_dir;
 
     public:
          void load_from_file(std::string path) {
@@ -38,7 +32,7 @@ namespace guarneri {
                  std::cerr << importer.GetErrorString() << std::endl;
                  return;
              }
-             root_dir = FS::path(path).root_directory().string();
+             parent_dir = FS::path(path).parent_path().string();
              traverse_nodes(scene->mRootNode, scene);
         }
 
@@ -59,7 +53,6 @@ namespace guarneri {
         {
             std::vector<vertex> vertices;
             std::vector<uint32_t> indices;
-            std::vector<texture> textures;
 
             for (uint32_t i = 0; i < mesh->mNumVertices; i++)
             {
@@ -108,36 +101,44 @@ namespace guarneri {
                 for (uint32_t j = 0; j < face.mNumIndices; j++)
                     indices.push_back(face.mIndices[j]);
             }
-            aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        
-            std::vector<texture> albedo = load_textures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-            textures.insert(textures.end(), albedo.begin(), albedo.end());
 
-            std::vector<texture> specular = load_textures(material, aiTextureType_SPECULAR, "texture_specular");
-            textures.insert(textures.end(), specular.begin(), specular.end());
+            aiMaterial* aiMat = scene->mMaterials[mesh->mMaterialIndex];
 
-            std::vector<texture> normal = load_textures(material, aiTextureType_HEIGHT, "texture_normal");
-            textures.insert(textures.end(), normal.begin(), normal.end());
-     
-            std::vector<texture> height = load_textures(material, aiTextureType_AMBIENT, "texture_height");
-            textures.insert(textures.end(), height.begin(), height.end());
+            texture* diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
+            texture* specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
+            texture* normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
+            texture* height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
+            
+            material material;
+            material.set_texture(albedo_prop, diffuse);
+            material.set_texture(specular_prop, specular);
+            material.set_texture(normal_prop, normal);
+            material.set_texture(height_prop, height);
 
-            return guarneri::mesh(vertices, indices);
+            return guarneri::mesh(vertices, indices, material);
         }
 
-        std::vector<texture> load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
+        texture* load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
         {
-            std::vector<texture> ret;
-            std::unordered_set<std::string> texture_cache;
+            texture* ret = nullptr;
             for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
             {
                 aiString str;
                 mat->GetTexture(type, i, &str);
-                if (texture_cache.count(str.C_Str()) <= 0) {
-                    texture_cache.insert(str.C_Str());
-                    std::string tex_path = root_dir + str.C_Str();
-                    ret.push_back(texture(tex_path.c_str(), property_name));
+                std::string relative_path = str.C_Str();
+                if (texture_cache.count(relative_path) <= 0) {
+                    std::string tex_path = parent_dir + "/" + relative_path;
+                    std::cerr << "load: " << tex_path << std::endl;
+                    auto tex = new texture(tex_path.c_str(), property_name);
+                    texture_cache[relative_path] = tex;
+                    ret = tex;
                 }
+                else {
+                    auto kv = texture_cache.find(relative_path);
+                    ret = kv->second;
+                }
+                // assume only one texture per texture property
+                break;
             }
             return ret;
         }

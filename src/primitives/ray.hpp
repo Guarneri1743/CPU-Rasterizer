@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <float3.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct ray {
@@ -13,7 +13,7 @@ namespace guarneri {
 		ray(const guarneri::float3& origin_t, const guarneri::float3& direction_t){
 			this->origin = origin_t;
 			this->direction = direction_t;
-			this->inversed_direction = guarneri::float3(1 / dir.x, 1 / dir.y, 1 / dir.z);
+			this->inversed_direction = guarneri::float3(1 / direction.x, 1 / direction.y, 1 / direction.z);
 		}
 
 		ray(const ray& other) {

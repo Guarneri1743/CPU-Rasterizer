@@ -1,11 +1,9 @@
 #pragma once
-#include <common.hpp>
-#include <float3.hpp>
-#include <mat4.hpp>
+#include <guarneri.hpp>
+#include <singleton.hpp>
 
 namespace guarneri {
-	class camera
-	{
+	class camera : public singleton<camera> {
 	public:
 		enum class projection {
 			perspective,
@@ -19,7 +17,7 @@ namespace guarneri {
 		float far;
 
 	private:
-		mat4 projection_matrix;
+		mat4 proj_matrix;
 		float3 position;
 		float3 lookat_target;
 		float3 front;
@@ -43,7 +41,7 @@ namespace guarneri {
 			update_proj_mode();
 		}
 
-		mat4 view_matrix() {
+		mat4 view_matrix() const {
 			return mat4::lookat_matrix(this->position, this->lookat_target, float3::UP);
 		}
 
@@ -51,8 +49,8 @@ namespace guarneri {
 			this->lookat_target = target;
 		}
 
-		const mat4& get_projection_matrix() const{
-			return projection_matrix;
+		const mat4& projection_matrix() const{
+			return proj_matrix;
 		}
 
 		void set_position(const float3& pos) {
@@ -97,13 +95,13 @@ namespace guarneri {
 		void update_proj_mode(){
 			switch (this->proj_type) {
 			case projection::perspective:
-				this->projection_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			case projection::orthographic:
-				this->projection_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			default:
-				this->projection_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 			}
 		}
 	};

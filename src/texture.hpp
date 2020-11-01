@@ -1,7 +1,5 @@
 #pragma once
-#include <common.hpp>
-#include <raw_buffer.hpp>
-#include <color.hpp>
+#include <guarneri.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>

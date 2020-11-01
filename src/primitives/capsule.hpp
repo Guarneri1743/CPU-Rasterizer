@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include <float3.hpp>
-#include <segment.hpp>
+#include <guarneri.hpp>
 
 namespace guarneri {
 	struct capsule {
