@@ -9,8 +9,15 @@ namespace guarneri {
 			this->width = width;
 			this->height = height;
 			int size = width * height;
-			buffer = std::make_shared<T>(new T[size], release);
+			buffer = std::make_shared<T>(new T[size], [](T* ptr) { delete[] ptr; });
 		}		
+
+		raw_buffer(void* buffer, uint32_t width, uint32_t height) {
+			this->width = width;
+			this->height = height;
+			auto buf_array = (T*)buffer;
+			this->buffer = std::make_shared<T>(buf_array, [](T* ptr) { delete[] ptr; });
+		}
 
 		raw_buffer(const std::shared_ptr<T>& buffer, uint32_t width, uint32_t height) {
 			this->width = width;
@@ -86,10 +93,6 @@ namespace guarneri {
 			this->buffer = other.buffer;
 			this->width = other.width;
 			this->height = other.height;
-		}
-
-		static void release(T* ptr) {
-			delete[] ptr;
 		}
 	};
 }

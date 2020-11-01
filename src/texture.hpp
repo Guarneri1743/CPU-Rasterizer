@@ -45,16 +45,12 @@ namespace guarneri {
 			switch (fmt) {
 				case texture_format::rgb:
 					{
-						auto ptr = (color_rgb*)tex_buffer;
-						auto buf = std::make_shared<color_rgb>(ptr, release_rgb_buf);
-						rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(buf, width, height);
+						rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex_buffer, width, height);
 					}
 					break;
 				case texture_format::rgba:
 					{
-						auto ptr = (color_rgba*)tex_buffer;
-						auto buf = std::make_shared<color_rgba>(ptr, release_rgba_buf);
-						rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(buf, width, height);
+						rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex_buffer, width, height);
 					}
 					break;
 			}
@@ -70,7 +66,7 @@ namespace guarneri {
 			}
 			else {
 				stb_uchar* tex = stbi_load(path, &width, &height, &channels, 0);
-				this->stb_data = std::make_shared<stb_uchar*>(tex, release_stb);
+				this->stb_data = std::make_shared<stb_uchar>(tex, [](stb_uchar* ptr) { delete[] ptr; });
 				if (channels == 3) {
 					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height);
 					this->fmt = texture_format::rgb;
@@ -102,7 +98,7 @@ namespace guarneri {
 	private:
 		std::shared_ptr<raw_buffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<raw_buffer<color_rgba>> rgba_buffer;
-		std::shared_ptr<stb_uchar*> stb_data;
+		std::shared_ptr<stb_uchar> stb_data;
 
 	public:
 		bool sample(const float& u, const float& v, color& ret) const {
@@ -243,18 +239,6 @@ namespace guarneri {
 			this->rgba_buffer = other.rgba_buffer;
 			this->rgb_buffer = other.rgb_buffer;
 			this->stb_data = other.stb_data;
-		}
-
-		static void release_stb(stb_uchar* stb_ptr) {
-			stbi_image_free(stb_ptr);
-		}
-
-		static void release_rgb_buf(color_rgb* buf) {
-			delete[] buf;
-		}
-
-		static void release_rgba_buf(color_rgba* buf) {
-			delete[] buf;
 		}
 	};
 }

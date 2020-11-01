@@ -39,9 +39,9 @@ namespace guarneri{
 	typedef std::string shader_id;
 
 	// color 
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
-	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
+	struct color_rgb{ unsigned char r; unsigned char g; unsigned char b; };
+	struct color_rgba{ unsigned char r; unsigned char g; unsigned char b; unsigned char a; };
+	struct color_bgra{ unsigned char b; unsigned char g; unsigned char r; unsigned char a; };
 	typedef unsigned char stb_uchar;
 
 	// simple texture properties
