@@ -24,12 +24,21 @@ namespace guarneri {
         std::string parent_dir;
 
     public:
+        void load_from_vertices(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, const material& material) {
+            if (vertices.size() == 0 || indices.size() == 0) {
+                std::cerr << "load vertices failed." << std::endl;
+            }
+            assert(indices.size() % 3 == 0);
+            mesh m(vertices, indices, material);
+            meshes.push_back(m);
+        }
+
          void load_from_file(std::string path) {
              Assimp::Importer importer;
              const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
              if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
              {
-                 std::cerr << importer.GetErrorString() << std::endl;
+                 std::cerr << "load model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
                  return;
              }
              parent_dir = FS::path(path).parent_path().string();

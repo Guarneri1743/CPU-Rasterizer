@@ -106,6 +106,8 @@ namespace guarneri{
 	class renderer;
 	class render_device;
 	class gdi_window;
+	class scene;
+	class model_generator;
 }
 
 #define NOMINMAX
@@ -131,6 +133,7 @@ namespace guarneri{
 #include <mat4.hpp>
 #include <transform.hpp>
 #include <vertex.hpp>
+#include <plane.hpp>
 #include <ray.hpp>
 #include <line.hpp>
 #include <segment.hpp>
@@ -138,7 +141,6 @@ namespace guarneri{
 #include <capsule.hpp>
 #include <aabb.hpp>
 #include <aabb2d.hpp>
-#include <plane.hpp>
 #include <triangle.hpp>
 #include <light.hpp>
 #include <raw_buffer.hpp>
@@ -152,3 +154,5 @@ namespace guarneri{
 #include <model.hpp>
 #include <render_device.hpp>
 #include <renderer.hpp>
+#include <scene.hpp>
+#include <model_generator.hpp>

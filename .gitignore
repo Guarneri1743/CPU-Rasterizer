@@ -280,3 +280,4 @@ vs2019/bin/release/res/textures/pavingstones_decorative2_2k_h_1.jpg
 vs2019/bin/release/res/textures/pavingstones_decorative2_2k_n_1.jpg
 vs2019/obj/Win64/Debug/SoftRasterizer/SoftRasterizer.Build.CppClean.log
 vs2019/obj/Win64/Debug/SoftRasterizer/SoftRasterizer.vcxproj.FileListAbsolute.txt
+vs2019/.vs/SoftRasterizer/v16/ipch/AutoPCH/c016d14d00e5059a/LINE.ipch

@@ -4,14 +4,12 @@
 namespace guarneri{
 	class scene : singleton<scene>{
 	public:
+		// todo: serialzie & deserialize scene data
 		void initialize() {
-			auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+			auto floor_tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+			texture plane_tex(floor_tex_path.c_str(), "MainTex");
 
-			texture plane_tex(tex_path.c_str(), "MainTex");
-
-			texture noise("MainTex", 512, 512, texture_format::rgba);
-
-			noise::generate_fractal_image(noise, 512, 512);
+			noise::generate_fractal_image(texture("MainTex", 512, 512, texture_format::rgba), 512, 512);
 
 			material plane_material;
 			plane_material.transparent = false;
@@ -24,8 +22,6 @@ namespace guarneri{
 			box_material.zwrite_mode = zwrite::off;
 
 			plane_material.set_texture("MainTex", &plane_tex);
-
-			model bunny();
 
 			float angle = 1;
 
@@ -44,10 +40,14 @@ namespace guarneri{
 
 			singleton<camera>::get().initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
-			model model;
-			model.load_from_file(res_path() + "/backpack/backpack.obj");
+			model backpack;
+			backpack.load_from_file(res_path() + "/backpack/backpack.obj");
 
-			renderer model_renderer(model);
+			renderer backpack_renderer(backpack);
+		}
+
+		void render() {
+
 		}
 
 		void finalize() {

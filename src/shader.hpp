@@ -111,7 +111,7 @@ namespace guarneri {
 		color fragment_shader(const v2f& input) {
 			color main_tex;
 			if (name2tex[albedo_prop] != nullptr && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
-				
+				return main_tex;
 			}
 
 			if (name2tex[normal_prop] != nullptr && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, main_tex)) {

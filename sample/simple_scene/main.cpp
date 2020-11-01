@@ -4,59 +4,8 @@
 using namespace guarneri;
 using namespace std;
 
-vertex cube_verts[8] = {
-	 vertex(float4(-1, -1,  1, 1), float4(1.0f, 0.2f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3(), float3()),
-	 vertex(float4(1, -1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f),float3::ONE,  float2(0.0f, 1.0f), float3(), float3()),
-	 vertex(float4(1, 1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3(), float3()),
-	 vertex(float4(-1,  1,  1, 1), float4(1.0f, 0.2f, 1.0f, 0.3f),  float3::ONE, float2(1.0f, 0.0f), float3(), float3()),
-	 vertex(float4(-1, -1, -1, 1), float4(1.0f, 1.0f, 0.2f, 0.3f), float3::ONE, float2(0.0f, 0.0f), float3(), float3()),
-	 vertex(float4(1, -1, -1, 1),float4(0.2f, 1.0f, 1.0f, 0.3f),  float3::ONE, float2(0.0f, 1.0f), float3(), float3()),
-	 vertex(float4(1,  1, -1, 1), float4(1.0f, 0.3f, 0.3f, 0.3f), float3::ONE,  float2(1.0f, 1.0f), float3(), float3()),
-	 vertex(float4(-1,  1, -1, 1),  float4(0.2f, 1.0f, 0.3f, 0.3f), float3::ONE,float2(1.0f, 0.0f), float3(), float3()),
-};
-
-void draw_plane(render_device& device, material& mat, int a, int b, int c, int d, const mat4& m, const mat4& v, const mat4& p) {
-	vertex p1 = cube_verts[a], p2 = cube_verts[b], p3 = cube_verts[c], p4 = cube_verts[d];
-	p1.uv.x = 0, p1.uv.y = 0, p2.uv.x = 0, p2.uv.y = 1;
-	p3.uv.x = 1, p3.uv.y = 1, p4.uv.x = 1, p4.uv.y = 0;
-	device.draw_primitive(mat, p1, p2, p3, m, v, p);
-	device.draw_primitive(mat, p3, p4, p1, m, v, p);
-}
-
-void draw_box(render_device& device, material& mat, const mat4& m, const mat4& v, const mat4& p) {
-	draw_plane(device, mat, 0, 1, 2, 3, m, v, p);
-	draw_plane(device, mat, 7, 6, 5, 4, m, v, p);
-	draw_plane(device, mat, 0, 4, 5, 1, m, v, p);
-	draw_plane(device, mat, 1, 5, 6, 2, m, v, p);
-	draw_plane(device, mat, 2, 6, 7, 3, m, v, p);
-	draw_plane(device, mat, 3, 7, 4, 0, m, v, p);
-}
-
-
 int main()
 {
-	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
-	
-	texture plane_tex(tex_path.c_str(), "MainTex");
-
-	texture noise("MainTex", 512, 512, texture_format::rgba);
-
-	noise::generate_fractal_image(noise, 512, 512);
-
-	material plane_material;
-	plane_material.transparent = false;
-
-	material box_material;
-	box_material.transparent = true;
-	box_material.blend_op = blend_operator::add;
-	box_material.src_factor = blend_factor::src_alpha;
-	box_material.dst_factor = blend_factor::one_minus_src_alpha;
-	box_material.zwrite_mode = zwrite::off;
-
-	plane_material.set_texture("MainTex", &plane_tex);
-
-	model bunny();
-
 	float angle = 1;
 
 	uint32_t w = 800;
@@ -68,16 +17,37 @@ int main()
 	device.initialize(gdiwin.framebuffer, w, h);
 
 	float aspect = (float)w / (float)h;
-
 	float3 cam_pos = float3(5.0f, 5.0f, 5.0f);
 	float3 box_pos = float3(0.0f, 0.0f, 0.0f);
-
 	singleton<camera>::get().initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
-	model model;
-	model.load_from_file(res_path() + "/backpack/backpack.obj");
+	// backpack
+	model backpack;
+	backpack.load_from_file(res_path() + "/backpack/backpack.obj");
+	renderer model_renderer(backpack);
 
-	renderer model_renderer(model);
+	// cube
+	material box_material;
+	box_material.transparent = true;
+	box_material.blend_op = blend_operator::add;
+	box_material.src_factor = blend_factor::src_alpha;
+	box_material.dst_factor = blend_factor::one_minus_src_alpha;
+	box_material.zwrite_mode = zwrite::off;
+	model box = model_generator::cube(box_material);
+	renderer box_renderer(box);
+
+	// plane
+	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+	texture plane_tex(tex_path.c_str(), "MainTex");
+	texture noise("MainTex", 512, 512, texture_format::rgba);
+	noise::generate_fractal_image(noise, 512, 512);
+	material plane_material;
+	plane_material.transparent = false;
+	plane_material.set_texture(albedo_prop, &plane_tex);
+	model plane = model_generator::plane(plane_material);
+	plane.transform.translate(float3::DOWN);
+	plane.transform.scale(float3(3.0f, 1.0f, 3.0f));
+	renderer plane_renderer(plane);
 
 	while (gdiwin.is_valid()) {
 		if (IS_ON(VK_F3)) device.r_flag = render_flag::wire_frame;
@@ -99,17 +69,9 @@ int main()
 
 		device.clear_buffer();
 
-		mat4 t = mat4::translation(box_pos);
-		mat4 r = mat4::rotation(float3(0, -0.5, 0), angle);
-		mat4 m = t * r;
-		mat4 pm = mat4::translation(float3(0.0f, -1.0f, 0.0f));
-		mat4 scale = mat4::scale(float3(3.0f, 1.0f, 3.0f));
-
-		draw_plane(device, plane_material, 2, 6, 7, 3, pm * scale, singleton<camera>::get().view_matrix(), singleton<camera>::get().projection_matrix());
-
-		draw_box(device, box_material, m, singleton<camera>::get().view_matrix(), singleton<camera>::get().projection_matrix());
-
+		plane_renderer.render();
 		model_renderer.render();
+		box_renderer.render();
 
 		gdiwin.flush();
 
