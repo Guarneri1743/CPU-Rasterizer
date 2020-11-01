@@ -9,10 +9,10 @@ namespace guarneri {
 			this->width = width;
 			this->height = height;
 			int size = width * height;
-			buffer = std::make_shared<T*>(new T[size], release);
+			buffer = std::make_shared<T>(new T[size], release);
 		}		
 
-		raw_buffer(const std::shared_ptr<T*>& buffer, uint32_t width, uint32_t height) {
+		raw_buffer(const std::shared_ptr<T>& buffer, uint32_t width, uint32_t height) {
 			this->width = width;
 			this->height = height;
 			this->buffer = buffer;
@@ -27,7 +27,7 @@ namespace guarneri {
 		}
 
 	private:
-		std::shared_ptr<T*> buffer;
+		std::shared_ptr<T> buffer;
 		uint32_t width;
 		uint32_t height;
 
@@ -43,7 +43,7 @@ namespace guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			out = (*buffer)[pos];
+			out = buffer.get()[pos];
 			return true;
 		}
 
@@ -58,7 +58,7 @@ namespace guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			(*buffer)[pos] = data;
+			buffer.get()[pos] = data;
 			return true;
 		}
 
@@ -70,7 +70,7 @@ namespace guarneri {
 
 		void clear(const T& val) {
 			uint32_t size = width * height;
-			std::fill(*buffer, *buffer + size, val);
+			std::fill(buffer.get(), buffer.get() + size, val);
 		}
 
 		T* get_ptr(int& size) {
