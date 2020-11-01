@@ -5,7 +5,9 @@
 #include <vertex.hpp>
 #include <float3.hpp>
 #include <unordered_set>
-
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace guarneri {
 	class model {

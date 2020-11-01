@@ -47,15 +47,25 @@ function setupSlotion()
          defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
          system "Windows"
          architecture "x86_64"
-         staticruntime "On"
+         staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Debug" }
+         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug/assimpd.dll\" \"$(OutDir)/assimpd.dll\""
+         postbuildcommands {
+           postBuildCMD
+         }
+         print("pbcmd: " .. postBuildCMD)
 
       filter { "platforms:Win*", "configurations:Release*" }
          defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
          system "Windows"
          architecture "x86_64"
-         staticruntime "On"
+         staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Release" }
+         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release/assimp.dll\" \"$(OutDir)/assimp.dll\""
+         postbuildcommands {
+           postBuildCMD
+         }
+         print("pbcmd: " .. postBuildCMD)
 
       filter { "platforms:Win*", "configurations:Debug*" }
          links { "assimpd" }
@@ -81,10 +91,10 @@ function setupSoftRasterizerProj()
    }
 
    filter { "configurations:Debug*" }
-      targetdir "build/debug"
+      targetdir (solution_dir .. "/bin/Debug")
 
    filter { "configurations:Release*" }
-      targetdir "build/release"
+      targetdir (solution_dir .. "/bin/release")
 end
 
 function setupPLYProj()
@@ -105,10 +115,10 @@ function setupPLYProj()
       }
 
       filter { "configurations:Debug*" }
-         targetdir "build/debug"
+         targetdir (solution_dir .. "/bin/debug")
 
       filter { "configurations:Release*" }
-         targetdir "build/release" 
+         targetdir (solution_dir .. "/bin/release")
 end
 
 function setupUnitTestProj()
@@ -128,10 +138,10 @@ function setupUnitTestProj()
    }
 
    filter { "configurations:Debug*" }
-      targetdir "build/debug"
+      targetdir (solution_dir .. "/bin/debug")
 
    filter { "configurations:Release*" }
-      targetdir "build/release"
+      targetdir (solution_dir .. "/bin/release")
 end
 
 setupIncludeDirs()

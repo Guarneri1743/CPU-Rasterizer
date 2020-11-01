@@ -93,6 +93,8 @@ int main(void)
 	camera cam = singleton<camera>::instance();
 	cam.initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
+	model model;
+	model.load_from_file(res_path() + "backpack/backpack.obj");
 
 	while (gdiwin.is_valid()) {
 		if (IS_ON(VK_F3)) device.r_flag = render_flag::wire_frame;
