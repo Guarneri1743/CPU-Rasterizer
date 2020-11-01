@@ -49,7 +49,7 @@ function setupSlotion()
          architecture "x86_64"
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Debug" }
-         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug/assimpd.dll\" \"$(OutDir)assimpd.dll\""
+         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)assimpd.dll\""
          postbuildcommands {
            postBuildCMD
          }
@@ -61,7 +61,7 @@ function setupSlotion()
          architecture "x86_64"
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Release" }
-         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release/assimp.dll\" \"$(OutDir)assimp.dll\""
+         local postBuildCMD = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)assimp.dll\""
          postbuildcommands {
            postBuildCMD
          }
