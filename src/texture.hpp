@@ -65,8 +65,8 @@ namespace guarneri {
 				std::cerr << "path does not exist" << std::endl;
 			}
 			else {
-				stb_uchar* tex = stbi_load(path, &width, &height, &channels, 0);
-				this->stb_data = std::make_shared<stb_uchar>(tex, [](stb_uchar* ptr) { delete[] ptr; });
+				auto tex = stbi_load(path, &width, &height, &channels, 0);
+				this->stb_data = std::shared_ptr<stbi_uc>(tex, [](unsigned char* ptr) { delete[] ptr; });
 				if (channels == 3) {
 					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height);
 					this->fmt = texture_format::rgb;
@@ -98,7 +98,7 @@ namespace guarneri {
 	private:
 		std::shared_ptr<raw_buffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<raw_buffer<color_rgba>> rgba_buffer;
-		std::shared_ptr<stb_uchar> stb_data;
+		std::shared_ptr<stbi_uc> stb_data;
 
 	public:
 		bool sample(const float& u, const float& v, color& ret) const {
