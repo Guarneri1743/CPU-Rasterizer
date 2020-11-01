@@ -9,27 +9,25 @@ namespace guarneri {
 			this->width = width;
 			this->height = height;
 			int size = width * height;
-			buffer = new T[size];
-			managed_buffer = true;
+			buffer = std::make_shared<T*>(new T[size], release);
 		}		
 
-		raw_buffer(void* buffer, uint32_t width, uint32_t height) {
+		raw_buffer(const std::shared_ptr<T*>& buffer, uint32_t width, uint32_t height) {
 			this->width = width;
 			this->height = height;
-			this->buffer = (T*)buffer;
-			managed_buffer = false;
+			this->buffer = buffer;
+		}
+
+		raw_buffer(const raw_buffer<T>& other) {
+			deep_copy(other);
 		}
 		
 		~raw_buffer() {
-			if(managed_buffer)
-			{
-				if (buffer) delete[] buffer;
-			}
+			buffer.reset();
 		}
 
 	private:
-		bool managed_buffer;
-		T* buffer;
+		std::shared_ptr<T*> buffer;
 		uint32_t width;
 		uint32_t height;
 
@@ -45,7 +43,7 @@ namespace guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			out = buffer[pos];
+			out = (*buffer)[pos];
 			return true;
 		}
 
@@ -60,7 +58,7 @@ namespace guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			buffer[pos] = data;
+			(*buffer)[pos] = data;
 			return true;
 		}
 
@@ -72,12 +70,26 @@ namespace guarneri {
 
 		void clear(const T& val) {
 			uint32_t size = width * height;
-			std::fill(buffer, buffer + size, val);
+			std::fill(*buffer, *buffer + size, val);
 		}
 
 		T* get_ptr(int& size) {
 			size = width * height * sizeof(T);
 			return buffer;
+		}
+
+		void operator = (const raw_buffer<T>& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const raw_buffer<T>& other) {
+			this->buffer = other.buffer;
+			this->width = other.width;
+			this->height = other.height;
+		}
+
+		static void release(T* ptr) {
+			delete[] ptr;
 		}
 	};
 }

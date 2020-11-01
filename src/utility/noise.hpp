@@ -3,7 +3,7 @@
 
 namespace guarneri {
 	struct noise {
-		static void generate_fractal_image(texture& image, int w, int h) {
+		static void generate_fractal_image(std::shared_ptr<texture> image, int w, int h) {
             double    cr, ci;
             double nextr, nexti;
             double prevr, previ;
@@ -21,7 +21,7 @@ namespace guarneri {
                     prevr = previ = 0;
 
                     float4 c = float4(0.4f, 0.6f, 0.8f, 1.0f);
-                    image.write(x, y, c);
+                    image->write(x, y, c);
 
                     for (int i = 0; i < max_iterations; ++i)
                     { 
@@ -39,7 +39,7 @@ namespace guarneri {
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
                             //float n = (float)(10 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
                             c = float4(0.2f, 0.4f, 0.6f, 1.0f);
-                            image.write(x, y, c);
+                            image->write(x, y, c);
 
                             break;
                         }

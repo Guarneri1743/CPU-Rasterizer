@@ -33,10 +33,8 @@ namespace guarneri {
 			m33 = column3.w;
 		}
 
-		mat4(const mat4& v) {
-			for (int i = 0; i < 16; i++) {
-				this->operator[](i) = v[i];
-			}
+		mat4(const mat4& other) {
+			deep_copy(other);
 		}
 
 	private:
@@ -562,6 +560,16 @@ namespace guarneri {
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
 				return m00;
+			}
+		}
+
+		void operator =(const mat4& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const mat4& other) {
+			for (int i = 0; i < 16; i++) {
+				this->operator[](i) = other[i];
 			}
 		}
 

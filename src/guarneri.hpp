@@ -42,6 +42,7 @@ namespace guarneri{
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
+	typedef unsigned char stb_uchar;
 
 	// simple texture properties
 	const property_name albedo_prop = "texture_diffuse";
@@ -95,7 +96,6 @@ namespace guarneri{
 	struct cylinder;
 	struct capsule;
 	struct light;
-
 	class mesh;
 	class camera;
 	class line_drawer;
@@ -106,8 +106,12 @@ namespace guarneri{
 	class renderer;
 	class render_device;
 	class gdi_window;
-	class scene;
 	class model_generator;
+	class scene;
+
+	render_device& grapihcs() {
+		return singleton<render_device>::get();
+	}
 }
 
 #define NOMINMAX
@@ -154,5 +158,5 @@ namespace guarneri{
 #include <model.hpp>
 #include <render_device.hpp>
 #include <renderer.hpp>
-#include <scene.hpp>
 #include <model_generator.hpp>
+#include <scene.hpp>

@@ -9,6 +9,10 @@ namespace guarneri {
 			local2world = mat4::IDENTITY;
 		}
 
+		transform(const transform& other) {
+			this->local2world = other.local2world;
+		}
+
 	public:
 		mat4 local2world;
 
@@ -26,6 +30,10 @@ namespace guarneri {
 		void scale(const float3& scale) {
 			mat4 s = mat4::scale(scale);
 			local2world = s * local2world;
+		}
+
+		void operator =(const transform& other) {
+			this->local2world = other.local2world;
 		}
 	};
 }

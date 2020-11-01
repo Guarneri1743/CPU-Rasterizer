@@ -39,6 +39,10 @@ namespace guarneri {
 
 		const float& operator[](const unsigned int& i) const { return (&x)[i]; }
 
+		void operator =(const float4& other) {
+			this->x = other.x; this->y = other.y; this->x = other.x; this->w = other.w;
+		}
+
 		bool operator == (const float4& other) {
 			return EQUALS(x, other.x) && EQUALS(y, other.y) && EQUALS(z, other.z) && EQUALS(w, other.w);
 		}

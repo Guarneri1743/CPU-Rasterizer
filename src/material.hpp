@@ -5,7 +5,7 @@ namespace guarneri {
 	class material {
 	public:
 		material() {
-			this->target_shader = &shader::default_shader;
+			this->target_shader = shader::default_shader;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
 			this->src_factor = blend_factor::src_alpha;
@@ -14,7 +14,7 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-		material(shader* shader) {
+		material(std::shared_ptr<shader> shader) {
 			this->target_shader = shader;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
@@ -24,12 +24,23 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
+		material(const material& other) {
+			deep_copy(other);
+		}
+
+		~material() {
+			target_shader.reset();
+			for (auto& kv : name2tex) {
+				kv.second.reset();
+			}
+		}
+
 	public:
-		shader* target_shader;
+		std::shared_ptr<shader> target_shader;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, texture*> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 		ztest ztest_mode;
 		zwrite zwrite_mode;
 		blend_factor src_factor;
@@ -38,11 +49,11 @@ namespace guarneri {
 		bool transparent;
 
 	public:
-		void set_shader(shader* shader) {
+		void set_shader(std::shared_ptr<shader> shader) {
 			this->target_shader = shader;
 		}
 
-		shader* get_shader() {
+		std::shared_ptr<shader> get_shader() {
 			return target_shader;
 		}
 
@@ -58,7 +69,7 @@ namespace guarneri {
 			name2float[name] = val;
 		}
 		
-		void set_texture(const property_name& name, texture* tex) {
+		void set_texture(const property_name& name, std::shared_ptr<texture> tex) {
 			if (tex == nullptr) {
 				return;
 			}
@@ -86,11 +97,25 @@ namespace guarneri {
 			return 0;
 		}
 
-		texture* get_texture(const property_name& name) const {
+		std::shared_ptr<texture> get_texture(const property_name& name) const {
 			if (name2tex.count(name) > 0) {
 				return name2tex.at(name);
 			}
 			return nullptr;
+		}
+
+		void operator =(const material& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const material& other) {
+			this->target_shader = other.target_shader;
+			this->ztest_mode = other.ztest_mode;
+			this->zwrite_mode = other.zwrite_mode;
+			this->src_factor = other.src_factor;
+			this->dst_factor = other.dst_factor;
+			this->blend_op = other.blend_op;
+			this->transparent = other.transparent;
 		}
 	};
 }

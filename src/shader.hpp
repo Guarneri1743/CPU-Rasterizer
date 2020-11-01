@@ -49,14 +49,22 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-	private:
-		mat4 v, p;
-		mat4 m;
+		shader(const shader& other) {
+			deep_copy(other);
+		}
 
+		~shader() {
+			for (auto& kv : name2tex) {
+				kv.second.reset();
+			}
+		}
+
+	private:
+		mat4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, texture*> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
@@ -67,7 +75,7 @@ namespace guarneri {
 		blend_factor dst_factor;
 		blend_operator blend_op;
 		bool transparent;
-		static shader default_shader;
+		static std::shared_ptr<shader> default_shader;
 
 	public:
 		void sync(ztest ztest, zwrite zwrite) {
@@ -86,7 +94,7 @@ namespace guarneri {
 			const std::unordered_map<property_name, float>& float_uniforms,
 			const std::unordered_map<property_name, float4>& float4_uniforms,
 			const std::unordered_map<property_name, int>& int_uniforms,
-			const std::unordered_map<property_name, texture*>& tex_uniforms) {
+			const std::unordered_map<property_name, std::shared_ptr<texture>>& tex_uniforms) {
 			this->name2float = float_uniforms;
 			this->name2float4 = float4_uniforms;
 			this->name2int = int_uniforms;
@@ -110,26 +118,45 @@ namespace guarneri {
 
 		color fragment_shader(const v2f& input) {
 			color main_tex;
-			if (name2tex[albedo_prop] != nullptr && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 				return main_tex;
 			}
 
-			if (name2tex[normal_prop] != nullptr && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 
 			}
 
-			if (name2tex[specular_prop] != nullptr && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 
 			}
 
-			if (name2tex[height_prop] != nullptr && name2tex[height_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			if (name2tex.count(height_prop) > 0 && name2tex[height_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 
 			}
 
 			// fallback
 			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f);
 		}
+
+		void operator =(const shader& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const shader& other) {
+			this->id = other.id;
+			this->ztest_mode = other.ztest_mode;
+			this->zwrite_mode = other.zwrite_mode;
+			this->src_factor = other.src_factor;
+			this->dst_factor = other.dst_factor;
+			this->blend_op = other.blend_op;
+			this->transparent = other.transparent;
+			this->name2float = other.name2float;
+			this->name2float4 = other.name2float4;
+			this->name2tex = other.name2tex;
+			this->name2int = other.name2int;
+			this->keywords = other.keywords;
+		}
 	};
 
-	shader shader::default_shader("default");
+	std::shared_ptr<shader> shader::default_shader = std::make_shared<shader>("default");
 }

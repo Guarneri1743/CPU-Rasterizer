@@ -12,53 +12,53 @@ namespace guarneri {
 		scanline = 1 << 5
 	};
 
-	class render_device : public singleton<render_device> { 
+	class render_device : public singleton<render_device> {
 	public:
 		uint32_t width;
 		uint32_t height;
 		render_flag r_flag;
 
 	private:
-		raw_buffer<float>* zbuffer;
-		raw_buffer<color_bgra>* framebuffer;
+		std::shared_ptr<raw_buffer<float>> zbuffer;
+		std::shared_ptr<raw_buffer<color_bgra>> framebuffer;
 
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
 			this->width = width_t;
 			this->height = height_t;
 			r_flag = render_flag::shaded;
-			zbuffer = new raw_buffer<float>(width_t, height_t);
+			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
+			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t);
 			zbuffer->clear(1.0f);
-			framebuffer = new raw_buffer<color_bgra>(bitmap_handle_t, width_t, height_t);
 		}
 
 		// =============================================================================================================Pipeline======================================================================================================================
 		// *																																																										*
-	    // *												 model matrix					view matrix							projection matrix                clipping, clip2ndc					    screen mapping								*
+		// *												 model matrix					view matrix							projection matrix                clipping, clip2ndc					    screen mapping								*
 		// *  vertex data ------------>local(model) space  ----------------> world space ----------------> view(camera) space ---------------------> clip space ---------------------> ndc(cvv) space --------------------> screen space(viewport)  *
 		// *																																																										*
 		// *						  primitive assembly/rasterization																																												*
 		// *  screen space vertices ------------------------------------->  fragments ------> scissor test -------> alpha test -------> stencil test ---------> depth test -------> blending --------> framebuffer									*
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
-		void draw_primitive(material& material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
+		void draw_primitive(std::shared_ptr<material>  material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
 			// early clip
 			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
 			}
 
-			shader* shader = material.get_shader();
+			auto shader = material->get_shader();
 
 			shader->set_mvp_matrix(m, v, p);
-			shader->sync(material.name2float, material.name2float4, material.name2int, material.name2tex);
-			shader->sync(material.ztest_mode, material.zwrite_mode);
-			shader->sync(material.transparent, material.src_factor, material.dst_factor, material.blend_op);
+			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
+			shader->sync(material->ztest_mode, material->zwrite_mode);
+			shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
 
 			assert(shader != nullptr);
 
-			v2f o1 = process_vertex(*shader, v1);
-			v2f o2 = process_vertex(*shader, v2);
-			v2f o3 = process_vertex(*shader, v3);
+			v2f o1 = process_vertex(shader, v1);
+			v2f o2 = process_vertex(shader, v2);
+			v2f o3 = process_vertex(shader, v3);
 
 			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
 			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
@@ -88,10 +88,10 @@ namespace guarneri {
 
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
-			
-				line_drawer::bresenham(*this->framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				line_drawer::bresenham(*this->framebuffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+
+				line_drawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				line_drawer::bresenham(framebuffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
@@ -99,9 +99,9 @@ namespace guarneri {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
-					line_drawer::bresenham(*this->framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					line_drawer::bresenham(*this->framebuffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					line_drawer::bresenham(framebuffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 
@@ -111,16 +111,16 @@ namespace guarneri {
 			}
 		}
 
-		v2f process_vertex(shader& shader, const vertex& vert) {
+		v2f process_vertex(const std::shared_ptr<shader>& shader, const vertex& vert) {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
 			input.color = vert.color;
 			input.normal = vert.normal;
-			return shader.vertex_shader(input);
+			return shader->vertex_shader(input);
 		}
 
-		void rasterize(std::vector<triangle>& tris, material& mat) {
+		void rasterize(std::vector<triangle>& tris, const std::shared_ptr<material>& mat) {
 			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
@@ -150,8 +150,8 @@ namespace guarneri {
 			}
 		}
 
-		void process_fragment(vertex& v, const uint32_t& row, const uint32_t& col, material& mat) {
-			shader* s = mat.get_shader();
+		void process_fragment(vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<material>  mat) {
+			auto s = mat->get_shader();
 			float z = v.position.z;
 
 			ztest ztest_mode = s->ztest_mode;
@@ -172,7 +172,8 @@ namespace guarneri {
 				v_out.uv = v.uv;
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = color::encode_bgra(fragment_result);
-			}else if (((int)r_flag & (int)render_flag::uv) != 0) {
+			}
+			else if (((int)r_flag & (int)render_flag::uv) != 0) {
 				pixel_color = color::encode_bgra(v.uv);
 			}
 			else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
@@ -214,7 +215,7 @@ namespace guarneri {
 			}
 		}
 
-		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const uint32_t& row, const uint32_t& col,const float& z) {
+		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {

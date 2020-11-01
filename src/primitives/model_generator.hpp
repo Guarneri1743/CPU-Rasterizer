@@ -35,19 +35,19 @@ namespace guarneri {
 
 	class model_generator {
 	public:
-		static model plane(const material& material) {
-			model ret;
+		static std::shared_ptr<model> plane(const std::shared_ptr<material>& material) {
+			auto ret = std::make_shared<model>();
 			const std::vector<vertex> vert(plane_vertices, plane_vertices + 4);
 			const std::vector<uint32_t> ind(plane_indices, plane_indices + 6);
-			ret.load_from_vertices(vert, ind, material);
+			ret->load_from_vertices(vert, ind, material);
 			return ret;
 		}
 
-		static model cube(material& material) {
-			model ret;
+		static std::shared_ptr<model> cube(const std::shared_ptr<material>& material) {
+			auto ret = std::make_shared<model>();
 			const std::vector<vertex> vert(cube_vertices, cube_vertices + 8);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
-			ret.load_from_vertices(vert, ind, material);
+			ret->load_from_vertices(vert, ind, material);
 			return ret;
 		}
 	};

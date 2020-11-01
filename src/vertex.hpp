@@ -25,13 +25,7 @@ namespace guarneri {
 		}
 
 		vertex(const vertex& other) {
-			this->position = other.position;
-			this->color = other.color;
-			this->uv = other.uv;
-			this->normal = other.normal;
-			this->tangent = other.tangent;
-			this->bitangent = other.bitangent;
-			this->rhw = other.rhw;
+			deep_copy(other);
 		}
 
 	public:
@@ -81,6 +75,20 @@ namespace guarneri {
 			ret.bitangent = (left.bitangent + differential.bitangent);
 			ret.rhw = (left.rhw + differential.rhw);
 			return ret;
+		}
+
+		void operator =(const vertex& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const vertex& other) {
+			this->position = other.position;
+			this->color = other.color;
+			this->uv = other.uv;
+			this->normal = other.normal;
+			this->tangent = other.tangent;
+			this->bitangent = other.bitangent;
+			this->rhw = other.rhw;
 		}
 
 	public:

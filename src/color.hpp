@@ -73,6 +73,10 @@ namespace guarneri {
 			return !(*this == other);
 		}
 
+		void operator =(const color& other) {
+			this->r = other.r; this->g = other.g; this->b = other.b; this->a = other.a;
+		}
+
 		color& operator +=(const color& other) {
 			r = r + other.r;
 			g = g + other.g;

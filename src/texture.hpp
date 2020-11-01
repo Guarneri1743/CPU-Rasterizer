@@ -23,59 +23,62 @@ namespace guarneri {
 	};
 
 	class texture {
+		typedef std::shared_ptr<raw_buffer<color_rgb>> buffer_rgb_reference;
+		typedef std::shared_ptr<raw_buffer<color_rgba>> buffer_rgba_reference;
+		typedef std::shared_ptr<stb_uchar*> buffer_stb;
+
 	public:
 		texture(const texture_id& id, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->id = id;
 			this->fmt = fmt;
-			this->rgba_buffer = nullptr;
-			this->rgb_buffer = nullptr;
-			this->stb_data = nullptr;
+			release();
 			switch (fmt) {
-			case texture_format::rgb:
-				rgb_buffer = new raw_buffer<color_rgb>(width, height);
-				break;
-			case texture_format::rgba:
-				rgba_buffer = new raw_buffer<color_rgba>(width, height);
-				break;
+				case texture_format::rgb:
+					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(width, height);
+					break;
+				case texture_format::rgba:
+					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(width, height);
+					break;
 			}
 		}
 
 		texture(void* tex_buffer, const texture_id& id, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->id = id;
 			this->fmt = fmt;
-			this->rgba_buffer = nullptr;
-			this->rgb_buffer = nullptr;
-			this->stb_data = nullptr;
+			release();
 			switch (fmt) {
-			case texture_format::rgb:
-				rgb_buffer = new raw_buffer<color_rgb>(tex_buffer, width, height);
-				break;
-			case texture_format::rgba:
-				rgba_buffer = new raw_buffer<color_rgba>(tex_buffer, width, height);
-				break;
+				case texture_format::rgb:
+					{
+						auto buf = std::make_shared<color_rgb*>((color_rgb*)tex_buffer, release_rgb_buf);
+						rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(buf, width, height);
+					}
+					break;
+				case texture_format::rgba:
+					{
+						auto buf = std::make_shared<color_rgba*>((color_rgba*)tex_buffer, release_rgba_buf);
+						rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(buf, width, height);
+					}
+					break;
 			}
 		}
 
 		texture(const char* path, const texture_id& id) {
 			this->id = id;
 			this->fmt = texture_format::invalid;
-			this->rgba_buffer = nullptr;
-			this->rgb_buffer = nullptr;
-			this->stb_data = nullptr;
+			release();
 			int width, height, channels;
 			if (!FS::exists(path)) {
 				std::cerr << "path does not exist" << std::endl;
 			}
 			else {
-				unsigned char* tex = stbi_load(path, &width, &height, &channels, 0);
-				this->stb_data = tex;
+				stb_uchar* tex = stbi_load(path, &width, &height, &channels, 0);
+				this->stb_data = std::make_shared<stb_uchar*>(tex, release_stb);
 				if (channels == 3) {
-					this->rgb_buffer = new raw_buffer<color_rgb>(tex, width, height);
+					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height);
 					this->fmt = texture_format::rgb;
 				}
 				else if (channels == 4) {
-
-					this->rgba_buffer = new raw_buffer<color_rgba>(tex, width, height);
+					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex, width, height);
 					this->fmt = texture_format::rgba;
 				}
 				else {
@@ -84,16 +87,12 @@ namespace guarneri {
 			}
 		}
 
+		texture(const texture& other) {
+			deep_copy(other);
+		}
+
 		~texture() {
-			if (rgb_buffer != nullptr) {
-				delete rgb_buffer;
-			}
-			if (rgba_buffer != nullptr) {
-				delete rgba_buffer;
-			}
-			if (stb_data != nullptr) {
-				stbi_image_free(stb_data);
-			}
+			release();
 		}
 
 	public:
@@ -103,9 +102,9 @@ namespace guarneri {
 		texture_format fmt;
 
 	private:
-		raw_buffer<color_rgb>* rgb_buffer;
-		raw_buffer<color_rgba>* rgba_buffer;
-		unsigned char* stb_data;
+		buffer_rgb_reference rgb_buffer;
+		buffer_rgba_reference rgba_buffer;
+		buffer_stb stb_data;
 
 	public:
 		bool sample(const float& u, const float& v, color& ret) const {
@@ -183,6 +182,12 @@ namespace guarneri {
 
 		}
 
+		void release() {
+			rgb_buffer.reset();
+			rgba_buffer.reset();
+			stb_data.reset();
+		}
+
 	private:
 		void wrap(float& u, float& v) const {
 			switch (wrap_mode) {
@@ -226,6 +231,32 @@ namespace guarneri {
 				rgba_buffer->clear(color_rgba());
 				break;
 			}
+		}
+
+		void operator =(const texture& other) {
+			deep_copy(other);
+		}
+
+		void deep_copy(const texture& other) {
+			this->id = other.id;
+			this->wrap_mode = other.wrap_mode;
+			this->filtering = other.filtering;
+			this->fmt = other.fmt;
+			this->rgba_buffer = other.rgba_buffer;
+			this->rgb_buffer = other.rgb_buffer;
+			this->stb_data = other.stb_data;
+		}
+
+		static void release_stb(stb_uchar* stb_ptr) {
+			stbi_image_free(stb_ptr);
+		}
+
+		static void release_rgb_buf(color_rgb* buf) {
+			delete[] buf;
+		}
+
+		static void release_rgba_buf(color_rgba* buf) {
+			delete[] buf;
 		}
 	};
 }
