@@ -55,7 +55,7 @@ namespace guarneri {
 		color(const float2& v, const float2& zw) { this->r = v.x; this->g = v.y; this->b = zw.x; this->a = zw.y; }
 		color(const float3& v, const float& w) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = w; }
 		color(const float& r, const float& g, const float& b) { this->r = r; this->g = g; this->b = b; this->a = 1.0f; }
-		color(const float& r, const float& g, const float& b, const float& w) { this->r = r; this->g = g; this->b = b; this->a = w; }
+		color(const float& r, const float& g, const float& b, const float& a) { this->r = r; this->g = g; this->b = b; this->a = a; }
 
 	public:
 		float r;
