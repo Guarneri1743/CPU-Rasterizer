@@ -19,9 +19,9 @@ namespace guarneri{
 		// todo: serialzie & deserialize scene data
 		void deserialize() {
 			// backpack
-		/*	auto backpack = std::make_shared<model>();
+			auto backpack = std::make_shared<model>();
 			backpack->load_from_file(res_path() + "/backpack/backpack.obj");
-			objects.push_back(std::make_shared<renderer>(backpack));*/
+			objects.push_back(std::make_shared<renderer>(backpack));
 
 			// cube
 			auto box_material = std::make_shared<material>();
@@ -34,9 +34,9 @@ namespace guarneri{
 
 			// plane
 			auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
-			auto plane_tex = std::make_shared<texture>(tex_path.c_str(), albedo_prop);
-			auto noise = std::make_shared<texture>(albedo_prop, 512, 512, texture_format::rgba);
-			noise::generate_fractal_image(noise, 512, 512);
+			auto plane_tex = texture::create(tex_path);
+			/*auto noise = texture::create(512, 512, texture_format::rgba);
+			noise::generate_fractal_image(noise, 512, 512);*/
 			auto plane_material = std::make_shared<material>();
 			plane_material->transparent = false;
 			plane_material->set_texture(albedo_prop, plane_tex);

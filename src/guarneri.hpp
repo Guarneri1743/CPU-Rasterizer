@@ -9,14 +9,17 @@
 #include <vector>
 #include <stack>
 #include <string>
-#include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <assert.h>
 #include <filesystem>
 #include <singleton.hpp>
+#include <resource_manager.hpp>
+#include <id_allocator.hpp>
 
 namespace guarneri{
+	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
 	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
 	#define FLOAT_LOG_PRECISION 6
@@ -32,16 +35,16 @@ namespace guarneri{
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	#define FS std::filesystem
-	
+
 	// resource id
 	typedef std::string texture_id;
 	typedef std::string property_name;
 	typedef std::string shader_id;
 
 	// color 
-	struct color_rgb{ unsigned char r; unsigned char g; unsigned char b; };
-	struct color_rgba{ unsigned char r; unsigned char g; unsigned char b; unsigned char a; };
-	struct color_bgra{ unsigned char b; unsigned char g; unsigned char r; unsigned char a; };
+	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
+	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
+	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef unsigned char stb_uchar;
 
 	// simple texture properties
@@ -108,10 +111,15 @@ namespace guarneri{
 	class gdi_window;
 	class model_generator;
 	class scene;
+	class id_allocator;
 
 	render_device& grapihcs() {
 		return singleton<render_device>::get();
 	}
+
+	id_allocator idalloc(INVALID_ID + 1, MAX_ID);
+	#define ALLOC_ID() idalloc.alloc();
+	#define FREE_ID(id) idalloc.free(id);
 }
 
 #define NOMINMAX

@@ -12,7 +12,7 @@ namespace guarneri {
 		scanline = 1 << 5
 	};
 
-	class render_device : public singleton<render_device> {
+	class render_device {
 	public:
 		uint32_t width;
 		uint32_t height;

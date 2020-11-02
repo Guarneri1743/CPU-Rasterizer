@@ -2,25 +2,26 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
+	#define INVALID_ID 0
 	struct id_spin {
 	public:
-		id_spin(int left, int right) :left_id(left), right_id(right) {}
-		int left()const { return left_id; }
-		int right()const { return right_id; }
+		id_spin(uint32_t left, uint32_t right) :left_id(left), right_id(right) {}
+		uint32_t left()const { return left_id; }
+		uint32_t right()const { return right_id; }
 
 		bool operator < (const id_spin& rhs)const {
 			return left_id < rhs.left() && right_id < rhs.left();
 		}
 	private:
-		int left_id;
-		int right_id;
+		uint32_t left_id;
+		uint32_t right_id;
 	};
 
 	class id_allocator {
 	public:
-		id_allocator(int min_id, int max_id)
+		id_allocator(uint32_t min_id, uint32_t max_id)
 		{
-			assert(min_id >= 0);
+			assert(min_id > INVALID_ID);
 			assert(min_id <= max_id);
 			this->min_id = min_id;
 			this->max_id = max_id;
@@ -28,12 +29,20 @@ namespace guarneri {
 		}
 
 	private:
-		int min_id;
-		int max_id;
+		uint32_t min_id;
+		uint32_t max_id;
 		std::set<id_spin> free_ids;
 
 	public:
-		bool alloc(int& iid)
+		uint32_t alloc() {
+			uint32_t id;
+			if (alloc(id)) {
+				return id;
+			}
+			return INVALID_ID;
+		}
+
+		bool alloc(uint32_t& iid)
 		{
 			auto first = free_ids.begin();
 			if (first == free_ids.end()) {
@@ -50,13 +59,13 @@ namespace guarneri {
 			return true;
 		}
 
-		void free(int iid)
+		void free(uint32_t iid)
 		{
 			if (iid > max_id || iid < min_id) {
 				return;
 			}
 			auto current = id_spin(iid, iid);
-			int left, right;
+			uint32_t left, right;
 			auto iterator = free_ids.upper_bound(current);
 			if (iterator == free_ids.end()) {
 				auto last = free_ids.rbegin();

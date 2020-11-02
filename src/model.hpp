@@ -18,14 +18,10 @@ namespace guarneri {
             for (auto& m : meshes) {
                 m.reset();
             }
-            for (auto& kv : texture_cache) {
-                kv.second.reset();
-            }
         }
 
     public:
         std::vector<std::shared_ptr<mesh>> meshes;
-        std::unordered_map<std::string, std::shared_ptr<texture>> texture_cache;
         transform transform;
 
     private:
@@ -145,17 +141,8 @@ namespace guarneri {
                 aiString str;
                 mat->GetTexture(type, i, &str);
                 std::string relative_path = str.C_Str();
-                if (texture_cache.count(relative_path) <= 0) {
-                    std::string tex_path = parent_dir + "/" + relative_path;
-                    std::cerr << "load: " << tex_path << std::endl;
-                    auto tex = std::make_shared<texture>(tex_path.c_str(), property_name);
-                    texture_cache[relative_path] = tex;
-                    return tex;
-                }
-                else {
-                    auto kv = texture_cache.find(relative_path);
-                    return kv->second;
-                }
+                std::string tex_path = parent_dir + "/" + relative_path;
+                return texture::create(tex_path);
             }
             return nullptr;
         }
@@ -166,7 +153,6 @@ namespace guarneri {
 
         void deep_copy(const model& other) {
             this->meshes = other.meshes;
-            this->texture_cache = other.texture_cache;
             this->transform = other.transform;
             this->parent_dir = other.parent_dir;
         }
