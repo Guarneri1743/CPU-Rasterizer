@@ -2,7 +2,7 @@ local solution_dir = _ACTION
 local lib_dir = "lib"
 local res_dir = "res"
 local src_dir = "src"
-local third_party_dir = "third_party"
+local include_dir = "include"
 local unit_test_dir = "unit_test"
 local sample_dir = "sample"
 
@@ -12,10 +12,10 @@ function setupIncludeDirs()
       src_dir .. "/utility",
       src_dir .. "/math",
       src_dir .. "/primitives",
-      third_party_dir,
-      third_party_dir .. "/assimp",
-      third_party_dir .. "/ply",
-      third_party_dir .. "/stb_image",
+      include_dir,
+      include_dir .. "/assimp",
+      include_dir .. "/ply",
+      include_dir .. "/stb_image",
    }
 end
 
@@ -91,9 +91,9 @@ function setupSoftRasterizerProj()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
       sample_dir .. "/simple_scene/*.*"
    }
 
@@ -114,10 +114,10 @@ function setupPLYProj()
          src_dir .. "/utility/*.*",
          src_dir .. "/math/*.*",
          src_dir .. "/primitives/*.*",
-         third_party_dir .. "/*.*",
-         third_party_dir .. "/assimp/*.*",
-         third_party_dir .. "/stb_image/*.*",
-         third_party_dir .. "/ply/*.*",
+         include_dir .. "/*.*",
+         include_dir .. "/assimp/*.*",
+         include_dir .. "/stb_image/*.*",
+         include_dir .. "/ply/*.*",
          sample_dir .. "/ply/*.*"
       }
 
@@ -138,9 +138,9 @@ function setupUnitTestProj()
       src_dir, "utility/*.*",
       src_dir, "math/*.*",
       src_dir, "primitives/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
       sample_dir .. "/unit_test/*.*"
    }
 

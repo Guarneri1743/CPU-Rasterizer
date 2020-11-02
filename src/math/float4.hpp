@@ -14,7 +14,6 @@ namespace guarneri {
 	public:
 		float4() { x = 0.0f; y = 0.0f; z = 0.0f; w = 1.0f; }
 		float4(const float& r) { this->x = r; this->y = r; this->z = r; this->w = r; }
-		float4(const float4& v) { this->x = v.x; this->y = v.y; this->z = v.z; this->w = v.w; }
 		float4(const float3& v) { this->x = v.x; this->y = v.y; this->z = v.z; this->w = 1.0f; }
 		float4(const float& x, const float3& yzw) { this->x = x; this->y = yzw.x; this->z = yzw.y; this->w = yzw.z; }
 		float4(const float& x, const float& y, const float2& zw) { this->x = x; this->y = y; this->z = zw.x; this->w = zw.y; }
@@ -38,10 +37,6 @@ namespace guarneri {
 		float& operator[](const unsigned int& i) { return (&x)[i]; }
 
 		const float& operator[](const unsigned int& i) const { return (&x)[i]; }
-
-		void operator =(const float4& other) {
-			this->x = other.x; this->y = other.y; this->x = other.x; this->w = other.w;
-		}
 
 		bool operator == (const float4& other) {
 			return EQUALS(x, other.x) && EQUALS(y, other.y) && EQUALS(z, other.z) && EQUALS(w, other.w);

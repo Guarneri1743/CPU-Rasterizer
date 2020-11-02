@@ -8,7 +8,6 @@ namespace guarneri {
 	class model {
 	public:
 		model() {
-            parent_dir = "";
 		}
 
         model(const model& other) {
@@ -50,7 +49,9 @@ namespace guarneri {
                  std::cerr << "load model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
                  return;
              }
-             parent_dir = FS::path(path).parent_path().string();
+             auto parent_path = FS::path(path).parent_path();
+             auto p = parent_path.string();
+             parent_dir = p;
              traverse_nodes(scene->mRootNode, scene);
              importer.FreeScene();
         }

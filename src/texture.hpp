@@ -45,12 +45,12 @@ namespace guarneri {
 			switch (fmt) {
 				case texture_format::rgb:
 					{
-						rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex_buffer, width, height);
+					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
 					}
 					break;
 				case texture_format::rgba:
 					{
-						rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex_buffer, width, height);
+						rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
 					}
 					break;
 			}
@@ -66,13 +66,12 @@ namespace guarneri {
 			}
 			else {
 				auto tex = stbi_load(path, &width, &height, &channels, 0);
-				this->stb_data = std::shared_ptr<stbi_uc>(tex, [](unsigned char* ptr) { delete[] ptr; });
 				if (channels == 3) {
-					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height);
+					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height, [](color_rgb* ptr) { std::cerr << "release stbi1" << ptr << std::endl; stbi_image_free((void*)ptr); });
 					this->fmt = texture_format::rgb;
 				}
 				else if (channels == 4) {
-					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex, width, height);
+					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex, width, height, [](color_rgba* ptr) { std::cerr << "release stbi2" << ptr << std::endl; stbi_image_free((void*)ptr); });
 					this->fmt = texture_format::rgba;
 				}
 				else {
@@ -98,7 +97,6 @@ namespace guarneri {
 	private:
 		std::shared_ptr<raw_buffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<raw_buffer<color_rgba>> rgba_buffer;
-		std::shared_ptr<stbi_uc> stb_data;
 
 	public:
 		bool sample(const float& u, const float& v, color& ret) const {
@@ -179,7 +177,6 @@ namespace guarneri {
 		void release() {
 			rgb_buffer.reset();
 			rgba_buffer.reset();
-			stb_data.reset();
 		}
 
 	private:
@@ -238,7 +235,6 @@ namespace guarneri {
 			this->fmt = other.fmt;
 			this->rgba_buffer = other.rgba_buffer;
 			this->rgb_buffer = other.rgb_buffer;
-			this->stb_data = other.stb_data;
 		}
 	};
 }

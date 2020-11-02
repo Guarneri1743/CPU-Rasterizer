@@ -28,7 +28,7 @@ namespace guarneri {
 			this->height = height_t;
 			r_flag = render_flag::shaded;
 			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
-			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t);
+			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			zbuffer->clear(1.0f);
 		}
 
@@ -121,9 +121,9 @@ namespace guarneri {
 		}
 
 		void rasterize(std::vector<triangle>& tris, const std::shared_ptr<material>& mat) {
-			bool flip = false;
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
+				bool flip = tri.flip;
 				int top_idx = flip ? 2 : 0;
 				int bottom_idx = flip ? 0 : 2;
 				int top = CEIL(tri[top_idx].position.y);
@@ -134,7 +134,7 @@ namespace guarneri {
 				for (int row = top; row < bottom; row++) {
 					vertex lhs;
 					vertex rhs;
-					tri.interpolate((float)row + 0.5f, lhs, rhs, flip);
+					tri.interpolate((float)row + 0.5f, lhs, rhs);
 					int left = CEIL(lhs.position.x);
 					int right = CEIL(rhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
@@ -146,7 +146,6 @@ namespace guarneri {
 						lhs = vertex::intagral(lhs, dx);
 					}
 				}
-				flip = true;
 			}
 		}
 

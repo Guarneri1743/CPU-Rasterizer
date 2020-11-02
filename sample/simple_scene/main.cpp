@@ -21,7 +21,7 @@ int main()
 	singleton<camera>::get().initialize(cam_pos, aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
 
 	scene demo_scene;
-
+	std::cout << "start_render" << std::endl;
 	while (gdiwin.is_valid()) {
 		if (IS_ON(VK_F3)) device.r_flag = render_flag::wire_frame;
 		if (IS_ON(VK_F2)) device.r_flag = render_flag::scanline;

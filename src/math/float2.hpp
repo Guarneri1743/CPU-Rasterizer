@@ -32,10 +32,6 @@ namespace guarneri {
 			return !(*this == other);
 		}
 
-		void operator =(const float2& other) {
-			this->x = other.x; this->y = other.y;
-		}
-
 		float2& operator +=(const float2& other) {
 			x = x + other.x;
 			y = y + other.y;

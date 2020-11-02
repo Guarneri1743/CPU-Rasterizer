@@ -39,7 +39,6 @@ namespace guarneri {
 	public:
 		color() { r = 0.0f; g = 0.0f; b = 0.0f; a = 1.0f; }
 		color(const float& r) { this->r = r; this->g = r; this->b = r; this->a = r; }
-		color(const color& v) { this->r = v.r; this->g = v.g; this->b = v.b; this->a = v.a; }
 		color(const float4& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = v.w; }
 		color(const float3& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = 1.0f; }
 		color(const float& r, const float3& yzw) { this->r = r; this->g = yzw.x; this->b = yzw.y; this->a = yzw.z; }
@@ -71,10 +70,6 @@ namespace guarneri {
 
 		bool operator != (const color& other) {
 			return !(*this == other);
-		}
-
-		void operator =(const color& other) {
-			this->r = other.r; this->g = other.g; this->b = other.b; this->a = other.a;
 		}
 
 		color& operator +=(const color& other) {

@@ -109,7 +109,8 @@ namespace guarneri {
 
 		v2f vertex_shader(const a2v& input) {
 			v2f o;
-			o.position = p * v * m * input.position;
+			auto oo = p * v * m * input.position;
+			o.position = oo;
 			o.color = input.color;
 			o.normal = input.normal;
 			o.uv = input.uv;

@@ -20,7 +20,6 @@ namespace guarneri {
 	public:
 		float3() { x = 0; y = 0; z = 0; }
 		float3(const float& r) { this->x = r; this->y = r; this->z = r; }
-		float3(const float3& v) { this->x = v.x; this->y = v.y; this->z = v.z; }
 		float3(const float& x, const float& y, const float& z) { this->x = x; this->y = y; this->z = z; }
 
 	public:
@@ -43,10 +42,6 @@ namespace guarneri {
 
 		bool operator != (const float3& other) {
 			return !(*this == other);
-		}
-
-		void operator =(const float3& other) {
-			this->x = other.x; this->y = other.y; this->x = other.x;
 		}
 
 		float3& operator +=(const float3& other) {

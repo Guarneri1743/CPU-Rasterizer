@@ -8,16 +8,26 @@ namespace guarneri {
 			for (int i = 0; i < 3; i++) {
 				vertices[i] = verts[i];
 			}
+			flip = false;
 		}
 
 		triangle(const vertex& v1, const vertex& v2, const vertex& v3) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
+			flip = false;
+		}
+
+		triangle(const vertex& v1, const vertex& v2, const vertex& v3, const bool& flip) {
+			vertices[0] = v1;
+			vertices[1] = v2;
+			vertices[2] = v3;
+			this->flip = flip;
 		}
 
 	public:
 		vertex vertices[3];
+		bool flip;
 
 	public:
 		// scan top/bottom triangle
@@ -41,7 +51,7 @@ namespace guarneri {
 		//        \/
 		//		bottom[0]
 		//====================================================
-		void interpolate(const float& screen_y, vertex& lhs, vertex& rhs, bool flip) {
+		void interpolate(const float& screen_y, vertex& lhs, vertex& rhs) {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
 			len = flip ? len : -len;
 			float dy = flip ? screen_y - this->vertices[2].position.y : screen_y - this->vertices[0].position.y;
@@ -112,15 +122,25 @@ namespace guarneri {
 				return ret;
 			}
 
-			// top flat triangle
-			if (sorted[0].position.y == sorted[1].position.y) {
-				ret.push_back(triangle(sorted));
+			// top triangle
+			if (sorted[1].position.y == sorted[2].position.y) {
+				if (sorted[1].position.x >= sorted[2].position.x) {
+					ret.push_back(triangle(sorted[0], sorted[2], sorted[1]));
+				}
+				else {
+					ret.push_back(triangle(sorted[0], sorted[1], sorted[2]));
+				}
 				return ret;
 			}
 
-			// bottom flat triangle
-			if (sorted[1].position.y == sorted[2].position.y) {
-				ret.push_back(triangle(sorted));
+			// bottom triangle
+			if (sorted[0].position.y == sorted[1].position.y) {
+				if (sorted[0].position.x >= sorted[1].position.x) {
+					ret.push_back(triangle(sorted[2], sorted[1], sorted[0], true));
+				}
+				else {
+					ret.push_back(triangle(sorted[2], sorted[0], sorted[1], true));
+				}
 				return ret;
 			}
 			
@@ -145,10 +165,10 @@ namespace guarneri {
 
 			// bottom triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
-				ret.push_back(triangle(sorted[2], sorted[1], v));
+				ret.push_back(triangle(sorted[2], sorted[1], v, true));
 			}
 			else {
-				ret.push_back(triangle(sorted[2], v, sorted[1]));
+				ret.push_back(triangle(sorted[2], v, sorted[1], true));
 			}
 
 			tri = ret[1];

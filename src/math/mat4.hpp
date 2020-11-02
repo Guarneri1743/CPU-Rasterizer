@@ -33,10 +33,6 @@ namespace guarneri {
 			m33 = column3.w;
 		}
 
-		mat4(const mat4& other) {
-			deep_copy(other);
-		}
-
 	private:
 		float m00;
 		float m01;
@@ -560,16 +556,6 @@ namespace guarneri {
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
 				return m00;
-			}
-		}
-
-		void operator =(const mat4& other) {
-			deep_copy(other);
-		}
-
-		void deep_copy(const mat4& other) {
-			for (int i = 0; i < 16; i++) {
-				this->operator[](i) = other[i];
 			}
 		}
 

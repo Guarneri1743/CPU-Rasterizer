@@ -19,9 +19,9 @@ namespace guarneri{
 		// todo: serialzie & deserialize scene data
 		void deserialize() {
 			// backpack
-			auto backpack = std::shared_ptr<model>();
+		/*	auto backpack = std::make_shared<model>();
 			backpack->load_from_file(res_path() + "/backpack/backpack.obj");
-			objects.push_back(std::make_shared<renderer>(backpack));
+			objects.push_back(std::make_shared<renderer>(backpack));*/
 
 			// cube
 			auto box_material = std::make_shared<material>();
