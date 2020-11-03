@@ -33,22 +33,18 @@ namespace guarneri {
 		0, 1, 2, 2, 3, 0
 	};
 
-	class model_generator {
+	class primitive_factory {
 	public:
-		static std::shared_ptr<model> plane(const std::shared_ptr<material>& material) {
-			auto ret = std::make_shared<model>();
+		static std::unique_ptr<model> plane(std::unique_ptr<material> material) {
 			const std::vector<vertex> vert(plane_vertices, plane_vertices + 4);
 			const std::vector<uint32_t> ind(plane_indices, plane_indices + 6);
-			ret->load_from_vertices(vert, ind, material);
-			return ret;
+			return model::create(vert, ind, std::move(material));
 		}
 
-		static std::shared_ptr<model> cube(const std::shared_ptr<material>& material) {
-			auto ret = std::make_shared<model>();
+		static std::unique_ptr<model> cube(std::unique_ptr<material> material) {
 			const std::vector<vertex> vert(cube_vertices, cube_vertices + 8);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
-			ret->load_from_vertices(vert, ind, material);
-			return ret;
+			return model::create(vert, ind, std::move(material));
 		}
 	};
 }

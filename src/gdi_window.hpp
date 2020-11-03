@@ -1,61 +1,23 @@
 #pragma once
-#include <windows.h>
-#include <tchar.h>
+#include <guarneri.hpp>
 
 namespace guarneri {
-	class gdi_window;
 	static LRESULT event_callback(HWND, UINT, WPARAM, LPARAM);
 	static int keys[512];
 	static bool closed;
 	#define IS_ON(key_code) keys[key_code] == 1
 
-
 	class gdi_window {
 	public:
-		gdi_window(int w, int h, LPCSTR title, LPCSTR name) {
-			this->width = w;
-			this->height = h;
-			this->title = title;
-			this->name = name;
-			buffer_size = width * height * 4;
-			window_handle = nullptr;
-			window_device_context = nullptr;
-			framebuffer = nullptr;
-			bitmap_handle = nullptr;
-			initialized = false;
-			closed = false;
-			std::fill(std::begin(keys), std::end(keys), 0);
-			initialize();
-		}
-
-		~gdi_window() {
-			if (original_handle) {
-				SelectObject(window_device_context, original_handle);
-				original_handle = nullptr;
-			}
-			if (window_device_context) {
-				DeleteDC(window_device_context);
-				window_device_context = nullptr;
-			}
-			if (bitmap_handle) {
-				DeleteObject(bitmap_handle);
-				bitmap_handle = nullptr;
-			}
-			if (window_handle) {
-				CloseWindow(window_handle);
-				window_handle = nullptr;
-			}
-		}
-
-	public:
 		void* framebuffer;
+		int width;
+		int height;
+		float aspect;
 
 	private:
 		LPCSTR title;
 		LPCSTR name;
 		bool initialized;
-		int width;
-		int height;
 		int buffer_size;
 		HWND window_handle;
 		HDC window_device_context;
@@ -63,10 +25,22 @@ namespace guarneri {
 		HBITMAP original_handle;
 
 	public:
-		void initialize() {
+		void initialize(int w, int h, LPCSTR title, LRESULT(*event_callback)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)) {
 			if (initialized) {
 				return;
 			}
+			this->width = w;
+			this->height = h;
+			this->aspect = (float)w / (float)h;
+			this->title = title;
+			this->name = title;
+			buffer_size = width * height * 4;
+			window_handle = nullptr;
+			window_device_context = nullptr;
+			framebuffer = nullptr;
+			bitmap_handle = nullptr;
+			closed = false;
+			std::fill(std::begin(keys), std::end(keys), 0);
 
 			WNDCLASS win_class;
 			win_class.style = CS_BYTEALIGNCLIENT;
@@ -133,6 +107,25 @@ namespace guarneri {
 			send_message();
 		}
 
+		void dispose() {
+			if (original_handle) {
+				SelectObject(window_device_context, original_handle);
+				original_handle = nullptr;
+			}
+			if (window_device_context) {
+				DeleteDC(window_device_context);
+				window_device_context = nullptr;
+			}
+			if (bitmap_handle) {
+				DeleteObject(bitmap_handle);
+				bitmap_handle = nullptr;
+			}
+			if (window_handle) {
+				CloseWindow(window_handle);
+				window_handle = nullptr;
+			}
+		}
+
 		void send_message() {
 			MSG msg;
 			while (1) {
@@ -142,21 +135,6 @@ namespace guarneri {
 					break;
 				DispatchMessage(&msg);
 			}
-		}
-
-		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-			switch (msg) {
-			case WM_CLOSE:
-				closed = true;
-				break;
-			case WM_KEYDOWN:
-				keys[wParam & 511] = 1;
-				break;
-			case WM_KEYUP:
-				keys[wParam & 511] = 0;
-				break;
-			}
-			return DefWindowProc(hWnd, msg, wParam, lParam);
 		}
 	};
 }

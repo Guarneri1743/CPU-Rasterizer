@@ -109,12 +109,25 @@ namespace guarneri{
 	class renderer;
 	class render_device;
 	class gdi_window;
-	class model_generator;
+	class primitive_factory;
 	class scene;
 	class id_allocator;
+	class input_manager;
 
 	render_device& grapihcs() {
 		return singleton<render_device>::get();
+	}
+
+	input_manager& input_mgr() {
+		return singleton<input_manager>::get();
+	}
+
+	gdi_window& window() {
+		return singleton<gdi_window>::get();
+	}
+
+	resource_manager<texture>& tex_mgr() {
+		return singleton<resource_manager<texture>>::get();
 	}
 
 	id_allocator idalloc(INVALID_ID + 1, MAX_ID);
@@ -124,6 +137,8 @@ namespace guarneri{
 
 #define NOMINMAX
 
+#include <windows.h>
+#include <tchar.h>
 #include <gdi_window.hpp>
 
 #ifdef near
@@ -143,6 +158,7 @@ namespace guarneri{
 #include <float4.hpp>
 #include <color.hpp>
 #include <mat4.hpp>
+#include <input_manager.hpp>
 #include <transform.hpp>
 #include <vertex.hpp>
 #include <plane.hpp>
@@ -166,5 +182,5 @@ namespace guarneri{
 #include <model.hpp>
 #include <render_device.hpp>
 #include <renderer.hpp>
-#include <model_generator.hpp>
+#include <primitive_factory.hpp>
 #include <scene.hpp>

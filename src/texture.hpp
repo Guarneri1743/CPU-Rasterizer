@@ -44,10 +44,6 @@ namespace guarneri {
 		return ss;
 	}
 
-	resource_manager<texture>& tex_mgr() {
-		return singleton<resource_manager<texture>>::get();
-	}
-
 	class texture {
 	public:
 		texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {

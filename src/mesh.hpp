@@ -4,10 +4,10 @@
 namespace guarneri {
 	class mesh {
 	public:
-		mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, const std::shared_ptr<material>& material) {
+		mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
 			this->vertices = vertices;
 			this->indices = indices;
-			this->material = material;
+			this->material = std::move(material);
 		}
 
 		mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
@@ -20,9 +20,7 @@ namespace guarneri {
 		}
 
 		~mesh() {
-			material.reset();
-			vertices.clear();
-			indices.clear();
+		
 		}
 
 	public:

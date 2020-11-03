@@ -6,35 +6,43 @@
 
 namespace guarneri {
 	class model {
-	public:
-		model() {
-		}
+    public:
+        model() {
 
-        model(const model& other) {
-            deep_copy(other);
         }
 
         ~model() {
-            for (auto& m : meshes) {
-                m.reset();
-            }
+            std::cout << "release model" << std::endl;
         }
 
     public:
-        std::vector<std::shared_ptr<mesh>> meshes;
+        std::vector<std::unique_ptr<mesh>> meshes;
         transform transform;
 
     private:
         std::string parent_dir;
 
     public:
-        void load_from_vertices(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, const std::shared_ptr<material>& material) {
+        static std::unique_ptr<model> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
+            auto m = std::make_unique<model>();
+            m->load_from_vertices(vertices, indices, std::move(material));
+            return m;
+        }
+
+        static std::unique_ptr<model> create(std::string path) {
+            auto m = std::make_unique<model>();
+            m->load_from_file(path);
+            return m;
+        }
+
+    private:
+        void load_from_vertices(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
             if (vertices.size() == 0 || indices.size() == 0) {
                 std::cerr << "load vertices failed." << std::endl;
             }
             assert(indices.size() % 3 == 0);
-            auto m = std::make_shared<mesh>(vertices, indices, material);
-            meshes.push_back(m);
+            auto m = std::make_unique<mesh>(vertices, indices, std::move(material));
+            meshes.push_back(std::move(m));
         }
 
          void load_from_file(std::string path) {
@@ -57,7 +65,7 @@ namespace guarneri {
             for (uint32_t i = 0; i < node->mNumMeshes; i++)
             {
                 aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-                meshes.push_back(load_mesh(mesh, scene));
+                meshes.push_back(std::move(load_mesh(mesh, scene)));
             }
             for (uint32_t i = 0; i < node->mNumChildren; i++)
             {
@@ -65,7 +73,7 @@ namespace guarneri {
             }
         }
 
-        std::shared_ptr<mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
+        std::unique_ptr<mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
         {
             std::vector<vertex> vertices;
             std::vector<uint32_t> indices;
@@ -125,13 +133,13 @@ namespace guarneri {
             auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
             auto height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
             
-            auto mat = std::make_shared<material>();
+            auto mat = std::make_unique<material>();
             mat->set_texture(albedo_prop, diffuse);
             mat->set_texture(specular_prop, specular);
             mat->set_texture(normal_prop, normal);
             mat->set_texture(height_prop, height);
 
-            return std::make_shared<mesh>(vertices, indices, mat);
+            return std::make_unique<mesh>(vertices, indices, std::move(mat));
         }
 
         std::shared_ptr<texture> load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
@@ -145,16 +153,6 @@ namespace guarneri {
                 return texture::create(tex_path);
             }
             return nullptr;
-        }
-
-        void operator =(const model& other) {
-            deep_copy(other);
-        }
-
-        void deep_copy(const model& other) {
-            this->meshes = other.meshes;
-            this->transform = other.transform;
-            this->parent_dir = other.parent_dir;
         }
 	};
 }

@@ -15,6 +15,7 @@ namespace guarneri {
 		float aspect;
 		float near;
 		float far;
+		static std::unique_ptr<camera> main_camera;
 
 	private:
 		mat4 proj_matrix;
@@ -28,6 +29,12 @@ namespace guarneri {
 		projection proj_type;
 
 	public:
+		static void create_main(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+			auto ret = std::make_unique<camera>();
+			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
+			main_camera = std::move(ret);
+		}
+
 		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
 			this->position = position_t;
 			this->aspect = aspect_t;
@@ -41,6 +48,26 @@ namespace guarneri {
 			update_proj_mode();
 		}
 
+		void on_mouse_moving(float2 mouse_position) {
+
+		}
+
+		void on_mouse_btn_down(mouse_button code) {
+
+		}
+
+		void on_mouse_btn_up(mouse_button code) {
+
+		}
+
+		void on_key_down(key_code code) {
+
+		}
+
+		void on_key_up(key_code code) {
+
+		}
+
 		mat4 view_matrix() const {
 			return mat4::lookat_matrix(this->position, this->lookat_target, float3::UP);
 		}
@@ -49,7 +76,7 @@ namespace guarneri {
 			this->lookat_target = target;
 		}
 
-		const mat4& projection_matrix() const{
+		const mat4 projection_matrix() const{
 			return proj_matrix;
 		}
 
@@ -105,4 +132,6 @@ namespace guarneri {
 			}
 		}
 	};
+
+	std::unique_ptr<camera> camera::main_camera;
 }

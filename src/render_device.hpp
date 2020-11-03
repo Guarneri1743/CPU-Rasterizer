@@ -206,7 +206,7 @@ namespace guarneri {
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
-					float linear_depth = linearize_depth(cur_depth, singleton<camera>::get().near, singleton<camera>::get().far);
+					float linear_depth = linearize_depth(cur_depth, camera::main_camera->near, camera::main_camera->far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
 					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					framebuffer->write(row, col, c);

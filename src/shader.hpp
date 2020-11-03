@@ -136,7 +136,7 @@ namespace guarneri {
 			}
 
 			// fallback
-			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f);
+			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f, 0.3f);
 		}
 
 		void operator =(const shader& other) {

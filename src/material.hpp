@@ -14,7 +14,7 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-		material(std::shared_ptr<shader> shader) {
+		material(const std::shared_ptr<shader>& shader) {
 			this->target_shader = shader;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
@@ -49,6 +49,18 @@ namespace guarneri {
 		bool transparent;
 
 	public:
+		static std::unique_ptr<material> create() {
+			return std::make_unique<material>();
+		}
+
+		static std::unique_ptr<material> create(const std::shared_ptr<shader>& shader) {
+			return std::make_unique<material>(shader);
+		}
+
+		static std::unique_ptr<material> create(const material& other) {
+			return std::make_unique<material>(other);
+		}
+
 		void set_shader(std::shared_ptr<shader> shader) {
 			this->target_shader = shader;
 		}

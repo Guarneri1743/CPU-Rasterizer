@@ -13,37 +13,41 @@ namespace guarneri{
 		}
 
 	public:
-		std::vector<std::shared_ptr<renderer>> objects;
-		std::vector<std::shared_ptr<renderer>> transparent_objects;
+		std::vector<std::unique_ptr<renderer>> objects;
+		std::vector<std::unique_ptr<renderer>> transparent_objects;
 
 		// todo: serialzie & deserialize scene data
 		void deserialize() {
 			// backpack
-			auto backpack = std::make_shared<model>();
-			backpack->load_from_file(res_path() + "/backpack/backpack.obj");
-			objects.push_back(std::make_shared<renderer>(backpack));
+			auto backpack = model::create(res_path() + "/backpack/backpack.obj");
+			objects.push_back(std::move(renderer::create(std::move(backpack))));
 
 			// cube
-			auto box_material = std::make_shared<material>();
+			auto box_material = material::create();
 			box_material->transparent = true;
 			box_material->blend_op = blend_operator::add;
 			box_material->src_factor = blend_factor::src_alpha;
 			box_material->dst_factor = blend_factor::one_minus_src_alpha;
 			box_material->zwrite_mode = zwrite::off;
-			transparent_objects.push_back(std::make_shared<renderer>(model_generator::cube(box_material)));
+			auto cube = primitive_factory::cube(std::move(box_material));
+			transparent_objects.push_back(std::move(renderer::create(std::move(cube))));
 
 			// plane
 			auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 			auto plane_tex = texture::create(tex_path);
 			/*auto noise = texture::create(512, 512, texture_format::rgba);
 			noise::generate_fractal_image(noise, 512, 512);*/
-			auto plane_material = std::make_shared<material>();
+			auto plane_material = material::create();
 			plane_material->transparent = false;
 			plane_material->set_texture(albedo_prop, plane_tex);
-			auto plane = model_generator::plane(plane_material);
+			auto plane = primitive_factory::plane(std::move(plane_material));
 			plane->transform.translate(float3::DOWN);
 			plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
-			objects.push_back(std::make_shared<renderer>(plane));
+			objects.push_back(std::move(renderer::create(std::move(plane))));
+		}
+
+		void update() {
+
 		}
 
 		void render() {
