@@ -35,6 +35,8 @@ namespace guarneri{
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	#define FS std::filesystem
+	#define CAMERA_ROTATE_SPEED 0.5f
+	#define CAMERA_MOVE_SPEED 0.5f
 
 	// resource id
 	typedef std::string texture_id;

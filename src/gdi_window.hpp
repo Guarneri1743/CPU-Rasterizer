@@ -107,6 +107,25 @@ namespace guarneri {
 			send_message();
 		}
 
+		void get_mouse_position(float& x, float& y, int& xi, int& yi) {
+			POINT pt;
+			if (GetCursorPos(&pt)) {
+				ScreenToClient(window_handle, &pt);
+				xi = (int)pt.x;
+				yi = (int)pt.y;
+				x = (float)pt.x / (float)window().width;
+				y = (float)pt.y / (float)window().height;
+			}
+		}
+
+		RECT get_rect() {
+			RECT rect;
+			if (GetWindowRect(window_handle, &rect)) {
+				return rect;
+			}
+			return rect;
+		}
+
 		void dispose() {
 			if (original_handle) {
 				SelectObject(window_device_context, original_handle);

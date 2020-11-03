@@ -135,13 +135,15 @@ namespace guarneri {
 
 	public:
 		float2 mouse_position;
+		int mouse_x;
+		int mouse_y;
 
 	private:
-		std::unordered_set<void (*)(float2 prev, float2 pos)> on_mouse_move_events;
-		std::unordered_set<void (*)(key_code code)> on_key_down_events;
-		std::unordered_set<void (*)(key_code code)> on_key_up_events;
-		std::unordered_set<void (*)(mouse_button code)> on_mouse_down_events;
-		std::unordered_set<void (*)(mouse_button code)> on_mouse_up_events;
+		std::unordered_map<void (*)(float2 prev, float2 pos, void* ud), void*> on_mouse_move_events;
+		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_down_events;
+		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_up_events;
+		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_down_events;
+		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_up_events;
 
 	public:
 		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -149,12 +151,30 @@ namespace guarneri {
 			case WM_CLOSE:
 				closed = true;
 				break;
+			case WM_MOUSEMOVE:
+				break;
+			case WM_LBUTTONDOWN:
+				input_mgr().on_vk_down(wParam);
+				break;
+			case WM_LBUTTONUP:
+				input_mgr().on_vk_up(wParam);
+				break;
+			case WM_RBUTTONDOWN:
+				input_mgr().on_vk_down(wParam);
+				break;
+			case WM_RBUTTONUP:
+				input_mgr().on_vk_up(wParam);
+				break;
+			case WM_MBUTTONDOWN:
+				input_mgr().on_vk_down(wParam);
+				break;
+			case WM_MBUTTONUP:
+				input_mgr().on_vk_up(wParam);
+				break;
 			case WM_KEYDOWN:
-				keys[wParam & 511] = 1;
 				input_mgr().on_vk_down(wParam);
 				break;
 			case WM_KEYUP:
-				keys[wParam & 511] = 0;
 				input_mgr().on_vk_up(wParam);
 				break;
 			}
@@ -162,66 +182,71 @@ namespace guarneri {
 		}
 
 		void update() {
-			tagPOINT pt;
-			if (GetCursorPos(&pt)) {
-				float2 prev = mouse_position;
-				mouse_position.x = (float)pt.x / (float)window().width;
-				mouse_position.y = (float)pt.y / (float)window().height;
-				for (auto& evt : on_mouse_move_events) {
-					evt(prev, mouse_position);
+			auto prev = mouse_position;
+			float x, y;
+			window().get_mouse_position(x, y, mouse_x, mouse_y);
+			mouse_position = float2(x, y);
+			if (float2::magnitude(prev - mouse_position) > EPSILON) {
+				for (auto& kv : on_mouse_move_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(prev, mouse_position, user_data);
 				}
 			}
-			/*if (IS_ON(VK_F3)) grapihcs().r_flag = render_flag::wire_frame;
-			if (IS_ON(VK_F2)) grapihcs().r_flag = render_flag::scanline;
-			if (IS_ON(VK_F1)) grapihcs().r_flag = render_flag::shaded;
-			if (IS_ON(VK_F4)) grapihcs().r_flag = render_flag::depth;
-			if (IS_ON(VK_F5)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
-			if (IS_ON(VK_F6)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
-			if (IS_ON(VK_UP)) box_pos.z -= 0.1f;
-			if (IS_ON(VK_DOWN)) box_pos.z += 0.1f;
-			if (IS_ON(VK_LEFT)) box_pos.x += 0.1f;
-			if (IS_ON(VK_RIGHT)) box_pos.x -= 0.1f;
-			if (IS_ON('W')) box_pos.y += 0.1f;
-			if (IS_ON('S')) box_pos.y -= 0.1f;*/
 		}
 
-		void add_on_key_down_evt(void (*on_key_down)(key_code code)) {
-			on_key_down_events.insert(on_key_down);
+		void add_on_key_down_evt(void (*on_key_down)(key_code code, void* ud), void* user_data) {
+			if (on_key_down_events.count(on_key_down) > 0) {
+				return;
+			}
+			on_key_down_events.insert(std::pair(on_key_down, user_data));
 		}
 
-		void remove_on_key_down_evt(void (*on_key_down)(key_code code)) {
+		void remove_on_key_down_evt(void (*on_key_down)(key_code code, void* ud), void* user_data) {
 			on_key_down_events.erase(on_key_down);
 		}
 
-		void add_on_key_up_evt(void (*on_key_up)(key_code code)) {
-			on_key_up_events.insert(on_key_up);
+		void add_on_key_up_evt(void (*on_key_up)(key_code code, void* ud), void* user_data) {
+			if (on_key_up_events.count(on_key_up) > 0) {
+				return;
+			}
+			on_key_up_events.insert(std::pair(on_key_up, user_data));
 		}
 
-		void remove_on_key_up_evt(void (*on_key_up)(key_code code)) {
+		void remove_on_key_up_evt(void (*on_key_up)(key_code code, void* ud), void* user_data) {
 			on_key_up_events.erase(on_key_up);
 		}
 
-		void add_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code)) {
-			on_mouse_down_events.insert(on_mouse_down);
+		void add_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud), void* user_data) {
+			if (on_mouse_down_events.count(on_mouse_down) > 0) {
+				return;
+			}
+			on_mouse_down_events.insert(std::pair(on_mouse_down, user_data));
 		}
 
-		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code)) {
+		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud), void* user_data) {
 			on_mouse_down_events.erase(on_mouse_down);
 		}
 
-		void add_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code)) {
-			on_mouse_up_events.insert(on_mouse_up);
+		void add_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud), void* user_data) {
+			if (on_mouse_up_events.count(on_mouse_up) > 0) {
+				return;
+			}
+			on_mouse_up_events.insert(std::pair(on_mouse_up, user_data));
 		}
 
-		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code)) {
+		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud), void* user_data) {
 			on_mouse_up_events.erase(on_mouse_up);
 		}
 
-		void add_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos)) {
-			on_mouse_move_events.insert(on_mouse_move);
+		void add_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos, void* ud), void* user_data) {
+			if (on_mouse_move_events.count(on_mouse_move) > 0) {
+				return;
+			}
+			on_mouse_move_events.insert(std::pair(on_mouse_move, user_data));
 		}
 
-		void remove_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos)) {
+		void remove_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos, void* ud), void* user_data) {
 			on_mouse_move_events.erase(on_mouse_move);
 		}
 
@@ -229,15 +254,19 @@ namespace guarneri {
 			if (vk2key.count(code) > 0) {
 				auto key = vk2key.find(code)->second;
 				active_keys.insert(key);
-				for (auto& evt : on_key_down_events) {
-					evt(key);
+				for (auto& kv : on_key_down_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
 				}
 			}
 			else if (vk2mouse.count(code) > 0) {
 				auto key = vk2mouse.find(code)->second;
 				active_mouse_btns.insert(key);
-				for (auto& evt : on_mouse_down_events) {
-					evt(key);
+				for (auto& kv : on_mouse_down_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
 				}
 			}
 		}
@@ -246,15 +275,19 @@ namespace guarneri {
 			if (vk2key.count(code) > 0) {
 				auto key = vk2key.find(code)->second;
 				active_keys.erase(key);
-				for (auto& evt : on_key_up_events) {
-					evt(key);
+				for (auto& kv : on_key_up_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
 				}
 			}
 			else if (vk2mouse.count(code) > 0) {
 				auto key = vk2mouse.find(code)->second;
 				active_mouse_btns.erase(key);
-				for (auto& evt : on_mouse_up_events) {
-					evt(key);
+				for (auto& kv : on_mouse_up_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
 				}
 			}
 		}

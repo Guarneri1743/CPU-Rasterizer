@@ -19,8 +19,8 @@ namespace guarneri {
 
 	private:
 		mat4 proj_matrix;
+		transform local2world; //todo
 		float3 position;
-		float3 lookat_target;
 		float3 front;
 		float3 right;
 		float3 up;
@@ -33,6 +33,30 @@ namespace guarneri {
 			auto ret = std::make_unique<camera>();
 			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
 			main_camera = std::move(ret);
+
+			// camera controller
+			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
+				if (input_mgr().is_mouse_down(mouse_button::right)) {
+					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
+					camera::main_camera->rotate(offset.x, offset.y);
+				}
+				if (input_mgr().is_key_down(key_code::W)) {
+					camera::main_camera->move_forward(CAMERA_MOVE_SPEED);
+				}
+				if (input_mgr().is_key_down(key_code::A)) {
+					camera::main_camera->move_left(CAMERA_MOVE_SPEED);
+				}
+				if (input_mgr().is_key_down(key_code::S)) {
+					camera::main_camera->move_backward(CAMERA_MOVE_SPEED);
+				}
+				if (input_mgr().is_key_down(key_code::D)) {
+					camera::main_camera->move_right(CAMERA_MOVE_SPEED);
+				}
+			}, nullptr);
+
+			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
+
+			}, nullptr);
 		}
 
 		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
@@ -48,32 +72,8 @@ namespace guarneri {
 			update_proj_mode();
 		}
 
-		void on_mouse_moving(float2 mouse_position) {
-
-		}
-
-		void on_mouse_btn_down(mouse_button code) {
-
-		}
-
-		void on_mouse_btn_up(mouse_button code) {
-
-		}
-
-		void on_key_down(key_code code) {
-
-		}
-
-		void on_key_up(key_code code) {
-
-		}
-
 		mat4 view_matrix() const {
-			return mat4::lookat_matrix(this->position, this->lookat_target, float3::UP);
-		}
-
-		void set_target(const float3& target) {
-			this->lookat_target = target;
+			return mat4::lookat_matrix(this->position, this->position + this->front, this->up);
 		}
 
 		const mat4 projection_matrix() const{
@@ -88,9 +88,25 @@ namespace guarneri {
 			this->position += t;
 		}
 
+		void move_forward(const float& length) {
+			this->position += length * this->front;
+		}
+
+		void move_backward(const float& length) {
+			this->position -= length * this->front;
+		}
+
+		void move_left(const float& length) {
+			this->position -= length * this->right;
+		}
+
+		void move_right(const float& length) {
+			this->position += length * this->right;
+		}
+
 		void rotate(const float& yaw_offset, const float& pitch_offset) {
-			this->yaw += yaw_offset;
-			this->pitch += pitch_offset;
+			this->yaw -= yaw_offset;
+			this->pitch -= pitch_offset;
 
 			if (this->pitch > 89.0f)
 			{
@@ -104,7 +120,7 @@ namespace guarneri {
 		}
 
 		void update_camera() {
-			/*float3 target_front;
+			float3 target_front;
 			target_front.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
 			target_front.y = sin(DEGREE2RAD(this->pitch));
 			target_front.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
@@ -113,9 +129,7 @@ namespace guarneri {
 			float3 target_up = float3::normalize(float3::cross(target_right, target_front));
 			this->front = target_front;
 			this->right = target_right;
-			this->up = target_up;*/
-
-
+			this->up = target_up;
 		}
 
 		//todo: ortho

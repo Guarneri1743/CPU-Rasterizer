@@ -30,6 +30,28 @@ namespace guarneri {
 			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
 			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			zbuffer->clear(1.0f);
+
+			input_mgr().add_on_key_down_evt([](key_code code, void* data){
+				auto device = (render_device*)data;
+				if (code == key_code::F1) {
+					device->r_flag = render_flag::shaded;
+				}
+				else if (code == key_code::F2) {
+					device->r_flag = render_flag::scanline;
+				}
+				else if (code == key_code::F3) {
+					device->r_flag = render_flag::wire_frame;
+				}
+				else if (code == key_code::F4) {
+					device->r_flag = render_flag::depth;
+				}
+				else if (code == key_code::F5) {
+					device->r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
+				}
+				else if (code == key_code::F6) {
+					device->r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
+				}
+			}, this);
 		}
 
 		// =============================================================================================================Pipeline======================================================================================================================

@@ -19,8 +19,8 @@ namespace guarneri{
 		// todo: serialzie & deserialize scene data
 		void deserialize() {
 			// backpack
-			auto backpack = model::create(res_path() + "/backpack/backpack.obj");
-			objects.push_back(std::move(renderer::create(std::move(backpack))));
+			/*auto backpack = model::create(res_path() + "/backpack/backpack.obj");
+			objects.push_back(std::move(renderer::create(std::move(backpack))));*/
 
 			// cube
 			auto box_material = material::create();
@@ -44,6 +44,8 @@ namespace guarneri{
 			plane->transform.translate(float3::DOWN);
 			plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
 			objects.push_back(std::move(renderer::create(std::move(plane))));
+
+
 		}
 
 		void update() {
