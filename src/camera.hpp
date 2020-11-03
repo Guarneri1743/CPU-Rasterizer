@@ -40,18 +40,6 @@ namespace guarneri {
 					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
 					camera::main_camera->rotate(offset.x, offset.y);
 				}
-				if (input_mgr().is_key_down(key_code::W)) {
-					camera::main_camera->move_forward(CAMERA_MOVE_SPEED);
-				}
-				if (input_mgr().is_key_down(key_code::A)) {
-					camera::main_camera->move_left(CAMERA_MOVE_SPEED);
-				}
-				if (input_mgr().is_key_down(key_code::S)) {
-					camera::main_camera->move_backward(CAMERA_MOVE_SPEED);
-				}
-				if (input_mgr().is_key_down(key_code::D)) {
-					camera::main_camera->move_right(CAMERA_MOVE_SPEED);
-				}
 			}, nullptr);
 
 			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
@@ -72,16 +60,27 @@ namespace guarneri {
 			update_proj_mode();
 		}
 
+		void update() {
+			if (input_mgr().is_key_down(key_code::W)) {
+				camera::main_camera->move_forward(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::A)) {
+				camera::main_camera->move_left(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::S)) {
+				camera::main_camera->move_backward(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::D)) {
+				camera::main_camera->move_right(CAMERA_MOVE_SPEED);
+			}
+		}
+
 		mat4 view_matrix() const {
 			return mat4::lookat_matrix(this->position, this->position + this->front, this->up);
 		}
 
 		const mat4 projection_matrix() const{
 			return proj_matrix;
-		}
-
-		void set_position(const float3& pos) {
-			this->position = pos;
 		}
 
 		void move(const float3& t) {
@@ -105,8 +104,8 @@ namespace guarneri {
 		}
 
 		void rotate(const float& yaw_offset, const float& pitch_offset) {
-			this->yaw -= yaw_offset;
-			this->pitch -= pitch_offset;
+			this->yaw += yaw_offset;
+			this->pitch += pitch_offset;
 
 			if (this->pitch > 89.0f)
 			{
@@ -121,9 +120,9 @@ namespace guarneri {
 
 		void update_camera() {
 			float3 target_front;
-			target_front.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
-			target_front.y = sin(DEGREE2RAD(this->pitch));
-			target_front.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
+			target_front.x = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw)); //cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
+			target_front.y = -sin(DEGREE2RAD(this->pitch));
+			target_front.z = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw)); //cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
 			target_front = float3::normalize(target_front);
 			float3 target_right = float3::normalize(float3::cross(target_front, float3::UP));
 			float3 target_up = float3::normalize(float3::cross(target_right, target_front));

@@ -3,9 +3,7 @@
 
 namespace guarneri {
 	static LRESULT event_callback(HWND, UINT, WPARAM, LPARAM);
-	static int keys[512];
 	static bool closed;
-	#define IS_ON(key_code) keys[key_code] == 1
 
 	class gdi_window {
 	public:
@@ -40,7 +38,6 @@ namespace guarneri {
 			framebuffer = nullptr;
 			bitmap_handle = nullptr;
 			closed = false;
-			std::fill(std::begin(keys), std::end(keys), 0);
 
 			WNDCLASS win_class;
 			win_class.style = CS_BYTEALIGNCLIENT;
@@ -97,7 +94,7 @@ namespace guarneri {
 		}
 
 		bool is_valid(){
-			return keys[VK_ESCAPE] == 0 && !closed;
+			return !closed;
 		}
 
 		void flush() {
@@ -143,6 +140,7 @@ namespace guarneri {
 				CloseWindow(window_handle);
 				window_handle = nullptr;
 			}
+			closed = false;
 		}
 
 		void send_message() {

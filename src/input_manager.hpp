@@ -154,22 +154,22 @@ namespace guarneri {
 			case WM_MOUSEMOVE:
 				break;
 			case WM_LBUTTONDOWN:
-				input_mgr().on_vk_down(wParam);
+				input_mgr().on_vk_down(VK_LBUTTON);
 				break;
 			case WM_LBUTTONUP:
-				input_mgr().on_vk_up(wParam);
+				input_mgr().on_vk_up(VK_LBUTTON);
 				break;
 			case WM_RBUTTONDOWN:
-				input_mgr().on_vk_down(wParam);
+				input_mgr().on_vk_down(VK_RBUTTON);
 				break;
 			case WM_RBUTTONUP:
-				input_mgr().on_vk_up(wParam);
+				input_mgr().on_vk_up(VK_RBUTTON);
 				break;
 			case WM_MBUTTONDOWN:
-				input_mgr().on_vk_down(wParam);
+				input_mgr().on_vk_down(VK_MBUTTON);
 				break;
 			case WM_MBUTTONUP:
-				input_mgr().on_vk_up(wParam);
+				input_mgr().on_vk_up(VK_MBUTTON);
 				break;
 			case WM_KEYDOWN:
 				input_mgr().on_vk_down(wParam);
@@ -260,7 +260,7 @@ namespace guarneri {
 					evt(key, user_data);
 				}
 			}
-			else if (vk2mouse.count(code) > 0) {
+			if (vk2mouse.count(code) > 0) {
 				auto key = vk2mouse.find(code)->second;
 				active_mouse_btns.insert(key);
 				for (auto& kv : on_mouse_down_events) {
@@ -281,7 +281,7 @@ namespace guarneri {
 					evt(key, user_data);
 				}
 			}
-			else if (vk2mouse.count(code) > 0) {
+			if (vk2mouse.count(code) > 0) {
 				auto key = vk2mouse.find(code)->second;
 				active_mouse_btns.erase(key);
 				for (auto& kv : on_mouse_up_events) {
