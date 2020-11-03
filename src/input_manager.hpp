@@ -62,6 +62,13 @@ namespace guarneri {
 		right,
 		middle
 	};
+
+	void (*on_mouse_move)(float2 prev, float2 pos);
+	void (*on_key_down)(key_code code);
+	void (*on_key_up)(key_code code);
+	void (*on_mouse_down)(mouse_button code);
+	void (*on_mouse_up)(mouse_button code);
+
 	class input_manager {
 		const std::unordered_map<WPARAM, key_code> vk2key =
 		{
@@ -129,6 +136,13 @@ namespace guarneri {
 	public:
 		float2 mouse_position;
 
+	private:
+		std::unordered_set<void (*)(float2 prev, float2 pos)> on_mouse_move_events;
+		std::unordered_set<void (*)(key_code code)> on_key_down_events;
+		std::unordered_set<void (*)(key_code code)> on_key_up_events;
+		std::unordered_set<void (*)(mouse_button code)> on_mouse_down_events;
+		std::unordered_set<void (*)(mouse_button code)> on_mouse_up_events;
+
 	public:
 		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			switch (msg) {
@@ -150,26 +164,98 @@ namespace guarneri {
 		void update() {
 			tagPOINT pt;
 			if (GetCursorPos(&pt)) {
+				float2 prev = mouse_position;
 				mouse_position.x = (float)pt.x / (float)window().width;
 				mouse_position.y = (float)pt.y / (float)window().height;
+				for (auto& evt : on_mouse_move_events) {
+					evt(prev, mouse_position);
+				}
 			}
+			/*if (IS_ON(VK_F3)) grapihcs().r_flag = render_flag::wire_frame;
+			if (IS_ON(VK_F2)) grapihcs().r_flag = render_flag::scanline;
+			if (IS_ON(VK_F1)) grapihcs().r_flag = render_flag::shaded;
+			if (IS_ON(VK_F4)) grapihcs().r_flag = render_flag::depth;
+			if (IS_ON(VK_F5)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
+			if (IS_ON(VK_F6)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
+			if (IS_ON(VK_UP)) box_pos.z -= 0.1f;
+			if (IS_ON(VK_DOWN)) box_pos.z += 0.1f;
+			if (IS_ON(VK_LEFT)) box_pos.x += 0.1f;
+			if (IS_ON(VK_RIGHT)) box_pos.x -= 0.1f;
+			if (IS_ON('W')) box_pos.y += 0.1f;
+			if (IS_ON('S')) box_pos.y -= 0.1f;*/
+		}
+
+		void add_on_key_down_evt(void (*on_key_down)(key_code code)) {
+			on_key_down_events.insert(on_key_down);
+		}
+
+		void remove_on_key_down_evt(void (*on_key_down)(key_code code)) {
+			on_key_down_events.erase(on_key_down);
+		}
+
+		void add_on_key_up_evt(void (*on_key_up)(key_code code)) {
+			on_key_up_events.insert(on_key_up);
+		}
+
+		void remove_on_key_up_evt(void (*on_key_up)(key_code code)) {
+			on_key_up_events.erase(on_key_up);
+		}
+
+		void add_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code)) {
+			on_mouse_down_events.insert(on_mouse_down);
+		}
+
+		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code)) {
+			on_mouse_down_events.erase(on_mouse_down);
+		}
+
+		void add_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code)) {
+			on_mouse_up_events.insert(on_mouse_up);
+		}
+
+		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code)) {
+			on_mouse_up_events.erase(on_mouse_up);
+		}
+
+		void add_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos)) {
+			on_mouse_move_events.insert(on_mouse_move);
+		}
+
+		void remove_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos)) {
+			on_mouse_move_events.erase(on_mouse_move);
 		}
 
 		void on_vk_down(WPARAM code) {
 			if (vk2key.count(code) > 0) {
-				active_keys.insert(vk2key.find(code)->second);
+				auto key = vk2key.find(code)->second;
+				active_keys.insert(key);
+				for (auto& evt : on_key_down_events) {
+					evt(key);
+				}
 			}
 			else if (vk2mouse.count(code) > 0) {
-				active_mouse_btns.insert(vk2mouse.find(code)->second);
+				auto key = vk2mouse.find(code)->second;
+				active_mouse_btns.insert(key);
+				for (auto& evt : on_mouse_down_events) {
+					evt(key);
+				}
 			}
 		}
 
 		void on_vk_up(WPARAM code) {
 			if (vk2key.count(code) > 0) {
-				active_keys.erase(vk2key.find(code)->second);
+				auto key = vk2key.find(code)->second;
+				active_keys.erase(key);
+				for (auto& evt : on_key_up_events) {
+					evt(key);
+				}
 			}
 			else if (vk2mouse.count(code) > 0) {
-				active_mouse_btns.erase(vk2mouse.find(code)->second);
+				auto key = vk2mouse.find(code)->second;
+				active_mouse_btns.erase(key);
+				for (auto& evt : on_mouse_up_events) {
+					evt(key);
+				}
 			}
 		}
 

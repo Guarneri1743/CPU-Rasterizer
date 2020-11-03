@@ -20,18 +20,6 @@ int main()
 	scene demo_scene;
 	std::cout << "start render" << std::endl;
 	while (window().is_valid()) {
-		if (IS_ON(VK_F3)) grapihcs().r_flag = render_flag::wire_frame;
-		if (IS_ON(VK_F2)) grapihcs().r_flag = render_flag::scanline;
-		if (IS_ON(VK_F1)) grapihcs().r_flag = render_flag::shaded;
-		if (IS_ON(VK_F4)) grapihcs().r_flag = render_flag::depth;
-		if (IS_ON(VK_F5)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
-		if (IS_ON(VK_F6)) grapihcs().r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
-		if (IS_ON(VK_UP)) box_pos.z -= 0.1f;
-		if (IS_ON(VK_DOWN)) box_pos.z += 0.1f;
-		if (IS_ON(VK_LEFT)) box_pos.x += 0.1f;
-		if (IS_ON(VK_RIGHT)) box_pos.x -= 0.1f;
-		if (IS_ON('W')) box_pos.y += 0.1f;
-		if (IS_ON('S')) box_pos.y -= 0.1f;
 		input_mgr().update();
 
 		camera::main_camera->set_position(cam_pos);
