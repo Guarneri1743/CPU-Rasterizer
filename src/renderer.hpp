@@ -4,7 +4,7 @@
 namespace guarneri {
 	class renderer {
 	public:
-		renderer(std::unique_ptr<model>& model) {
+		renderer(std::unique_ptr<model> model) {
 			this->target = std::move(model);
 		}
 
@@ -41,7 +41,7 @@ namespace guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							grapihcs().draw_primitive(m->material, vertices[0], vertices[1], vertices[2], target->transform.local2world, view, proj);
+							grapihcs().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], target->transform.local2world, view, proj);
 							idx = 0;
 						}
 					}

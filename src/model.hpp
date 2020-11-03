@@ -5,15 +5,33 @@
 #include <assimp/postprocess.h>
 
 namespace guarneri {
-	class model {
+	class model : object {
     public:
-        model() {
-
+        model(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
+            if (vertices.size() == 0 || indices.size() == 0) {
+                std::cerr << "load vertices failed." << std::endl;
+            }
+            assert(indices.size() % 3 == 0);
+            auto m = std::make_unique<mesh>(vertices, indices, std::move(material));
+            meshes.push_back(std::move(m));
         }
 
-        ~model() {
-            std::cout << "release model" << std::endl;
+        model(std::string path) {
+            Assimp::Importer importer;
+            const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+            {
+                std::cerr << "load model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
+                return;
+            }
+            auto parent_path = FS::path(path).parent_path();
+            auto p = parent_path.string();
+            parent_dir = p;
+            traverse_nodes(scene->mRootNode, scene);
+            importer.FreeScene();
         }
+
+        ~model() {}
 
     public:
         std::vector<std::unique_ptr<mesh>> meshes;
@@ -24,42 +42,14 @@ namespace guarneri {
 
     public:
         static std::unique_ptr<model> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
-            auto m = std::make_unique<model>();
-            m->load_from_vertices(vertices, indices, std::move(material));
-            return m;
+            return std::make_unique<model>(vertices, indices, std::move(material));
         }
 
         static std::unique_ptr<model> create(std::string path) {
-            auto m = std::make_unique<model>();
-            m->load_from_file(path);
-            return m;
+            return std::make_unique<model>(path);
         }
 
     private:
-        void load_from_vertices(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
-            if (vertices.size() == 0 || indices.size() == 0) {
-                std::cerr << "load vertices failed." << std::endl;
-            }
-            assert(indices.size() % 3 == 0);
-            auto m = std::make_unique<mesh>(vertices, indices, std::move(material));
-            meshes.push_back(std::move(m));
-        }
-
-         void load_from_file(std::string path) {
-             Assimp::Importer importer;
-             const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-             if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-             {
-                 std::cerr << "load model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
-                 return;
-             }
-             auto parent_path = FS::path(path).parent_path();
-             auto p = parent_path.string();
-             parent_dir = p;
-             traverse_nodes(scene->mRootNode, scene);
-             importer.FreeScene();
-        }
-
         void traverse_nodes(aiNode* node, const aiScene* scene)
         {
             for (uint32_t i = 0; i < node->mNumMeshes; i++)

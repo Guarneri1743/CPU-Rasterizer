@@ -145,6 +145,10 @@ namespace guarneri {
 			return std::make_shared<texture>(tex_buffer, width, height, fmt);
 		}
 
+		static std::shared_ptr<texture> create(const texture& other) {
+			return std::make_shared<texture>(other);
+		}
+
 		static std::shared_ptr<texture> create(const std::string& path) {
 			std::shared_ptr<texture> ret = nullptr;
 			if (tex_mgr().get(path, ret)) {

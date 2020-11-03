@@ -81,6 +81,7 @@ namespace guarneri{
 	#define REF(obj) unused(obj)
 
 	// forward declarations
+	class object;
 	struct float2;
 	struct float3;
 	struct float4;
@@ -153,6 +154,7 @@ namespace guarneri{
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#include <object.hpp>
 #include <float2.hpp>
 #include <float3.hpp>
 #include <float4.hpp>
