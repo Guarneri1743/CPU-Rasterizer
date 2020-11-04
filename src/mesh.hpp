@@ -15,10 +15,6 @@ namespace guarneri {
 			this->indices = indices;
 		}
 
-		mesh(const mesh& other) {
-			deep_copy(other);
-		}
-
 	public:
 		std::vector<vertex> vertices;
 		std::vector<uint32_t> indices;
@@ -37,14 +33,10 @@ namespace guarneri {
 			return std::make_unique<mesh>(other);
 		}
 
-		void operator =(const mesh& other) {
-			deep_copy(other);
-		}
-
-		void deep_copy(const mesh& other) {
-			this->vertices = other.vertices;
-			this->indices = other.indices;
-			this->mat = other.mat;
+		std::string str() const {
+			std::stringstream ss;
+			ss << "Mesh[" << this->id << " vertices: " << vertices.size() << " indices: " << indices.size() << "]";
+			return ss.str();
 		}
 	};
 }

@@ -1,6 +1,7 @@
 #include <guarneri.hpp>
 
 using namespace guarneri;
+using namespace std;
 
 int main()
 {
@@ -13,16 +14,6 @@ int main()
 	/*auto backpack = model::create(res_path() + "/backpack/backpack.obj");
 	objects.push_back(std::move(renderer::create(std::move(backpack))));*/
 
-	// cube
-	auto box_material = material::create();
-	box_material->transparent = true;
-	box_material->blend_op = blend_operator::add;
-	box_material->src_factor = blend_factor::src_alpha;
-	box_material->dst_factor = blend_factor::one_minus_src_alpha;
-	box_material->zwrite_mode = zwrite::off;
-	auto cube = primitive_factory::cube(std::move(box_material));
-	demo_scene.add_renderer(renderer::create(std::move(cube)), false);
-
 	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	auto plane_tex = texture::create(tex_path);
@@ -34,8 +25,20 @@ int main()
 	auto plane = primitive_factory::plane(std::move(plane_material));
 	plane->transform.translate(float3::DOWN);
 	plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
-	demo_scene.add_renderer(renderer::create(std::move(plane)), true);
+	cout << "create: " << plane << endl;
+	demo_scene.add(renderer::create(std::move(plane)), false);
 
+	// transparent cube
+	auto box_material = material::create();
+	box_material->transparent = true;
+	box_material->blend_op = blend_operator::add;
+	box_material->src_factor = blend_factor::src_alpha;
+	box_material->dst_factor = blend_factor::one_minus_src_alpha;
+	box_material->zwrite_mode = zwrite::off;
+	auto cube = primitive_factory::cube(std::move(box_material));
+	cout << "create: " << cube << endl;
+	demo_scene.add(renderer::create(std::move(cube)), true);
+	 
 	kick_off(demo_scene);
 	return 0;
 }

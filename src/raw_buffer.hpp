@@ -26,7 +26,7 @@ namespace guarneri {
 		}
 
 		raw_buffer(const raw_buffer<T>& other) {
-			deep_copy(other);
+			copy(other);
 		}
 		
 		~raw_buffer() {
@@ -85,11 +85,12 @@ namespace guarneri {
 			return buffer;
 		}
 
-		void operator = (const raw_buffer<T>& other) {
-			deep_copy(other);
+		raw_buffer<T>& operator = (const raw_buffer<T>& other) {
+			copy(other);
+			return *this;
 		}
 
-		void deep_copy(const raw_buffer<T>& other) {
+		void copy(const raw_buffer<T>& other) {
 			this->buffer = other.buffer;
 			this->width = other.width;
 			this->height = other.height;

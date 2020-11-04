@@ -2,23 +2,6 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	enum class ztest {
-		always,
-		less,
-		less_equal,
-		equal,
-		greater_equal,
-		greater,
-		not_equal
-	};
-
-	enum class zwrite {
-		on,
-		off,
-		fragment_z,
-		early_z
-	};
-
 	struct a2v {
 		float4 position;
 		float2 uv;
@@ -37,7 +20,7 @@ namespace guarneri {
 		float3 custom_data;
 	};
 
-	class shader {
+	class shader : public object{
 	public:
 		shader(const shader_id& id) {
 			this->id = id;
@@ -50,14 +33,10 @@ namespace guarneri {
 		}
 
 		shader(const shader& other) {
-			deep_copy(other);
+			copy(other);
 		}
 
-		~shader() {
-			for (auto& kv : name2tex) {
-				kv.second.reset();
-			}
-		}
+		~shader() { }
 
 	private:
 		mat4 m, v, p;
@@ -139,11 +118,12 @@ namespace guarneri {
 			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f, 0.3f);
 		}
 
-		void operator =(const shader& other) {
-			deep_copy(other);
+		shader& operator =(const shader& other) {
+			copy(other);
+			return *this;
 		}
 
-		void deep_copy(const shader& other) {
+		void copy(const shader& other) {
 			this->id = other.id;
 			this->ztest_mode = other.ztest_mode;
 			this->zwrite_mode = other.zwrite_mode;
@@ -156,6 +136,12 @@ namespace guarneri {
 			this->name2tex = other.name2tex;
 			this->name2int = other.name2int;
 			this->keywords = other.keywords;
+		}
+
+		std::string str() const {
+			std::stringstream ss;
+			ss << "Shader[" << this->id << "]" << std::endl;
+			return ss.str();
 		}
 	};
 

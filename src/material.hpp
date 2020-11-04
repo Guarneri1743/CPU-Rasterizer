@@ -2,7 +2,7 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	class material {
+	class material : public object {
 	public:
 		material() {
 			this->target_shader = shader::default_shader;
@@ -25,28 +25,23 @@ namespace guarneri {
 		}
 
 		material(const material& other) {
-			deep_copy(other);
+			copy(other);
 		}
 
-		~material() {
-			target_shader.reset();
-			for (auto& kv : name2tex) {
-				kv.second.reset();
-			}
-		}
+		~material() { }
 
 	public:
 		std::shared_ptr<shader> target_shader;
-		std::unordered_map<property_name, float> name2float;
-		std::unordered_map<property_name, float4> name2float4;
-		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 		ztest ztest_mode;
 		zwrite zwrite_mode;
 		blend_factor src_factor;
 		blend_factor dst_factor;
 		blend_operator blend_op;
 		bool transparent;
+		std::unordered_map<property_name, float> name2float;
+		std::unordered_map<property_name, float4> name2float4;
+		std::unordered_map<property_name, int> name2int;
+		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 
 	public:
 		static std::unique_ptr<material> create() {
@@ -116,11 +111,12 @@ namespace guarneri {
 			return nullptr;
 		}
 
-		void operator =(const material& other) {
-			deep_copy(other);
+		material& operator =(const material& other) {
+			copy(other);
+			return *this;
 		}
 
-		void deep_copy(const material& other) {
+		void copy(const material& other) {
 			this->target_shader = other.target_shader;
 			this->ztest_mode = other.ztest_mode;
 			this->zwrite_mode = other.zwrite_mode;
@@ -128,6 +124,16 @@ namespace guarneri {
 			this->dst_factor = other.dst_factor;
 			this->blend_op = other.blend_op;
 			this->transparent = other.transparent;
+			this->name2float = other.name2float;
+			this->name2float4 = other.name2float4;
+			this->name2int = other.name2int;
+			this->name2tex = other.name2tex;
+		}
+
+		std::string str() const {
+			std::stringstream ss;
+			ss << "Material[" << this->id << " shader: " << this->target_shader << "]";
+			return ss.str();
 		}
 	};
 }

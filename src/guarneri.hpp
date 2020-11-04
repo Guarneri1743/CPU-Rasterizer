@@ -46,6 +46,67 @@ namespace guarneri {
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef unsigned char stb_uchar;
 
+	enum class projection {
+		perspective,
+		orthographic
+	};
+
+	enum class wrap_mode {
+		repeat,
+		clamp
+	};
+
+	enum class filtering {
+		point,
+		bilinear
+	};
+
+	// todo: support other formats
+	enum class texture_format {
+		invalid,
+		rgb,
+		rgba
+	};
+
+	enum class ztest {
+		always,
+		less,
+		less_equal,
+		equal,
+		greater_equal,
+		greater,
+		not_equal
+	};
+
+	enum class zwrite {
+		on,
+		off,
+		fragment_z,
+		early_z
+	};
+
+	static std::string to_string(const texture_format& fmt) {
+		switch (fmt) {
+		case texture_format::invalid:
+			return "invalid";
+		case texture_format::rgb:
+			return "rgb";
+		case texture_format::rgba:
+			return "rgba";
+		}
+		return "invalid";
+	};
+
+	static std::ostream& operator <<(std::ostream& os, const texture_format& fmt) {
+		os << to_string(fmt);
+		return os;
+	};
+
+	static std::stringstream& operator <<(std::stringstream& ss, const texture_format& fmt) {
+		ss << to_string(fmt);
+		return ss;
+	};
+
 	// forward declarations
 	class object;
 	struct float2;

@@ -2,19 +2,17 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	class renderer {
+	class renderer : public object {
 	public:
 		renderer(std::unique_ptr<model> model) {
 			this->target = std::move(model);
 		}
 
 		renderer(const renderer& other) {
-			deep_copy(other);
+			copy(other);
 		}
 
-		~renderer() {
-			target.reset();
-		}
+		~renderer() { }
 
 	public:
 		std::shared_ptr<model> target;
@@ -49,13 +47,20 @@ namespace guarneri {
 			}
 		}
 
-		void operator =(const renderer& other) {
-			deep_copy(other);
+		renderer& operator =(const renderer& other) {
+			copy(other);
+			return *this;
 		}
 
-		void deep_copy(const renderer& other) {
+		void copy(const renderer& other) {
 			this->target = other.target;
 			std::copy(std::begin(other.vertices), std::end(other.vertices), std::begin(vertices));
+		}
+
+		std::string str() const {
+			std::stringstream ss;
+			ss << "Renderer[" << this->id << " model: " << *target << "]";
+			return ss.str();
 		}
 	};
 }

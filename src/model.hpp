@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 
 namespace guarneri {
-	class model : object {
+	class model : public object {
     public:
         model(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
             if (vertices.size() == 0 || indices.size() == 0) {
@@ -144,5 +144,12 @@ namespace guarneri {
             }
             return nullptr;
         }
+
+        public:
+            std::string str() const {
+                std::stringstream ss;
+                ss << "Model[" << this->id << " path: " << parent_dir << " mesh count: " << meshes.size() << "]";
+                return ss.str();
+            }
 	};
 }

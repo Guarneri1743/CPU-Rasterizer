@@ -19,7 +19,7 @@ namespace guarneri{
 
 		// todo: serialzie & deserialize scene data
 		void initialize() {
-			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective));
+			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
 			uint32_t id = main_cam->get_id();
 			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
 			if (input_mgr().is_mouse_down(mouse_button::right)) {
@@ -34,12 +34,12 @@ namespace guarneri{
 			}, nullptr);
 		}
 
-		void add_renderer(std::unique_ptr<renderer> target, bool transparent) {
+		void add(std::unique_ptr<renderer> target, bool transparent) {
 			if (transparent) {
-				objects.push_back(std::move(target));
+				transparent_objects.push_back(std::move(target));
 			}
 			else {
-				transparent_objects.push_back(std::move(target));
+				objects.push_back(std::move(target));
 			}
 		}
 

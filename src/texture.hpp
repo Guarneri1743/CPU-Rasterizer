@@ -5,49 +5,9 @@
 #include <stb_image.hpp>
 
 namespace guarneri {
-	enum class wrap_mode {
-		repeat,
-		clamp
-	};
-
-	enum class filtering {
-		point,
-		bilinear
-	};
-
-	// todo: support other formats
-	enum class texture_format {
-		invalid,
-		rgb,
-		rgba
-	};
-
-	static std::string to_string(const texture_format& fmt) {
-		switch (fmt) {
-		case texture_format::invalid:
-			return "invalid";
-		case texture_format::rgb:
-			return "rgb";
-		case texture_format::rgba:
-			return "rgba";
-		}
-		return "invalid";
-	}
-
-	static std::ostream& operator <<(std::ostream& os, const texture_format& fmt) {
-		os << to_string(fmt);
-		return os;
-	}
-
-	static std::stringstream& operator <<(std::stringstream& ss, const texture_format& fmt) {
-		ss << to_string(fmt);
-		return ss;
-	}
-
-	class texture {
+	class texture : public object{
 	public:
 		texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
-			this->id = ALLOC_ID();
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
@@ -64,7 +24,6 @@ namespace guarneri {
 		}
 
 		texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
-			this->id = ALLOC_ID();
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
@@ -85,7 +44,6 @@ namespace guarneri {
 		}
 
 		texture(const char* path) {
-			this->id = ALLOC_ID();
 			this->path = path;
 			this->fmt = texture_format::invalid;
 			release();
@@ -113,7 +71,7 @@ namespace guarneri {
 		}
 
 		texture(const texture& other) {
-			deep_copy(other);
+			copy(other);
 		}
 
 		~texture() {
@@ -123,7 +81,6 @@ namespace guarneri {
 		}
 
 	public:
-		uint32_t id;
 		wrap_mode wrap_mode;
 		filtering filtering;
 		texture_format fmt;
@@ -284,11 +241,12 @@ namespace guarneri {
 			}
 		}
 
-		void operator =(const texture& other) {
-			deep_copy(other);
+		texture& operator =(const texture& other) {
+			copy(other);
+			return *this;
 		}
 
-		void deep_copy(const texture& other) {
+		void copy(const texture& other) {
 			this->id = other.id;
 			this->wrap_mode = other.wrap_mode;
 			this->filtering = other.filtering;
@@ -300,18 +258,8 @@ namespace guarneri {
 		public:
 			std::string str() const {
 				std::stringstream ss;
-				ss << "Texture[" << this->id << "], w["<< this->width <<"], h["<< this->height << "], fmt[" << fmt << "], path[" << this->path << "]" << std::endl;
+				ss << "Texture[" << this->id << "], w["<< this->width <<"], h["<< this->height << "], fmt[" << fmt << "], path[" << this->path << "]";
 				return ss.str();
 			}
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const texture& tex) {
-		stream << tex.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const texture& tex) {
-		stream << tex.str();
-		return stream;
-	}
 }

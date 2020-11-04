@@ -5,10 +5,7 @@
 namespace guarneri {
 	class camera : public object {
 	public:
-		enum class projection {
-			perspective,
-			orthographic
-		};
+		~camera(){}
 
 	public:
 		float fov;
@@ -122,5 +119,12 @@ namespace guarneri {
 				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 			}
 		}
+
+		public:
+			std::string str() const {
+				std::stringstream ss;
+				ss << "Camera[" << this->id << "  pos: "<<this->position << "]";
+				return ss.str();
+			}
 	};
 }
