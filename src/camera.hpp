@@ -3,7 +3,7 @@
 #include <singleton.hpp>
 
 namespace guarneri {
-	class camera : public singleton<camera> {
+	class camera : public object {
 	public:
 		enum class projection {
 			perspective,
@@ -15,36 +15,29 @@ namespace guarneri {
 		float aspect;
 		float near;
 		float far;
-		static std::unique_ptr<camera> main_camera;
-
-	private:
-		mat4 proj_matrix;
-		transform local2world; //todo
 		float3 position;
 		float3 front;
 		float3 right;
 		float3 up;
+
+	private:
+		mat4 proj_matrix;
+		transform local2world; //todo
 		float yaw;
 		float pitch;
 		projection proj_type;
 
 	public:
-		static void create_main(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+		static std::unique_ptr<camera> create(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
 			auto ret = std::make_unique<camera>();
 			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
-			main_camera = std::move(ret);
+			return ret;
+		}
 
-			// camera controller
-			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
-				if (input_mgr().is_mouse_down(mouse_button::right)) {
-					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
-					camera::main_camera->rotate(offset.x, offset.y);
-				}
-			}, nullptr);
-
-			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
-
-			}, nullptr);
+		void draw_axis() {
+			grapihcs().draw_line(position, position + front, color::GREEN, this->view_matrix(), this->projection_matrix());
+			grapihcs().draw_line(position, position + right, color::BLUE, this->view_matrix(), this->projection_matrix());
+			grapihcs().draw_line(position, position + up, color::RED, this->view_matrix(), this->projection_matrix());
 		}
 
 		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
@@ -58,21 +51,6 @@ namespace guarneri {
 			this->proj_type = proj_type_t;
 			update_camera();
 			update_proj_mode();
-		}
-
-		void update() {
-			if (input_mgr().is_key_down(key_code::W)) {
-				camera::main_camera->move_forward(CAMERA_MOVE_SPEED);
-			}
-			if (input_mgr().is_key_down(key_code::A)) {
-				camera::main_camera->move_left(CAMERA_MOVE_SPEED);
-			}
-			if (input_mgr().is_key_down(key_code::S)) {
-				camera::main_camera->move_backward(CAMERA_MOVE_SPEED);
-			}
-			if (input_mgr().is_key_down(key_code::D)) {
-				camera::main_camera->move_right(CAMERA_MOVE_SPEED);
-			}
 		}
 
 		mat4 view_matrix() const {
@@ -120,9 +98,9 @@ namespace guarneri {
 
 		void update_camera() {
 			float3 target_front;
-			target_front.x = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw)); //cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
-			target_front.y = -sin(DEGREE2RAD(this->pitch));
-			target_front.z = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw)); //cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
+			target_front.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
+			target_front.y = sin(DEGREE2RAD(this->pitch));
+			target_front.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
 			target_front = float3::normalize(target_front);
 			float3 target_right = float3::normalize(float3::cross(target_front, float3::UP));
 			float3 target_up = float3::normalize(float3::cross(target_right, target_front));
@@ -145,6 +123,4 @@ namespace guarneri {
 			}
 		}
 	};
-
-	std::unique_ptr<camera> camera::main_camera;
 }

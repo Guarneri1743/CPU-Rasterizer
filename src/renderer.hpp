@@ -30,8 +30,8 @@ namespace guarneri {
 		}
 
 		void render() {
-			auto view = camera::main_camera->view_matrix();
-			auto proj = camera::main_camera->projection_matrix();
+			auto view = misc_param.view_matrix;
+			auto proj = misc_param.proj_matrix;
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);

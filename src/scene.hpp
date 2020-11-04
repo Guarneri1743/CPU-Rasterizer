@@ -5,7 +5,7 @@ namespace guarneri{
 	class scene{
 	public:
 		scene() {
-			deserialize();
+			initialize();
 		}
 
 		~scene() {
@@ -15,41 +15,54 @@ namespace guarneri{
 	public:
 		std::vector<std::unique_ptr<renderer>> objects;
 		std::vector<std::unique_ptr<renderer>> transparent_objects;
+		std::shared_ptr<camera> main_cam;
 
 		// todo: serialzie & deserialize scene data
-		void deserialize() {
-			// backpack
-			/*auto backpack = model::create(res_path() + "/backpack/backpack.obj");
-			objects.push_back(std::move(renderer::create(std::move(backpack))));*/
+		void initialize() {
+			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective));
+			uint32_t id = main_cam->get_id();
+			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
+			if (input_mgr().is_mouse_down(mouse_button::right)) {
+				float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
+				std::shared_ptr<camera>* cam = (std::shared_ptr<camera>*)(data);
+				(*cam)->rotate(offset.x, offset.y);
+			}
+			}, &main_cam);
 
-			// cube
-			auto box_material = material::create();
-			box_material->transparent = true;
-			box_material->blend_op = blend_operator::add;
-			box_material->src_factor = blend_factor::src_alpha;
-			box_material->dst_factor = blend_factor::one_minus_src_alpha;
-			box_material->zwrite_mode = zwrite::off;
-			auto cube = primitive_factory::cube(std::move(box_material));
-			transparent_objects.push_back(std::move(renderer::create(std::move(cube))));
+			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
 
-			// plane
-			auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
-			auto plane_tex = texture::create(tex_path);
-			/*auto noise = texture::create(512, 512, texture_format::rgba);
-			noise::generate_fractal_image(noise, 512, 512);*/
-			auto plane_material = material::create();
-			plane_material->transparent = false;
-			plane_material->set_texture(albedo_prop, plane_tex);
-			auto plane = primitive_factory::plane(std::move(plane_material));
-			plane->transform.translate(float3::DOWN);
-			plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
-			objects.push_back(std::move(renderer::create(std::move(plane))));
+			}, nullptr);
+		}
 
-
+		void add_renderer(std::unique_ptr<renderer> target, bool transparent) {
+			if (transparent) {
+				objects.push_back(std::move(target));
+			}
+			else {
+				transparent_objects.push_back(std::move(target));
+			}
 		}
 
 		void update() {
+			misc_param.cam_far = main_cam->far;
+			misc_param.cam_near = main_cam->near;
+			misc_param.view_matrix = main_cam->view_matrix();
+			misc_param.proj_matrix = main_cam->projection_matrix();
+			misc_param.screen_width = window().width;
+			misc_param.screen_height = window().height;
 
+			if (input_mgr().is_key_down(key_code::W)) {
+				main_cam->move_forward(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::A)) {
+				main_cam->move_left(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::S)) {
+				main_cam->move_backward(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::D)) {
+				main_cam->move_right(CAMERA_MOVE_SPEED);
+			}
 		}
 
 		void render() {

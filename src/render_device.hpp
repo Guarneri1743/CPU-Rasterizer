@@ -133,6 +133,19 @@ namespace guarneri {
 			}
 		}
 
+		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {
+			float4 clip_start = p * v * float4(start);
+			float4 clip_end = p * v * float4(end);
+
+			float4 n1 = clip2ndc(clip_start);
+			float4 n2 = clip2ndc(clip_end);
+
+			float4 s1 = ndc2viewport(n1);
+			float4 s2 = ndc2viewport(n2);
+
+			line_drawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, color::encode_bgra(col));
+		}
+
 		v2f process_vertex(const std::shared_ptr<shader>& shader, const vertex& vert) {
 			a2v input;
 			input.position = vert.position;
@@ -228,7 +241,7 @@ namespace guarneri {
 			if (((int)r_flag & (int)render_flag::depth) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
-					float linear_depth = linearize_depth(cur_depth, camera::main_camera->near, camera::main_camera->far);
+					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
 					float3 depth_color = float3::ONE * linear_depth / 20.0f;
 					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					framebuffer->write(row, col, c);

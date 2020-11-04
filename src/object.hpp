@@ -4,8 +4,8 @@
 namespace guarneri {
 	class object {
 	public:
-		object() {}
-		virtual ~object() {}
+		object() { id = ALLOC_ID(); }
+		virtual ~object() { FREE_ID(id); }
 
 	private:
 		uint32_t id;

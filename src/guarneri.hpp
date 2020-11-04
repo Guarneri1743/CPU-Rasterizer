@@ -14,11 +14,8 @@
 #include <sstream>
 #include <assert.h>
 #include <filesystem>
-#include <singleton.hpp>
-#include <resource_manager.hpp>
-#include <id_allocator.hpp>
 
-namespace guarneri{
+namespace guarneri {
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
 	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
@@ -48,39 +45,6 @@ namespace guarneri{
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef unsigned char stb_uchar;
-
-	// simple texture properties
-	const property_name albedo_prop = "texture_diffuse";
-	const property_name specular_prop = "texture_specular";
-	const property_name normal_prop = "texture_normal";
-	const property_name height_prop = "texture_height";
-
-	// utils
-	static std::string replace(std::string str, std::string pattern, std::string content) {
-		while (str.find(pattern) != std::string::npos) {
-			str.replace(str.find(pattern), 1, content);
-		}
-		return str;
-	}
-
-	static std::string cur_path() {
-		std::string ret = FS::current_path().string();
-#if _DEBUG
-		ret += "/bin/Debug";
-#else
-		ret += "/bin/Release";
-#endif
-		return replace(ret, "\\", "/");
-	}
-
-	static std::string res_path() {
-		return cur_path() + "/res";
-	}
-
-	template <class T>
-	inline void unused(T const&){}
-
-	#define REF(obj) unused(obj)
 
 	// forward declarations
 	class object;
@@ -116,6 +80,53 @@ namespace guarneri{
 	class scene;
 	class id_allocator;
 	class input_manager;
+}
+
+// common
+#include <singleton.hpp>
+#include <resource_manager.hpp>
+#include <id_allocator.hpp>
+
+// math
+#include <float2.hpp>
+#include <float3.hpp>
+#include <float4.hpp>
+#include <color.hpp>
+#include <mat4.hpp>
+
+namespace guarneri{
+	// simple texture properties
+	const property_name albedo_prop = "texture_diffuse";
+	const property_name specular_prop = "texture_specular";
+	const property_name normal_prop = "texture_normal";
+	const property_name height_prop = "texture_height";
+
+	// utils
+	static std::string replace(std::string str, std::string pattern, std::string content) {
+		while (str.find(pattern) != std::string::npos) {
+			str.replace(str.find(pattern), 1, content);
+		}
+		return str;
+	}
+
+	static std::string cur_path() {
+		std::string ret = FS::current_path().string();
+#if _DEBUG
+		ret += "/bin/Debug";
+#else
+		ret += "/bin/Release";
+#endif
+		return replace(ret, "\\", "/");
+	}
+
+	static std::string res_path() {
+		return cur_path() + "/res";
+	}
+
+	template <class T>
+	inline void unused(T const&){}
+
+	#define REF(obj) unused(obj)
 
 	render_device& grapihcs() {
 		return singleton<render_device>::get();
@@ -136,32 +147,35 @@ namespace guarneri{
 	id_allocator idalloc(INVALID_ID + 1, MAX_ID);
 	#define ALLOC_ID() idalloc.alloc();
 	#define FREE_ID(id) idalloc.free(id);
+
+	typedef struct {
+		float cam_near;
+		float cam_far;
+		float screen_width;
+		float screen_height;
+		mat4 view_matrix;
+		mat4 proj_matrix;
+	} misc_parameter;
+	static misc_parameter misc_param;
 }
 
+// windows api
 #define NOMINMAX
-
 #include <windows.h>
 #include <tchar.h>
 #include <gdi_window.hpp>
-
 #ifdef near
 #undef near
 #endif
-
 #ifdef far
 #undef far
 #endif
-
 #if WIN32
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+// rasterizer
 #include <object.hpp>
-#include <float2.hpp>
-#include <float3.hpp>
-#include <float4.hpp>
-#include <color.hpp>
-#include <mat4.hpp>
 #include <input_manager.hpp>
 #include <transform.hpp>
 #include <vertex.hpp>
@@ -177,7 +191,6 @@ namespace guarneri{
 #include <light.hpp>
 #include <raw_buffer.hpp>
 #include <texture.hpp>
-#include <camera.hpp>
 #include <line_drawer.hpp>
 #include <noise.hpp>
 #include <shader.hpp>
@@ -185,6 +198,26 @@ namespace guarneri{
 #include <mesh.hpp>
 #include <model.hpp>
 #include <render_device.hpp>
+#include <camera.hpp>
 #include <renderer.hpp>
 #include <primitive_factory.hpp>
 #include <scene.hpp>
+
+namespace guarneri {
+	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
+		window().initialize(w, h, title, input_mgr().event_callback);
+		input_mgr().add_on_key_down_evt([](key_code code, void* data) { if (code == key_code::ESC) window().dispose(); }, nullptr);
+		grapihcs().initialize(window().framebuffer, window().width, window().height);
+	}
+
+	void kick_off(scene& scene) {
+		while (window().is_valid()) {
+			input_mgr().update();
+			grapihcs().clear_buffer();
+			scene.update();
+			scene.render();
+			window().flush();
+			Sleep(0);
+		}
+	}
+}

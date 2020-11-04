@@ -1,32 +1,41 @@
-#include <iostream>
 #include <guarneri.hpp>
 
 using namespace guarneri;
-using namespace std;
-
 
 int main()
 {
-	uint32_t w = 800;
-	uint32_t h = 600;
-	window().initialize(w, h, "SoftRasterizer", input_mgr().event_callback);
-	input_mgr().add_on_key_down_evt([](key_code code, void* data) { if (code == key_code::ESC) window().dispose(); }, nullptr);
-	camera::create_main(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, camera::projection::perspective);
-	grapihcs().initialize(window().framebuffer, window().width, window().height);
+	// initialize rasterizer
+	prepare(800, 600, "SoftRasterizer");
 
 	scene demo_scene;
-	while (window().is_valid()) {
-		input_mgr().update();
 
-		grapihcs().clear_buffer();
-		camera::main_camera->update();
-		demo_scene.update();
-		demo_scene.render();
+	// backpack
+	/*auto backpack = model::create(res_path() + "/backpack/backpack.obj");
+	objects.push_back(std::move(renderer::create(std::move(backpack))));*/
 
-		window().flush();
+	// cube
+	auto box_material = material::create();
+	box_material->transparent = true;
+	box_material->blend_op = blend_operator::add;
+	box_material->src_factor = blend_factor::src_alpha;
+	box_material->dst_factor = blend_factor::one_minus_src_alpha;
+	box_material->zwrite_mode = zwrite::off;
+	auto cube = primitive_factory::cube(std::move(box_material));
+	demo_scene.add_renderer(renderer::create(std::move(cube)), false);
 
-		Sleep(0);
-	}
+	// plane
+	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+	auto plane_tex = texture::create(tex_path);
+	/*auto noise = texture::create(512, 512, texture_format::rgba);
+	noise::generate_fractal_image(noise, 512, 512);*/
+	auto plane_material = material::create();
+	plane_material->transparent = false;
+	plane_material->set_texture(albedo_prop, plane_tex);
+	auto plane = primitive_factory::plane(std::move(plane_material));
+	plane->transform.translate(float3::DOWN);
+	plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
+	demo_scene.add_renderer(renderer::create(std::move(plane)), true);
 
+	kick_off(demo_scene);
 	return 0;
 }
