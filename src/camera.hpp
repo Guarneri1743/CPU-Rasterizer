@@ -12,7 +12,7 @@ namespace guarneri {
 		float aspect;
 		float near;
 		float far;
-		//transform transform;
+		// todo: transform transform; 
 		float3 forward;
 		float3 right;
 		float3 up;
@@ -43,6 +43,25 @@ namespace guarneri {
 			this->proj_type = proj_type_t;
 			update_camera();
 			update_proj_mode();
+		}
+
+		void rotate(const float& yaw_offset, const float& pitch_offset) {
+			this->yaw -= yaw_offset;
+			this->pitch -= pitch_offset;
+			this->pitch = std::clamp(this->pitch, -89.0f, 89.0f);
+			update_camera();
+		}
+
+		void lookat(const float3& target) {
+			this->forward = float3::normalize(target - this->position);
+		}
+
+		void update_camera() {
+			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward.y = sin(DEGREE2RAD(this->pitch));
+			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward = float3::normalize(forward);
+			float3::calculate_right_up(forward, right, up);
 		}
 
 		mat4 view_matrix() const {
@@ -80,32 +99,6 @@ namespace guarneri {
 		void move_descend(const float& distance) {
 			this->position -= distance * this->up;
 		}
-
-		void rotate(const float& yaw_offset, const float& pitch_offset) {
-			this->yaw -= yaw_offset;
-			this->pitch -= pitch_offset;
-			if (this->pitch > 89.0f)
-			{
-				this->pitch = 89.0f;
-			}
-			if (this->pitch < -89.0f)
-			{
-				this->pitch = -89.0f;
-			}
-			update_camera();
-		}
-
-		void lookat(const float3& target) {
-			this->forward = float3::normalize(target - this->position);
-		}
-
-		void update_camera() {
-			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
-			forward.y = sin(DEGREE2RAD(this->pitch));
-			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
-			forward = float3::normalize(forward);
-			float3::calculate_right_up(forward, right, up);
-		} 
 
 		//todo: ortho
 		void update_proj_mode(){

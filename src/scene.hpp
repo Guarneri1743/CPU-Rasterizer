@@ -53,6 +53,28 @@ namespace guarneri{
 						s->main_cam->move_backward(CAMERA_ZOOM_SPEED);
 					}
 				}, this);
+
+			input_mgr().add_on_key_down_evt([](key_code code, void* data) {
+				auto device = (render_device*)data;
+				if (code == key_code::F1) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::shaded);
+				}
+				else if (code == key_code::F2) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::scanline);
+				}
+				else if (code == key_code::F3) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::wire_frame);
+				}
+				else if (code == key_code::F4) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::depth);
+				}
+				else if (code == key_code::F5) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::uv);
+				}
+				else if (code == key_code::F6) {
+					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::vertex_color);
+				}
+				}, &grapihcs());
 		}
 
 		void add(std::shared_ptr<renderer> target, bool transparent) {

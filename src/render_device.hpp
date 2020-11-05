@@ -2,16 +2,6 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	enum class render_flag {
-		disable = 0,
-		wire_frame = 1 << 0,
-		shaded = 1 << 1,
-		depth = 1 << 2,
-		uv = 1 << 3,
-		vertex_color = 1 << 4,
-		scanline = 1 << 5
-	};
-
 	class render_device {
 	public:
 		uint32_t width;
@@ -30,28 +20,6 @@ namespace guarneri {
 			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
 			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			zbuffer->clear(1.0f);
-
-			input_mgr().add_on_key_down_evt([](key_code code, void* data){
-				auto device = (render_device*)data;
-				if (code == key_code::F1) {
-					device->r_flag = render_flag::shaded;
-				}
-				else if (code == key_code::F2) {
-					device->r_flag = render_flag::scanline;
-				}
-				else if (code == key_code::F3) {
-					device->r_flag = render_flag::wire_frame;
-				}
-				else if (code == key_code::F4) {
-					device->r_flag = render_flag::depth;
-				}
-				else if (code == key_code::F5) {
-					device->r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::uv);
-				}
-				else if (code == key_code::F6) {
-					device->r_flag = (render_flag)((int)render_flag::shaded | (int)render_flag::vertex_color);
-				}
-			}, this);
 		}
 
 		// =============================================================================================================Pipeline======================================================================================================================
@@ -108,6 +76,9 @@ namespace guarneri {
 			// primitive assembly
 			std::vector<triangle> tris = tri.horizontal_split();
 
+			// rasterization
+			rasterize(tris, material);
+
 			// wireframe
 			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
 
@@ -125,11 +96,6 @@ namespace guarneri {
 					line_drawer::bresenham(framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 					line_drawer::bresenham(framebuffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				}
-			}
-
-			// rasterization
-			if (((int)r_flag & (int)render_flag::shaded) != 0 || ((int)r_flag & (int)render_flag::depth) != 0) {
-				rasterize(tris, material);
 			}
 		}
 
@@ -196,15 +162,29 @@ namespace guarneri {
 				top = CLAMP_INT(top, 0, this->height);
 				bottom = CLAMP_INT(bottom, 0, this->height);
 				assert(bottom >= top);
+				// interpolate vertically
 				for (int row = top; row < bottom; row++) {
 					vertex lhs;
 					vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
 					int left = CEIL(lhs.position.x);
 					int right = CEIL(rhs.position.x);
-					left = CLAMP_INT(left, 0, this->width);
-					right = CLAMP_INT(right, 0, this->width);
 					assert(right >= left);
+
+					// todo: clip triangle to polygons in order to avoid these two steps
+					if (left < 0.0f) {
+						float t = -(float)left / (float)(right - left);
+						lhs = vertex::interpolate(lhs, rhs, t);
+					}
+					left = CLAMP_INT(left, 0, this->width);
+
+					if (right > this->width) {
+						float t = (float)(this->width - left) / (float)(right - left);
+						rhs = vertex::interpolate(lhs, rhs, t);
+					}
+					right = CLAMP_INT(right, 0, this->width);
+
+					// interpolate horizontally
 					for (int col = left; col < right; col++) {
 						process_fragment(lhs, row, col, mat);
 						auto dx = vertex::differential(lhs, rhs);
@@ -237,10 +217,10 @@ namespace guarneri {
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = color::encode_bgra(fragment_result);
 			}
-			else if (((int)r_flag & (int)render_flag::uv) != 0) {
+			if (((int)r_flag & (int)render_flag::uv) != 0) {
 				pixel_color = color::encode_bgra(v.uv);
 			}
-			else if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
+			if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
 				pixel_color = color::encode_bgra(v.color);
 			}
 

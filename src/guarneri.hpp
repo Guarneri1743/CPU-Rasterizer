@@ -87,6 +87,16 @@ namespace guarneri {
 		early_z
 	};
 
+	enum class render_flag {
+		disable = 0,
+		wire_frame = 1 << 0,
+		shaded = 1 << 1,
+		depth = 1 << 2,
+		uv = 1 << 3,
+		vertex_color = 1 << 4,
+		scanline = 1 << 5
+	};
+
 	static std::string to_string(const texture_format& fmt) {
 		switch (fmt) {
 		case texture_format::invalid:
