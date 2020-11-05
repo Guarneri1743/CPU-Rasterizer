@@ -71,8 +71,8 @@ namespace guarneri {
 
 		void uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const {
 			// [0.0, 1.0) -> [0, width-1]
-			row = FLOOR_UINT(u * this->width - EPSILON);
-			col = FLOOR_UINT(v * this->height - EPSILON);
+			row = FLOOR_UINT(v * this->width - EPSILON);
+			col = FLOOR_UINT(u * this->height - EPSILON);
 		}
 
 		void clear(const T& val) {

@@ -52,6 +52,7 @@ namespace guarneri {
 				std::cerr << "create texture failed, path does not exist: " << path << std::endl;
 			}
 			else {
+				stbi_set_flip_vertically_on_load(true);
 				auto tex = stbi_load(path, &width, &height, &channels, 0);
 				this->width = width;
 				this->height = height;
