@@ -16,6 +16,7 @@
 #include <filesystem>
 
 namespace guarneri {
+	#define LEFT_HANDED
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
 	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
@@ -34,6 +35,7 @@ namespace guarneri {
 	#define FS std::filesystem
 	#define CAMERA_ROTATE_SPEED 0.25f
 	#define CAMERA_MOVE_SPEED 0.1f
+	#define CAMERA_ZOOM_SPEED 1.0f
 
 	// resource id
 	typedef std::string texture_id;

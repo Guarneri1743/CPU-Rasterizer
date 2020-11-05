@@ -101,56 +101,38 @@ namespace guarneri {
 			return ret;
 		}
 
-		// perspective matrix
-		static mat4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
-			float rad = DEGREE2RAD(fov * 0.5f);
-			float cot = std::cos(rad) / std::sin(rad);
-			mat4 m = ZERO;
-			m.at(0, 0) = cot / aspect;
-			m.at(1, 1) = cot;
-			m.at(2, 2) = (far + near) / (near - far);
-			m.at(3, 2) = -1.0f;
-			m.at(2, 3) = 2.0f * (far * near) / (near - far);
-			return m;
+		static mat4 lookat(const float3& eye, const float3& target, const float3& world_up) {
+#ifdef LEFT_HANDED
+			return lookat_lh(eye, target, world_up);
+#else
+			return lookat_rh(eye, target, world_up);
+#endif
 		}
 
-		// ortho matrix
-		static mat4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
-			mat4 m = IDENTITY;
-			m.at(0, 0) = 2.0f / (right - left);
-			m.at(0, 3) = -(right + left) / (right - left);
-			m.at(1, 1) = 2.0f / (top - bottom);
-			m.at(1, 3) = -(top + bottom) / (top - bottom);
-			m.at(2, 2) = -2.0f / (far - near);
-			m.at(2, 3) = -(far + near) / (far - near);
-			return m;
-		}
-
-		static mat4 lookat_matrix(const float3& eye, const float3& target, const float3& world_up) {
+		static mat4 lookat_lh(const float3& eye, const float3& target, const float3& world_up) {
 			float3 forward = float3::normalize(target - eye);
-			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
-			float3 up = float3::cross(right, forward); // no need to normalize
+			float3 right = float3::normalize(float3::cross(float3::normalize(world_up), forward)); // it's possible that camera's forward vector is parallel to the world up vector
+			float3 up = float3::cross(forward, right); // no need to normalize
 
-			mat4 translation = mat4::translation(-eye);
 			// UVN--right up forward
-			mat4 rot = mat4::IDENTITY;
-			rot.at(0, 0) = right.x;
-			rot.at(1, 0) = right.y;
-			rot.at(2, 0) = right.z;
-			rot.at(0, 1) = up.x;
-			rot.at(1, 1) = up.y;
-			rot.at(2, 1) = up.z;
-			rot.at(0, 2) = -forward.x;
-			rot.at(1, 2) = -forward.y;
-			rot.at(2, 2) = -forward.z;
-
-			mat4 view = rot.transpose() * translation;
+			mat4 view = mat4::IDENTITY;
+			view.at(0, 0) = right.x;
+			view.at(0, 1) = right.y;
+			view.at(0, 2) = right.z;
+			view.at(1, 0) = up.x;
+			view.at(1, 1) = up.y;
+			view.at(1, 2) = up.z;
+			view.at(2, 0) = forward.x;
+			view.at(2, 1) = forward.y;
+			view.at(2, 2) = forward.z;
+			view.at(0, 3) = -float3::dot(right, eye);
+			view.at(1, 3) = -float3::dot(up, eye);
+			view.at(2, 3) = -float3::dot(forward, eye);
 
 			return view;
 		}
 
-		// view matrix
-		static mat4 lookat(const float3& eye, const float3& target, const float3& world_up) {
+		static mat4 lookat_rh(const float3& eye, const float3& target, const float3& world_up) {
 			float3 forward = float3::normalize(target - eye);
 			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
 			float3 up = float3::cross(right, forward); // no need to normalize
@@ -168,9 +150,52 @@ namespace guarneri {
 			view.at(2, 2) = -forward.z;
 			view.at(0, 3) = -float3::dot(right, eye);
 			view.at(1, 3) = -float3::dot(up, eye);
-			view.at(2, 3) = -float3::dot(forward, eye);
+			view.at(2, 3) = float3::dot(forward, eye);
 
 			return view;
+		}
+
+		static mat4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
+#ifdef LEFT_HANDED
+			return perspective_lh(fov, aspect, near, far);
+#else
+			return perspective_rh(fov, aspect, near, far);
+#endif
+		}
+
+		static mat4 perspective_rh(const float& fov, const float& aspect, const float& near, const float& far) {
+			float rad = DEGREE2RAD(fov * 0.5f);
+			float cot = std::cos(rad) / std::sin(rad);
+			mat4 m = ZERO;
+			m.at(0, 0) = cot / aspect;
+			m.at(1, 1) = cot;
+			m.at(2, 2) = -(far + near) / (far - near);
+			m.at(3, 2) = -1.0f;
+			m.at(2, 3) = -2.0f * (far * near) / (far - near);
+			return m;
+		}
+
+		static mat4 perspective_lh(const float& fov, const float& aspect, const float& near, const float& far) {
+			float rad = DEGREE2RAD(fov * 0.5f);
+			float cot = std::cos(rad) / std::sin(rad);
+			mat4 m = ZERO;
+			m.at(0, 0) = cot / aspect;
+			m.at(1, 1) = cot;
+			m.at(2, 2) = (far + near) / (far - near);
+			m.at(3, 2) = 1.0f;
+			m.at(2, 3) = -2.0f * (far * near) / (far - near);
+			return m;
+		}
+
+		static mat4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+			mat4 m = IDENTITY;
+			m.at(0, 0) = 2.0f / (right - left);
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 1) = 2.0f / (top - bottom);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 2) = -2.0f / (far - near);
+			m.at(2, 3) = -(far + near) / (far - near);
+			return m;
 		}
 
 		float3 transform_point(const float3& point) const {

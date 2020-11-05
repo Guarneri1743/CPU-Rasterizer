@@ -25,7 +25,7 @@ int main()
 	auto plane = primitive_factory::plane(std::move(plane_material));
 	plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
 	plane->transform.translate(float3(-2.0f, -2.0f, -2.0f));
-	cout << "create: " << plane << endl;
+
 	demo_scene.add(renderer::create(std::move(plane)), false);
 
 	// transparent cube
@@ -37,9 +37,25 @@ int main()
 	box_material->zwrite_mode = zwrite::off;
 	auto cube = primitive_factory::cube(std::move(box_material));
 	cube->transform.translate(float3(-2.0f, 0.0f, -2.0f));
-	cout << "create: " << cube << endl;
-	demo_scene.add(renderer::create(std::move(cube)), true);
-	 
+	std::shared_ptr<renderer> cube_renderer = renderer::create(std::move(cube));
+	demo_scene.add(cube_renderer, true);
+	demo_scene.add_on_update_evt([](void* user_data) {
+		std::shared_ptr<renderer> cb = *reinterpret_cast<std::shared_ptr<renderer>*>(user_data);
+		if (input_mgr().is_key_down(key_code::W)) {
+			cb->target->transform.move_forward(0.2f);
+		}
+		if (input_mgr().is_key_down(key_code::A)) {
+			cb->target->transform.move_left(0.2f);
+		}
+		if (input_mgr().is_key_down(key_code::S)) {
+			cb->target->transform.move_backward(0.2f);
+		}
+		if (input_mgr().is_key_down(key_code::D)) {
+			cb->target->transform.move_right(0.2f);
+		}
+	}, &cube_renderer);
+
+
 	kick_off(demo_scene);
 	return 0;
 }

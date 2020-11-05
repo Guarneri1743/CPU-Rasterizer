@@ -45,7 +45,7 @@ namespace guarneri {
 		}
 
 		mat4 view_matrix() const {
-			return mat4::lookat_matrix(this->position, this->position + this->front, float3::UP);
+			return mat4::lookat_lh(this->position, this->position + this->front, float3::UP);
 		}
 
 		void set_target(const float3& target) {
@@ -85,8 +85,8 @@ namespace guarneri {
 		}
 
 		void rotate(const float& yaw_offset, const float& pitch_offset) {
-			this->yaw += yaw_offset;
-			this->pitch += pitch_offset;
+			this->yaw -= yaw_offset;
+			this->pitch -= pitch_offset;
 
 			if (this->pitch > 89.0f)
 			{
@@ -101,26 +101,31 @@ namespace guarneri {
 
 		void update_camera() {
 			float3 forward;
-			forward.x = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward.y = sin(DEGREE2RAD(this->pitch));
-			forward.z = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward = float3::normalize(forward);
 			this->front = forward;
+#ifdef LEFT_HANDED
+			this->right = float3::normalize(float3::cross(float3::UP, forward));
+			this->up = float3::cross(forward, right);
+#else 
 			this->right = float3::normalize(float3::cross(forward, float3::UP));
 			this->up = float3::cross(right, forward);
+#endif
 		} 
 
 		//todo: ortho
 		void update_proj_mode(){
 			switch (this->proj_type) {
 			case projection::perspective:
-				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
 				break;
 			case projection::orthographic:
-				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
 				break;
 			default:
-				this->proj_matrix = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
 			}
 		}
 
