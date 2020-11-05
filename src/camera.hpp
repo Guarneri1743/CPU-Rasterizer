@@ -37,7 +37,7 @@ namespace guarneri {
 			this->fov = fov_t;
 			this->near = near_t;
 			this->far = far_t;
-			this->yaw = 90.0f;
+			this->yaw = 0.0f;
 			this->pitch = 0.0f;
 			this->proj_type = proj_type_t;
 			update_camera();
@@ -45,7 +45,7 @@ namespace guarneri {
 		}
 
 		mat4 view_matrix() const {
-			return mat4::lookat_matrix(this->position, this->position + this->front, this->up);
+			return mat4::lookat_matrix(this->position, this->position + this->front, float3::UP);
 		}
 
 		void set_target(const float3& target) {
@@ -101,9 +101,9 @@ namespace guarneri {
 
 		void update_camera() {
 			float3 forward;
-			forward.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
+			forward.x = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward.y = sin(DEGREE2RAD(this->pitch));
-			forward.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
+			forward.z = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward = float3::normalize(forward);
 			this->front = forward;
 			this->right = float3::normalize(float3::cross(forward, float3::UP));

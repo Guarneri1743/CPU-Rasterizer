@@ -168,7 +168,7 @@ namespace guarneri {
 			view.at(2, 2) = -forward.z;
 			view.at(0, 3) = -float3::dot(right, eye);
 			view.at(1, 3) = -float3::dot(up, eye);
-			view.at(2, 3) = float3::dot(forward, eye);
+			view.at(2, 3) = -float3::dot(forward, eye);
 
 			return view;
 		}
