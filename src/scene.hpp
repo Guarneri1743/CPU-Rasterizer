@@ -24,8 +24,8 @@ namespace guarneri{
 		void initialize() {
 			debug_cam_distance = 4.0f;
 			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 60.0f, 0.5f, 500.0f, projection::perspective));
-			debug_cam = std::move(camera::create(main_cam->position + float3(-1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
-			world_debug_cam = std::move(camera::create(float3(-1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
+			debug_cam = std::move(camera::create(main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
+			world_debug_cam = std::move(camera::create(float3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
 
 			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
 				if (input_mgr().is_mouse_down(mouse_button::right)) {
@@ -84,7 +84,7 @@ namespace guarneri{
 			float3 right = main_cam->right;
 			float3 up = main_cam->up;
 			grapihcs().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-			debug_cam->position = main_cam->position + float3(-1.0f, 1.0f, -1.0f) * debug_cam_distance;
+			debug_cam->position = main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance;
 			debug_cam->set_target(main_cam->position);
 		}
 
@@ -92,7 +92,7 @@ namespace guarneri{
 			float2 offset = float2(-(window().width / 2 - 100.0f), window().height / 2 - 100.0f);
 			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD, float3::UP, float3::RIGHT, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD, float3::UP, float3::RIGHT, main_cam->view_matrix(), main_cam->projection_matrix());
-			world_debug_cam->position = float3(-1.0f, 1.0f, -1.0f) * debug_cam_distance;
+			world_debug_cam->position = float3(1.0f, 1.0f, -1.0f) * debug_cam_distance;
 			world_debug_cam->set_target(float3::ZERO);
 		}
 
