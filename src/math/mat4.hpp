@@ -131,20 +131,20 @@ namespace guarneri {
 			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
 			float3 up = float3::cross(right, forward); // no need to normalize
 
+			mat4 translation = mat4::translation(-eye);
 			// UVN--right up forward
-			mat4 view = mat4::IDENTITY;
-			view.at(0, 0) = right.x;
-			view.at(0, 1) = right.y;
-			view.at(0, 2) = right.z;
-			view.at(1, 0) = up.x;
-			view.at(1, 1) = up.y;
-			view.at(1, 2) = up.z;
-			view.at(2, 0) = -forward.x;
-			view.at(2, 1) = -forward.y;
-			view.at(2, 2) = -forward.z;
-			view.at(0, 3) = -float3::dot(right, eye);
-			view.at(1, 3) = -float3::dot(up, eye);
-			view.at(2, 3) = float3::dot(forward, eye);
+			mat4 rot = mat4::IDENTITY;
+			rot.at(0, 0) = right.x;
+			rot.at(1, 0) = right.y;
+			rot.at(2, 0) = right.z;
+			rot.at(0, 1) = up.x;
+			rot.at(1, 1) = up.y;
+			rot.at(2, 1) = up.z;
+			rot.at(0, 2) = forward.x;
+			rot.at(1, 2) = forward.y;
+			rot.at(2, 2) = forward.z;
+
+			mat4 view = rot.transpose() * translation;
 
 			return view;
 		}

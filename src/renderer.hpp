@@ -34,7 +34,7 @@ namespace guarneri {
 			auto pos = target->transform.position();
 			auto up = target->transform.up();
 			auto forward = target->transform.forward();
-			auto right = target->transform.forward();
+			auto right = target->transform.right();
 			grapihcs().draw_coordinates(pos, forward, up, right, view, proj);
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {

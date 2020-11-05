@@ -283,10 +283,10 @@ namespace guarneri {
 
 	const float3 float3::ZERO = float3(0.0f, 0.0f, 0.0f);
 	const float3 float3::ONE = float3(1.0f, 1.0f, 1.0f);
-	const float3 float3::UP = float3(0.f, 1.0f, 0.f);
-	const float3 float3::DOWN = float3(0.f, -1.0f, 0.f);
-	const float3 float3::LEFT = float3(-1.0f, 0.f, 0.f);
-	const float3 float3::RIGHT = float3(1.0f, 0.f, 0.f);
-	const float3 float3::FORWARD = float3(0.f, 0.f, 1.0f);
-	const float3 float3::BACK = float3(0.f, 0.f, -1.0f);
+	const float3 float3::UP = float3(0.f, 1.0f, 0.0f);
+	const float3 float3::DOWN = float3(0.0f, -1.0f, 0.0f);
+	const float3 float3::LEFT = float3(-1.0f, 0.0f, 0.0f);
+	const float3 float3::RIGHT = float3(1.0f, 0.0f, 0.0f);
+	const float3 float3::FORWARD = float3(0.0f, 0.0f, 1.0f);
+	const float3 float3::BACK = float3(0.0f, 0.0f, -1.0f);
 }

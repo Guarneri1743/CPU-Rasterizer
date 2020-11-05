@@ -152,15 +152,15 @@ namespace guarneri {
 		}
 
 		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p, const float2& offset) {
-			grapihcs().draw_line(pos, pos + forward, color::GREEN, v, p, offset);
-			grapihcs().draw_line(pos, pos + right, color::BLUE, v, p, offset);
-			grapihcs().draw_line(pos, pos + up, color::RED, v, p, offset);
+			grapihcs().draw_line(pos, pos + forward, color::BLUE, v, p, offset);
+			grapihcs().draw_line(pos, pos + right, color::RED, v, p, offset);
+			grapihcs().draw_line(pos, pos + up, color::GREEN, v, p, offset);
 		}
 
 		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p) {
-			grapihcs().draw_line(pos, pos + forward, color::GREEN, v, p);
-			grapihcs().draw_line(pos, pos + right, color::BLUE, v, p);
-			grapihcs().draw_line(pos, pos + up, color::RED, v, p);
+			grapihcs().draw_line(pos, pos + forward, color::BLUE, v, p);
+			grapihcs().draw_line(pos, pos + right, color::RED, v, p);
+			grapihcs().draw_line(pos, pos + up, color::GREEN, v, p);
 		}
 
 		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {

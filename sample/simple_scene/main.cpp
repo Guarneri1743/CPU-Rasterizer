@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	prepare(600, 400, "SoftRasterizer");
+	prepare(800, 600, "SoftRasterizer");
 
 	scene demo_scene;
 
@@ -23,8 +23,8 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto plane = primitive_factory::plane(std::move(plane_material));
-	plane->transform.translate(float3::DOWN);
 	plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
+	plane->transform.translate(float3(-2.0f, -2.0f, -2.0f));
 	cout << "create: " << plane << endl;
 	demo_scene.add(renderer::create(std::move(plane)), false);
 
@@ -36,6 +36,7 @@ int main()
 	box_material->dst_factor = blend_factor::one_minus_src_alpha;
 	box_material->zwrite_mode = zwrite::off;
 	auto cube = primitive_factory::cube(std::move(box_material));
+	cube->transform.translate(float3(-2.0f, 0.0f, -2.0f));
 	cout << "create: " << cube << endl;
 	demo_scene.add(renderer::create(std::move(cube)), true);
 	 

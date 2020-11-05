@@ -37,7 +37,7 @@ namespace guarneri {
 			this->fov = fov_t;
 			this->near = near_t;
 			this->far = far_t;
-			this->yaw = -90.0f;
+			this->yaw = 90.0f;
 			this->pitch = 0.0f;
 			this->proj_type = proj_type_t;
 			update_camera();
@@ -100,17 +100,15 @@ namespace guarneri {
 		}
 
 		void update_camera() {
-			float3 target_front;
-			target_front.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
-			target_front.y = sin(DEGREE2RAD(this->pitch));
-			target_front.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
-			target_front = float3::normalize(target_front);
-			float3 target_right = float3::normalize(float3::cross(target_front, float3::UP));
-			float3 target_up = float3::normalize(float3::cross(target_right, target_front));
-			this->front = target_front;
-			this->right = target_right;
-			this->up = target_up;
-		}
+			float3 forward;
+			forward.x = cos(DEGREE2RAD(this->pitch)) * cos(DEGREE2RAD(this->yaw));
+			forward.y = sin(DEGREE2RAD(this->pitch));
+			forward.z = cos(DEGREE2RAD(this->pitch)) * sin(DEGREE2RAD(this->yaw));
+			forward = float3::normalize(forward);
+			this->front = forward;
+			this->right = float3::normalize(float3::cross(forward, float3::UP));
+			this->up = float3::cross(right, forward);
+		} 
 
 		//todo: ortho
 		void update_proj_mode(){
