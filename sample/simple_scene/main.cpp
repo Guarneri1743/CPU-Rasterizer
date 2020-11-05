@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	prepare(800, 600, "SoftRasterizer");
+	prepare(600, 400, "SoftRasterizer");
 
 	scene demo_scene;
 

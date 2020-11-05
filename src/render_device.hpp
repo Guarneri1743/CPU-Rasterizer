@@ -151,6 +151,18 @@ namespace guarneri {
 			line_drawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, color::encode_bgra(col));
 		}
 
+		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p, const float2& offset) {
+			grapihcs().draw_line(pos, pos + forward, color::GREEN, v, p, offset);
+			grapihcs().draw_line(pos, pos + right, color::BLUE, v, p, offset);
+			grapihcs().draw_line(pos, pos + up, color::RED, v, p, offset);
+		}
+
+		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p) {
+			grapihcs().draw_line(pos, pos + forward, color::GREEN, v, p);
+			grapihcs().draw_line(pos, pos + right, color::BLUE, v, p);
+			grapihcs().draw_line(pos, pos + up, color::RED, v, p);
+		}
+
 		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {
 			float4 clip_start = p * v * float4(start);
 			float4 clip_end = p * v * float4(end);

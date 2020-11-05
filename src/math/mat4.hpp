@@ -126,9 +126,8 @@ namespace guarneri {
 			return m;
 		}
 
-		// view matrix
-		static mat4 lookat_matrix(const float3& position, const float3& target, const float3& world_up) {
-			float3 forward = -float3::normalize(target - position);
+		static mat4 lookat_matrix(const float3& eye, const float3& target, const float3& world_up) {
+			float3 forward = float3::normalize(target - eye);
 			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
 			float3 up = float3::cross(right, forward); // no need to normalize
 
@@ -140,12 +139,36 @@ namespace guarneri {
 			view.at(1, 0) = up.x;
 			view.at(1, 1) = up.y;
 			view.at(1, 2) = up.z;
-			view.at(2, 0) = forward.x;
-			view.at(2, 1) = forward.y;
-			view.at(2, 2) = forward.z;
-			view.at(0, 3) = -float3::dot(right, position);
-			view.at(1, 3) = -float3::dot(up, position);
-			view.at(2, 3) = -float3::dot(forward, position);
+			view.at(2, 0) = -forward.x;
+			view.at(2, 1) = -forward.y;
+			view.at(2, 2) = -forward.z;
+			view.at(0, 3) = -float3::dot(right, eye);
+			view.at(1, 3) = -float3::dot(up, eye);
+			view.at(2, 3) = float3::dot(forward, eye);
+
+			return view;
+		}
+
+		// view matrix
+		static mat4 lookat(const float3& eye, const float3& target, const float3& world_up) {
+			float3 forward = float3::normalize(target - eye);
+			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
+			float3 up = float3::cross(right, forward); // no need to normalize
+
+			// UVN--right up forward
+			mat4 view = mat4::IDENTITY;
+			view.at(0, 0) = right.x;
+			view.at(0, 1) = right.y;
+			view.at(0, 2) = right.z;
+			view.at(1, 0) = up.x;
+			view.at(1, 1) = up.y;
+			view.at(1, 2) = up.z;
+			view.at(2, 0) = -forward.x;
+			view.at(2, 1) = -forward.y;
+			view.at(2, 2) = -forward.z;
+			view.at(0, 3) = -float3::dot(right, eye);
+			view.at(1, 3) = -float3::dot(up, eye);
+			view.at(2, 3) = float3::dot(forward, eye);
 
 			return view;
 		}

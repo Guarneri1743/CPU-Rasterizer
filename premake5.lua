@@ -3,7 +3,6 @@ local lib_dir = "lib"
 local res_dir = "res"
 local src_dir = "src"
 local include_dir = "include"
-local unit_test_dir = "unit_test"
 local sample_dir = "sample"
 
 function setupIncludeDirs()
@@ -134,10 +133,10 @@ function setupUnitTestProj()
    language "C++"
 
    files { 
-      src_dir, "*.*", 
-      src_dir, "utility/*.*",
-      src_dir, "math/*.*",
-      src_dir, "primitives/*.*",
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/math/*.*",
+      src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",

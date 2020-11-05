@@ -1,25 +1,14 @@
 ﻿#include <iostream>
-//#include <mat4.hpp>
-//#include <float4.hpp>
-//#include <aabb.hpp>
-//#include <line.hpp>
-//#include <sphere.hpp>
-//#include <cylinder.hpp>
-//#include <capsule.hpp>
-//#include <segment.hpp>
-//#include <ray.hpp>
-//#include <plane.hpp>
-//#include <vertex.hpp>
-//#include <camera.hpp>
-//#include <render_device.hpp>
-#include <raw_buffer.hpp>
-#include <framebuffer.hpp>
+#include <guarneri.hpp>
+
 
 using namespace guarneri;
 using namespace std;
 
 int main()
 {
+	mat4 m = mat4::lookat_matrix(float3(5, 5, 5), float3::ZERO, float3::UP);
+	cout << m << endl;
 	//void* buffer = malloc(400);
 	//framebuffer fb(buffer, 3, 3);
 	//for (int i = 0; i < 3; i++) {

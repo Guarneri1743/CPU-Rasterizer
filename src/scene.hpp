@@ -23,14 +23,14 @@ namespace guarneri{
 		void initialize() {
 			debug_cam_distance = 4.0f;
 			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 60.0f, 0.5f, 500.0f, projection::perspective));
-			debug_cam = std::move(camera::create(main_cam->position + (main_cam->front + main_cam->up + main_cam->right) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
+			debug_cam = std::move(camera::create(main_cam->position + float3::ONE * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
 
 			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
-			if (input_mgr().is_mouse_down(mouse_button::right)) {
-				float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
-				scene* s = reinterpret_cast<scene*>(data);
-				s->main_cam->rotate(offset.x, offset.y);
-			}
+				if (input_mgr().is_mouse_down(mouse_button::right)) {
+					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
+					scene* s = reinterpret_cast<scene*>(data);
+					s->main_cam->rotate(offset.x, offset.y);
+				}
 			}, this);
 
 			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
@@ -67,16 +67,33 @@ namespace guarneri{
 			if (input_mgr().is_key_down(key_code::D)) {
 				main_cam->move_right(CAMERA_MOVE_SPEED);
 			}
+			if (input_mgr().is_key_down(key_code::Q)) {
+				main_cam->move_ascend(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_key_down(key_code::E)) {
+				main_cam->move_descend(CAMERA_MOVE_SPEED);
+			}
 
-			debug_cam->position = main_cam->position + (main_cam->front + main_cam->up + main_cam->right) * debug_cam_distance;
+			debug_cam->position = main_cam->position + float3::ONE * debug_cam_distance;
 			debug_cam->set_target(main_cam->position);
 		}
 
+		void draw_camera_coords() {
+			float2 offset = float2(-(window().width / 2 - 100.0f), window().height / 2 - 100.0f);
+			float3 pos = main_cam->position;
+			float3 forward = main_cam->front;
+			float3 right = main_cam->right;
+			float3 up = main_cam->up;
+			grapihcs().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+		}
+
+		void draw_world_coords() {
+			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD, float3::UP, float3::RIGHT, main_cam->view_matrix(), main_cam->projection_matrix());
+		}
+
 		void render() {
-			float2 offset = float2(-300.0f, +200.0f);
-			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->front, color::GREEN, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->right, color::BLUE, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->up, color::RED, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+			draw_world_coords();
+			draw_camera_coords();
 			
 			for (auto& obj : objects) {
 				obj->render();

@@ -30,6 +30,12 @@ namespace guarneri {
 		void render() {
 			auto view = misc_param.view_matrix;
 			auto proj = misc_param.proj_matrix;
+			auto model = target->transform.local2world;
+			auto pos = target->transform.position();
+			auto up = target->transform.up();
+			auto forward = target->transform.forward();
+			auto right = target->transform.forward();
+			grapihcs().draw_coordinates(pos, forward, up, right, view, proj);
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);
@@ -39,7 +45,7 @@ namespace guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							grapihcs().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], target->transform.local2world, view, proj);
+							grapihcs().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], model, view, proj);
 							idx = 0;
 						}
 					}

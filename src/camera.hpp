@@ -60,20 +60,28 @@ namespace guarneri {
 			this->position += t;
 		}
 
-		void move_forward(const float& length) {
-			this->position += length * this->front;
+		void move_forward(const float& distance) {
+			this->position += distance * this->front;
 		}
 
-		void move_backward(const float& length) {
-			this->position -= length * this->front;
+		void move_backward(const float& distance) {
+			this->position -= distance * this->front;
 		}
 
-		void move_left(const float& length) {
-			this->position -= length * this->right;
+		void move_left(const float& distance) {
+			this->position -= distance * this->right;
 		}
 
-		void move_right(const float& length) {
-			this->position += length * this->right;
+		void move_right(const float& distance) {
+			this->position += distance * this->right;
+		}
+
+		void move_ascend(const float& distance) {
+			this->position += distance * this->up;
+		}
+
+		void move_descend(const float& distance) {
+			this->position -= distance * this->up;
 		}
 
 		void rotate(const float& yaw_offset, const float& pitch_offset) {
