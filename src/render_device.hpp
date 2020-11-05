@@ -133,6 +133,24 @@ namespace guarneri {
 			}
 		}
 
+		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p, const float2& screen_translation) {
+			float4 clip_start = p * v * float4(start);
+			float4 clip_end = p * v * float4(end);
+
+			float4 n1 = clip2ndc(clip_start);
+			float4 n2 = clip2ndc(clip_end);
+
+			float4 s1 = ndc2viewport(n1);
+			float4 s2 = ndc2viewport(n2);
+
+			mat4 translation = mat4::translation(float3(screen_translation));
+
+			s1 = translation * s1;
+			s2 = translation * s2;
+
+			line_drawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, color::encode_bgra(col));
+		}
+
 		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {
 			float4 clip_start = p * v * float4(start);
 			float4 clip_end = p * v * float4(end);
@@ -291,13 +309,21 @@ namespace guarneri {
 		vertex clip2ndc(const vertex& v) {
 			vertex ret = v;
 			ret.position = clip2ndc(v.position);
-			ret.rhw = 1.0f / ret.position.w;
+			float w = ret.position.w;
+			if (w == 0.0f) {
+				w = EPSILON;
+			}
+			ret.rhw = 1.0f / w;
 			return ret;
 		}
 
 		float4 clip2ndc(const float4& v) {
 			float4 ndc_pos = v;
-			float rhw = 1.0f / v.w;
+			float w = v.w;
+			if (w == 0.0f) {
+				w += EPSILON;
+			}
+			float rhw = 1.0f / w;
 			ndc_pos *= rhw;
 			ndc_pos.w = 1.0f;
 			return ndc_pos;

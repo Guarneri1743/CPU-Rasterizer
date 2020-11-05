@@ -31,12 +31,6 @@ namespace guarneri {
 			return ret;
 		}
 
-		void draw_axis() {
-			grapihcs().draw_line(position, position + front, color::GREEN, this->view_matrix(), this->projection_matrix());
-			grapihcs().draw_line(position, position + right, color::BLUE, this->view_matrix(), this->projection_matrix());
-			grapihcs().draw_line(position, position + up, color::RED, this->view_matrix(), this->projection_matrix());
-		}
-
 		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
 			this->position = position_t;
 			this->aspect = aspect_t;
@@ -52,6 +46,10 @@ namespace guarneri {
 
 		mat4 view_matrix() const {
 			return mat4::lookat_matrix(this->position, this->position + this->front, this->up);
+		}
+
+		void set_target(const float3& target) {
+			this->front = float3::normalize(target - this->position);
 		}
 
 		const mat4 projection_matrix() const{

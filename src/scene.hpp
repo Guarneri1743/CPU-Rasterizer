@@ -16,18 +16,22 @@ namespace guarneri{
 		std::vector<std::unique_ptr<renderer>> objects;
 		std::vector<std::unique_ptr<renderer>> transparent_objects;
 		std::shared_ptr<camera> main_cam;
+		std::shared_ptr<camera> debug_cam;
+		float debug_cam_distance;
 
 		// todo: serialzie & deserialize scene data
 		void initialize() {
-			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
-			uint32_t id = main_cam->get_id();
+			debug_cam_distance = 4.0f;
+			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 60.0f, 0.5f, 500.0f, projection::perspective));
+			debug_cam = std::move(camera::create(main_cam->position + (main_cam->front + main_cam->up + main_cam->right) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
+
 			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
 			if (input_mgr().is_mouse_down(mouse_button::right)) {
 				float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
-				std::shared_ptr<camera>* cam = (std::shared_ptr<camera>*)(data);
-				(*cam)->rotate(offset.x, offset.y);
+				scene* s = reinterpret_cast<scene*>(data);
+				s->main_cam->rotate(offset.x, offset.y);
 			}
-			}, &main_cam);
+			}, this);
 
 			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
 
@@ -63,9 +67,17 @@ namespace guarneri{
 			if (input_mgr().is_key_down(key_code::D)) {
 				main_cam->move_right(CAMERA_MOVE_SPEED);
 			}
+
+			debug_cam->position = main_cam->position + (main_cam->front + main_cam->up + main_cam->right) * debug_cam_distance;
+			debug_cam->set_target(main_cam->position);
 		}
 
 		void render() {
+			float2 offset = float2(-300.0f, +200.0f);
+			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->front, color::GREEN, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->right, color::BLUE, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+			grapihcs().draw_line(main_cam->position, main_cam->position + main_cam->up, color::RED, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+			
 			for (auto& obj : objects) {
 				obj->render();
 			}
