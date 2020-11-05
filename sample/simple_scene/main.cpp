@@ -11,8 +11,8 @@ int main()
 	scene demo_scene;
 
 	// backpack
-	/*auto backpack = model::create(res_path() + "/backpack/backpack.obj");
-	objects.push_back(std::move(renderer::create(std::move(backpack))));*/
+	auto backpack = model::create(res_path() + "/backpack/backpack.obj");
+	demo_scene.add(renderer::create(std::move(backpack)), false);
 
 	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
