@@ -140,9 +140,9 @@ namespace guarneri {
 			rot.at(0, 1) = up.x;
 			rot.at(1, 1) = up.y;
 			rot.at(2, 1) = up.z;
-			rot.at(0, 2) = forward.x;
-			rot.at(1, 2) = forward.y;
-			rot.at(2, 2) = forward.z;
+			rot.at(0, 2) = -forward.x;
+			rot.at(1, 2) = -forward.y;
+			rot.at(2, 2) = -forward.z;
 
 			mat4 view = rot.transpose() * translation;
 

@@ -63,11 +63,10 @@ namespace guarneri {
 		middle
 	};
 
-	void (*on_mouse_move)(float2 prev, float2 pos);
-	void (*on_key_down)(key_code code);
-	void (*on_key_up)(key_code code);
-	void (*on_mouse_down)(mouse_button code);
-	void (*on_mouse_up)(mouse_button code);
+	enum class mouse_wheel_rolling {
+		up,
+		down
+	};
 
 	class input_manager {
 		const std::unordered_map<WPARAM, key_code> vk2key =
@@ -144,6 +143,7 @@ namespace guarneri {
 		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_up_events;
 		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_down_events;
 		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_up_events;
+		std::unordered_map<void (*)(mouse_wheel_rolling rolling, void* ud), void*> on_wheel_rolling_events;
 
 	public:
 		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -171,6 +171,9 @@ namespace guarneri {
 			case WM_MBUTTONUP:
 				input_mgr().on_vk_up(VK_MBUTTON);
 				break;
+			case WM_MOUSEWHEEL:
+				input_mgr().on_wheel_rolling(GET_WHEEL_DELTA_WPARAM(wParam));
+				break;
 			case WM_KEYDOWN:
 				input_mgr().on_vk_down(wParam);
 				break;
@@ -192,6 +195,14 @@ namespace guarneri {
 					auto user_data = kv.second;
 					evt(prev, mouse_position, user_data);
 				}
+			}
+		}
+
+		void on_wheel_rolling(short delta) {
+			for (auto& kv : on_wheel_rolling_events) {
+				auto evt = kv.first;
+				auto user_data = kv.second;
+				evt(delta > 0 ? mouse_wheel_rolling::up : mouse_wheel_rolling::down, user_data);
 			}
 		}
 
@@ -248,6 +259,17 @@ namespace guarneri {
 
 		void remove_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos, void* ud), void* user_data) {
 			on_mouse_move_events.erase(on_mouse_move);
+		}
+
+		void add_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud), void* user_data) {
+			if (on_wheel_rolling_events.count(on_mouse_wheel_rolling) > 0) {
+				return;
+			}
+			on_wheel_rolling_events.insert(std::pair(on_mouse_wheel_rolling, user_data));
+		}
+
+		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud), void* user_data) {
+			on_wheel_rolling_events.erase(on_mouse_wheel_rolling);
 		}
 
 		void on_vk_down(WPARAM code) {

@@ -35,6 +35,16 @@ namespace guarneri{
 				}
 			}, this);
 
+			input_mgr().add_on_mouse_wheel_rolling_evt([](mouse_wheel_rolling rolling, void* data) {
+					scene* s = reinterpret_cast<scene*>(data);
+					if (rolling == mouse_wheel_rolling::up) {
+						s->main_cam->move_forward(CAMERA_MOVE_SPEED);
+					}
+					else {
+						s->main_cam->move_backward(CAMERA_MOVE_SPEED);
+					}
+				}, this);
+
 			input_mgr().add_on_key_down_evt([](key_code pos, void* data) {
 
 			}, nullptr);
@@ -73,6 +83,12 @@ namespace guarneri{
 				main_cam->move_ascend(CAMERA_MOVE_SPEED);
 			}
 			if (input_mgr().is_key_down(key_code::E)) {
+				main_cam->move_descend(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_mouse_down(mouse_button::middle)) {
+				main_cam->move_ascend(CAMERA_MOVE_SPEED);
+			}
+			if (input_mgr().is_mouse_down(mouse_button::middle)) {
 				main_cam->move_descend(CAMERA_MOVE_SPEED);
 			}
 		}
