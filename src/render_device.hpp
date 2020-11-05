@@ -227,7 +227,7 @@ namespace guarneri {
 			// todo: scissor test
 
 			// alpha blend
-			if (s != nullptr && s->transparent) {
+			if (s != nullptr && s->transparent && ((int)r_flag & (int)render_flag::transparent) != 0) {
 				color_bgra dst;
 				if (framebuffer->read(row, col, dst)) {
 					color dst_color = color::decode(dst);
@@ -290,7 +290,7 @@ namespace guarneri {
 
 				if (pass) {
 					// write z buffer 
-					if (zwrite_mode == zwrite::on) {
+					if (zwrite_mode == zwrite::on || ((int)r_flag & (int)render_flag::transparent) == 0) {
 						zbuffer->write(row, col, z);
 					}
 				}

@@ -206,6 +206,48 @@ namespace guarneri {
 			}
 		}
 
+		void on_vk_down(WPARAM code) {
+			if (vk2key.count(code) > 0) {
+				auto key = vk2key.find(code)->second;
+				active_keys.insert(key);
+				for (auto& kv : on_key_down_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
+				}
+			}
+			if (vk2mouse.count(code) > 0) {
+				auto key = vk2mouse.find(code)->second;
+				active_mouse_btns.insert(key);
+				for (auto& kv : on_mouse_down_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
+				}
+			}
+		}
+
+		void on_vk_up(WPARAM code) {
+			if (vk2key.count(code) > 0) {
+				auto key = vk2key.find(code)->second;
+				active_keys.erase(key);
+				for (auto& kv : on_key_up_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
+				}
+			}
+			if (vk2mouse.count(code) > 0) {
+				auto key = vk2mouse.find(code)->second;
+				active_mouse_btns.erase(key);
+				for (auto& kv : on_mouse_up_events) {
+					auto evt = kv.first;
+					auto user_data = kv.second;
+					evt(key, user_data);
+				}
+			}
+		}
+
 		void add_on_key_down_evt(void (*on_key_down)(key_code code, void* ud), void* user_data) {
 			if (on_key_down_events.count(on_key_down) > 0) {
 				return;
@@ -270,48 +312,6 @@ namespace guarneri {
 
 		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud), void* user_data) {
 			on_wheel_rolling_events.erase(on_mouse_wheel_rolling);
-		}
-
-		void on_vk_down(WPARAM code) {
-			if (vk2key.count(code) > 0) {
-				auto key = vk2key.find(code)->second;
-				active_keys.insert(key);
-				for (auto& kv : on_key_down_events) {
-					auto evt = kv.first;
-					auto user_data = kv.second;
-					evt(key, user_data);
-				}
-			}
-			if (vk2mouse.count(code) > 0) {
-				auto key = vk2mouse.find(code)->second;
-				active_mouse_btns.insert(key);
-				for (auto& kv : on_mouse_down_events) {
-					auto evt = kv.first;
-					auto user_data = kv.second;
-					evt(key, user_data);
-				}
-			}
-		}
-
-		void on_vk_up(WPARAM code) {
-			if (vk2key.count(code) > 0) {
-				auto key = vk2key.find(code)->second;
-				active_keys.erase(key);
-				for (auto& kv : on_key_up_events) {
-					auto evt = kv.first;
-					auto user_data = kv.second;
-					evt(key, user_data);
-				}
-			}
-			if (vk2mouse.count(code) > 0) {
-				auto key = vk2mouse.find(code)->second;
-				active_mouse_btns.erase(key);
-				for (auto& kv : on_mouse_up_events) {
-					auto evt = kv.first;
-					auto user_data = kv.second;
-					evt(key, user_data);
-				}
-			}
 		}
 
 		bool is_key_down(key_code code) {

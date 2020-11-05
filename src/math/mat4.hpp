@@ -172,7 +172,6 @@ namespace guarneri {
 			);
 		}
 
-
 		static mat4 euler_angle_y(const float& angle) {
 			float rad = DEGREE2RAD(angle);
 			float c = std::cos(rad);
@@ -184,7 +183,6 @@ namespace guarneri {
 				0, 0, 0, 1
 			);
 		}
-
 
 		static mat4 euler_angle_z(const float& angle) {
 			float rad = DEGREE2RAD(angle);

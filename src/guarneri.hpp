@@ -94,7 +94,8 @@ namespace guarneri {
 		depth = 1 << 2,
 		uv = 1 << 3,
 		vertex_color = 1 << 4,
-		scanline = 1 << 5
+		scanline = 1 << 5,
+		transparent = 1 << 6
 	};
 
 	static std::string to_string(const texture_format& fmt) {

@@ -38,8 +38,8 @@ namespace guarneri {
 			this->fov = fov_t;
 			this->near = near_t;
 			this->far = far_t;
-			this->yaw = 0.0f;
-			this->pitch = 0.0f;
+			this->yaw = -210.0f;
+			this->pitch = -45.0f;
 			this->proj_type = proj_type_t;
 			update_camera();
 			update_proj_mode();
@@ -54,6 +54,7 @@ namespace guarneri {
 
 		void lookat(const float3& target) {
 			this->forward = float3::normalize(target - this->position);
+			float3::calculate_right_up(forward, right, up);
 		}
 
 		void update_camera() {

@@ -29,12 +29,14 @@ int main()
 	demo_scene.add(renderer::create(std::move(plane)), false);
 
 	// transparent cube
+	auto cube_tex = texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
 	auto box_material = material::create();
 	box_material->transparent = true;
 	box_material->blend_op = blend_operator::add;
 	box_material->src_factor = blend_factor::src_alpha;
 	box_material->dst_factor = blend_factor::one_minus_src_alpha;
 	box_material->zwrite_mode = zwrite::off;
+	box_material->set_texture(albedo_prop, cube_tex);
 	auto cube = primitive_factory::cube(std::move(box_material));
 	cube->transform.translate(float3(-2.0f, 0.0f, -2.0f));
 	std::shared_ptr<renderer> cube_renderer = renderer::create(std::move(cube));
