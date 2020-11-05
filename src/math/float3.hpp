@@ -209,6 +209,16 @@ namespace guarneri {
 			return float3(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z));
 		}
 
+		static void calculate_right_up(const float3& forward, float3& right, float3& up) {
+#ifdef LEFT_HANDED
+			right = float3::normalize(float3::cross(float3::UP, forward));
+			up = float3::cross(forward, right);
+#else 
+			right = float3::normalize(float3::cross(forward, float3::UP));
+			up = float3::cross(right, forward);
+#endif
+		}
+
 		std::string str() const {
 			std::stringstream ss;
 			ss << "(" << std::setprecision(FLOAT_LOG_PRECISION) << this->x << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->y << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->z << ")";

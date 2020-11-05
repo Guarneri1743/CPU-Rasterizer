@@ -12,14 +12,15 @@ namespace guarneri {
 		float aspect;
 		float near;
 		float far;
-		float3 position;
-		float3 front;
+		//transform transform;
+		float3 forward;
 		float3 right;
 		float3 up;
+		float3 position;
 
 	private:
-		mat4 proj_matrix;
-		transform local2world; //todo
+		mat4 p;
+		mat4 v;
 		float yaw;
 		float pitch;
 		projection proj_type;
@@ -45,15 +46,11 @@ namespace guarneri {
 		}
 
 		mat4 view_matrix() const {
-			return mat4::lookat_lh(this->position, this->position + this->front, float3::UP);
-		}
-
-		void set_target(const float3& target) {
-			this->front = float3::normalize(target - this->position);
+			return  mat4::lookat(position, position + forward, float3::UP);
 		}
 
 		const mat4 projection_matrix() const{
-			return proj_matrix;
+			return p;
 		}
 
 		void move(const float3& t) {
@@ -61,11 +58,11 @@ namespace guarneri {
 		}
 
 		void move_forward(const float& distance) {
-			this->position += distance * this->front;
+			this->position += distance * this->forward;
 		}
 
 		void move_backward(const float& distance) {
-			this->position -= distance * this->front;
+			this->position -= distance * this->forward;
 		}
 
 		void move_left(const float& distance) {
@@ -87,7 +84,6 @@ namespace guarneri {
 		void rotate(const float& yaw_offset, const float& pitch_offset) {
 			this->yaw -= yaw_offset;
 			this->pitch -= pitch_offset;
-
 			if (this->pitch > 89.0f)
 			{
 				this->pitch = 89.0f;
@@ -99,33 +95,29 @@ namespace guarneri {
 			update_camera();
 		}
 
+		void lookat(const float3& target) {
+			this->forward = float3::normalize(target - this->position);
+		}
+
 		void update_camera() {
-			float3 forward;
 			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward.y = sin(DEGREE2RAD(this->pitch));
 			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward = float3::normalize(forward);
-			this->front = forward;
-#ifdef LEFT_HANDED
-			this->right = float3::normalize(float3::cross(float3::UP, forward));
-			this->up = float3::cross(forward, right);
-#else 
-			this->right = float3::normalize(float3::cross(forward, float3::UP));
-			this->up = float3::cross(right, forward);
-#endif
+			float3::calculate_right_up(forward, right, up);
 		} 
 
 		//todo: ortho
 		void update_proj_mode(){
 			switch (this->proj_type) {
 			case projection::perspective:
-				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
+				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			case projection::orthographic:
-				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
+				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			default:
-				this->proj_matrix = mat4::perspective_lh(this->fov, this->aspect, this->near, this->far);
+				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
 			}
 		}
 

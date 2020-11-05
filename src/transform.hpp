@@ -17,36 +17,29 @@ namespace guarneri {
 		mat4 local2world;
 
 	public:
-		float3 position() {
-			float3 pos;
-			pos.x = local2world.at(0, 3);
-			pos.y = local2world.at(1, 3);
-			pos.z = local2world.at(2, 3);
-			return pos;
+		void lookat(const float3& pos){
+			float3 eye = this->position();
+			this->local2world = mat4::lookat(eye, pos, float3::UP);
 		}
 
-		float3 forward() {
-			float3 f;
-			f.x = local2world.at(2, 0);
-			f.y = local2world.at(2, 1);
-			f.z = local2world.at(2, 2);
-			return f;
+		void set_position(const float3& eye) {
+			this->local2world = mat4::lookat(eye, eye + this->forward(), float3::UP);
 		}
 
-		float3 up() {
-			float3 u;
-			u.x = local2world.at(1, 0);
-			u.y = local2world.at(1, 1);
-			u.z = local2world.at(1, 2);
-			return u;
+		float3 position() const {
+			return local2world.position();
 		}
 
-		float3 right() {
-			float3 r;
-			r.x = local2world.at(0, 0);
-			r.y = local2world.at(0, 1);
-			r.z = local2world.at(0, 2);
-			return r;
+		float3 forward() const {
+			return local2world.forward();
+		}
+
+		float3 up() const {
+			return local2world.up();
+		}
+
+		float3 right()  const {
+			return local2world.right();
 		}
 
 		void translate(const float3& translation){
@@ -94,7 +87,7 @@ namespace guarneri {
 			local2world = s * local2world;
 		}
 
-		void operator =(const transform& other) {
+		transform& operator =(const transform& other) {
 			this->local2world = other.local2world;
 		}
 	};

@@ -14,23 +14,45 @@ namespace guarneri {
 			}
 		}
 
-		mat4(const float4& column0, const float4& column1, const float4& column2, const float4& column3) {
-			m00 = column0.x;
-			m01 = column1.x;
-			m02 = column2.x;
-			m03 = column3.x;
-			m10 = column0.y;
-			m11 = column1.y;
-			m12 = column2.y;
-			m13 = column3.y;
-			m20 = column0.z;
-			m21 = column1.z;
-			m22 = column2.z;
-			m23 = column3.z;
-			m30 = column0.w;
-			m31 = column1.w;
-			m32 = column2.w;
-			m33 = column3.w;
+		mat4(const float4& row0, const float4& row1, const float4& row2, const float4& row3) {
+			m00 = row0.x;
+			m01 = row1.x;
+			m02 = row2.x;
+			m03 = row3.x;
+			m10 = row0.y;
+			m11 = row1.y;
+			m12 = row2.y;
+			m13 = row3.y;
+			m20 = row0.z;
+			m21 = row1.z;
+			m22 = row2.z;
+			m23 = row3.z;
+			m30 = row0.w;
+			m31 = row1.w;
+			m32 = row2.w;
+			m33 = row3.w;
+		}
+
+		mat4(const float& _m00, const float& _m01, const float& _m02, const float& _m03,
+			const float& _m10, const float& _m11, const float& _m12, const float& _m13,
+			const float& _m20, const float& _m21, const float& _m22, const float& _m23,
+			const float& _m30, const float& _m31, const float& _m32, const float& _m33) {
+			m00 = _m00;
+			m01 = _m01;
+			m02 = _m02;
+			m03 = _m03;
+			m10 = _m10;
+			m11 = _m11;
+			m12 = _m12;
+			m13 = _m13;
+			m20 = _m20;
+			m21 = _m21;
+			m22 = _m22;
+			m23 = _m23;
+			m30 = _m30;
+			m31 = _m31;
+			m32 = _m32;
+			m33 = _m33;
 		}
 
 	private:
@@ -92,6 +114,38 @@ namespace guarneri {
 			return m;
 		}
 
+		float3 position() const {
+			float3 pos;
+			pos.x = at(0, 3);
+			pos.y = at(1, 3);
+			pos.z = at(2, 3);
+			return pos;
+		}
+
+		float3 forward() const {
+			float3 f;
+			f.x = at(2, 0);
+			f.y = at(2, 1);
+			f.z = at(2, 2);
+			return f.normalized();
+		}
+
+		float3 up() const {
+			float3 u;
+			u.x = at(1, 0);
+			u.y = at(1, 1);
+			u.z = at(1, 2);
+			return u.normalized();
+		}
+
+		float3 right() const {
+			float3 r;
+			r.x = at(0, 0);
+			r.y = at(0, 1);
+			r.z = at(0, 2);
+			return r.normalized();
+		}
+
 		static mat4 viewport(const int& x, const int& y, const int& w, const int& h) {
 			mat4 ret = IDENTITY;
 			ret.at(0, 0) = w * 0.5f;
@@ -99,6 +153,49 @@ namespace guarneri {
 			ret.at(1, 1) = h * 0.5f;
 			ret.at(1, 3) = y + (h * 0.5f);
 			return ret;
+		}
+
+		// yaw-y pitch-x roll-z
+		static mat4 yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll) {
+			return euler_angle_z(roll) * euler_angle_x(pitch) * euler_angle_y(yaw);
+		}
+
+		static mat4 euler_angle_x(const float& angle) {
+			float rad = DEGREE2RAD(angle);
+			float c = std::cos(rad);
+			float s = std::sin(rad);
+			return mat4(
+				1, 0, 0, 0,
+				0, c, s, 0,
+				0, -s, c, 0,
+				0, 0, 0, 1
+			);
+		}
+
+
+		static mat4 euler_angle_y(const float& angle) {
+			float rad = DEGREE2RAD(angle);
+			float c = std::cos(rad);
+			float s = std::sin(rad);
+			return mat4(
+				c, 0, -s, 0,
+				0, 1, 0, 0,
+				s, 0, c, 0,
+				0, 0, 0, 1
+			);
+		}
+
+
+		static mat4 euler_angle_z(const float& angle) {
+			float rad = DEGREE2RAD(angle);
+			float c = std::cos(rad);
+			float s = std::sin(rad);
+			return mat4(
+				c, s, 0, 0,
+				-s, c, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+			);
 		}
 
 		static mat4 lookat(const float3& eye, const float3& target, const float3& world_up) {
@@ -111,8 +208,8 @@ namespace guarneri {
 
 		static mat4 lookat_lh(const float3& eye, const float3& target, const float3& world_up) {
 			float3 forward = float3::normalize(target - eye);
-			float3 right = float3::normalize(float3::cross(float3::normalize(world_up), forward)); // it's possible that camera's forward vector is parallel to the world up vector
-			float3 up = float3::cross(forward, right); // no need to normalize
+			float3 right = float3::normalize(float3::cross(float3::normalize(world_up), forward));
+			float3 up = float3::cross(forward, right);
 
 			// UVN--right up forward
 			mat4 view = mat4::IDENTITY;
@@ -134,8 +231,8 @@ namespace guarneri {
 
 		static mat4 lookat_rh(const float3& eye, const float3& target, const float3& world_up) {
 			float3 forward = float3::normalize(target - eye);
-			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); // it's possible that camera's forward vector is parallel to the world up vector
-			float3 up = float3::cross(right, forward); // no need to normalize
+			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); 
+			float3 up = float3::cross(right, forward); 
 
 			// UVN--right up forward
 			mat4 view = mat4::IDENTITY;

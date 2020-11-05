@@ -114,12 +114,12 @@ namespace guarneri{
 		void draw_camera_coords() {
 			float2 offset = float2(-(window().width / 2 - 50.0f), window().height / 2 - 50.0f);
 			float3 pos = main_cam->position;
-			float3 forward = main_cam->front;
+			float3 forward = main_cam->forward;
 			float3 right = main_cam->right;
 			float3 up = main_cam->up;
 			grapihcs().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-			debug_cam->position = main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance;
-			debug_cam->set_target(main_cam->position);
+			debug_cam->position = (main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance);
+			debug_cam->lookat(main_cam->position);
 		}
 
 		void draw_world_coords() {
@@ -128,13 +128,13 @@ namespace guarneri{
 			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 	
 			float3 pos = main_cam->position;
-			float3 forward = main_cam->front;
+			float3 forward = main_cam->forward;
 			float3 right = main_cam->right;
 			float3 up = main_cam->up;
 			grapihcs().draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
-			world_debug_cam->position = float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance;
-			world_debug_cam->set_target(float3::ZERO);
+			world_debug_cam->position = (float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
+			world_debug_cam->lookat(float3::ZERO);
 		}
 
 		void render() {
