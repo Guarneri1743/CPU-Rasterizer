@@ -609,52 +609,36 @@ namespace guarneri {
 			{
 			case 0:
 				return m00;
-				break;
 			case 1:
-				return m10;
-				break;
-			case 2:
-				return m20;
-				break;
-			case 3:
-				return m30;
-				break;
-			case 4:
 				return m01;
-				break;
+			case 2:
+				return m02;
+			case 3:
+				return m03;
+			case 4:
+				return m10;
 			case 5:
 				return m11;
-				break;
 			case 6:
-				return m21;
-				break;
-			case 7:
-				return m31;
-				break;
-			case 8:
-				return m02;
-				break;
-			case 9:
 				return m12;
-				break;
+			case 7:
+				return m13;
+			case 8:
+				return m20;
+			case 9:
+				return m21;
 			case 10:
 				return m22;
-				break;
 			case 11:
-				return m32;
-				break;
-			case 12:
-				return m03;
-				break;
-			case 13:
-				return m13;
-				break;
-			case 14:
 				return m23;
-				break;
+			case 12:
+				return m30;
+			case 13:
+				return m31;
+			case 14:
+				return m32;
 			case 15:
 				return m33;
-				break;
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
 				return m00;
@@ -667,33 +651,33 @@ namespace guarneri {
 			case 0:
 				return m00;
 			case 1:
-				return m10;
-			case 2:
-				return m20;
-			case 3:
-				return m30;
-			case 4:
 				return m01;
+			case 2:
+				return m02;
+			case 3:
+				return m03;
+			case 4:
+				return m10;
 			case 5:
 				return m11;
 			case 6:
-				return m21;
-			case 7:
-				return m31;
-			case 8:
-				return m02;
-			case 9:
 				return m12;
+			case 7:
+				return m13;
+			case 8:
+				return m20;
+			case 9:
+				return m21;
 			case 10:
 				return m22;
 			case 11:
-				return m32;
-			case 12:
-				return m03;
-			case 13:
-				return m13;
-			case 14:
 				return m23;
+			case 12:
+				return m30;
+			case 13:
+				return m31;
+			case 14:
+				return m32;
 			case 15:
 				return m33;
 			default:
@@ -710,7 +694,7 @@ namespace guarneri {
 
 	private:
 		int rc2index(const int& row, const int& column) const {
-			return row + (column * 4);
+			return row * 4 + column;
 		}
 	};
 

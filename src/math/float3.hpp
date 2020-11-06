@@ -29,7 +29,7 @@ namespace guarneri {
 		float z;
 		
 	public:
-		float3 normalized() {
+		float3 normalized() const {
 			return float3::normalize(*this);
 		}
 
@@ -37,11 +37,11 @@ namespace guarneri {
 
 		const float& operator[](const unsigned int i) const { return (&x)[i]; }
 
-		bool operator == (const float3& other) {
+		bool operator == (const float3& other) const {
 			return EQUALS(x, other.x) && EQUALS(y, other.y) && EQUALS(z, other.z);
 		}
 
-		bool operator != (const float3& other) {
+		bool operator != (const float3& other) const {
 			return !(*this == other);
 		}
 

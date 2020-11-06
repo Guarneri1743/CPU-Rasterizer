@@ -6,6 +6,7 @@ namespace guarneri {
 	public:
 		vertex() {
 			position = float4();
+			world_pos = float3();
 			color = float4();
 			uv = float2();
 			normal = float3();
@@ -14,8 +15,9 @@ namespace guarneri {
 			this->rhw = 1.0f;
 		}
 
-		vertex(const float4& position, const float4& color, const float3& normal, const float2& uv, const float3& tangent, const float3& bitangent) {
+		vertex(const float4& position, const float3& world_pos, const float4& color, const float3& normal, const float2& uv, const float3& tangent, const float3& bitangent) {
 			this->position = position;
+			this->world_pos = world_pos;
 			this->color = color;
 			this->normal = normal;
 			this->uv = uv;
@@ -26,6 +28,7 @@ namespace guarneri {
 
 		vertex(const float4& position, const float3& normal, const float2& uv) {
 			this->position = position;
+			this->world_pos = position.xyz();
 			this->color = float4::ONE;
 			this->normal = normal;
 			this->uv = uv;
@@ -36,6 +39,7 @@ namespace guarneri {
 
 	public:
 		float4 position;
+		float3 world_pos;
 		float4 color;
 		float3 normal;
 		float2 uv;
@@ -48,6 +52,7 @@ namespace guarneri {
 			vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
 			ret.position.w = 1.0f;
+			ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
 			ret.color = left.color + (right.color - left.color) * t;
 			ret.normal = left.normal + (right.normal - left.normal) * t;
 			ret.uv = left.uv + (right.uv - left.uv) * t;
@@ -62,6 +67,7 @@ namespace guarneri {
 			float segmentation = 1.0f / w;
 			vertex ret;
 			ret.position = (rhs.position - lhs.position) * segmentation;
+			ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;
 			ret.color = (rhs.color - lhs.color) * segmentation;
 			ret.uv = (rhs.uv - lhs.uv) * segmentation;
 			ret.normal = (rhs.normal - lhs.normal) * segmentation;
@@ -74,6 +80,7 @@ namespace guarneri {
 		static vertex intagral(const vertex& left, const vertex& differential) {
 			vertex ret;
 			ret.position = (left.position + differential.position);
+			ret.world_pos = (left.world_pos + differential.world_pos);
 			ret.color = (left.color + differential.color);
 			ret.normal = (left.normal + differential.normal);
 			ret.uv = (left.uv + differential.uv);

@@ -56,10 +56,10 @@ namespace guarneri {
 	};
 
 	vertex plane_vertices[8] = {
-		vertex(float4(1, 1,  1, 1), float4(0.2f, 0.2f, 1.0f, 0.3f), float3::ONE,  float2(0.0f, 0.0f), float3(), float3()),
-		vertex(float4(1,  1, -1, 1), float4(1.0f, 0.3f, 0.3f, 0.3f), float3::ONE,  float2(0.0f, 1.0f), float3(), float3()),
-		vertex(float4(-1,  1, -1, 1),  float4(0.2f, 1.0f, 0.3f, 0.3f), float3::ONE, float2(1.0f, 1.0f), float3(), float3()),
-		vertex(float4(-1,  1,  1, 1), float4(1.0f, 0.2f, 1.0f, 0.3f),  float3::ONE, float2(1.0f, 0.0f), float3(), float3()),
+		vertex(float4(1, 1,  1, 1), float3::UP,  float2(0.0f, 0.0f)),
+		vertex(float4(1,  1, -1, 1), float3::UP,  float2(0.0f, 1.0f)),
+		vertex(float4(-1,  1, -1, 1), float3::UP, float2(1.0f, 1.0f)),
+		vertex(float4(-1,  1,  1, 1), float3::UP, float2(1.0f, 0.0f)),
 	};
 
 	uint32_t plane_indices[6] = {

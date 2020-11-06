@@ -8,7 +8,13 @@ int main()
 	// initialize rasterizer
 	prepare(800, 600, "SoftRasterizer");
 
+	// setup main light
 	scene demo_scene;
+	demo_scene.main_light.direction = float3(1, 1, 1);
+	demo_scene.main_light.ambient = color(0.05f, 0.05f, 0.05f, 1.0f);
+	demo_scene.main_light.diffuse = color(1.0f, 1.0f, 1.0f, 1.0f);
+	demo_scene.main_light.specular = color(1.0f, 1.0f, 1.0f, 1.0f);
+	demo_scene.main_light.intensity = 1.0f;
 
 	// backpack
 	auto backpack = model::create(res_path() + "/backpack/backpack.obj");
@@ -23,7 +29,7 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto plane = primitive_factory::plane(std::move(plane_material));
-	plane->transform.scale(float3(3.0f, 1.0f, 3.0f));
+	plane->transform.scale(float3(10.0f, 1.0f, 10.0f));
 	plane->transform.translate(float3(-2.0f, -2.0f, -2.0f));
 
 	demo_scene.add(renderer::create(std::move(plane)), false);

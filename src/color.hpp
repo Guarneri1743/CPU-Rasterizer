@@ -426,6 +426,22 @@ namespace guarneri {
 		return c * other;
 	}
 
+	static color operator *(const float4& other, const color& c) {
+		return color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
+	}
+
+	static color operator *(const color& c, const float4& other) {
+		return color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
+	}
+
+	static color operator *(const float3& other, const color& c) {
+		return color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
+	}
+
+	static color operator *(const color& c, const float3& other) {
+		return color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
+	}
+
 	static std::ostream& operator << (std::ostream& stream, const color& c) {
 		stream << c.str();
 		return stream;

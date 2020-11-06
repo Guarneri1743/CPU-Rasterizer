@@ -33,9 +33,9 @@ namespace guarneri {
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(std::shared_ptr<material>  material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
 			// early clip
-			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
+			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
-			}
+			}*/
 
 			auto shader = material->get_shader();
 
@@ -43,6 +43,7 @@ namespace guarneri {
 			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
 			shader->sync(material->ztest_mode, material->zwrite_mode);
 			shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
+			shader->sync(material->lighting_param);
 
 			assert(shader != nullptr);
 
@@ -50,9 +51,9 @@ namespace guarneri {
 			v2f o2 = process_vertex(shader, v2);
 			v2f o3 = process_vertex(shader, v3);
 
-			vertex c1(o1.position, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
-			vertex c2(o2.position, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
-			vertex c3(o3.position, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+			vertex c1(o1.position, o1.world_pos, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
+			vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
+			vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			vertex n1 = clip2ndc(c1);
 			vertex n2 = clip2ndc(c2);
@@ -211,6 +212,7 @@ namespace guarneri {
 			if (((int)r_flag & (int)render_flag::shaded) != 0 && s != nullptr) {
 				v2f v_out;
 				v_out.position = v.position;
+				v_out.world_pos = v.world_pos;
 				v_out.color = v.color;
 				v_out.normal = v.normal;
 				v_out.uv = v.uv;

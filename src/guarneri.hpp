@@ -109,6 +109,7 @@ namespace guarneri {
 	struct float2;
 	struct float3;
 	struct float4;
+	struct mat3;
 	struct mat4;
 	struct transform;
 	struct color;
@@ -138,6 +139,7 @@ namespace guarneri {
 	class scene;
 	class id_allocator;
 	class input_manager;
+	struct directional_light;
 
 	static std::string to_string(const texture_format& fmt) {
 		switch (fmt) {
@@ -173,6 +175,10 @@ namespace guarneri {
 #include <float4.hpp>
 #include <color.hpp>
 #include <mat4.hpp>
+#include <mat3.hpp>
+
+// lighting 
+#include <light.hpp>
 
 namespace guarneri{
 	// utils
@@ -227,10 +233,16 @@ namespace guarneri{
 		float cam_far;
 		float screen_width;
 		float screen_height;
+		float3 camera_pos;
 		mat4 view_matrix;
 		mat4 proj_matrix;
+		directional_light main_light;
 	} misc_parameter;
 	static misc_parameter misc_param;
+
+	struct lighting_data {
+		float glossiness;
+	};
 }
 
 // windows api

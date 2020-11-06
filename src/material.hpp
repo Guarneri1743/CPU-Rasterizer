@@ -42,6 +42,7 @@ namespace guarneri {
 		std::unordered_map<property_name, float4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
+		lighting_data lighting_param;
 
 	public:
 		static std::unique_ptr<material> create() {

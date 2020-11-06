@@ -33,10 +33,10 @@ namespace guarneri{
 			main_light.specular = color(1.0f, 1.0f, 1.0f, 1.0f);
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
-			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 60.0f, 0.5f, 500.0f, projection::perspective));
+			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
 			main_cam->lookat(float3::ZERO);
-			debug_cam = std::move(camera::create(main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
-			world_debug_cam = std::move(camera::create(float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 60.0f, 0.5f, 10.0f, projection::perspective));
+			debug_cam = std::move(camera::create(main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
+			world_debug_cam = std::move(camera::create(float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
 
 			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
 				if (input_mgr().is_mouse_down(mouse_button::right)) {
@@ -111,7 +111,8 @@ namespace guarneri{
 			misc_param.proj_matrix = main_cam->projection_matrix();
 			misc_param.screen_width = window().width;
 			misc_param.screen_height = window().height;
-
+			misc_param.main_light = main_light;
+			misc_param.camera_pos = main_cam->position;
 			/*if (input_mgr().is_key_down(key_code::W)) {
 				main_cam->move_forward(CAMERA_MOVE_SPEED);
 			}

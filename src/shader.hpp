@@ -11,6 +11,7 @@ namespace guarneri {
 
 	struct v2f {
 		float4 position;
+		float3 world_pos;
 		float2 uv;
 		float4 color;
 		float3 normal;
@@ -54,6 +55,7 @@ namespace guarneri {
 		blend_factor dst_factor;
 		blend_operator blend_op;
 		bool transparent;
+		lighting_data lighting_param;
 
 	public:
 		void sync(ztest ztest, zwrite zwrite) {
@@ -79,6 +81,10 @@ namespace guarneri {
 			this->name2tex = tex_uniforms;
 		}
 
+		void sync(const lighting_data& data) {
+			this->lighting_param = data;
+		}
+
 		void set_mvp_matrix(const mat4& model, const mat4& view, const mat4& proj) {
 			this->m = model;
 			this->v = view;
@@ -89,32 +95,52 @@ namespace guarneri {
 			v2f o;
 			auto oo = p * v * m * input.position;
 			o.position = oo;
+			o.world_pos = (m * input.position).xyz();
 			o.color = input.color;
-			o.normal = input.normal;
+			o.normal = mat3(m).inverse().transpose() * input.normal;
 			o.uv = input.uv;
 			return o;
 		}
 
 		color fragment_shader(const v2f& input) {
+			color ambient = misc_param.main_light.ambient;
+			color specular = misc_param.main_light.specular;
+			color diffuse = misc_param.main_light.diffuse;
+			float intensity = misc_param.main_light.intensity;
+			float3 light_dir = misc_param.main_light.direction.normalized();
+			float3 cam_pos = misc_param.camera_pos;
+			float3 frag_pos = input.world_pos;
+			float4 screen_pos = input.position;
+			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
+
+			float3 normal = input.normal.normalized();
+			float ndl = std::max(float3::dot(normal, light_dir), 0.0f);
+			float3 view_dir = (cam_pos - frag_pos).normalized();
+			float3 reflect_dir = light_dir - 2.0f * normal * ndl;
+			float spec = std::pow(std::max(float3::dot(view_dir, reflect_dir), 0.0f), 32.0f);
+
+			color ret = ambient;
 			color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
-				return main_tex;
+				ret += diffuse * ndl * main_tex;
 			}
 
-			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
-
-			}
-
-			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			color normal_tex;
+			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, normal_tex)) {
 
 			}
 
-			if (name2tex.count(height_prop) > 0 && name2tex[height_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			color spec_tex;
+			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
+				ret += specular * spec * spec_tex;
+			}
+
+			color height_tex;
+			if (name2tex.count(height_prop) > 0 && name2tex[height_prop]->sample(input.uv.x, input.uv.y, height_tex)) {
 
 			}
 
-			// fallback
-			return color(207.0f / 255.0f, 0.0f, 112.0f / 255.0f, 0.3f);
+			return color(ret.r, ret.g, ret.b, 1.0f);
 		}
 
 		shader& operator =(const shader& other) {
