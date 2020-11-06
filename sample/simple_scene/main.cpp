@@ -35,7 +35,7 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto plane = primitive_factory::plane(std::move(plane_material));
-	plane->transform.scale(float3(10.0f, 0.0f, 10.0f));
+	plane->transform.scale(float3(10.0f, 1.0f, 10.0f));
 	demo_scene.add(renderer::create(std::move(plane)), false);
 
 	// transparent cube
@@ -68,6 +68,15 @@ int main()
 		}
 	}, &cube_renderer);
 
+	demo_scene.add_on_update_evt([](void* user_data) {
+		scene* s = reinterpret_cast<scene*>(user_data);
+		if (input_mgr().is_key_down(key_code::R)) {
+			s->main_light.direction += float3(0.2f, 0.0f, 0.2f);
+		}
+		if (input_mgr().is_key_down(key_code::T)) {
+			s->main_light.direction -= float3(0.2f, 0.0f, 0.2f);
+		}
+		}, & demo_scene);
 
 	kick_off(demo_scene);
 	return 0;
