@@ -107,6 +107,7 @@ namespace guarneri {
                 else
                     vertex.uv = float2(0.0f, 0.0f);
 
+                vertex.color = vertex.tangent;
                 vertices.push_back(vertex);
             }
             for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)

@@ -100,8 +100,9 @@ namespace guarneri {
 		depth = 1 << 2,
 		uv = 1 << 3,
 		vertex_color = 1 << 4,
-		scanline = 1 << 5,
-		transparent = 1 << 6
+		normal = 1 << 5,
+		scanline = 1 << 6,
+		transparent = 1 << 7
 	};
 
 	// forward declarations
@@ -208,7 +209,7 @@ namespace guarneri{
 
 	#define REF(obj) unused(obj)
 
-	render_device& grapihcs() {
+	render_device& graphics() {
 		return singleton<render_device>::get();
 	}
 
@@ -237,6 +238,7 @@ namespace guarneri{
 		mat4 view_matrix;
 		mat4 proj_matrix;
 		directional_light main_light;
+		render_flag flag;
 	} misc_parameter;
 	static misc_parameter misc_param;
 
@@ -293,13 +295,14 @@ namespace guarneri {
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 		window().initialize(w, h, title, input_mgr().event_callback);
 		input_mgr().add_on_key_down_evt([](key_code code, void* data) { if (code == key_code::ESC) window().dispose(); }, nullptr);
-		grapihcs().initialize(window().framebuffer, window().width, window().height);
+		graphics().initialize(window().framebuffer, window().width, window().height);
 	}
 
 	void kick_off(scene& scene) {
 		while (window().is_valid()) {
+			graphics().clear_buffer();
 			input_mgr().update();
-			grapihcs().clear_buffer();
+			graphics().update();
 			scene.update();
 			scene.render();
 			window().flush();

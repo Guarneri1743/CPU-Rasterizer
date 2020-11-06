@@ -6,7 +6,6 @@ namespace guarneri {
 	public:
 		uint32_t width;
 		uint32_t height;
-		render_flag r_flag;
 
 	private:
 		std::shared_ptr<raw_buffer<float>> zbuffer;
@@ -16,10 +15,13 @@ namespace guarneri {
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
 			this->width = width_t;
 			this->height = height_t;
-			r_flag = render_flag::shaded;
 			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
 			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			zbuffer->clear(1.0f);
+		}
+
+		void update() {
+			
 		}
 
 		// =============================================================================================================Pipeline======================================================================================================================
@@ -55,10 +57,12 @@ namespace guarneri {
 			vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 			vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
+			// position perspective division
 			vertex n1 = clip2ndc(c1);
 			vertex n2 = clip2ndc(c2);
 			vertex n3 = clip2ndc(c3);
 
+			// other channels perspective division
 			n1.perspective_division(c1.rhw);
 			n2.perspective_division(c2.rhw);
 			n3.perspective_division(c3.rhw);
@@ -85,7 +89,7 @@ namespace guarneri {
 			rasterize(tris, material);
 
 			// wireframe
-			if (((int)r_flag & (int)render_flag::wire_frame) != 0) {
+			if (((int)misc_param.flag & (int)render_flag::wire_frame) != 0) {
 
 				line_drawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				line_drawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
@@ -93,7 +97,7 @@ namespace guarneri {
 			}
 
 			// wireframe & scanline
-			if (((int)r_flag & (int)render_flag::scanline) != 0) {
+			if (((int)misc_param.flag & (int)render_flag::scanline) != 0) {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
@@ -123,15 +127,15 @@ namespace guarneri {
 		}
 
 		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p, const float2& offset) {
-			grapihcs().draw_line(pos, pos + forward, color::BLUE, v, p, offset);
-			grapihcs().draw_line(pos, pos + right, color::RED, v, p, offset);
-			grapihcs().draw_line(pos, pos + up, color::GREEN, v, p, offset);
+			graphics().draw_line(pos, pos + forward, color::BLUE, v, p, offset);
+			graphics().draw_line(pos, pos + right, color::RED, v, p, offset);
+			graphics().draw_line(pos, pos + up, color::GREEN, v, p, offset);
 		}
 
 		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p) {
-			grapihcs().draw_line(pos, pos + forward, color::BLUE, v, p);
-			grapihcs().draw_line(pos, pos + right, color::RED, v, p);
-			grapihcs().draw_line(pos, pos + up, color::GREEN, v, p);
+			graphics().draw_line(pos, pos + forward, color::BLUE, v, p);
+			graphics().draw_line(pos, pos + right, color::RED, v, p);
+			graphics().draw_line(pos, pos + up, color::GREEN, v, p);
 		}
 
 		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {
@@ -213,7 +217,7 @@ namespace guarneri {
 
 			// fragment shader
 			color fragment_result;
-			if (((int)r_flag & (int)render_flag::shaded) != 0 && s != nullptr) {
+			if (((int)misc_param.flag & (int)render_flag::shaded) != 0 && s != nullptr) {
 				v2f v_out;
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
@@ -224,17 +228,11 @@ namespace guarneri {
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = color::encode_bgra(fragment_result);
 			}
-			if (((int)r_flag & (int)render_flag::uv) != 0) {
-				pixel_color = color::encode_bgra(v.uv);
-			}
-			if (((int)r_flag & (int)render_flag::vertex_color) != 0) {
-				pixel_color = color::encode_bgra(v.color);
-			}
 
 			// todo: scissor test
 
 			// alpha blend
-			if (s != nullptr && s->transparent && ((int)r_flag & (int)render_flag::transparent) != 0) {
+			if (s != nullptr && s->transparent && ((int)misc_param.flag & (int)render_flag::transparent) != 0) {
 				color_bgra dst;
 				if (framebuffer->read(row, col, dst)) {
 					color dst_color = color::decode(dst);
@@ -255,7 +253,7 @@ namespace guarneri {
 			}
 
 			// depth buffer visualization
-			if (((int)r_flag & (int)render_flag::depth) != 0) {
+			if (((int)misc_param.flag & (int)render_flag::depth) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
@@ -297,7 +295,7 @@ namespace guarneri {
 
 				if (pass) {
 					// write z buffer 
-					if (zwrite_mode == zwrite::on || ((int)r_flag & (int)render_flag::transparent) == 0) {
+					if (zwrite_mode == zwrite::on || ((int)misc_param.flag & (int)render_flag::transparent) == 0) {
 						zbuffer->write(row, col, z);
 					}
 				}
@@ -378,7 +376,7 @@ namespace guarneri {
 
 		void clear_buffer() {
 			zbuffer->clear(1.0f);
-			if (((int)r_flag & (int)render_flag::depth) != 0)
+			if (((int)misc_param.flag & (int)render_flag::depth) != 0)
 			{
 				framebuffer->clear(color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}

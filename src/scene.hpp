@@ -63,29 +63,31 @@ namespace guarneri{
 				}, this);
 
 			input_mgr().add_on_key_down_evt([](key_code code, void* data) {
-				auto device = (render_device*)data;
 				if (code == key_code::F1) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::shaded);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::shaded);
 				}
 				else if (code == key_code::F2) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::scanline);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::scanline);
 				}
 				else if (code == key_code::F3) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::wire_frame);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::wire_frame);
 				}
 				else if (code == key_code::F4) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::depth);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::depth);
 				}
 				else if (code == key_code::F5) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::uv);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::uv);
 				}
 				else if (code == key_code::F6) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::vertex_color);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::vertex_color);
 				}
 				else if (code == key_code::F7) {
-					device->r_flag = (render_flag)((int)device->r_flag ^ (int)render_flag::transparent);
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::transparent);
 				}
-				}, &grapihcs());
+				else if (code == key_code::F8) {
+					misc_param.flag = (render_flag)((int)misc_param.flag ^ (int)render_flag::normal);
+				}
+				}, nullptr);
 		}
 
 		void add(std::shared_ptr<renderer> target, bool transparent) {
@@ -151,21 +153,21 @@ namespace guarneri{
 			float3 forward = main_cam->forward;
 			float3 right = main_cam->right;
 			float3 up = main_cam->up;
-			grapihcs().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+			graphics().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
 			debug_cam->position = (main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance);
 			debug_cam->lookat(main_cam->position);
 		}
 
 		void draw_world_coords() {
 			float2 offset = float2(-(window().width / 2 - 150.0f), -(window().height / 2 - 150.0f));
-			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-			grapihcs().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
+			graphics().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+			graphics().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 	
 			float3 pos = main_cam->position;
 			float3 forward = main_cam->forward;
 			float3 right = main_cam->right;
 			float3 up = main_cam->up;
-			grapihcs().draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+			graphics().draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
 			world_debug_cam->position = (float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
 			world_debug_cam->lookat(float3::ZERO);

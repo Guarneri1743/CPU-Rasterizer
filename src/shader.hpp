@@ -140,6 +140,18 @@ namespace guarneri {
 
 			}
 
+			if (((int)misc_param.flag & (int)render_flag::uv) != 0) {
+				return input.uv;
+			}
+
+			if (((int)misc_param.flag & (int)render_flag::vertex_color) != 0) {
+				return input.color;
+			}
+
+			if (((int)misc_param.flag & (int)render_flag::normal) != 0) {
+				return input.normal;
+			}
+
 			return color(ret.r, ret.g, ret.b, 1.0f);
 		}
 
