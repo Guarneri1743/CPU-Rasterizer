@@ -42,6 +42,12 @@ namespace guarneri {
 	typedef std::string property_name;
 	typedef std::string shader_id;
 
+	// simple texture properties
+	const property_name albedo_prop = "texture_diffuse";
+	const property_name specular_prop = "texture_specular";
+	const property_name normal_prop = "texture_normal";
+	const property_name height_prop = "texture_height";
+
 	// color 
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
@@ -98,28 +104,6 @@ namespace guarneri {
 		transparent = 1 << 6
 	};
 
-	static std::string to_string(const texture_format& fmt) {
-		switch (fmt) {
-		case texture_format::invalid:
-			return "invalid";
-		case texture_format::rgb:
-			return "rgb";
-		case texture_format::rgba:
-			return "rgba";
-		}
-		return "invalid";
-	};
-
-	static std::ostream& operator <<(std::ostream& os, const texture_format& fmt) {
-		os << to_string(fmt);
-		return os;
-	};
-
-	static std::stringstream& operator <<(std::stringstream& ss, const texture_format& fmt) {
-		ss << to_string(fmt);
-		return ss;
-	};
-
 	// forward declarations
 	class object;
 	struct float2;
@@ -154,6 +138,28 @@ namespace guarneri {
 	class scene;
 	class id_allocator;
 	class input_manager;
+
+	static std::string to_string(const texture_format& fmt) {
+		switch (fmt) {
+		case texture_format::invalid:
+			return "invalid";
+		case texture_format::rgb:
+			return "rgb";
+		case texture_format::rgba:
+			return "rgba";
+		}
+		return "invalid";
+	};
+
+	static std::ostream& operator <<(std::ostream& os, const texture_format& fmt) {
+		os << to_string(fmt);
+		return os;
+	};
+
+	static std::stringstream& operator <<(std::stringstream& ss, const texture_format& fmt) {
+		ss << to_string(fmt);
+		return ss;
+	};
 }
 
 // common
@@ -169,12 +175,6 @@ namespace guarneri {
 #include <mat4.hpp>
 
 namespace guarneri{
-	// simple texture properties
-	const property_name albedo_prop = "texture_diffuse";
-	const property_name specular_prop = "texture_specular";
-	const property_name normal_prop = "texture_normal";
-	const property_name height_prop = "texture_height";
-
 	// utils
 	static std::string replace(std::string str, std::string pattern, std::string content) {
 		while (str.find(pattern) != std::string::npos) {

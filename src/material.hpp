@@ -5,7 +5,7 @@ namespace guarneri {
 	class material : public object {
 	public:
 		material() {
-			this->target_shader = shader::default_shader;
+			this->target_shader = std::make_unique<shader>("default");
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
 			this->src_factor = blend_factor::src_alpha;
@@ -14,8 +14,8 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-		material(const std::shared_ptr<shader>& shader) {
-			this->target_shader = shader;
+		material(std::unique_ptr<shader>& shader) {
+			this->target_shader = std::move(shader);
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
 			this->src_factor = blend_factor::src_alpha;
@@ -48,7 +48,7 @@ namespace guarneri {
 			return std::make_unique<material>();
 		}
 
-		static std::unique_ptr<material> create(const std::shared_ptr<shader>& shader) {
+		static std::unique_ptr<material> create(std::unique_ptr<shader>& shader) {
 			return std::make_unique<material>(shader);
 		}
 

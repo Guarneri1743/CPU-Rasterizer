@@ -54,7 +54,6 @@ namespace guarneri {
 		blend_factor dst_factor;
 		blend_operator blend_op;
 		bool transparent;
-		static std::shared_ptr<shader> default_shader;
 
 	public:
 		void sync(ztest ztest, zwrite zwrite) {
@@ -144,6 +143,4 @@ namespace guarneri {
 			return ss.str();
 		}
 	};
-
-	std::shared_ptr<shader> shader::default_shader = std::make_shared<shader>("default");
 }
