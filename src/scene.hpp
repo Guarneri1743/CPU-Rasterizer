@@ -13,6 +13,7 @@ namespace guarneri{
 		}
 
 	public:
+		directional_light main_light;
 		std::vector<std::shared_ptr<renderer>> objects;
 		std::vector<std::shared_ptr<renderer>> transparent_objects;
 		std::shared_ptr<camera> main_cam;
@@ -22,8 +23,14 @@ namespace guarneri{
 		float debug_world_cam_distance;
 		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
 
+	public:
 		// todo: serialzie & deserialize scene data
 		void initialize() {
+			main_light.direction = float3(1.0f, 1.0f, 1.0f);
+			main_light.intensity = 1.0f;
+			main_light.diffuse = color(1.0f, 0.8f, 0.8f, 1.0f);
+			main_light.ambient = color(0.1f, 0.05f, 0.2f, 1.0f);
+			main_light.specular = color(1.0f, 1.0f, 1.0f, 1.0f);
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
 			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 60.0f, 0.5f, 500.0f, projection::perspective));

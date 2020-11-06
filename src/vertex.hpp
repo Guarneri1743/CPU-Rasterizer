@@ -24,6 +24,16 @@ namespace guarneri {
 			this->rhw = 1.0f / this->position.w;
 		}
 
+		vertex(const float4& position, const float3& normal, const float2& uv) {
+			this->position = position;
+			this->color = float4::ONE;
+			this->normal = normal;
+			this->uv = uv;
+			this->tangent = float3::ZERO;
+			this->bitangent = float3::ZERO;
+			this->rhw = 1.0f / this->position.w;
+		}
+
 	public:
 		float4 position;
 		float4 color;
