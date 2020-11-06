@@ -48,6 +48,15 @@ namespace guarneri {
 		float rhw;
 
 	public:
+		void perspective_division(const float& rhw) {
+			world_pos *= rhw;
+			color *= rhw;
+			normal *= rhw;
+			uv *= rhw;
+			tangent *= rhw;
+			bitangent *= rhw;
+		}
+
 		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
 			vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;

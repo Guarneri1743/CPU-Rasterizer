@@ -59,18 +59,22 @@ namespace guarneri {
 			vertex n2 = clip2ndc(c2);
 			vertex n3 = clip2ndc(c3);
 
+			n1.perspective_division(c1.rhw);
+			n2.perspective_division(c2.rhw);
+			n3.perspective_division(c3.rhw);
+
 			vertex s1 = ndc2viewport(n1);
 			vertex s2 = ndc2viewport(n2);
 			vertex s3 = ndc2viewport(n3);
 
 			s1.position.w = c1.position.w;
-			s1.rhw = c1.rhw;
-
+			s1.rhw = 1.0f / c1.position.w;
+		
 			s2.position.w = c2.position.w;
-			s2.rhw = c2.rhw;
+			s2.rhw = 1.0f / c2.position.w;
 
 			s3.position.w = c3.position.w;
-			s3.rhw = c3.rhw;
+			s3.rhw = 1.0f / c3.position.w;
 
 			triangle tri(s1, s2, s3);
 
@@ -168,22 +172,22 @@ namespace guarneri {
 					vertex lhs;
 					vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
-					int left = CEIL(lhs.position.x);
-					int right = CEIL(rhs.position.x);
-					assert(right >= left);
-
 					// todo: clip triangle to polygons in order to avoid these two steps
-					if (left < 0.0f) {
-						float t = -(float)left / (float)(right - left);
+					if (lhs.position.x <= 0.0f) {
+						float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
 						lhs = vertex::interpolate(lhs, rhs, t);
 					}
+					int left = CEIL(lhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
 
-					if (right > this->width) {
-						float t = (float)(this->width - left) / (float)(right - left);
+					if (rhs.position.x >= this->width) {
+						float t = ((float)this->width - lhs.position.x) / (rhs.position.x - lhs.position.x);
 						rhs = vertex::interpolate(lhs, rhs, t);
 					}
+					int right = CEIL(rhs.position.x);
 					right = CLAMP_INT(right, 0, this->width);
+
+					assert(right >= left);
 
 					// interpolate horizontally
 					for (int col = left; col < right; col++) {
@@ -211,11 +215,12 @@ namespace guarneri {
 			color fragment_result;
 			if (((int)r_flag & (int)render_flag::shaded) != 0 && s != nullptr) {
 				v2f v_out;
+				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
-				v_out.world_pos = v.world_pos;
-				v_out.color = v.color;
-				v_out.normal = v.normal;
-				v_out.uv = v.uv;
+				v_out.world_pos = v.world_pos * w;
+				v_out.color = v.color * w;
+				v_out.normal = v.normal * w;
+				v_out.uv = v.uv * w;
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = color::encode_bgra(fragment_result);
 			}
