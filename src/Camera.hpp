@@ -1,6 +1,6 @@
-#pragma once
+#ifndef _CAMERA_
+#define _CAMERA_
 #include <Guarneri.hpp>
-#include <Singleton.hpp>
 
 namespace Guarneri {
 	class Camera : public Object {
@@ -123,3 +123,4 @@ namespace Guarneri {
 			}
 	};
 }
+#endif

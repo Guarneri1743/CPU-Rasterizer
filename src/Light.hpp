@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _LIGHT_
+#define _LIGHT_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -20,3 +21,4 @@ namespace Guarneri {
 		float theta;
 	};
 }
+#endif

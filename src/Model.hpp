@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _MODEL_
+#define _MODEL_
 #include <Guarneri.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/Scene.h>
@@ -156,3 +157,4 @@ namespace Guarneri {
             }
 	};
 }
+#endif

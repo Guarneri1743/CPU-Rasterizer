@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RAW_BUFFER_
+#define _RAW_BUFFER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -97,3 +98,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

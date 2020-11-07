@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _FRUSTUM_
+#define _FRUSTUM_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -73,6 +74,26 @@ namespace Guarneri {
 			return Frustum(left, right, top, bottom, near, far);
 		}
 
+		static Frustum create_clip(const float& w) {
+			Plane left = Plane(w, 0.0f, 0.0f, 1.0f);
+			Plane right = Plane(-w, 0.0f, 0.0f, 1.0f);
+			Plane bottom = Plane(0.0f, w, 0.0f, 1.0f);
+			Plane top = Plane(0.0f, -w, 0.0f, 1.0f);
+			Plane near = Plane(0.0f, 0.0f, w, 1.0f);
+			Plane far = Plane(0.0f, 0.0f, -w, 1.0f);
+			return Frustum(left, right, top, bottom, near, far);
+		}
+
+		static Frustum create_ndc() {
+			Plane left = Plane(1.0f, 0.0f, 0.0f, 1.0f);
+			Plane right = Plane(-1.0f, 0.0f, 0.0f, 1.0f);
+			Plane bottom = Plane(0.0f, 1.0f, 0.0f, 1.0f);
+			Plane top = Plane(0.0f, -1.0f, 0.0f, 1.0f);
+			Plane near = Plane(0.0f, 0.0f, 1.0f, 1.0f);
+			Plane far = Plane(0.0f, 0.0f, -1.0f, 1.0f);
+			return Frustum(left, right, top, bottom, near, far);
+		}
+
 		const Plane& operator[](const int& index) const {
 			switch (index)
 			{
@@ -116,3 +137,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

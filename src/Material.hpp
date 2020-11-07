@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _MATERIAL_
+#define _MATERIAL_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -150,3 +151,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

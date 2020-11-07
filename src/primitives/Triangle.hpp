@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _TRIANGLE_
+#define _TRIANGLE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -184,3 +185,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

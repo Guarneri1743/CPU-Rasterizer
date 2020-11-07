@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _PLANE_
+#define _PLANE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -35,7 +36,7 @@ namespace Guarneri {
 		float constant;
 
 	public:
-		float distance(const Vector3& pt) {
+		float distance(const Vector3& pt) const {
 			return Vector3::dot(normal, pt) + constant;
 		}
 
@@ -56,3 +57,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

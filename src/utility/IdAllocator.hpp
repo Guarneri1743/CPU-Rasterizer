@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _ID_ALLOC_
+#define _ID_ALLOC_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -120,3 +121,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

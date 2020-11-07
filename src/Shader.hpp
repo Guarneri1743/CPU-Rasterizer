@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SHADER_
+#define _SHADER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -181,3 +182,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

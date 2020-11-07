@@ -1,4 +1,5 @@
-#pragma
+#ifndef _CUBEMAP_
+#define _CUBEMAP_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -60,3 +61,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

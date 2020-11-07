@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _GUARNERI_
+#define _GUARNERI_
 #include <cstdlib>
 #include <cmath>
 #include <limits.h>
@@ -219,6 +220,7 @@ namespace Guarneri {
 	class Material;
 	class Model;
 	class Renderer;
+	class Clipper;
 	class GraphicsDevice;
 	class GDIWindow;
 	class PrimitiveFactory;
@@ -290,6 +292,8 @@ namespace Guarneri {
 #include <BoundingBox.hpp>
 #include <BoundingBox2D.hpp>
 #include <Frustum.hpp>
+#include <Vertex.hpp>
+#include <Triangle.hpp>
 
 // lighting 
 #include <Light.hpp>
@@ -377,11 +381,9 @@ namespace Guarneri{
 
 // rasterizer
 #include <Object.hpp>
+#include <Clipper.hpp>
 #include <InputManager.hpp>
 #include <Transform.hpp>
-#include <Vertex.hpp>
-#include <Triangle.hpp>
-#include <Light.hpp>
 #include <RawBuffer.hpp>
 #include <Texture.hpp>
 #include <SegmentDrawer.hpp>
@@ -433,3 +435,4 @@ namespace Guarneri {
 		}
 	}
 }
+#endif

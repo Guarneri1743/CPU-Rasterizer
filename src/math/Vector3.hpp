@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _VEC3_
+#define _VEC3_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -300,3 +301,4 @@ namespace Guarneri {
 	const Vector3 Vector3::FORWARD = Vector3(0.0f, 0.0f, 1.0f);
 	const Vector3 Vector3::BACK = Vector3(0.0f, 0.0f, -1.0f);
 }
+#endif

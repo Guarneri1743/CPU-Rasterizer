@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RENDERER_
+#define _RENDERER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -70,3 +71,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

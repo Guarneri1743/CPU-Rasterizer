@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SINGLETON_
+#define _SINGLETON_
 
 namespace Guarneri {
 	template<typename T>
@@ -17,3 +18,4 @@ namespace Guarneri {
 		void operator=(const Singleton&) = delete;
 	};
 }
+#endif

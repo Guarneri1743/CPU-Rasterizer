@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _SEGMENT_
+#define _SEGMENT_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -58,3 +59,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

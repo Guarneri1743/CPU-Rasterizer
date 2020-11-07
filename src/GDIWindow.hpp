@@ -1,5 +1,5 @@
-#pragma once
-#include <Guarneri.hpp>
+#ifndef _GDI_WINDOW_
+#define _GDI_WINDOW_
 
 namespace Guarneri {
 	static LRESULT event_callback(HWND, UINT, WPARAM, LPARAM);
@@ -159,3 +159,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

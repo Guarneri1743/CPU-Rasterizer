@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _CYLINDER_
+#define _CYLINDER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -45,3 +46,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

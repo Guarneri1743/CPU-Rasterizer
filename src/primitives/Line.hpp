@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _LINE_
+#define _LINE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -41,3 +42,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

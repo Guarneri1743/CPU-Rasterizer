@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SKYBOX_SHADER_
+#define _SKYBOX_SHADER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -39,3 +40,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

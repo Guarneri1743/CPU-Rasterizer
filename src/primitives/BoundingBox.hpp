@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _BOUNDINGBOX_
+#define _BOUNDINGBOX_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -221,3 +222,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

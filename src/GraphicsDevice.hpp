@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _GRAPHICS_DEVICE_
+#define _GRAPHICS_DEVICE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -52,7 +53,15 @@ namespace Guarneri {
 			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-			if (!material->skybox && clipping(c1.position, c2.position, c3.position)) {
+			if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
+			/*	std::cout << "P: " << p << std::endl << "V: " << v << std::endl << "M: " << m << std::endl;
+				std::cout << "PV: " << p * v << std::endl;
+				std::cout << "PVM: " << p * v * m << std::endl;
+				std::cout << "v: " << v1.position << ", " << v2.position << ", " << v3.position << std::endl;
+				std::cout << "world: " << m * v1.position << ", " << m * v2.position << ", " << m * v3.position << std::endl;
+				std::cout << "view; " << v * m * v1.position << ", " << v * m * v2.position << ", " << v * m * v3.position << std::endl;
+				std::cout << "clip: " << p * v * m * v1.position << ", " << p * v * m * v2.position << ", " << p * v * m * v3.position << std::endl;
+				std::cout << "ndc: " << clip2ndc(p * v * m * v1.position) << ", " << clip2ndc(p * v * m * v2.position) << ", " << clip2ndc(p * v * m * v3.position) << std::endl;*/
 				return;
 			}
 
@@ -63,7 +72,7 @@ namespace Guarneri {
 
 			bool double_face = material->double_face;
 
-			if (!double_face && !material->skybox && backface_culling(n1.position, n2.position, n3.position)) {
+			if (!double_face && !material->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
 				return;
 			}
 
@@ -357,32 +366,6 @@ namespace Guarneri {
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
 		}
 
-		bool backface_culling(const Vector4& v1, const Vector4& v2, const Vector4& v3) {
-			auto v1v2 = v2 - v2;
-			auto v1v3 = v3 - v1;
-			float ndv = Vector3::dot(Vector3::cross(v1v2.xyz(), v1v3.xyz()), Vector3::BACK);
-			return ndv < 0; // front face: ndv > 0
-		}
-
-		bool clipping(const Vector4& c1, const Vector4& c2, const Vector4& c3) {
-			// z: [-w, w](GL) [0, w](DX)
-			// x: [-w, w]
-			// y: [-w, w]
-
-			// clip near and far planes here, clip left, right, top and bottom planes at scanline stage
-			if (c1.w <= 0.0f || c2.w <= 0.0f || c3.w <= 0.0f) {
-				std::cerr << c1 << ", " << c2 << ", " << c3 << std::endl;
-				return true;
-			}
-			if (c1.z > c1.w || c2.z > c2.w || c3.z > c3.w) {
-				return true;
-			}
-			if (c1.z < -c1.w || c2.z < -c2.w || c3.z < -c3.w) {
-				return true;
-			}
-			return false;
-		}
-
 		bool frustum_culling(const BoundingBox& aabb, const Matrix4x4& v, const Matrix4x4& p) {
 			auto frustum = Frustum::create(v, p);
 			auto bmin = aabb.min();
@@ -417,3 +400,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _VERTEX_
+#define _VERTEX_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -117,3 +118,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SCENE_
+#define _SCENE_
 #include <Guarneri.hpp>
 
 namespace Guarneri{
@@ -193,3 +194,4 @@ namespace Guarneri{
 		}
 	};
 }
+#endif

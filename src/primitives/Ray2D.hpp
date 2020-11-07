@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RAY2D_
+#define _RAY2D_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -45,3 +46,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

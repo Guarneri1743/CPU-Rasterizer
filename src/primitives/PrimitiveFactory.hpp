@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef _PRIMITIVE_FACTORY_
+#define _PRIMITIVE_FACTORY_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -131,3 +132,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

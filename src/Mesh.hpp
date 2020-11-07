@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _MESH_
+#define _MESH_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -29,3 +30,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _TRANSFORM_
+#define _TRANSFORM_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -97,3 +98,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

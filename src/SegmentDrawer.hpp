@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SEGMENT_DRAWER_
+#define _SEGMENT_DRAWER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -45,3 +46,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

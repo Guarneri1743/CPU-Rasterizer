@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef _NOISE_
+#define _NOISE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -49,3 +50,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _MAT3_
+#define _MAT3_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -300,3 +301,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

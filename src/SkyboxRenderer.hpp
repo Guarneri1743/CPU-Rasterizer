@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SKYBOX_RENDERER_
+#define _SKYBOX_RENDERER_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -46,3 +47,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

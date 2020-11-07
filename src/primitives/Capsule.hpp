@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef _CAPSULE_
+#define _CAPSULE_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -51,3 +52,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

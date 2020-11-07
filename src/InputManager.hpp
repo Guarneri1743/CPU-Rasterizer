@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _INPUT_MGR_
+#define _INPUT_MGR_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -257,3 +258,4 @@ namespace Guarneri {
 		}
 	};
 }
+#endif

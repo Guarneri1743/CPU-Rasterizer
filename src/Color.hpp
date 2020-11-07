@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _COLOR_
+#define _COLOR_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -436,3 +437,4 @@ namespace Guarneri {
 	const Color Color::GREEN = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	const Color Color::BLUE = Color(0.0f, 0.0f, 1.0f, 1.0f);
 }
+#endif

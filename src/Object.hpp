@@ -1,5 +1,5 @@
-#pragma once
-#include <Guarneri.hpp>
+#ifndef _OBJECT_
+#define _OBJECT_
 
 namespace Guarneri {
 	class Object {
@@ -28,3 +28,4 @@ namespace Guarneri {
 		return stream;
 	}
 }
+#endif

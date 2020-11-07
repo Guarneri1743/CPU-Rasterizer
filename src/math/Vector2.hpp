@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _VEC2_
+#define _VEC2_
 #include <Guarneri.hpp>
 
 namespace Guarneri {
@@ -173,3 +174,4 @@ namespace Guarneri {
 	const Vector2 Vector2::ZERO = Vector2(0.0f, 0.0f);
 	const Vector2 Vector2::ONE = Vector2(1.0f, 1.0f);
 }
+#endif

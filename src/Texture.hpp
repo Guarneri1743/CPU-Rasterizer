@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _TEXTURE_
+#define _TEXTURE_
 #include <Guarneri.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -302,3 +303,4 @@ namespace Guarneri {
 			}
 	};
 }
+#endif

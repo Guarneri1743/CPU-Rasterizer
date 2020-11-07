@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _RES_MGR_
+#define _RES_MGR_
 #include <Guarneri.hpp>
 
 // simple cache based on weak_ptr
@@ -57,3 +58,4 @@ namespace Guarneri {
 		std::unordered_map<uint32_t, std::weak_ptr<T>> id2res;
 	};
 }
+#endif
