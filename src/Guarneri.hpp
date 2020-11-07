@@ -220,7 +220,6 @@ namespace Guarneri {
 	class Material;
 	class Model;
 	class Renderer;
-	class Clipper;
 	class GraphicsDevice;
 	class GDIWindow;
 	class PrimitiveFactory;
@@ -230,6 +229,7 @@ namespace Guarneri {
 	class CubeMap;
 	class SkyboxShader;
 	class SkyboxRenderer;
+	class Clipper;
 
 	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
 	uint32_t CLAMP_UINT(uint32_t x, uint32_t min, uint32_t max) { return (x < min) ? min : ((x > max) ? max : x); }
