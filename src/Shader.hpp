@@ -17,8 +17,7 @@ namespace Guarneri {
 		Vector3 normal;
 		Vector3 tangent;
 		Vector3 bitangent;
-		// todo: add userdata feature to Vertex
-		Vector3 custom_data;
+		Vector4 shadow_coord;
 	};
 
 	class Shader : public Object{
@@ -91,7 +90,7 @@ namespace Guarneri {
 
 		virtual v2f vertex_shader(const a2v& input) {
 			v2f o;
-			auto oo = p * v * m * input.position;
+			auto oo = p * v * m * Vector4(input.position.x, input.position.y, input.position.z, 1.0f);
 			o.position = oo;
 			o.world_pos = (m * input.position).xyz();
 			o.color = input.color;

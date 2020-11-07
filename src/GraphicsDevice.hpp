@@ -34,7 +34,7 @@ namespace Guarneri {
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			auto shader = material->get_shader();
+			auto shader = material->target_shader;
 
 			shader->set_mvp_matrix(m, v, p);
 			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
@@ -52,7 +52,7 @@ namespace Guarneri {
 			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-			if (clipping(c1.position, c2.position, c3.position)) {
+			if (!material->skybox && clipping(c1.position, c2.position, c3.position)) {
 				return;
 			}
 
@@ -63,7 +63,7 @@ namespace Guarneri {
 
 			bool double_face = material->double_face;
 
-			if (!double_face && backface_culling(n1.position, n2.position, n3.position)) {
+			if (!double_face && !material->skybox && backface_culling(n1.position, n2.position, n3.position)) {
 				return;
 			}
 
@@ -213,7 +213,7 @@ namespace Guarneri {
 		}
 
 		void process_fragment(Vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
-			auto s = mat->get_shader();
+			auto s = mat->target_shader;
 			float z = v.position.z;
 
 			ZTest ztest_mode = s->ztest_mode;
@@ -371,6 +371,7 @@ namespace Guarneri {
 
 			// clip near and far planes here, clip left, right, top and bottom planes at scanline stage
 			if (c1.w <= 0.0f || c2.w <= 0.0f || c3.w <= 0.0f) {
+				std::cerr << c1 << ", " << c2 << ", " << c3 << std::endl;
 				return true;
 			}
 			if (c1.z > c1.w || c2.z > c2.w || c3.z > c3.w) {

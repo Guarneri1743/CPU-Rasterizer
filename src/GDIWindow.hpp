@@ -93,6 +93,10 @@ namespace Guarneri {
 			initialized = true;
 		}
 
+		void set_title(LPCSTR title) {
+			SetWindowText(window_handle, title);
+		}
+
 		bool is_valid(){
 			return !closed;
 		}

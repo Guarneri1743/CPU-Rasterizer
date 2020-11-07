@@ -186,7 +186,7 @@ namespace Guarneri{
 				obj->render();
 			}
 
-			skybox->render();
+			//skybox->render();
 
 			//draw_world_coords();
 			draw_camera_coords();

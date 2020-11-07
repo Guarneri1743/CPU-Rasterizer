@@ -14,6 +14,7 @@
 #include <sstream>
 #include <assert.h>
 #include <filesystem>
+#include <chrono>
 
 namespace Guarneri {
 	#define LEFT_HANDED
@@ -224,6 +225,7 @@ namespace Guarneri {
 	class Scene;
 	class IdAllocator;
 	class InputManager;
+	class CubeMap;
 	class SkyboxShader;
 	class SkyboxRenderer;
 
@@ -253,6 +255,17 @@ namespace Guarneri {
 		ss << to_string(fmt);
 		return ss;
 	};
+
+	static std::chrono::steady_clock::time_point start_time;
+
+	static void start_watch() {
+		start_time = std::chrono::steady_clock::now();
+	}
+
+	static float stop_watch() {
+		auto end = std::chrono::steady_clock::now();
+		return (float)std::chrono::duration_cast<std::chrono::microseconds>(end - start_time).count() / (float)1000.0f;
+	}
 }
 
 // common
@@ -371,7 +384,6 @@ namespace Guarneri{
 #include <Light.hpp>
 #include <RawBuffer.hpp>
 #include <Texture.hpp>
-#include <CubeMap.hpp>
 #include <SegmentDrawer.hpp>
 #include <Noise.hpp>
 #include <Shader.hpp>
@@ -382,11 +394,17 @@ namespace Guarneri{
 #include <Camera.hpp>
 #include <Renderer.hpp>
 #include <PrimitiveFactory.hpp>
+#include <CubeMap.hpp>
 #include <SkyboxShader.hpp>
 #include <SkyboxRenderer.hpp>
 #include <Scene.hpp>
 
+
 namespace Guarneri {
+	float fps;
+	float cost;
+	float frame_count;
+
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 		window().initialize(w, h, title, input_mgr().event_callback);
 		input_mgr().add_on_key_down_evt([](KeyCode code, void* data) { 
@@ -398,12 +416,19 @@ namespace Guarneri {
 
 	void kick_off(Scene& scene) {
 		while (window().is_valid()) {
+			start_watch();
 			graphics().clear_buffer();
 			input_mgr().update();
 			graphics().update();
 			scene.update();
 			scene.render();
 			window().flush();
+			frame_count += 1.0f;
+			cost += stop_watch() / 1000.0f;
+			fps = frame_count / cost;
+			std::stringstream ss;
+			ss << "SoftRasterizer  FPS: " << (int)fps;
+			window().set_title(ss.str().c_str());
 			Sleep(0);
 		}
 	}

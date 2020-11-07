@@ -112,22 +112,22 @@ namespace Guarneri {
 
 	class PrimitiveFactory {
 	public:
-		static std::unique_ptr<Model> Plane(std::unique_ptr<Material> material) {
+		static std::unique_ptr<Model> Plane(std::unique_ptr<Material>& material) {
 			const std::vector<Vertex> vert(plane_vertices, plane_vertices + 4);
 			const std::vector<uint32_t> ind(plane_indices, plane_indices + 6);
 			return Model::create(vert, ind, std::move(material));
 		}
 
-		static std::unique_ptr<Model> cube(std::unique_ptr<Material> material) {
+		static std::unique_ptr<Model> cube(std::unique_ptr<Material>& material) {
 			const std::vector<Vertex> vert(cube_vertices, cube_vertices + 36);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
 			return Model::create(vert, ind, std::move(material));
 		}
 
-		static std::unique_ptr<Model> skybox(std::unique_ptr<Material> material) {
+		static std::unique_ptr<Model> skybox(std::unique_ptr<Material>& material) {
 			const std::vector<Vertex> vert(sky_box_vertices, sky_box_vertices + 36);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
-			return Model::create(vert, ind, std::move(material));
+			return Model::create(vert, ind, material);
 		}
 	};
 }

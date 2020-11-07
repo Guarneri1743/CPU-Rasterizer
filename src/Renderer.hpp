@@ -19,7 +19,7 @@ namespace Guarneri {
 		Vertex vertices[3];
 
 	public:
-		static std::unique_ptr<Renderer> create(std::unique_ptr<Model> model) {
+		static std::unique_ptr<Renderer> create(std::unique_ptr<Model>& model) {
 			return std::make_unique<Renderer>(std::move(model));
 		}
 

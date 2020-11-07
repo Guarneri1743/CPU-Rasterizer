@@ -5,36 +5,40 @@ namespace Guarneri {
 	class Material : public Object {
 	public:
 		Material() {
-			this->target_shader = std::move(std::make_unique<Shader>());
-			this->ztest_mode = ZTest::LEQUAL;
+			this->target_shader = std::make_shared<Shader>();
+			this->ztest_mode = ZTest::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->skybox = false;
 		}
 
 		Material(std::unique_ptr<Shader>& shader) {
 			this->target_shader = std::move(shader);
-			this->ztest_mode = ZTest::LEQUAL;
+			this->ztest_mode = ZTest::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->skybox = false;
 		}
 
 		Material(std::unique_ptr<SkyboxShader>& shader) {
-			this->target_shader = std::move(shader);
-			this->ztest_mode = ZTest::LEQUAL;
+			auto shader_ptr = shader.release();
+			this->target_shader = std::shared_ptr<Shader>((Shader*)(shader_ptr));
+			this->ztest_mode = ZTest::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->skybox = true;
 		}
 
 		Material(const Material& other) {
@@ -51,6 +55,7 @@ namespace Guarneri {
 		BlendFactor dst_factor;
 		BlendOp blend_op;
 		bool double_face;
+		bool skybox;
 		bool transparent;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -69,14 +74,6 @@ namespace Guarneri {
 
 		static std::unique_ptr<Material> create(const Material& other) {
 			return std::make_unique<Material>(other);
-		}
-
-		void set_shader(std::shared_ptr<Shader> Shader) {
-			this->target_shader = Shader;
-		}
-
-		std::shared_ptr<Shader> get_shader() {
-			return target_shader;
 		}
 
 		void set_int(const property_name& name, const int& val) {

@@ -44,7 +44,7 @@ namespace Guarneri {
         std::string parent_dir;
 
     public:
-        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material) {
+        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material) {
             return std::make_unique<Model>(vertices, indices, std::move(material));
         }
 

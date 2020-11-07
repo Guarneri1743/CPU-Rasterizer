@@ -5,7 +5,10 @@ namespace Guarneri {
 	class SkyboxRenderer {
 	public:
 		SkyboxRenderer() {
-			target = PrimitiveFactory::skybox(std::make_unique<Material>(std::make_unique<SkyboxShader>()));
+			auto shader = std::make_unique<SkyboxShader>();
+			auto mat = std::make_unique<Material>(shader);
+			mat->ztest_mode = ZTest::LEQUAL;
+			target = PrimitiveFactory::skybox(mat);
 		}
 
 	private:

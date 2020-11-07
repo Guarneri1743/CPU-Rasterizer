@@ -1,6 +1,5 @@
 #pragma once
 #include <Guarneri.hpp>
-#include <Shader.hpp>
 
 namespace Guarneri {
 	class SkyboxShader : public Shader {
@@ -8,19 +7,27 @@ namespace Guarneri {
 		SkyboxShader() {}
 		~SkyboxShader(){}
 
+	private:
+		std::shared_ptr<CubeMap> cube_map;
+
 	public:
+		void sync(const std::shared_ptr<CubeMap>& cube_map) {
+			this->cube_map = cube_map;
+		}
+
 		v2f vertex_shader(const a2v& input) {
 			v2f o;
 			auto clip_pos = p * v * input.position;
 			o.position = Vector4(clip_pos.xy(), clip_pos.ww());
-			o.uv = input.uv;
+			o.shadow_coord = input.position;
 			return o;
 		}
 
 		Color fragment_shader(const v2f& input)  {
-			Color main_tex;
-			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
-				return main_tex;
+			Color sky_color;
+			return Color::BLUE;
+			if (cube_map != nullptr && cube_map->sample(input.shadow_coord.xyz(), sky_color)) {
+				return sky_color;
 			}
 			return Color::BLACK;
 		}
