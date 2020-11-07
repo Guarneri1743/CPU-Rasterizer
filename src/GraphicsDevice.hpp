@@ -35,9 +35,9 @@ namespace Guarneri {
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			// early clip
-			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
+			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
-			}*/
+			}
 
 			auto Shader = material->get_shader();
 
@@ -81,6 +81,7 @@ namespace Guarneri {
 			s3.rhw = 1.0f / c3.position.w;
 
 			Triangle tri(s1, s2, s3);
+			
 
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontal_split();
@@ -336,7 +337,7 @@ namespace Guarneri {
 		Vector4 ndc2viewport(const Vector4& v) {
 			Vector4 viewport_pos;
 			viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
-			viewport_pos.y = (1.0f - v.y) * this->height * 0.5f;
+			viewport_pos.y = (v.y + 1.0f) * this->height * 0.5f;
 			viewport_pos.z = v.z;
 			viewport_pos.w = 1.0f;
 			return viewport_pos;
@@ -351,6 +352,9 @@ namespace Guarneri {
 		bool clipping(const Vector4& v1, const Vector4& v2, const Vector4& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto mvp = p * v * m;
 			Vector4 c1 = mvp * v1; Vector4 c2 = mvp * v2; Vector4 c3 = mvp * v3;
+			if (c1.w < 0 || c2.w < 0 || c3.w < 0) {
+				return true;
+			}
 			return clipping(c1) && clipping(c2) && clipping(c3);
 		}
 
@@ -358,7 +362,7 @@ namespace Guarneri {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
 			// y: [-w, w]
-			float w = v.w; float x = v.x; float y = v.y; float z = v.y;
+			float w = v.w; float x = v.x; float y = v.y; float z = v.z;
 			return (z < -w) || (z > w) || (x < -w) || (x > w) || (y < -w) || (y > w);
 		}
 

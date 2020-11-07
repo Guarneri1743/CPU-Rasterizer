@@ -24,7 +24,7 @@ int main()
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	demo_scene.add(Renderer::create(std::move(backpack)), false);
+	//demo_scene.add(Renderer::create(std::move(backpack)), false);
 
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
@@ -35,7 +35,7 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto Plane = PrimitiveFactory::Plane(std::move(plane_material));
-	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
+	Plane->transform.scale(Vector3(50.0f, 1.0f, 50.0f));
 	demo_scene.add(Renderer::create(std::move(Plane)), false);
 
 	// transparent cube
@@ -51,7 +51,7 @@ int main()
 	cube->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
 	cube->transform.translate(Vector3(5.0f, 3.0f, 5.0f));
 	std::shared_ptr<Renderer> cube_renderer = Renderer::create(std::move(cube));
-	demo_scene.add(cube_renderer, true);
+	//demo_scene.add(cube_renderer, true);
 	demo_scene.add_on_update_evt([](void* user_data) {
 		std::shared_ptr<Renderer> cb = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
 		if (input_mgr().is_key_down(KeyCode::W)) {

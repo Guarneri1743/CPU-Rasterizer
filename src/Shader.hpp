@@ -85,8 +85,8 @@ namespace Guarneri {
 			this->lighting_param = data;
 		}
 
-		void set_mvp_matrix(const Matrix4x4& Model, const Matrix4x4& view, const Matrix4x4& proj) {
-			this->m = Model;
+		void set_mvp_matrix(const Matrix4x4& model, const Matrix4x4& view, const Matrix4x4& proj) {
+			this->m = model;
 			this->v = view;
 			this->p = proj;
 		}

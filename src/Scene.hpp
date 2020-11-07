@@ -149,7 +149,7 @@ namespace Guarneri{
 		}
 
 		void draw_camera_coords() {
-			Vector2 offset = Vector2(-(window().width / 2 - 50.0f), window().height / 2 - 50.0f);
+			Vector2 offset = Vector2(-(window().width / 2 - 50.0f), -(window().height / 2 - 50.0f));
 			Vector3 pos = main_cam->position;
 			Vector3 forward = main_cam->forward;
 			Vector3 right = main_cam->right;

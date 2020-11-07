@@ -55,7 +55,7 @@ namespace Guarneri {
 			BITMAPINFOHEADER bitmap_header;
 			bitmap_header.biSize = sizeof(BITMAPINFOHEADER);
 			bitmap_header.biWidth = width;
-			bitmap_header.biHeight = -height;
+			bitmap_header.biHeight = height;
 			bitmap_header.biPlanes = 1;
 			bitmap_header.biBitCount  = 32;
 			bitmap_header.biCompression = BI_RGB;

@@ -30,8 +30,8 @@ namespace Guarneri {
 		void render() {
 			auto view = misc_param.view_matrix;
 			auto proj = misc_param.proj_matrix;
-			auto Model = target->transform.local2world;
-			auto pos = target->transform.position();
+			auto model = target->transform.local2world;
+			auto pos = target->transform.position;
 			auto up = target->transform.up();
 			auto forward = target->transform.forward();
 			auto right = target->transform.right();
@@ -45,7 +45,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw_primitive(m->material, vertices[0], vertices[1], vertices[2], Model, view, proj);
+							graphics().draw_primitive(m->material, vertices[0], vertices[1], vertices[2], model, view, proj);
 							idx = 0;
 						}
 					}

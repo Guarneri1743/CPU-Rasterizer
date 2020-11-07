@@ -117,6 +117,13 @@ namespace Guarneri {
 			sorted[1] = vertices[mid];
 			sorted[2] = vertices[max_idx];
 
+			if (vertices[min_idx].position.y > vertices[mid].position.y) {
+				std::cerr << "fatal: min > mid: " << vertices[min_idx].position << ", " << vertices[mid].position << std::endl;
+			}
+			if (vertices[mid].position.y > vertices[max_idx].position.y) {
+				std::cerr << "fatal: mid > max_idx: " << vertices[mid].position << ", " << vertices[max_idx].position << std::endl;
+			}
+
 			// Line
 			if (sorted[0].position.y == sorted[1].position.y && sorted[1].position.y == sorted[2].position.y) {
 				return ret;
@@ -148,7 +155,7 @@ namespace Guarneri {
 			float mid_y = sorted[1].position.y;
 
 			float t = (mid_y - sorted[0].position.y)/ (sorted[2].position.y - sorted[0].position.y);
-
+		
 			// interpolate new Vertex
 			Vertex v = Vertex::interpolate(sorted[0], sorted[2], t);
 
@@ -161,7 +168,10 @@ namespace Guarneri {
 			}
 
 			auto tri = ret[0];
-			assert(EQUALS(tri[1].position.y, tri[2].position.y));
+			//assert(EQUALS(tri[1].position.y, tri[2].position.y));
+			if (!EQUALS(tri[1].position.y, tri[2].position.y)) {
+				//std::cerr << tri[1].position << ",   " << tri[2].position << std::endl;
+			}
 
 			// bottom Triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
@@ -172,7 +182,10 @@ namespace Guarneri {
 			}
 
 			tri = ret[1];
-			assert(EQUALS(tri[1].position.y, tri[2].position.y));
+			//assert(EQUALS(tri[1].position.y, tri[2].position.y));
+			if (!EQUALS(tri[1].position.y, tri[2].position.y)) {
+				//std::cerr << tri[1].position << ",   " << tri[2].position << std::endl;
+			}
 
 			return ret;
 		}
