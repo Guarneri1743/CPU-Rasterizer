@@ -22,6 +22,7 @@ int main()
 
 	// backpack
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
+	backpack->material->lighting_param.glossiness = 64.0f;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
 	demo_scene.add(Renderer::create(std::move(backpack)), false);
@@ -35,7 +36,7 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto Plane = PrimitiveFactory::Plane(std::move(plane_material));
-	Plane->transform.scale(Vector3(10.0f, 0.0f, 10.0f));
+	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
 	demo_scene.add(Renderer::create(std::move(Plane)), false);
 
 	// transparent cube

@@ -23,8 +23,7 @@ namespace Guarneri {
 
 	class Shader : public Object{
 	public:
-		Shader(const shader_id& _id) {
-			this->id = _id;
+		Shader() {
 			this->ztest_mode = ZTest::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -37,9 +36,9 @@ namespace Guarneri {
 			copy(other);
 		}
 
-		~Shader() { }
+		virtual ~Shader() { }
 
-	private:
+	protected:
 		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -48,7 +47,6 @@ namespace Guarneri {
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
-		shader_id id;
 		ZTest ztest_mode;
 		ZWrite zwrite_mode;
 		BlendFactor src_factor;
@@ -91,7 +89,7 @@ namespace Guarneri {
 			this->p = proj;
 		}
 
-		v2f vertex_shader(const a2v& input) {
+		virtual v2f vertex_shader(const a2v& input) {
 			v2f o;
 			auto oo = p * v * m * input.position;
 			o.position = oo;
@@ -102,7 +100,7 @@ namespace Guarneri {
 			return o;
 		}
 
-		Color fragment_shader(const v2f& input) {
+		virtual Color fragment_shader(const v2f& input) {
 			Color ambient = misc_param.main_light.ambient;
 			Color specular = misc_param.main_light.specular;
 			Color diffuse = misc_param.main_light.diffuse;

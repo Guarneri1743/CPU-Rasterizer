@@ -12,11 +12,13 @@ namespace Guarneri {
                 std::cerr << "load vertices failed." << std::endl;
             }
             assert(indices.size() % 3 == 0);
-            auto m = std::make_unique<Mesh>(vertices, indices, std::move(material));
+            auto m = std::make_unique<Mesh>(vertices, indices);
             meshes.push_back(std::move(m));
+            this->material = std::move(material);
         }
 
         Model(std::string path) {
+            this->material = std::make_shared<Material>();
             Assimp::Importer importer;
             const aiScene* Scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
             if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
@@ -36,6 +38,7 @@ namespace Guarneri {
     public:
         std::vector<std::unique_ptr<Mesh>> meshes;
         Transform transform;
+        std::shared_ptr<Material> material;
 
     private:
         std::string parent_dir;
@@ -124,13 +127,12 @@ namespace Guarneri {
             auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
             auto height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
             
-            auto mat = std::make_unique<Material>();
-            mat->set_texture(albedo_prop, diffuse);
-            mat->set_texture(specular_prop, specular);
-            mat->set_texture(normal_prop, normal);
-            mat->set_texture(height_prop, height);
+            material->set_texture(albedo_prop, diffuse);
+            material->set_texture(specular_prop, specular);
+            material->set_texture(normal_prop, normal);
+            material->set_texture(height_prop, height);
 
-            return std::make_unique<Mesh>(vertices, indices, std::move(mat));
+            return std::make_unique<Mesh>(vertices, indices);
         }
 
         std::shared_ptr<Texture> load_textures(aiMaterial* material, aiTextureType type, std::string property_name)

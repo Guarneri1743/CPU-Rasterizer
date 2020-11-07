@@ -5,7 +5,7 @@ namespace Guarneri {
 	class Material : public Object {
 	public:
 		Material() {
-			this->target_shader = std::make_unique<Shader>("default");
+			this->target_shader = std::move(std::make_unique<Shader>());
 			this->ztest_mode = ZTest::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -16,6 +16,17 @@ namespace Guarneri {
 		}
 
 		Material(std::unique_ptr<Shader>& shader) {
+			this->target_shader = std::move(shader);
+			this->ztest_mode = ZTest::LEQUAL;
+			this->zwrite_mode = ZWrite::ON;
+			this->src_factor = BlendFactor::SRC_ALPHA;
+			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+			this->blend_op = BlendOp::ADD;
+			this->double_face = false;
+			this->transparent = false;
+		}
+
+		Material(std::unique_ptr<SkyboxShader>& shader) {
 			this->target_shader = std::move(shader);
 			this->ztest_mode = ZTest::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;

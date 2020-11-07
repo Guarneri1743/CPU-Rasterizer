@@ -9,11 +9,11 @@ namespace Guarneri {
 		float intensity;
 	};
 
-	struct directional_light : Light {
+	struct DirectionalLight : Light {
 		Vector3 direction;
 	};
 
-	struct spot_light : Light {
+	struct SpotLight : Light {
 		Vector3 position;
 		Vector3 spot_direction;
 		float phi;

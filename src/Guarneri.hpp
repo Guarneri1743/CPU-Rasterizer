@@ -19,7 +19,7 @@ namespace Guarneri {
 	#define LEFT_HANDED
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
-	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
+	#define EQUALS(a, b) (std::abs(a-b) <= EPSILON)
 	#define FLOAT_LOG_PRECISION 6
 	#define DEGREE2RAD(degree) degree * 0.0174532925f
 	#define PI 3.1415926
@@ -209,6 +209,7 @@ namespace Guarneri {
 	struct Cylinder;
 	struct Capsule;
 	struct Light;
+	struct DirectionalLight;
 	class Mesh;
 	class Camera;
 	class SegmentDrawer;
@@ -223,7 +224,8 @@ namespace Guarneri {
 	class Scene;
 	class IdAllocator;
 	class InputManager;
-	struct directional_light;
+	class SkyboxShader;
+	class SkyboxRenderer;
 
 	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
 	uint32_t CLAMP_UINT(uint32_t x, uint32_t min, uint32_t max) { return (x < min) ? min : ((x > max) ? max : x); }
@@ -335,7 +337,7 @@ namespace Guarneri{
 		Vector3 camera_pos;
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;
-		directional_light main_light;
+		DirectionalLight main_light;
 		RenderFlag flag;
 	} misc_parameter;
 	static misc_parameter misc_param;
@@ -369,6 +371,7 @@ namespace Guarneri{
 #include <Light.hpp>
 #include <RawBuffer.hpp>
 #include <Texture.hpp>
+#include <CubeMap.hpp>
 #include <SegmentDrawer.hpp>
 #include <Noise.hpp>
 #include <Shader.hpp>
@@ -379,6 +382,8 @@ namespace Guarneri{
 #include <Camera.hpp>
 #include <Renderer.hpp>
 #include <PrimitiveFactory.hpp>
+#include <SkyboxShader.hpp>
+#include <SkyboxRenderer.hpp>
 #include <Scene.hpp>
 
 namespace Guarneri {

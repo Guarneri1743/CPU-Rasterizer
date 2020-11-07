@@ -11,6 +11,7 @@ namespace Guarneri {
 			this->fmt = _fmt;
 			this->width = _width;
 			this->height = _height;
+			this->filtering = Filtering::BILINEAR;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
@@ -27,6 +28,7 @@ namespace Guarneri {
 			this->fmt = _fmt;
 			this->width = _width;
 			this->height = _height;
+			this->filtering = Filtering::BILINEAR;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
@@ -46,6 +48,7 @@ namespace Guarneri {
 		Texture(const char* path) {
 			this->path = path;
 			this->fmt = TextureFormat::INVALID;
+			this->filtering = Filtering::BILINEAR;
 			release();
 			int w, h, channels;
 			if (!FS::exists(path)) {

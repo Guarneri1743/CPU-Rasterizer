@@ -52,7 +52,7 @@ namespace Guarneri {
 		12, 13, 14, 15, 16, 17,
 		18, 19, 20, 21, 22, 23,
 		24, 25, 26, 27, 28, 29,
-		30, 31, 32, 33, 34, 35, 
+		30, 31, 32, 33, 34, 35,
 	};
 
 	Vertex plane_vertices[8] = {
@@ -66,6 +66,50 @@ namespace Guarneri {
 		0, 1, 2, 2, 3, 0
 	};
 
+	Vertex sky_box_vertices[] = {
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+
+		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f))
+	};
+
 	class PrimitiveFactory {
 	public:
 		static std::unique_ptr<Model> Plane(std::unique_ptr<Material> material) {
@@ -76,6 +120,12 @@ namespace Guarneri {
 
 		static std::unique_ptr<Model> cube(std::unique_ptr<Material> material) {
 			const std::vector<Vertex> vert(cube_vertices, cube_vertices + 36);
+			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
+			return Model::create(vert, ind, std::move(material));
+		}
+
+		static std::unique_ptr<Model> skybox(std::unique_ptr<Material> material) {
+			const std::vector<Vertex> vert(sky_box_vertices, sky_box_vertices + 36);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
 			return Model::create(vert, ind, std::move(material));
 		}

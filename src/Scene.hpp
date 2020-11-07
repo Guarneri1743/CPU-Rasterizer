@@ -13,9 +13,10 @@ namespace Guarneri{
 		}
 
 	public:
-		directional_light main_light;
+		DirectionalLight main_light;
 		std::vector<std::shared_ptr<Renderer>> objects;
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
+		std::unique_ptr<SkyboxRenderer> skybox;
 		std::shared_ptr<Camera> main_cam;
 		std::shared_ptr<Camera> debug_cam;
 		std::shared_ptr<Camera> world_debug_cam;
@@ -37,6 +38,8 @@ namespace Guarneri{
 			main_cam->lookat(Vector3::ZERO);
 			debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
 			world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
+
+			skybox = std::make_unique<SkyboxRenderer>();
 
 			input_mgr().add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data) {
 				if (input_mgr().is_mouse_down(MouseButton::RIGHT)) {
@@ -182,6 +185,8 @@ namespace Guarneri{
 			for (auto& obj : transparent_objects) {
 				obj->render();
 			}
+
+			skybox->render();
 
 			//draw_world_coords();
 			draw_camera_coords();
