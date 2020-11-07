@@ -2,21 +2,21 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	class render_device {
+	class GraphicsDevice {
 	public:
 		uint32_t width;
 		uint32_t height;
 
 	private:
-		std::shared_ptr<raw_buffer<float>> zbuffer;
-		std::shared_ptr<raw_buffer<color_bgra>> framebuffer;
+		std::shared_ptr<RawBuffer<float>> zbuffer;
+		std::shared_ptr<RawBuffer<color_bgra>> framebuffer;
 
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
 			this->width = width_t;
 			this->height = height_t;
-			zbuffer = std::make_shared<raw_buffer<float>>(width_t, height_t);
-			framebuffer = std::make_shared<raw_buffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
+			zbuffer = std::make_shared<RawBuffer<float>>(width_t, height_t);
+			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			zbuffer->clear(1.0f);
 		}
 
@@ -27,49 +27,49 @@ namespace Guarneri {
 		// =============================================================================================================Pipeline======================================================================================================================
 		// *																																																										*
 		// *												 Model matrix					view matrix							projection matrix                clipping, clip2ndc					    screen mapping								*
-		// *  vertex data ------------>local(Model) space  ----------------> world space ----------------> view(Camera) space ---------------------> clip space ---------------------> ndc(cvv) space --------------------> screen space(viewport)  *
+		// *  Vertex data ------------>local(Model) space  ----------------> world space ----------------> view(Camera) space ---------------------> clip space ---------------------> ndc(cvv) space --------------------> screen space(viewport)  *
 		// *																																																										*
 		// *						  primitive assembly/rasterization																																												*
 		// *  screen space vertices ------------------------------------->  fragments ------> scissor test -------> alpha test -------> stencil test ---------> depth test -------> blending --------> framebuffer									*
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
-		void draw_primitive(std::shared_ptr<Material>  Material, const vertex& v1, const vertex& v2, const vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw_primitive(std::shared_ptr<Material>  Material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			// early clip
 			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
 			}*/
 
-			auto shader = Material->get_shader();
+			auto Shader = Material->get_shader();
 
-			shader->set_mvp_matrix(m, v, p);
-			shader->sync(Material->name2float, Material->name2float4, Material->name2int, Material->name2tex);
-			shader->sync(Material->ztest_mode, Material->zwrite_mode);
-			shader->sync(Material->transparent, Material->src_factor, Material->dst_factor, Material->blend_op);
-			shader->sync(Material->lighting_param);
+			Shader->set_mvp_matrix(m, v, p);
+			Shader->sync(Material->name2float, Material->name2float4, Material->name2int, Material->name2tex);
+			Shader->sync(Material->ztest_mode, Material->zwrite_mode);
+			Shader->sync(Material->transparent, Material->src_factor, Material->dst_factor, Material->blend_op);
+			Shader->sync(Material->lighting_param);
 
-			assert(shader != nullptr);
+			assert(Shader != nullptr);
 
-			v2f o1 = process_vertex(shader, v1);
-			v2f o2 = process_vertex(shader, v2);
-			v2f o3 = process_vertex(shader, v3);
+			v2f o1 = process_vertex(Shader, v1);
+			v2f o2 = process_vertex(Shader, v2);
+			v2f o3 = process_vertex(Shader, v3);
 
-			vertex c1(o1.position, o1.world_pos, o1.Color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
-			vertex c2(o2.position, o2.world_pos, o2.Color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
-			vertex c3(o3.position, o3.world_pos, o3.Color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+			Vertex c1(o1.position, o1.world_pos, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
+			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
+			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			// position perspective division
-			vertex n1 = clip2ndc(c1);
-			vertex n2 = clip2ndc(c2);
-			vertex n3 = clip2ndc(c3);
+			Vertex n1 = clip2ndc(c1);
+			Vertex n2 = clip2ndc(c2);
+			Vertex n3 = clip2ndc(c3);
 
 			// other channels perspective division
 			n1.perspective_division(c1.rhw);
 			n2.perspective_division(c2.rhw);
 			n3.perspective_division(c3.rhw);
 
-			vertex s1 = ndc2viewport(n1);
-			vertex s2 = ndc2viewport(n2);
-			vertex s3 = ndc2viewport(n3);
+			Vertex s1 = ndc2viewport(n1);
+			Vertex s2 = ndc2viewport(n2);
+			Vertex s3 = ndc2viewport(n3);
 
 			s1.position.w = c1.position.w;
 			s1.rhw = 1.0f / c1.position.w;
@@ -151,13 +151,13 @@ namespace Guarneri {
 			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
 		}
 
-		v2f process_vertex(const std::shared_ptr<shader>& shader, const vertex& vert) {
+		v2f process_vertex(const std::shared_ptr<Shader>& Shader, const Vertex& vert) {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
-			input.Color = vert.Color;
+			input.color = vert.color;
 			input.normal = vert.normal;
-			return shader->vertex_shader(input);
+			return Shader->vertex_shader(input);
 		}
 
 		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Material>& mat) {
@@ -173,20 +173,20 @@ namespace Guarneri {
 				assert(bottom >= top);
 				// interpolate vertically
 				for (int row = top; row < bottom; row++) {
-					vertex lhs;
-					vertex rhs;
+					Vertex lhs;
+					Vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
 					// todo: clip Triangle to polygons in order to avoid these two steps
 					if (lhs.position.x <= 0.0f) {
 						float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
-						lhs = vertex::interpolate(lhs, rhs, t);
+						lhs = Vertex::interpolate(lhs, rhs, t);
 					}
 					int left = CEIL(lhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
 
 					if (rhs.position.x >= this->width) {
 						float t = ((float)this->width - lhs.position.x) / (rhs.position.x - lhs.position.x);
-						rhs = vertex::interpolate(lhs, rhs, t);
+						rhs = Vertex::interpolate(lhs, rhs, t);
 					}
 					int right = CEIL(rhs.position.x);
 					right = CLAMP_INT(right, 0, this->width);
@@ -196,14 +196,14 @@ namespace Guarneri {
 					// interpolate horizontally
 					for (int col = left; col < right; col++) {
 						process_fragment(lhs, row, col, mat);
-						auto dx = vertex::differential(lhs, rhs);
-						lhs = vertex::intagral(lhs, dx);
+						auto dx = Vertex::differential(lhs, rhs);
+						lhs = Vertex::intagral(lhs, dx);
 					}
 				}
 			}
 		}
 
-		void process_fragment(vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
+		void process_fragment(Vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
 			auto s = mat->get_shader();
 			float z = v.position.z;
 
@@ -215,14 +215,14 @@ namespace Guarneri {
 
 			color_bgra pixel_color;
 
-			// fragment shader
+			// fragment Shader
 			Color fragment_result;
 			if (((int)misc_param.flag & (int)render_flag::shaded) != 0 && s != nullptr) {
 				v2f v_out;
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
 				v_out.world_pos = v.world_pos * w;
-				v_out.Color = v.Color * w;
+				v_out.color = v.color * w;
 				v_out.normal = v.normal * w;
 				v_out.uv = v.uv * w;
 				fragment_result = s->fragment_shader(v_out);
@@ -303,8 +303,8 @@ namespace Guarneri {
 			return pass;
 		}
 
-		vertex clip2ndc(const vertex& v) {
-			vertex ret = v;
+		Vertex clip2ndc(const Vertex& v) {
+			Vertex ret = v;
 			ret.position = clip2ndc(v.position);
 			float w = ret.position.w;
 			if (w == 0.0f) {
@@ -326,8 +326,8 @@ namespace Guarneri {
 			return ndc_pos;
 		}
 
-		vertex ndc2viewport(const vertex& v) {
-			vertex ret = v;
+		Vertex ndc2viewport(const Vertex& v) {
+			Vertex ret = v;
 			ret.position = ndc2viewport(v.position);
 			ret.rhw = 1.0f;
 			return ret;

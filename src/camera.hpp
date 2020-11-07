@@ -12,7 +12,7 @@ namespace Guarneri {
 		float aspect;
 		float near;
 		float far;
-		// todo: transform transform; 
+		// todo: Transform Transform; 
 		Vector3 forward;
 		Vector3 right;
 		Vector3 up;
@@ -26,21 +26,21 @@ namespace Guarneri {
 		projection proj_type;
 
 	public:
-		static std::unique_ptr<Camera> create(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+		static std::unique_ptr<Camera> create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const projection& _proj_type) {
 			auto ret = std::make_unique<Camera>();
-			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
+			ret->initialize(_position, _aspect, _fov, _near, _far, _proj_type);
 			return ret;
 		}
 
-		void initialize(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
-			this->position = position_t;
-			this->aspect = aspect_t;
-			this->fov = fov_t;
-			this->near = near_t;
-			this->far = far_t;
+		void initialize(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const projection& _proj_type) {
+			this->position = _position;
+			this->aspect = _aspect;
+			this->fov = _fov;
+			this->near = _near;
+			this->far = _far;
 			this->yaw = -210.0f;
 			this->pitch = -45.0f;
-			this->proj_type = proj_type_t;
+			this->proj_type = _proj_type;
 			update_camera();
 			update_proj_mode();
 		}

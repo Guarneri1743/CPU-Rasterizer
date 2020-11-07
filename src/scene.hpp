@@ -2,20 +2,20 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri{
-	class scene{
+	class Scene{
 	public:
-		scene() {
+		Scene() {
 			initialize();
 		}
 
-		~scene() {
+		~Scene() {
 
 		}
 
 	public:
 		directional_light main_light;
-		std::vector<std::shared_ptr<renderer>> objects;
-		std::vector<std::shared_ptr<renderer>> transparent_objects;
+		std::vector<std::shared_ptr<Renderer>> objects;
+		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::shared_ptr<Camera> main_cam;
 		std::shared_ptr<Camera> debug_cam;
 		std::shared_ptr<Camera> world_debug_cam;
@@ -24,7 +24,7 @@ namespace Guarneri{
 		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
 
 	public:
-		// todo: serialzie & deserialize scene data
+		// todo: serialzie & deserialize Scene data
 		void initialize() {
 			main_light.direction = Vector3(1.0f, 1.0f, 1.0f);
 			main_light.intensity = 1.0f;
@@ -41,19 +41,19 @@ namespace Guarneri{
 			input_mgr().add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data) {
 				if (input_mgr().is_mouse_down(mouse_button::right)) {
 					Vector2 offset = (pos - prev) * Vector2(window().width, window().height) * CAMERA_ROTATE_SPEED;
-					scene* s = reinterpret_cast<scene*>(data);
+					Scene* s = reinterpret_cast<Scene*>(data);
 					s->main_cam->rotate(offset.x, offset.y);
 				}
 				if (input_mgr().is_mouse_down(mouse_button::middle)) {
 					Vector2 offset = (pos - prev) * Vector2(window().width, window().height) * CAMERA_ROTATE_SPEED;
-					scene* s = reinterpret_cast<scene*>(data);
+					Scene* s = reinterpret_cast<Scene*>(data);
 					s->main_cam->move_left(offset.x);
 					s->main_cam->move_ascend(offset.y);
 				}
 			}, this);
 
 			input_mgr().add_on_mouse_wheel_rolling_evt([](mouse_wheel_rolling rolling, void* data) {
-					scene* s = reinterpret_cast<scene*>(data);
+					Scene* s = reinterpret_cast<Scene*>(data);
 					if (rolling == mouse_wheel_rolling::up) {
 						s->main_cam->move_forward(CAMERA_ZOOM_SPEED);
 					}
@@ -90,7 +90,7 @@ namespace Guarneri{
 				}, nullptr);
 		}
 
-		void add(std::shared_ptr<renderer> target, bool transparent) {
+		void add(std::shared_ptr<Renderer> target, bool transparent) {
 			if (transparent) {
 				transparent_objects.push_back(target);
 			}

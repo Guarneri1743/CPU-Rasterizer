@@ -4,21 +4,21 @@
 namespace Guarneri {
 	struct Triangle {
 	public:
-		Triangle(const vertex verts[3]) {
+		Triangle(const Vertex verts[3]) {
 			for (int i = 0; i < 3; i++) {
 				vertices[i] = verts[i];
 			}
 			flip = false;
 		}
 
-		Triangle(const vertex& v1, const vertex& v2, const vertex& v3) {
+		Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
 			flip = false;
 		}
 
-		Triangle(const vertex& v1, const vertex& v2, const vertex& v3, const bool& flip) {
+		Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, const bool& flip) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
@@ -26,7 +26,7 @@ namespace Guarneri {
 		}
 
 	public:
-		vertex vertices[3];
+		Vertex vertices[3];
 		bool flip;
 
 	public:
@@ -51,7 +51,7 @@ namespace Guarneri {
 		//        \/
 		//		bottom[0]
 		//====================================================
-		void interpolate(const float& screen_y, vertex& lhs, vertex& rhs) {
+		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
 			len = flip ? len : -len;
 			float dy = flip ? screen_y - this->vertices[2].position.y : screen_y - this->vertices[0].position.y;
@@ -62,8 +62,8 @@ namespace Guarneri {
 			r0 = flip ? 2 : 0;
 			l1 = flip ? 0 : 1;
 			r1 = flip ? 0 : 2;
-			lhs = vertex::interpolate(this->vertices[l0], this->vertices[l1], t);
-			rhs = vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
+			lhs = Vertex::interpolate(this->vertices[l0], this->vertices[l1], t);
+			rhs = Vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
 		}
 
 		// split a Triangle to 1-2 triangles
@@ -111,7 +111,7 @@ namespace Guarneri {
 
 			int mid = min_idx == 0 ? (max_idx == 1 ? 2 : 1) : (max_idx == 0 ? (min_idx == 1 ? 2 : 1) : 0);
 
-			vertex sorted[3];
+			Vertex sorted[3];
 
 			sorted[0] = vertices[min_idx];
 			sorted[1] = vertices[mid];
@@ -149,8 +149,8 @@ namespace Guarneri {
 
 			float t = (mid_y - sorted[0].position.y)/ (sorted[2].position.y - sorted[0].position.y);
 
-			// interpolate new vertex
-			vertex v = vertex::interpolate(sorted[0], sorted[2], t);
+			// interpolate new Vertex
+			Vertex v = Vertex::interpolate(sorted[0], sorted[2], t);
 
 			// top Triangle: top-left-right
 			if (v.position.x >= sorted[1].position.x) {
@@ -177,9 +177,9 @@ namespace Guarneri {
 			return ret;
 		}
 
-		vertex& operator[](const uint32_t i) { return vertices[i]; }
+		Vertex& operator[](const uint32_t i) { return vertices[i]; }
 
-		const vertex& operator[](const uint32_t i) const { return vertices[i]; }
+		const Vertex& operator[](const uint32_t i) const { return vertices[i]; }
 
 		public:
 			std::string str() const {

@@ -5,7 +5,7 @@ namespace Guarneri {
 	class Material : public Object {
 	public:
 		Material() {
-			this->target_shader = std::make_unique<shader>("default");
+			this->target_shader = std::make_unique<Shader>("default");
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
 			this->src_factor = blend_factor::src_alpha;
@@ -14,8 +14,8 @@ namespace Guarneri {
 			this->transparent = false;
 		}
 
-		Material(std::unique_ptr<shader>& shader) {
-			this->target_shader = std::move(shader);
+		Material(std::unique_ptr<Shader>& Shader) {
+			this->target_shader = std::move(Shader);
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
 			this->src_factor = blend_factor::src_alpha;
@@ -31,7 +31,7 @@ namespace Guarneri {
 		~Material() { }
 
 	public:
-		std::shared_ptr<shader> target_shader;
+		std::shared_ptr<Shader> target_shader;
 		ztest ztest_mode;
 		zwrite zwrite_mode;
 		blend_factor src_factor;
@@ -41,7 +41,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		lighting_data lighting_param;
 
 	public:
@@ -49,19 +49,19 @@ namespace Guarneri {
 			return std::make_unique<Material>();
 		}
 
-		static std::unique_ptr<Material> create(std::unique_ptr<shader>& shader) {
-			return std::make_unique<Material>(shader);
+		static std::unique_ptr<Material> create(std::unique_ptr<Shader>& Shader) {
+			return std::make_unique<Material>(Shader);
 		}
 
 		static std::unique_ptr<Material> create(const Material& other) {
 			return std::make_unique<Material>(other);
 		}
 
-		void set_shader(std::shared_ptr<shader> shader) {
-			this->target_shader = shader;
+		void set_shader(std::shared_ptr<Shader> Shader) {
+			this->target_shader = Shader;
 		}
 
-		std::shared_ptr<shader> get_shader() {
+		std::shared_ptr<Shader> get_shader() {
 			return target_shader;
 		}
 
@@ -77,7 +77,7 @@ namespace Guarneri {
 			name2float[name] = val;
 		}
 		
-		void set_texture(const property_name& name, std::shared_ptr<texture> tex) {
+		void set_texture(const property_name& name, std::shared_ptr<Texture> tex) {
 			if (tex == nullptr) {
 				return;
 			}
@@ -105,7 +105,7 @@ namespace Guarneri {
 			return 0;
 		}
 
-		std::shared_ptr<texture> get_texture(const property_name& name) const {
+		std::shared_ptr<Texture> get_texture(const property_name& name) const {
 			if (name2tex.count(name) > 0) {
 				return name2tex.at(name);
 			}
@@ -133,7 +133,7 @@ namespace Guarneri {
 
 		std::string str() const {
 			std::stringstream ss;
-			ss << "Material[" << this->id << " shader: " << this->target_shader << "]";
+			ss << "Material[" << this->id << " Shader: " << this->target_shader << "]";
 			return ss.str();
 		}
 	};

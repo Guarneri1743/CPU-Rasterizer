@@ -4,7 +4,7 @@
 // simple cache based on weak_ptr
 namespace Guarneri {
 	template<typename T>
-	class resource_manager {
+	class ResourceManager {
 	public:
 		void cache(const std::string& path, const std::shared_ptr<T>& res) {
 			if (path2res.count(path) > 0) {

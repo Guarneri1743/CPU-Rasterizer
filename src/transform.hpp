@@ -2,14 +2,14 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	//todo: hierarchical transform
-	struct transform {
+	//todo: hierarchical Transform
+	struct Transform {
 	public:
-		transform() {
+		Transform() {
 			local2world = Matrix4x4::IDENTITY;
 		}
 
-		transform(const transform& other) {
+		Transform(const Transform& other) {
 			this->local2world = other.local2world;
 		}
 
@@ -87,7 +87,7 @@ namespace Guarneri {
 			local2world = s * local2world;
 		}
 
-		transform& operator =(const transform& other) {
+		Transform& operator =(const Transform& other) {
 			this->local2world = other.local2world;
 		}
 	};

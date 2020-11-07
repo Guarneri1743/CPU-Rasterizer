@@ -5,7 +5,7 @@ namespace Guarneri {
 	struct a2v {
 		Vector4 position;
 		Vector2 uv;
-		Vector4 Color;
+		Vector4 color;
 		Vector3 normal;
 	};
 
@@ -13,17 +13,17 @@ namespace Guarneri {
 		Vector4 position;
 		Vector3 world_pos;
 		Vector2 uv;
-		Vector4 Color;
+		Vector4 color;
 		Vector3 normal;
 		Vector3 tangent;
 		Vector3 bitangent;
-		// todo: add userdata feature to vertex
+		// todo: add userdata feature to Vertex
 		Vector3 custom_data;
 	};
 
-	class shader : public Object{
+	class Shader : public Object{
 	public:
-		shader(const shader_id& id) {
+		Shader(const shader_id& id) {
 			this->id = id;
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
@@ -33,18 +33,18 @@ namespace Guarneri {
 			this->transparent = false;
 		}
 
-		shader(const shader& other) {
+		Shader(const Shader& other) {
 			copy(other);
 		}
 
-		~shader() { }
+		~Shader() { }
 
 	private:
 		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
@@ -74,7 +74,7 @@ namespace Guarneri {
 			const std::unordered_map<property_name, float>& float_uniforms,
 			const std::unordered_map<property_name, Vector4>& float4_uniforms,
 			const std::unordered_map<property_name, int>& int_uniforms,
-			const std::unordered_map<property_name, std::shared_ptr<texture>>& tex_uniforms) {
+			const std::unordered_map<property_name, std::shared_ptr<Texture>>& tex_uniforms) {
 			this->name2float = float_uniforms;
 			this->name2float4 = float4_uniforms;
 			this->name2int = int_uniforms;
@@ -96,7 +96,7 @@ namespace Guarneri {
 			auto oo = p * v * m * input.position;
 			o.position = oo;
 			o.world_pos = (m * input.position).xyz();
-			o.Color = input.Color;
+			o.color = input.color;
 			o.normal = Matrix3x3(m).inverse().transpose() * input.normal;
 			o.uv = input.uv;
 			return o;
@@ -107,6 +107,8 @@ namespace Guarneri {
 			Color specular = misc_param.main_light.specular;
 			Color diffuse = misc_param.main_light.diffuse;
 			float intensity = misc_param.main_light.intensity;
+			REF(intensity);
+
 			Vector3 light_dir = misc_param.main_light.direction.normalized();
 			Vector3 cam_pos = misc_param.camera_pos;
 			Vector3 frag_pos = input.world_pos;
@@ -145,7 +147,7 @@ namespace Guarneri {
 			}
 
 			if (((int)misc_param.flag & (int)render_flag::vertex_color) != 0) {
-				return input.Color;
+				return input.color;
 			}
 
 			if (((int)misc_param.flag & (int)render_flag::normal) != 0) {
@@ -155,12 +157,12 @@ namespace Guarneri {
 			return Color(ret.r, ret.g, ret.b, 1.0f);
 		}
 
-		shader& operator =(const shader& other) {
+		Shader& operator =(const Shader& other) {
 			copy(other);
 			return *this;
 		}
 
-		void copy(const shader& other) {
+		void copy(const Shader& other) {
 			this->id = other.id;
 			this->ztest_mode = other.ztest_mode;
 			this->zwrite_mode = other.zwrite_mode;

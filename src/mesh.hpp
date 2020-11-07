@@ -4,28 +4,28 @@
 namespace Guarneri {
 	class Mesh : public Object{
 	public:
-		Mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
 			this->vertices = vertices;
 			this->indices = indices;
-			this->mat = std::move(Material);
+			this->material = std::move(Material);
 		}
 
-		Mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
 			this->vertices = vertices;
 			this->indices = indices;
 		}
 
 	public:
-		std::vector<vertex> vertices;
+		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
-		std::shared_ptr<Material> mat;
+		std::shared_ptr<Material> material;
 
 	public:
-		std::unique_ptr<Mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
-			return std::make_unique<Mesh>(vertices, indices, std::move(Material));
+		std::unique_ptr<Mesh> create(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices, std::unique_ptr<Material> _material) {
+			return std::make_unique<Mesh>(_vertices, _indices, std::move(_material));
 		}
 
-		std::unique_ptr<Mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
+		std::unique_ptr<Mesh> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
 			return std::make_unique<Mesh>(vertices, indices);
 		}
 

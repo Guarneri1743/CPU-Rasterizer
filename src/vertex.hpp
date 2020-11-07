@@ -2,12 +2,12 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	struct vertex {
+	struct Vertex {
 	public:
-		vertex() {
+		Vertex() {
 			position = Vector4();
 			world_pos = Vector3();
-			Color = Vector4();
+			color = Vector4();
 			uv = Vector2();
 			normal = Vector3();
 			tangent = Vector3();
@@ -15,10 +15,10 @@ namespace Guarneri {
 			this->rhw = 1.0f;
 		}
 
-		vertex(const Vector4& position, const Vector3& world_pos, const Vector4& Color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
+		Vertex(const Vector4& position, const Vector3& world_pos, const Vector4& Color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
 			this->position = position;
 			this->world_pos = world_pos;
-			this->Color = Color;
+			this->color = Color;
 			this->normal = normal;
 			this->uv = uv;
 			this->tangent = tangent;
@@ -26,10 +26,10 @@ namespace Guarneri {
 			this->rhw = 1.0f / this->position.w;
 		}
 
-		vertex(const Vector4& position, const Vector3& normal, const Vector2& uv) {
+		Vertex(const Vector4& position, const Vector3& normal, const Vector2& uv) {
 			this->position = position;
 			this->world_pos = position.xyz();
-			this->Color = Vector4::ONE;
+			this->color = Vector4::ONE;
 			this->normal = normal;
 			this->uv = uv;
 			this->tangent = Vector3::ZERO;
@@ -40,7 +40,7 @@ namespace Guarneri {
 	public:
 		Vector4 position;
 		Vector3 world_pos;
-		Vector4 Color;
+		Vector4 color;
 		Vector3 normal;
 		Vector2 uv;
 		Vector3 tangent;
@@ -48,21 +48,21 @@ namespace Guarneri {
 		float rhw;
 
 	public:
-		void perspective_division(const float& rhw) {
-			world_pos *= rhw;
-			Color *= rhw;
-			normal *= rhw;
-			uv *= rhw;
-			tangent *= rhw;
-			bitangent *= rhw;
+		void perspective_division(const float& _rhw) {
+			world_pos *= _rhw;
+			color *= _rhw;
+			normal *= _rhw;
+			uv *= _rhw;
+			tangent *= _rhw;
+			bitangent *= _rhw;
 		}
 
-		static vertex interpolate(const vertex& left, const vertex& right, const float& t) {
-			vertex ret;
+		static Vertex interpolate(const Vertex& left, const Vertex& right, const float& t) {
+			Vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
 			ret.position.w = 1.0f;
 			ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
-			ret.Color = left.Color + (right.Color - left.Color) * t;
+			ret.color = left.color + (right.color - left.color) * t;
 			ret.normal = left.normal + (right.normal - left.normal) * t;
 			ret.uv = left.uv + (right.uv - left.uv) * t;
 			ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
@@ -71,13 +71,13 @@ namespace Guarneri {
 			return ret;
 		}
 
-		static vertex differential(const vertex& lhs, const vertex& rhs) {
+		static Vertex differential(const Vertex& lhs, const Vertex& rhs) {
 			float w = rhs.position.x - lhs.position.x;
 			float segmentation = 1.0f / w;
-			vertex ret;
+			Vertex ret;
 			ret.position = (rhs.position - lhs.position) * segmentation;
 			ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;
-			ret.Color = (rhs.Color - lhs.Color) * segmentation;
+			ret.color = (rhs.color - lhs.color) * segmentation;
 			ret.uv = (rhs.uv - lhs.uv) * segmentation;
 			ret.normal = (rhs.normal - lhs.normal) * segmentation;
 			ret.tangent = (rhs.tangent - lhs.tangent) * segmentation;
@@ -86,11 +86,11 @@ namespace Guarneri {
 			return ret;
 		}
 
-		static vertex intagral(const vertex& left, const vertex& differential) {
-			vertex ret;
+		static Vertex intagral(const Vertex& left, const Vertex& differential) {
+			Vertex ret;
 			ret.position = (left.position + differential.position);
 			ret.world_pos = (left.world_pos + differential.world_pos);
-			ret.Color = (left.Color + differential.Color);
+			ret.color = (left.color + differential.color);
 			ret.normal = (left.normal + differential.normal);
 			ret.uv = (left.uv + differential.uv);
 			ret.tangent = (left.tangent + differential.tangent);
@@ -102,17 +102,17 @@ namespace Guarneri {
 	public:
 		std::string str() const {
 			std::stringstream ss;
-			ss << "vertex: [pos: " << this->position << ", Color: " << this->Color << ", uv: " << uv << "]";
+			ss << "Vertex: [pos: " << this->position << ", Color: " << this->color << ", uv: " << uv << "]";
 			return ss.str();
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const vertex& v) {
+	static std::ostream& operator << (std::ostream& stream, const Vertex& v) {
 		stream << v.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const vertex& v) {
+	static std::stringstream& operator << (std::stringstream& stream, const Vertex& v) {
 		stream << v.str();
 		return stream;
 	}

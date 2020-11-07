@@ -2,29 +2,29 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	class renderer : public Object {
+	class Renderer : public Object {
 	public:
-		renderer(std::unique_ptr<Model> Model) {
+		Renderer(std::unique_ptr<Model> Model) {
 			this->target = std::move(Model);
 		}
 
-		renderer(const renderer& other) {
+		Renderer(const Renderer& other) {
 			copy(other);
 		}
 
-		~renderer() { }
+		~Renderer() { }
 
 	public:
 		std::shared_ptr<Model> target;
-		vertex vertices[3];
+		Vertex vertices[3];
 
 	public:
-		static std::unique_ptr<renderer> create(std::unique_ptr<Model> Model) {
-			return std::make_unique<renderer>(std::move(Model));
+		static std::unique_ptr<Renderer> create(std::unique_ptr<Model> Model) {
+			return std::make_unique<Renderer>(std::move(Model));
 		}
 
-		static std::unique_ptr<renderer> create(const renderer& other) {
-			return std::make_unique<renderer>(other);
+		static std::unique_ptr<Renderer> create(const Renderer& other) {
+			return std::make_unique<Renderer>(other);
 		}
 
 		void render() {
@@ -45,7 +45,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], Model, view, proj);
+							graphics().draw_primitive(m->material, vertices[0], vertices[1], vertices[2], Model, view, proj);
 							idx = 0;
 						}
 					}
@@ -53,12 +53,12 @@ namespace Guarneri {
 			}
 		}
 
-		renderer& operator =(const renderer& other) {
+		Renderer& operator =(const Renderer& other) {
 			copy(other);
 			return *this;
 		}
 
-		void copy(const renderer& other) {
+		void copy(const Renderer& other) {
 			this->target = other.target;
 			std::copy(std::begin(other.vertices), std::end(other.vertices), std::begin(vertices));
 		}

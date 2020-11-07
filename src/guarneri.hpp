@@ -42,7 +42,7 @@ namespace Guarneri {
 	typedef std::string property_name;
 	typedef std::string shader_id;
 
-	// simple texture properties
+	// simple Texture properties
 	const property_name albedo_prop = "texture_diffuse";
 	const property_name specular_prop = "texture_specular";
 	const property_name normal_prop = "texture_normal";
@@ -112,10 +112,10 @@ namespace Guarneri {
 	struct Vector4;
 	struct Matrix3x3;
 	struct Matrix4x4;
-	struct transform;
+	struct Transform;
 	struct Color;
 	struct Light;
-	struct vertex;
+	struct Vertex;
 	struct Ray;
 	struct Line;
 	struct BoundingBox;
@@ -129,15 +129,15 @@ namespace Guarneri {
 	class Mesh;
 	class Camera;
 	class SegmentDrawer;
-	class texture;
-	class shader;
+	class Texture;
+	class Shader;
 	class Material;
 	class Model;
-	class renderer;
-	class render_device;
+	class Renderer;
+	class GraphicsDevice;
 	class GDIWindow;
 	class PrimitiveFactory;
-	class scene;
+	class Scene;
 	class IdAllocator;
 	class InputManager;
 	struct directional_light;
@@ -167,7 +167,7 @@ namespace Guarneri {
 
 // common
 #include <Singleton.hpp>
-#include <resource_manager.hpp>
+#include <ResourceManager.hpp>
 #include <IdAllocator.hpp>
 
 // math
@@ -209,8 +209,8 @@ namespace Guarneri{
 
 	#define REF(obj) unused(obj)
 
-	render_device& graphics() {
-		return Singleton<render_device>::get();
+	GraphicsDevice& graphics() {
+		return Singleton<GraphicsDevice>::get();
 	}
 
 	InputManager& input_mgr() {
@@ -221,8 +221,8 @@ namespace Guarneri{
 		return Singleton<GDIWindow>::get();
 	}
 
-	resource_manager<texture>& tex_mgr() {
-		return Singleton<resource_manager<texture>>::get();
+	ResourceManager<Texture>& tex_mgr() {
+		return Singleton<ResourceManager<Texture>>::get();
 	}
 
 	IdAllocator idalloc(INVALID_ID + 1, MAX_ID);
@@ -265,8 +265,8 @@ namespace Guarneri{
 // rasterizer
 #include <Object.hpp>
 #include <InputManager.hpp>
-#include <transform.hpp>
-#include <vertex.hpp>
+#include <Transform.hpp>
+#include <Vertex.hpp>
 #include <Plane.hpp>
 #include <Ray.hpp>
 #include <Line.hpp>
@@ -277,19 +277,19 @@ namespace Guarneri{
 #include <BoundingBox2D.hpp>
 #include <Triangle.hpp>
 #include <Light.hpp>
-#include <raw_buffer.hpp>
-#include <texture.hpp>
+#include <RawBuffer.hpp>
+#include <Texture.hpp>
 #include <SegmentDrawer.hpp>
 #include <Noise.hpp>
-#include <shader.hpp>
+#include <Shader.hpp>
 #include <Material.hpp>
 #include <Mesh.hpp>
 #include <Model.hpp>
-#include <render_device.hpp>
+#include <GraphicsDevice.hpp>
 #include <Camera.hpp>
-#include <renderer.hpp>
+#include <Renderer.hpp>
 #include <PrimitiveFactory.hpp>
-#include <scene.hpp>
+#include <Scene.hpp>
 
 namespace Guarneri {
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
@@ -298,13 +298,13 @@ namespace Guarneri {
 		graphics().initialize(window().framebuffer, window().width, window().height);
 	}
 
-	void kick_off(scene& scene) {
+	void kick_off(Scene& Scene) {
 		while (window().is_valid()) {
 			graphics().clear_buffer();
 			input_mgr().update();
 			graphics().update();
-			scene.update();
-			scene.render();
+			Scene.update();
+			Scene.render();
 			window().flush();
 			Sleep(0);
 		}

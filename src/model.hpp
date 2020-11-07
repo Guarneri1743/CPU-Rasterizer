@@ -1,13 +1,13 @@
 #pragma once
 #include <Guarneri.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
+#include <assimp/Scene.h>
 #include <assimp/postprocess.h>
 
 namespace Guarneri {
 	class Model : public Object {
     public:
-        Model(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
+        Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
             if (vertices.size() == 0 || indices.size() == 0) {
                 std::cerr << "load vertices failed." << std::endl;
             }
@@ -18,8 +18,8 @@ namespace Guarneri {
 
         Model(std::string path) {
             Assimp::Importer importer;
-            const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-            if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+            const aiScene* Scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
             {
                 std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
                 return;
@@ -27,7 +27,7 @@ namespace Guarneri {
             auto parent_path = FS::path(path).parent_path();
             auto p = parent_path.string();
             parent_dir = p;
-            traverse_nodes(scene->mRootNode, scene);
+            traverse_nodes(Scene->mRootNode, Scene);
             importer.FreeScene();
         }
 
@@ -35,13 +35,13 @@ namespace Guarneri {
 
     public:
         std::vector<std::unique_ptr<Mesh>> meshes;
-        transform transform;
+        Transform transform;
 
     private:
         std::string parent_dir;
 
     public:
-        static std::unique_ptr<Model> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
+        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
             return std::make_unique<Model>(vertices, indices, std::move(Material));
         }
 
@@ -50,40 +50,40 @@ namespace Guarneri {
         }
 
     private:
-        void traverse_nodes(aiNode* node, const aiScene* scene)
+        void traverse_nodes(aiNode* node, const aiScene* Scene)
         {
             for (uint32_t i = 0; i < node->mNumMeshes; i++)
             {
-                aiMesh* Mesh = scene->mMeshes[node->mMeshes[i]];
-                meshes.push_back(std::move(load_mesh(Mesh, scene)));
+                aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
+                meshes.push_back(std::move(load_mesh(Mesh, Scene)));
             }
             for (uint32_t i = 0; i < node->mNumChildren; i++)
             {
-                traverse_nodes(node->mChildren[i], scene);
+                traverse_nodes(node->mChildren[i], Scene);
             }
         }
 
-        std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
+        std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* Scene)
         {
-            std::vector<vertex> vertices;
+            std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
 
             for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
             {
-                vertex vertex;
+                Vertex Vertex;
                 Vector3 vector; 
             
                 vector.x = ai_mesh->mVertices[i].x;
                 vector.y = ai_mesh->mVertices[i].y;
                 vector.z = ai_mesh->mVertices[i].z;
-                vertex.position = vector;
+                Vertex.position = vector;
            
                 if (ai_mesh->HasNormals())
                 {
                     vector.x = ai_mesh->mNormals[i].x;
                     vector.y = ai_mesh->mNormals[i].y;
                     vector.z = ai_mesh->mNormals[i].z;
-                    vertex.normal = vector;
+                    Vertex.normal = vector;
                 }
 
                 if (ai_mesh->mTextureCoords[0]) 
@@ -92,23 +92,23 @@ namespace Guarneri {
 
                     vec.x = ai_mesh->mTextureCoords[0][i].x;
                     vec.y = ai_mesh->mTextureCoords[0][i].y;
-                    vertex.uv = vec;
+                    Vertex.uv = vec;
                 
                     vector.x = ai_mesh->mTangents[i].x;
                     vector.y = ai_mesh->mTangents[i].y;
                     vector.z = ai_mesh->mTangents[i].z;
-                    vertex.tangent = vector;
+                    Vertex.tangent = vector;
               
                     vector.x = ai_mesh->mBitangents[i].x;
                     vector.y = ai_mesh->mBitangents[i].y;
                     vector.z = ai_mesh->mBitangents[i].z;
-                    vertex.bitangent = vector;
+                    Vertex.bitangent = vector;
                 }
                 else
-                    vertex.uv = Vector2(0.0f, 0.0f);
+                    Vertex.uv = Vector2(0.0f, 0.0f);
 
-                vertex.Color = vertex.tangent;
-                vertices.push_back(vertex);
+                Vertex.color = Vertex.tangent;
+                vertices.push_back(Vertex);
             }
             for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
             {
@@ -117,7 +117,7 @@ namespace Guarneri {
                     indices.push_back(face.mIndices[j]);
             }
 
-            aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
+            aiMaterial* aiMat = Scene->mMaterials[ai_mesh->mMaterialIndex];
 
             auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
             auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
@@ -133,7 +133,7 @@ namespace Guarneri {
             return std::make_unique<Mesh>(vertices, indices, std::move(mat));
         }
 
-        std::shared_ptr<texture> load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
+        std::shared_ptr<Texture> load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
         {
             for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
             {
@@ -141,7 +141,7 @@ namespace Guarneri {
                 mat->GetTexture(type, i, &str);
                 std::string relative_path = str.C_Str();
                 std::string tex_path = parent_dir + "/" + relative_path;
-                return texture::create(tex_path);
+                return Texture::create(tex_path);
             }
             return nullptr;
         }

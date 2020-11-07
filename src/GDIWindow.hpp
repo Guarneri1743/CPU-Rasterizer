@@ -23,15 +23,15 @@ namespace Guarneri {
 		HBITMAP original_handle;
 
 	public:
-		void initialize(int w, int h, LPCSTR title, LRESULT(*event_callback)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)) {
+		void initialize(int w, int h, LPCSTR title_str, LRESULT(*event_callback)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)) {
 			if (initialized) {
 				return;
 			}
 			this->width = w;
 			this->height = h;
 			this->aspect = (float)w / (float)h;
-			this->title = title;
-			this->name = title;
+			this->title = title_str;
+			this->name = title_str;
 			buffer_size = width * height * 4;
 			window_handle = nullptr;
 			window_device_context = nullptr;

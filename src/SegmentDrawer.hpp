@@ -5,7 +5,7 @@ namespace Guarneri {
 	class SegmentDrawer {
 	public:
 		template<typename T>
-		static void dda(const std::shared_ptr<raw_buffer<T>>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
+		static void dda(const std::shared_ptr<RawBuffer<T>>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
 			assert(buffer != nullptr);
 			int dx = std::abs(x1 - x0);
 			int dy = std::abs(y1 - y0);
@@ -26,7 +26,7 @@ namespace Guarneri {
 		}
 
 		template<typename T>
-		static void bresenham(const std::shared_ptr<raw_buffer<T>>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
+		static void bresenham(const std::shared_ptr<RawBuffer<T>>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){
 			assert(buffer != nullptr);
 			int dx = std::abs(x1 - x0);
 			int dy = std::abs(y1 - y0);

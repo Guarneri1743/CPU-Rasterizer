@@ -255,7 +255,7 @@ namespace Guarneri {
 			on_key_down_events.insert(std::pair(on_key_down, user_data));
 		}
 
-		void remove_on_key_down_evt(void (*on_key_down)(key_code code, void* ud), void* user_data) {
+		void remove_on_key_down_evt(void (*on_key_down)(key_code code, void* ud)) {
 			on_key_down_events.erase(on_key_down);
 		}
 
@@ -266,7 +266,7 @@ namespace Guarneri {
 			on_key_up_events.insert(std::pair(on_key_up, user_data));
 		}
 
-		void remove_on_key_up_evt(void (*on_key_up)(key_code code, void* ud), void* user_data) {
+		void remove_on_key_up_evt(void (*on_key_up)(key_code code, void* ud)) {
 			on_key_up_events.erase(on_key_up);
 		}
 
@@ -277,7 +277,7 @@ namespace Guarneri {
 			on_mouse_down_events.insert(std::pair(on_mouse_down, user_data));
 		}
 
-		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud), void* user_data) {
+		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud)) {
 			on_mouse_down_events.erase(on_mouse_down);
 		}
 
@@ -288,7 +288,7 @@ namespace Guarneri {
 			on_mouse_up_events.insert(std::pair(on_mouse_up, user_data));
 		}
 
-		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud), void* user_data) {
+		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud)) {
 			on_mouse_up_events.erase(on_mouse_up);
 		}
 
@@ -299,7 +299,7 @@ namespace Guarneri {
 			on_mouse_move_events.insert(std::pair(on_mouse_move, user_data));
 		}
 
-		void remove_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud), void* user_data) {
+		void remove_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud)) {
 			on_mouse_move_events.erase(on_mouse_move);
 		}
 
@@ -310,7 +310,7 @@ namespace Guarneri {
 			on_wheel_rolling_events.insert(std::pair(on_mouse_wheel_rolling, user_data));
 		}
 
-		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud), void* user_data) {
+		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud)) {
 			on_wheel_rolling_events.erase(on_mouse_wheel_rolling);
 		}
 

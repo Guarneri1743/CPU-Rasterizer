@@ -5,25 +5,25 @@
 #include <stb_image.hpp>
 
 namespace Guarneri {
-	class texture : public Object{
+	class Texture : public Object{
 	public:
-		texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		Texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
 			release();
 			switch (fmt) {
 				case texture_format::rgb:
-					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(width, height);
+					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(width, height);
 					break;
 				case texture_format::rgba:
-					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(width, height);
+					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(width, height);
 					break;
 			}
 			std::cout << this->str() << " created" << std::endl;
 		}
 
-		texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		Texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
@@ -31,37 +31,40 @@ namespace Guarneri {
 			switch (fmt) {
 				case texture_format::rgb:
 				{
-					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
+					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
 				}
 				break;
 				case texture_format::rgba:
 				{
-					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
+					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
 				}
 				break;
 			}
 			std::cout << this->str() << " created" << std::endl;
 		}
 
-		texture(const char* path) {
+		Texture(const char* path) {
 			this->path = path;
 			this->fmt = texture_format::invalid;
 			release();
-			int width, height, channels;
+			int w, h, channels;
 			if (!FS::exists(path)) {
-				std::cerr << "create texture failed, path does not exist: " << path << std::endl;
+				std::cerr << "create Texture failed, path does not exist: " << path << std::endl;
 			}
 			else {
 				stbi_set_flip_vertically_on_load(true);
-				auto tex = stbi_load(path, &width, &height, &channels, 0);
-				this->width = width;
-				this->height = height;
+				auto tex = stbi_load(path, &w, &h, &channels, 0);
+				this->width = w;
+				this->height = h;
+				assert(channels > 0);
+				assert(w <= 4096);
+				assert(h <= 4096);
 				if (channels == 3) {
-					rgb_buffer = std::make_shared<raw_buffer<color_rgb>>(tex, width, height, [](color_rgb* ptr) { stbi_image_free((void*)ptr); });
+					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex, w, h, [](color_rgb* ptr) { stbi_image_free((void*)ptr); });
 					this->fmt = texture_format::rgb;
 				}
 				else if (channels == 4) {
-					rgba_buffer = std::make_shared<raw_buffer<color_rgba>>(tex, width, height, [](color_rgba* ptr) { stbi_image_free((void*)ptr); });
+					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex, w, h, [](color_rgba* ptr) { stbi_image_free((void*)ptr); });
 					this->fmt = texture_format::rgba;
 				}
 				else {
@@ -71,11 +74,11 @@ namespace Guarneri {
 			std::cout << this->str() << " created" << std::endl;
 		}
 
-		texture(const texture& other) {
+		Texture(const Texture& other) {
 			copy(other);
 		}
 
-		~texture() {
+		~Texture() {
 			release();
 			tex_mgr().free(this->path);
 			std::cout << this->str() << " freed." << std::endl;
@@ -87,32 +90,32 @@ namespace Guarneri {
 		texture_format fmt;
 
 	private:
-		static std::unordered_map<uint32_t, std::shared_ptr<texture>> texture_cache;
-		std::shared_ptr<raw_buffer<color_rgb>> rgb_buffer;
-		std::shared_ptr<raw_buffer<color_rgba>> rgba_buffer;
+		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
+		std::shared_ptr<RawBuffer<color_rgb>> rgb_buffer;
+		std::shared_ptr<RawBuffer<color_rgba>> rgba_buffer;
 		std::string path;
 		uint32_t width;
 		uint32_t height;
 
 	public:
-		static std::shared_ptr<texture> create(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
-			return std::make_shared<texture>(width, height, fmt);
+		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+			return std::make_shared<Texture>(width, height, fmt);
 		}
 
-		static std::shared_ptr<texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
-			return std::make_shared<texture>(tex_buffer, width, height, fmt);
+		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+			return std::make_shared<Texture>(tex_buffer, width, height, fmt);
 		}
 
-		static std::shared_ptr<texture> create(const texture& other) {
-			return std::make_shared<texture>(other);
+		static std::shared_ptr<Texture> create(const Texture& other) {
+			return std::make_shared<Texture>(other);
 		}
 
-		static std::shared_ptr<texture> create(const std::string& path) {
-			std::shared_ptr<texture> ret = nullptr;
+		static std::shared_ptr<Texture> create(const std::string& path) {
+			std::shared_ptr<Texture> ret = nullptr;
 			if (tex_mgr().get(path, ret)) {
 				return ret;
 			}
-			ret = std::make_shared<texture>(path.c_str());
+			ret = std::make_shared<Texture>(path.c_str());
 			tex_mgr().cache(path, ret);
 			return ret;
 		}
@@ -242,12 +245,12 @@ namespace Guarneri {
 			}
 		}
 
-		texture& operator =(const texture& other) {
+		Texture& operator =(const Texture& other) {
 			copy(other);
 			return *this;
 		}
 
-		void copy(const texture& other) {
+		void copy(const Texture& other) {
 			this->id = other.id;
 			this->wrap_mode = other.wrap_mode;
 			this->filtering = other.filtering;

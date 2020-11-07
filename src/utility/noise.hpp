@@ -3,7 +3,7 @@
 
 namespace Guarneri {
 	struct Noise {
-		static void generate_fractal_image(std::shared_ptr<texture> image, int w, int h) {
+		static void generate_fractal_image(std::shared_ptr<Texture> image, int w, int h) {
             double    cr, ci;
             double nextr, nexti;
             double prevr, previ;

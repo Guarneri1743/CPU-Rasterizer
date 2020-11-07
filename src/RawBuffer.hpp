@@ -3,33 +3,33 @@
 
 namespace Guarneri {
 	template<typename T>
-	class raw_buffer {
+	class RawBuffer {
 	public:
-		raw_buffer(uint32_t width, uint32_t height) {
+		RawBuffer(uint32_t width, uint32_t height) {
 			this->width = width;
 			this->height = height;
 			int size = width * height;
 			buffer = std::shared_ptr<T>(new T[size], [](T* ptr) { delete[] ptr; });
 		}		
 
-		raw_buffer(void* buffer, uint32_t width, uint32_t height, void (*deletor)(T* ptr)) {
+		RawBuffer(void* buffer, uint32_t width, uint32_t height, void (*deletor)(T* ptr)) {
 			this->width = width;
 			this->height = height;
 			auto buf_array = (T*)buffer;
 			this->buffer = std::shared_ptr<T>(buf_array, deletor);
 		}
 
-		raw_buffer(const std::shared_ptr<T>& buffer, uint32_t width, uint32_t height) {
+		RawBuffer(const std::shared_ptr<T>& buffer, uint32_t width, uint32_t height) {
 			this->width = width;
 			this->height = height;
 			this->buffer = buffer;
 		}
 
-		raw_buffer(const raw_buffer<T>& other) {
+		RawBuffer(const RawBuffer<T>& other) {
 			copy(other);
 		}
 		
-		~raw_buffer() {
+		~RawBuffer() {
 			buffer.reset();
 		}
 
@@ -85,12 +85,12 @@ namespace Guarneri {
 			return buffer;
 		}
 
-		raw_buffer<T>& operator = (const raw_buffer<T>& other) {
+		RawBuffer<T>& operator = (const RawBuffer<T>& other) {
 			copy(other);
 			return *this;
 		}
 
-		void copy(const raw_buffer<T>& other) {
+		void copy(const RawBuffer<T>& other) {
 			this->buffer = other.buffer;
 			this->width = other.width;
 			this->height = other.height;
