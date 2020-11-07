@@ -11,6 +11,7 @@ namespace Guarneri {
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
+			this->double_face = false;
 			this->transparent = false;
 		}
 
@@ -21,6 +22,7 @@ namespace Guarneri {
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
+			this->double_face = false;
 			this->transparent = false;
 		}
 
@@ -37,6 +39,7 @@ namespace Guarneri {
 		BlendFactor src_factor;
 		BlendFactor dst_factor;
 		BlendOp blend_op;
+		bool double_face;
 		bool transparent;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -124,6 +127,7 @@ namespace Guarneri {
 			this->src_factor = other.src_factor;
 			this->dst_factor = other.dst_factor;
 			this->blend_op = other.blend_op;
+			this->double_face = other.double_face;
 			this->transparent = other.transparent;
 			this->name2float = other.name2float;
 			this->name2float4 = other.name2float4;

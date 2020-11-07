@@ -62,6 +62,12 @@ namespace Guarneri {
 			Vertex n2 = clip2ndc(c2);
 			Vertex n3 = clip2ndc(c3);
 
+			bool double_face = material->double_face;
+
+			if (!double_face && backface_culling(n1.position, n2.position, n3.position)) {
+				return;
+			}
+
 			// other channels perspective division
 			n1.perspective_division(c1.rhw);
 			n2.perspective_division(c2.rhw);
@@ -349,10 +355,17 @@ namespace Guarneri {
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
 		}
 
+		bool backface_culling(const Vector4& v1, const Vector4& v2, const Vector4& v3) {
+			auto v1v2 = v2 - v2;
+			auto v1v3 = v3 - v1;
+			float ndv = Vector3::dot(Vector3::cross(v1v2.xyz(), v1v3.xyz()), Vector3::BACK);
+			return ndv < 0;
+		}
+
 		bool clipping(const Vector4& v1, const Vector4& v2, const Vector4& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto mvp = p * v * m;
 			Vector4 c1 = mvp * v1; Vector4 c2 = mvp * v2; Vector4 c3 = mvp * v3;
-			if (c1.w < 0 || c2.w < 0 || c3.w < 0) {
+			if (c1.w <= 0 || c2.w <= 0 || c3.w <= 0) {
 				return true;
 			}
 			return clipping(c1) && clipping(c2) && clipping(c3);
