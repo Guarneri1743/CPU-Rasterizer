@@ -14,6 +14,7 @@ namespace Guarneri {
 		Vector2(const float& r) { this->x = r; this->y = r; }
 		Vector2(const Vector2& v) { this->x = v.x; this->y = v.y; }
 		Vector2(const float& x, const float& y) { this->x = x; this->y = y; }
+		Vector2(const int& x, const int& y) { this->x = (float)x; this->y = (float)y; }
 
 	public:
 		float x;

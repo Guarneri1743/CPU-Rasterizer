@@ -25,8 +25,8 @@ namespace Guarneri {
 			return std::make_unique<Mesh>(_vertices, _indices, std::move(_material));
 		}
 
-		std::unique_ptr<Mesh> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
-			return std::make_unique<Mesh>(vertices, indices);
+		std::unique_ptr<Mesh> create(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices) {
+			return std::make_unique<Mesh>(_vertices, _indices);
 		}
 
 		std::unique_ptr<Mesh> create(const Mesh& other) {

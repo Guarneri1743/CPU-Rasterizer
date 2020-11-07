@@ -294,7 +294,7 @@ namespace Guarneri{
 	template <class T>
 	inline void unused(T const&){}
 
-	#define REF(obj) unused(obj)
+	#define REF(obj) unused(obj);
 
 	GraphicsDevice& graphics() {
 		return Singleton<GraphicsDevice>::get();
@@ -319,8 +319,8 @@ namespace Guarneri{
 	typedef struct {
 		float cam_near;
 		float cam_far;
-		float screen_width;
-		float screen_height;
+		int screen_width;
+		int screen_height;
 		Vector3 camera_pos;
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;
@@ -381,17 +381,20 @@ namespace Guarneri{
 namespace Guarneri {
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 		window().initialize(w, h, title, input_mgr().event_callback);
-		input_mgr().add_on_key_down_evt([](KeyCode code, void* data) { if (code == KeyCode::ESC) window().dispose(); }, nullptr);
+		input_mgr().add_on_key_down_evt([](KeyCode code, void* data) { 
+			REF(data)
+			if (code == KeyCode::ESC) window().dispose(); 
+		}, nullptr);
 		graphics().initialize(window().framebuffer, window().width, window().height);
 	}
 
-	void kick_off(Scene& Scene) {
+	void kick_off(Scene& scene) {
 		while (window().is_valid()) {
 			graphics().clear_buffer();
 			input_mgr().update();
 			graphics().update();
-			Scene.update();
-			Scene.render();
+			scene.update();
+			scene.render();
 			window().flush();
 			Sleep(0);
 		}

@@ -62,7 +62,8 @@ namespace Guarneri{
 					}
 				}, this);
 
-			input_mgr().add_on_key_down_evt([](KeyCode code, void* data) {
+			input_mgr().add_on_key_down_evt([](KeyCode code, void* data){			
+				REF(data)
 				if (code == KeyCode::F1) {
 					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::SHADED);
 				}
