@@ -334,7 +334,7 @@ namespace Guarneri {
 		}
 
 		static Color decode(const color_rgb& c) {
-			return Color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, 255.0f);
+			return Color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, 1.0f);
 		}
 
 		static Color decode(const color_rgba& c) {

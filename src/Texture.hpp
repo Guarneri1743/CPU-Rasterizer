@@ -85,8 +85,8 @@ namespace Guarneri {
 		}
 
 	public:
-		WrapMode WrapMode;
-		Filtering Filtering;
+		WrapMode wrapMode;
+		Filtering filtering;
 		TextureFormat fmt;
 
 	private:
@@ -120,27 +120,59 @@ namespace Guarneri {
 			return ret;
 		}
 
-		bool sample(const float& u, const float& v, Color& ret) const {
+		bool bilinear(const float& u, const float& v, Color& ret) const {
+			float rf = v * (float)this->width;
+			float cf = u * (float)this->height;
+
+			uint32_t row = FLOOR_UINT(rf - EPSILON);
+			uint32_t col = FLOOR_UINT(cf - EPSILON);
+		
+			float frac_row = rf - (float)row;
+			float frac_col = cf - (float)col;
+
+			Color c00, c01, c11, c10;
+			sample(row, col, c00);
+			sample(row + 1, col, c01);
+			sample(row + 1, col + 1, c11);
+			sample(row, col + 1, c10);
+
+			Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
+			Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
+			ret = a * (1.0f - frac_col) + b * frac_col;
+			return true;
+		}
+
+		bool point(const float& u, const float& v, Color& ret) const {
 			float wu = u;
 			float wv = v;
 			this->wrap(wu, wv);
 			switch (fmt) {
-				case TextureFormat::rgb:
-				{
-					if (rgb_buffer == nullptr) return false;
-					color_rgb pixel;
-					bool ok = rgb_buffer->read(wu, wv, pixel);
-					ret = Color::decode(pixel);
-					return ok;
-				}
-				case TextureFormat::rgba:
-				{
-					if(rgba_buffer == nullptr) return false;
-					color_rgba pixel;
-					bool ok =rgba_buffer->read(wu, wv, pixel);
-					ret = Color::decode(pixel);
-					return ok;
-				}
+			case TextureFormat::rgb:
+			{
+				if (rgb_buffer == nullptr) return false;
+				color_rgb pixel;
+				bool ok = rgb_buffer->read(wu, wv, pixel);
+				ret = Color::decode(pixel);
+				return ok;
+			}
+			case TextureFormat::rgba:
+			{
+				if (rgba_buffer == nullptr) return false;
+				color_rgba pixel;
+				bool ok = rgba_buffer->read(wu, wv, pixel);
+				ret = Color::decode(pixel);
+				return ok;
+			}
+			}
+			return false;
+		}
+
+		bool sample(const float& u, const float& v, Color& ret) const {
+			switch (this->filtering) {
+			case Filtering::BILINEAR:
+				return bilinear(u, v, ret);
+			case Filtering::POINT:
+				return point(u, v, ret);
 			}
 			return false;
 		}
@@ -202,7 +234,7 @@ namespace Guarneri {
 
 	private:
 		void wrap(float& u, float& v) const {
-			switch (WrapMode) {
+			switch (wrapMode) {
 			case WrapMode::CLAMP:
 				if (u < 0.0f) {
 					u = 0.0f;
@@ -252,8 +284,8 @@ namespace Guarneri {
 
 		void copy(const Texture& other) {
 			this->id = other.id;
-			this->WrapMode = other.WrapMode;
-			this->Filtering = other.Filtering;
+			this->wrapMode = other.wrapMode;
+			this->filtering = other.filtering;
 			this->fmt = other.fmt;
 			this->rgba_buffer = other.rgba_buffer;
 			this->rgb_buffer = other.rgb_buffer;
