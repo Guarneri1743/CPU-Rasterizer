@@ -14,8 +14,8 @@ namespace Guarneri {
 			this->transparent = false;
 		}
 
-		Material(std::unique_ptr<Shader>& Shader) {
-			this->target_shader = std::move(Shader);
+		Material(std::unique_ptr<Shader>& shader) {
+			this->target_shader = std::move(shader);
 			this->ztest_mode = ZTest::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;

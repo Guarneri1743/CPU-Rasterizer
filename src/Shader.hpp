@@ -23,8 +23,8 @@ namespace Guarneri {
 
 	class Shader : public Object{
 	public:
-		Shader(const shader_id& id) {
-			this->id = id;
+		Shader(const shader_id& _id) {
+			this->id = _id;
 			this->ztest_mode = ZTest::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;

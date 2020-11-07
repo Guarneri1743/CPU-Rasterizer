@@ -5,24 +5,24 @@ namespace Guarneri {
 	template<typename T>
 	class RawBuffer {
 	public:
-		RawBuffer(uint32_t width, uint32_t height) {
-			this->width = width;
-			this->height = height;
-			int size = width * height;
+		RawBuffer(uint32_t _width, uint32_t _height) {
+			this->width = _width;
+			this->height = _height;
+			int size = _width * _height;
 			buffer = std::shared_ptr<T>(new T[size], [](T* ptr) { delete[] ptr; });
 		}		
 
-		RawBuffer(void* buffer, uint32_t width, uint32_t height, void (*deletor)(T* ptr)) {
-			this->width = width;
-			this->height = height;
-			auto buf_array = (T*)buffer;
+		RawBuffer(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr)) {
+			this->width = _width;
+			this->height = _height;
+			auto buf_array = (T*)_buffer;
 			this->buffer = std::shared_ptr<T>(buf_array, deletor);
 		}
 
-		RawBuffer(const std::shared_ptr<T>& buffer, uint32_t width, uint32_t height) {
-			this->width = width;
-			this->height = height;
-			this->buffer = buffer;
+		RawBuffer(const std::shared_ptr<T>& _buffer, uint32_t _width, uint32_t _height) {
+			this->width = _width;
+			this->height = _height;
+			this->buffer = _buffer;
 		}
 
 		RawBuffer(const RawBuffer<T>& other) {

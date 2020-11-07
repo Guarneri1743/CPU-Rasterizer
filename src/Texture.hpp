@@ -7,10 +7,10 @@
 namespace Guarneri {
 	class Texture : public Object{
 	public:
-		Texture(const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
-			this->fmt = fmt;
-			this->width = width;
-			this->height = height;
+		Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) {
+			this->fmt = _fmt;
+			this->width = _width;
+			this->height = _height;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
@@ -23,10 +23,10 @@ namespace Guarneri {
 			std::cout << this->str() << " created" << std::endl;
 		}
 
-		Texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
-			this->fmt = fmt;
-			this->width = width;
-			this->height = height;
+		Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) {
+			this->fmt = _fmt;
+			this->width = _width;
+			this->height = _height;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:

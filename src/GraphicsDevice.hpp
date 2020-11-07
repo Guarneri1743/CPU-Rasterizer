@@ -33,19 +33,19 @@ namespace Guarneri {
 		// *  screen space vertices ------------------------------------->  fragments ------> scissor test -------> alpha test -------> stencil test ---------> depth test -------> blending --------> framebuffer									*
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
-		void draw_primitive(std::shared_ptr<Material>  Material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			// early clip
 			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
 			}*/
 
-			auto Shader = Material->get_shader();
+			auto Shader = material->get_shader();
 
 			Shader->set_mvp_matrix(m, v, p);
-			Shader->sync(Material->name2float, Material->name2float4, Material->name2int, Material->name2tex);
-			Shader->sync(Material->ztest_mode, Material->zwrite_mode);
-			Shader->sync(Material->transparent, Material->src_factor, Material->dst_factor, Material->blend_op);
-			Shader->sync(Material->lighting_param);
+			Shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
+			Shader->sync(material->ztest_mode, material->zwrite_mode);
+			Shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
+			Shader->sync(material->lighting_param);
 
 			assert(Shader != nullptr);
 
@@ -86,7 +86,7 @@ namespace Guarneri {
 			std::vector<Triangle> tris = tri.horizontal_split();
 
 			// rasterization
-			rasterize(tris, Material);
+			rasterize(tris, material);
 
 			// wireframe
 			if (((int)misc_param.flag & (int)RenderFlag::WIREFRAME) != 0) {

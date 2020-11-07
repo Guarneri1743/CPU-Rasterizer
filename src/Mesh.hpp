@@ -4,15 +4,15 @@
 namespace Guarneri {
 	class Mesh : public Object{
 	public:
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
-			this->vertices = vertices;
-			this->indices = indices;
-			this->material = std::move(Material);
+		Mesh(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices, std::unique_ptr<Material> _material) {
+			this->vertices = _vertices;
+			this->indices = _indices;
+			this->material = std::move(_material);
 		}
 
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) {
-			this->vertices = vertices;
-			this->indices = indices;
+		Mesh(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices) {
+			this->vertices = _vertices;
+			this->indices = _indices;
 		}
 
 	public:

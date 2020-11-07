@@ -15,23 +15,23 @@ namespace Guarneri {
 			this->rhw = 1.0f;
 		}
 
-		Vertex(const Vector4& position, const Vector3& world_pos, const Vector4& Color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
-			this->position = position;
-			this->world_pos = world_pos;
-			this->color = Color;
-			this->normal = normal;
-			this->uv = uv;
-			this->tangent = tangent;
-			this->bitangent = bitangent;
+		Vertex(const Vector4& _position, const Vector3& _world_pos, const Vector4& _color, const Vector3& _normal, const Vector2& _uv, const Vector3& _tangent, const Vector3& _bitangent) {
+			this->position = _position;
+			this->world_pos = _world_pos;
+			this->color = _color;
+			this->normal = _normal;
+			this->uv = _uv;
+			this->tangent = _tangent;
+			this->bitangent = _bitangent;
 			this->rhw = 1.0f / this->position.w;
 		}
 
-		Vertex(const Vector4& position, const Vector3& normal, const Vector2& uv) {
-			this->position = position;
-			this->world_pos = position.xyz();
+		Vertex(const Vector4& _position, const Vector3& _normal, const Vector2& _uv) {
+			this->position = _position;
+			this->world_pos = _position.xyz();
 			this->color = Vector4::ONE;
-			this->normal = normal;
-			this->uv = uv;
+			this->normal = _normal;
+			this->uv = _uv;
 			this->tangent = Vector3::ZERO;
 			this->bitangent = Vector3::ZERO;
 			this->rhw = 1.0f / this->position.w;

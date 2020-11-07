@@ -7,12 +7,12 @@
 namespace Guarneri {
 	class Model : public Object {
     public:
-        Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
+        Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material) {
             if (vertices.size() == 0 || indices.size() == 0) {
                 std::cerr << "load vertices failed." << std::endl;
             }
             assert(indices.size() % 3 == 0);
-            auto m = std::make_unique<Mesh>(vertices, indices, std::move(Material));
+            auto m = std::make_unique<Mesh>(vertices, indices, std::move(material));
             meshes.push_back(std::move(m));
         }
 
@@ -41,8 +41,8 @@ namespace Guarneri {
         std::string parent_dir;
 
     public:
-        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
-            return std::make_unique<Model>(vertices, indices, std::move(Material));
+        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material) {
+            return std::make_unique<Model>(vertices, indices, std::move(material));
         }
 
         static std::unique_ptr<Model> create(std::string path) {
@@ -63,7 +63,7 @@ namespace Guarneri {
             }
         }
 
-        std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* Scene)
+        std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
         {
             std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
@@ -117,7 +117,7 @@ namespace Guarneri {
                     indices.push_back(face.mIndices[j]);
             }
 
-            aiMaterial* aiMat = Scene->mMaterials[ai_mesh->mMaterialIndex];
+            aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
 
             auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
             auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
@@ -133,12 +133,12 @@ namespace Guarneri {
             return std::make_unique<Mesh>(vertices, indices, std::move(mat));
         }
 
-        std::shared_ptr<Texture> load_textures(aiMaterial* mat, aiTextureType type, std::string property_name)
+        std::shared_ptr<Texture> load_textures(aiMaterial* material, aiTextureType type, std::string property_name)
         {
-            for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
+            for (uint32_t i = 0; i < material->GetTextureCount(type); i++)
             {
                 aiString str;
-                mat->GetTexture(type, i, &str);
+                material->GetTexture(type, i, &str);
                 std::string relative_path = str.C_Str();
                 std::string tex_path = parent_dir + "/" + relative_path;
                 return Texture::create(tex_path);

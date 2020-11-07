@@ -4,8 +4,8 @@
 namespace Guarneri {
 	class Renderer : public Object {
 	public:
-		Renderer(std::unique_ptr<Model> Model) {
-			this->target = std::move(Model);
+		Renderer(std::unique_ptr<Model> model) {
+			this->target = std::move(model);
 		}
 
 		Renderer(const Renderer& other) {
@@ -19,8 +19,8 @@ namespace Guarneri {
 		Vertex vertices[3];
 
 	public:
-		static std::unique_ptr<Renderer> create(std::unique_ptr<Model> Model) {
-			return std::make_unique<Renderer>(std::move(Model));
+		static std::unique_ptr<Renderer> create(std::unique_ptr<Model> model) {
+			return std::make_unique<Renderer>(std::move(model));
 		}
 
 		static std::unique_ptr<Renderer> create(const Renderer& other) {
