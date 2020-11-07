@@ -39,13 +39,13 @@ namespace guarneri {
 	public:
 		color() { r = 0.0f; g = 0.0f; b = 0.0f; a = 1.0f; }
 		color(const float& r) { this->r = r; this->g = r; this->b = r; this->a = r; }
-		color(const float4& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = v.w; }
-		color(const float3& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = 1.0f; }
-		color(const float& r, const float3& yzw) { this->r = r; this->g = yzw.x; this->b = yzw.y; this->a = yzw.z; }
-		color(const float& r, const float& g, const float2& zw) { this->r = r; this->g = g; this->b = zw.x; this->a = zw.y; }
-		color(const float2& v, const float& b, const float& w) { this->r = v.x; this->g = v.y; this->b = b; this->a = w; }
-		color(const float2& v, const float2& zw) { this->r = v.x; this->g = v.y; this->b = zw.x; this->a = zw.y; }
-		color(const float3& v, const float& w) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = w; }
+		color(const Vector4& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = v.w; }
+		color(const Vector3& v) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = 1.0f; }
+		color(const float& r, const Vector3& yzw) { this->r = r; this->g = yzw.x; this->b = yzw.y; this->a = yzw.z; }
+		color(const float& r, const float& g, const Vector2& zw) { this->r = r; this->g = g; this->b = zw.x; this->a = zw.y; }
+		color(const Vector2& v, const float& b, const float& w) { this->r = v.x; this->g = v.y; this->b = b; this->a = w; }
+		color(const Vector2& v, const Vector2& zw) { this->r = v.x; this->g = v.y; this->b = zw.x; this->a = zw.y; }
+		color(const Vector3& v, const float& w) { this->r = v.x; this->g = v.y; this->b = v.z; this->a = w; }
 		color(const float& r, const float& g, const float& b) { this->r = r; this->g = g; this->b = b; this->a = 1.0f; }
 		color(const float& r, const float& g, const float& b, const float& a) { this->r = r; this->g = g; this->b = b; this->a = a; }
 
@@ -267,15 +267,15 @@ namespace guarneri {
 			return encode_rgb(c.r, c.g, c.b);
 		}
 
-		static color_rgb encode_rgb(const float4& c) {
+		static color_rgb encode_rgb(const Vector4& c) {
 			return encode_rgb(c.x, c.y, c.z);
 		}
 
-		static color_rgb encode_rgb(const float3& c) {
+		static color_rgb encode_rgb(const Vector3& c) {
 			return encode_rgb(c.x, c.y, c.z);
 		}
 
-		static color_rgb encode_rgb(const float2& c) {
+		static color_rgb encode_rgb(const Vector2& c) {
 			return encode_rgb(c.x, c.y, 0.0f);
 		}
 
@@ -283,15 +283,15 @@ namespace guarneri {
 			return encode_bgra(c.r, c.g, c.b, c.a);
 		}
 
-		static color_bgra encode_bgra(const float4& c) {
+		static color_bgra encode_bgra(const Vector4& c) {
 			return encode_bgra(c.x, c.y, c.z, c.w);
 		}
 
-		static color_bgra encode_bgra(const float3& c) {
+		static color_bgra encode_bgra(const Vector3& c) {
 			return encode_bgra(c.x, c.y, c.z, 1.0f);
 		}
 
-		static color_bgra encode_bgra(const float2& c) {
+		static color_bgra encode_bgra(const Vector2& c) {
 			return encode_bgra(c.x, c.y, 0.0f, 1.0f);
 		}
 
@@ -299,15 +299,15 @@ namespace guarneri {
 			return encode_rgba(c.r, c.g, c.b, c.a);
 		}
 
-		static color_rgba encode_rgba(const float4& c) {
+		static color_rgba encode_rgba(const Vector4& c) {
 			return encode_rgba(c.x, c.y, c.z, c.w);
 		}
 
-		static color_rgba encode_rgba(const float3& c) {
+		static color_rgba encode_rgba(const Vector3& c) {
 			return encode_rgba(c.x, c.y, c.z, 1.0f);
 		}
 
-		static color_rgba encode_rgba(const float2& c) {
+		static color_rgba encode_rgba(const Vector2& c) {
 			return encode_rgba(c.x, c.y, 0.0f, 1.0f);
 		}
 
@@ -426,19 +426,19 @@ namespace guarneri {
 		return c * other;
 	}
 
-	static color operator *(const float4& other, const color& c) {
+	static color operator *(const Vector4& other, const color& c) {
 		return color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 	}
 
-	static color operator *(const color& c, const float4& other) {
+	static color operator *(const color& c, const Vector4& other) {
 		return color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 	}
 
-	static color operator *(const float3& other, const color& c) {
+	static color operator *(const Vector3& other, const color& c) {
 		return color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 	}
 
-	static color operator *(const color& c, const float3& other) {
+	static color operator *(const color& c, const Vector3& other) {
 		return color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 	}
 

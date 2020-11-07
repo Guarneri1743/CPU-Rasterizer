@@ -2,19 +2,19 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct mat4 {
+	struct Matrix4x4 {
 	public:
-		static const mat4 IDENTITY;
-		static const mat4 ZERO;
+		static const Matrix4x4 IDENTITY;
+		static const Matrix4x4 ZERO;
 
 	public:
-		mat4(){
+		Matrix4x4(){
 			for (int i = 0; i < 16; i++) {
 				this->operator[](i) = 0.0f;
 			}
 		}
 
-		mat4(const float4& row0, const float4& row1, const float4& row2, const float4& row3) {
+		Matrix4x4(const Vector4& row0, const Vector4& row1, const Vector4& row2, const Vector4& row3) {
 			m00 = row0.x;
 			m01 = row1.x;
 			m02 = row2.x;
@@ -33,7 +33,7 @@ namespace guarneri {
 			m33 = row3.w;
 		}
 
-		mat4(const float& _m00, const float& _m01, const float& _m02, const float& _m03,
+		Matrix4x4(const float& _m00, const float& _m01, const float& _m02, const float& _m03,
 			const float& _m10, const float& _m11, const float& _m12, const float& _m13,
 			const float& _m20, const float& _m21, const float& _m22, const float& _m23,
 			const float& _m30, const float& _m31, const float& _m32, const float& _m33) {
@@ -74,23 +74,23 @@ namespace guarneri {
 		float m33;
 
 	public:
-		static mat4 translation(const float3& translation) {
-			mat4 m = IDENTITY;
+		static Matrix4x4 translation(const Vector3& translation) {
+			Matrix4x4 m = IDENTITY;
 			m.at(0, 3) = translation.x;
 			m.at(1, 3) = translation.y;
 			m.at(2, 3) = translation.z;
 			return m;
 		}
 
-		static mat4 rotation(const float3& axis, const float& theta) {
+		static Matrix4x4 rotation(const Vector3& axis, const float& theta) {
 			float rad = DEGREE2RAD(theta);
 			float s = std::sin(rad);
 			float c = std::cos(rad);
-			float3 normalized_axis = float3::normalize(axis);
+			Vector3 normalized_axis = Vector3::normalize(axis);
 			float x = normalized_axis.x;
 			float y = normalized_axis.y;
 			float z = normalized_axis.z;
-			mat4 m = IDENTITY;
+			Matrix4x4 m = IDENTITY;
 			m.at(0, 0) = c + (1 - c) * x * x;
 			m.at(0, 1) = (1 - c) * x * y - s * z;
 			m.at(0, 2) = (1 - c) * x * z + s * y;
@@ -106,48 +106,48 @@ namespace guarneri {
 			return m;
 		}
 
-		static mat4 scale(const float3& scale) {
-			mat4 m = IDENTITY;
+		static Matrix4x4 scale(const Vector3& scale) {
+			Matrix4x4 m = IDENTITY;
 			m.at(0, 0) = scale.x;
 			m.at(1, 1) = scale.y;
 			m.at(2, 2) = scale.z;
 			return m;
 		}
 
-		float3 position() const {
-			float3 pos;
+		Vector3 position() const {
+			Vector3 pos;
 			pos.x = at(0, 3);
 			pos.y = at(1, 3);
 			pos.z = at(2, 3);
 			return pos;
 		}
 
-		float3 forward() const {
-			float3 f;
+		Vector3 forward() const {
+			Vector3 f;
 			f.x = at(2, 0);
 			f.y = at(2, 1);
 			f.z = at(2, 2);
 			return f.normalized();
 		}
 
-		float3 up() const {
-			float3 u;
+		Vector3 up() const {
+			Vector3 u;
 			u.x = at(1, 0);
 			u.y = at(1, 1);
 			u.z = at(1, 2);
 			return u.normalized();
 		}
 
-		float3 right() const {
-			float3 r;
+		Vector3 right() const {
+			Vector3 r;
 			r.x = at(0, 0);
 			r.y = at(0, 1);
 			r.z = at(0, 2);
 			return r.normalized();
 		}
 
-		static mat4 viewport(const int& x, const int& y, const int& w, const int& h) {
-			mat4 ret = IDENTITY;
+		static Matrix4x4 viewport(const int& x, const int& y, const int& w, const int& h) {
+			Matrix4x4 ret = IDENTITY;
 			ret.at(0, 0) = w * 0.5f;
 			ret.at(0, 3) = x + (w * 0.5f);
 			ret.at(1, 1) = h * 0.5f;
@@ -156,15 +156,15 @@ namespace guarneri {
 		}
 
 		// yaw-y pitch-x roll-z
-		static mat4 yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll) {
+		static Matrix4x4 yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll) {
 			return euler_angle_z(roll) * euler_angle_x(pitch) * euler_angle_y(yaw);
 		}
 
-		static mat4 euler_angle_x(const float& angle) {
+		static Matrix4x4 euler_angle_x(const float& angle) {
 			float rad = DEGREE2RAD(angle);
 			float c = std::cos(rad);
 			float s = std::sin(rad);
-			return mat4(
+			return Matrix4x4(
 				1, 0, 0, 0,
 				0, c, s, 0,
 				0, -s, c, 0,
@@ -172,11 +172,11 @@ namespace guarneri {
 			);
 		}
 
-		static mat4 euler_angle_y(const float& angle) {
+		static Matrix4x4 euler_angle_y(const float& angle) {
 			float rad = DEGREE2RAD(angle);
 			float c = std::cos(rad);
 			float s = std::sin(rad);
-			return mat4(
+			return Matrix4x4(
 				c, 0, -s, 0,
 				0, 1, 0, 0,
 				s, 0, c, 0,
@@ -184,11 +184,11 @@ namespace guarneri {
 			);
 		}
 
-		static mat4 euler_angle_z(const float& angle) {
+		static Matrix4x4 euler_angle_z(const float& angle) {
 			float rad = DEGREE2RAD(angle);
 			float c = std::cos(rad);
 			float s = std::sin(rad);
-			return mat4(
+			return Matrix4x4(
 				c, s, 0, 0,
 				-s, c, 0, 0,
 				0, 0, 1, 0,
@@ -196,7 +196,7 @@ namespace guarneri {
 			);
 		}
 
-		static mat4 lookat(const float3& eye, const float3& target, const float3& world_up) {
+		static Matrix4x4 lookat(const Vector3& eye, const Vector3& target, const Vector3& world_up) {
 #ifdef LEFT_HANDED
 			return lookat_lh(eye, target, world_up);
 #else
@@ -204,13 +204,13 @@ namespace guarneri {
 #endif
 		}
 
-		static mat4 lookat_lh(const float3& eye, const float3& target, const float3& world_up) {
-			float3 forward = float3::normalize(target - eye);
-			float3 right = float3::normalize(float3::cross(float3::normalize(world_up), forward));
-			float3 up = float3::cross(forward, right);
+		static Matrix4x4 lookat_lh(const Vector3& eye, const Vector3& target, const Vector3& world_up) {
+			Vector3 forward = Vector3::normalize(target - eye);
+			Vector3 right = Vector3::normalize(Vector3::cross(Vector3::normalize(world_up), forward));
+			Vector3 up = Vector3::cross(forward, right);
 
 			// UVN--right up forward
-			mat4 view = mat4::IDENTITY;
+			Matrix4x4 view = Matrix4x4::IDENTITY;
 			view.at(0, 0) = right.x;
 			view.at(0, 1) = right.y;
 			view.at(0, 2) = right.z;
@@ -220,20 +220,20 @@ namespace guarneri {
 			view.at(2, 0) = forward.x;
 			view.at(2, 1) = forward.y;
 			view.at(2, 2) = forward.z;
-			view.at(0, 3) = -float3::dot(right, eye);
-			view.at(1, 3) = -float3::dot(up, eye);
-			view.at(2, 3) = -float3::dot(forward, eye);
+			view.at(0, 3) = -Vector3::dot(right, eye);
+			view.at(1, 3) = -Vector3::dot(up, eye);
+			view.at(2, 3) = -Vector3::dot(forward, eye);
 
 			return view;
 		}
 
-		static mat4 lookat_rh(const float3& eye, const float3& target, const float3& world_up) {
-			float3 forward = float3::normalize(target - eye);
-			float3 right = float3::normalize(float3::cross(forward, float3::normalize(world_up))); 
-			float3 up = float3::cross(right, forward); 
+		static Matrix4x4 lookat_rh(const Vector3& eye, const Vector3& target, const Vector3& world_up) {
+			Vector3 forward = Vector3::normalize(target - eye);
+			Vector3 right = Vector3::normalize(Vector3::cross(forward, Vector3::normalize(world_up))); 
+			Vector3 up = Vector3::cross(right, forward); 
 
 			// UVN--right up forward
-			mat4 view = mat4::IDENTITY;
+			Matrix4x4 view = Matrix4x4::IDENTITY;
 			view.at(0, 0) = right.x;
 			view.at(0, 1) = right.y;
 			view.at(0, 2) = right.z;
@@ -243,14 +243,14 @@ namespace guarneri {
 			view.at(2, 0) = -forward.x;
 			view.at(2, 1) = -forward.y;
 			view.at(2, 2) = -forward.z;
-			view.at(0, 3) = -float3::dot(right, eye);
-			view.at(1, 3) = -float3::dot(up, eye);
-			view.at(2, 3) = float3::dot(forward, eye);
+			view.at(0, 3) = -Vector3::dot(right, eye);
+			view.at(1, 3) = -Vector3::dot(up, eye);
+			view.at(2, 3) = Vector3::dot(forward, eye);
 
 			return view;
 		}
 
-		static mat4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
+		static Matrix4x4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
 #ifdef LEFT_HANDED
 			return perspective_lh(fov, aspect, near, far);
 #else
@@ -258,10 +258,10 @@ namespace guarneri {
 #endif
 		}
 
-		static mat4 perspective_rh(const float& fov, const float& aspect, const float& near, const float& far) {
+		static Matrix4x4 perspective_rh(const float& fov, const float& aspect, const float& near, const float& far) {
 			float rad = DEGREE2RAD(fov * 0.5f);
 			float cot = std::cos(rad) / std::sin(rad);
-			mat4 m = ZERO;
+			Matrix4x4 m = ZERO;
 			m.at(0, 0) = cot / aspect;
 			m.at(1, 1) = cot;
 			m.at(2, 2) = -(far + near) / (far - near);
@@ -270,10 +270,10 @@ namespace guarneri {
 			return m;
 		}
 
-		static mat4 perspective_lh(const float& fov, const float& aspect, const float& near, const float& far) {
+		static Matrix4x4 perspective_lh(const float& fov, const float& aspect, const float& near, const float& far) {
 			float rad = DEGREE2RAD(fov * 0.5f);
 			float cot = std::cos(rad) / std::sin(rad);
-			mat4 m = ZERO;
+			Matrix4x4 m = ZERO;
 			m.at(0, 0) = cot / aspect;
 			m.at(1, 1) = cot;
 			m.at(2, 2) = (far + near) / (far - near);
@@ -282,8 +282,8 @@ namespace guarneri {
 			return m;
 		}
 
-		static mat4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
-			mat4 m = IDENTITY;
+		static Matrix4x4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+			Matrix4x4 m = IDENTITY;
 			m.at(0, 0) = 2.0f / (right - left);
 			m.at(0, 3) = -(right + left) / (right - left);
 			m.at(1, 1) = 2.0f / (top - bottom);
@@ -293,8 +293,8 @@ namespace guarneri {
 			return m;
 		}
 
-		float3 transform_point(const float3& point) const {
-			float3 ret;
+		Vector3 transform_point(const Vector3& point) const {
+			Vector3 ret;
 			ret.x = m00 * point.x + m01 * point.y + m02 * point.z + m03;
 			ret.y = m10 * point.x + m11 * point.y + m12 * point.z + m13;
 			ret.z = m20 * point.x + m21 * point.y + m22 * point.z + m23;
@@ -306,16 +306,16 @@ namespace guarneri {
 			return ret;
 		}
 
-		float3 transform_direction(const float3& point) const {
-			float3 ret;
+		Vector3 transform_direction(const Vector3& point) const {
+			Vector3 ret;
 			ret.x = m00 * point.x + m01 * point.y + m02 * point.z;
 			ret.y = m10 * point.x + m11 * point.y + m12 * point.z;
 			ret.z = m20 * point.x + m21 * point.y + m22 * point.z;
 			return ret;
 		}
 
-		mat4 operator *(const mat4& rhs) const {
-			mat4 ret;
+		Matrix4x4 operator *(const Matrix4x4& rhs) const {
+			Matrix4x4 ret;
 			ret.m00 = m00 * rhs.m00 + m01 * rhs.m10 + m02 * rhs.m20 + m03 * rhs.m30;
 			ret.m01 = m00 * rhs.m01 + m01 * rhs.m11 + m02 * rhs.m21 + m03 * rhs.m31;
 			ret.m02 = m00 * rhs.m02 + m01 * rhs.m12 + m02 * rhs.m22 + m03 * rhs.m32;
@@ -335,8 +335,8 @@ namespace guarneri {
 			return ret;
 		}
 
-		mat4 transpose() const {
-			mat4 ret = mat4(*this);
+		Matrix4x4 transpose() const {
+			Matrix4x4 ret = Matrix4x4(*this);
 			std::swap(ret.at(0, 1), ret.at(1, 0));
 			std::swap(ret.at(0, 2), ret.at(2, 0));
 			std::swap(ret.at(0, 3), ret.at(3, 0));
@@ -348,7 +348,7 @@ namespace guarneri {
 
 		// Gaussian Elimination with Partial Pivoting https://stuff.mit.edu/afs/athena/course/10/10.001/Web/Course_Notes/GaussElimPivoting.html
 		// Cramer's rule is O(N^4) where Gaussian Elimination is O(N^3) https://www.reddit.com/r/math/comments/fkec7/why_would_you_use_gaussian_elimination_instead_of/
-		mat4 inverse() const
+		Matrix4x4 inverse() const
 		{
 			float r0[8];
 			float r1[8];
@@ -392,7 +392,7 @@ namespace guarneri {
 				std::swap(r1, r0);
 
 			if (0.0f == r0[0])
-				return mat4::ZERO;
+				return Matrix4x4::ZERO;
 
 			m1 = r1[0] / r0[0]; m2 = r2[0] / r0[0]; m3 = r3[0] / r0[0];
 
@@ -438,7 +438,7 @@ namespace guarneri {
 				std::swap(r2, r1);
 
 			if (0.0f == r1[1])
-				return mat4::ZERO;
+				return Matrix4x4::ZERO;
 
 			m2 = r2[1] / r1[1];
 			m3 = r3[1] / r1[1];
@@ -484,7 +484,7 @@ namespace guarneri {
 				std::swap(r3, r2);
 
 			if (0.0f == r2[2])
-				return mat4::ZERO;
+				return Matrix4x4::ZERO;
 
 			m3 = r3[2] / r2[2];
 			r3[3] -= m3 * r2[3];
@@ -494,7 +494,7 @@ namespace guarneri {
 			r3[7] -= m3 * r2[7];
 
 			if (0.0f == r3[3])
-				return mat4::ZERO;
+				return Matrix4x4::ZERO;
 
 			s = 1.0f / r3[3];
 			r3[4] *= s;
@@ -526,7 +526,7 @@ namespace guarneri {
 			r0[4] = s * (r0[4] - r1[4] * m0); r0[5] = s * (r0[5] - r1[5] * m0),
 				r0[6] = s * (r0[6] - r1[6] * m0); r0[7] = s * (r0[7] - r1[7] * m0);
 
-			mat4 out;
+			Matrix4x4 out;
 			out.at(0, 0) = r0[4]; out.at(0, 1) = r0[5], out.at(0, 2) = r0[6]; out.at(0, 3) = r0[7];
 			out.at(1, 0) = r1[4]; out.at(1, 1) = r1[5], out.at(1, 2) = r1[6]; out.at(1, 3) = r1[7];
 			out.at(2, 0) = r2[4]; out.at(2, 1) = r2[5], out.at(2, 2) = r2[6]; out.at(2, 3) = r2[7];
@@ -534,8 +534,8 @@ namespace guarneri {
 			return out;
 		}
 
-		float4 operator *(const float4& vector) const {
-			float4 ret;
+		Vector4 operator *(const Vector4& vector) const {
+			Vector4 ret;
 			ret.x = m00 * vector.x + m01 * vector.y + m02 * vector.z + m03 * vector.w;
 			ret.y = m10 * vector.x + m11 * vector.y + m12 * vector.z + m13 * vector.w;
 			ret.z = m20 * vector.x + m21 * vector.y + m22 * vector.z + m23 * vector.w;
@@ -543,11 +543,11 @@ namespace guarneri {
 			return ret;
 		}
 
-		bool operator ==(const mat4& rhs) const {
+		bool operator ==(const Matrix4x4& rhs) const {
 			return !(*this != rhs);
 		}
 
-		bool operator !=(const mat4& rhs) const {
+		bool operator !=(const Matrix4x4& rhs) const {
 			for (int idx = 0; idx < 4; idx++) {
 				if (column(idx) != rhs.column(idx)) {
 					return true;
@@ -556,21 +556,21 @@ namespace guarneri {
 			return false;
 		}
 
-		float4 row(const int& index) const {
-			float4 ret;
+		Vector4 row(const int& index) const {
+			Vector4 ret;
 			switch (index)
 			{
 			case 0:
-				ret = float4(m00, m01, m02, m03);
+				ret = Vector4(m00, m01, m02, m03);
 				break;
 			case 1:
-				ret = float4(m10, m11, m12, m13);
+				ret = Vector4(m10, m11, m12, m13);
 				break;
 			case 2:
-				ret = float4(m20, m21, m22, m23);
+				ret = Vector4(m20, m21, m22, m23);
 				break;
 			case 3:
-				ret = float4(m30, m31, m32, m33);
+				ret = Vector4(m30, m31, m32, m33);
 				break;
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
@@ -578,21 +578,21 @@ namespace guarneri {
 			return ret;
 		}
 
-		float4 column(const int& index) const {
-			float4 ret;
+		Vector4 column(const int& index) const {
+			Vector4 ret;
 			switch (index)
 			{
 			case 0:
-				ret = float4(m00, m10, m20, m30);
+				ret = Vector4(m00, m10, m20, m30);
 				break;
 			case 1:
-				ret = float4(m01, m11, m21, m31);
+				ret = Vector4(m01, m11, m21, m31);
 				break;
 			case 2:
-				ret = float4(m02, m12, m22, m32);
+				ret = Vector4(m02, m12, m22, m32);
 				break;
 			case 3:
-				ret = float4(m03, m13, m23, m33);
+				ret = Vector4(m03, m13, m23, m33);
 				break;
 			default:
 				std::cerr << "index out of range: " << index << std::endl;
@@ -698,15 +698,15 @@ namespace guarneri {
 		}
 	};
 
-	const mat4 mat4::IDENTITY(float4(1.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 1.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 1.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 1.0f));
-	const mat4 mat4::ZERO;
+	const Matrix4x4 Matrix4x4::IDENTITY(Vector4(1.0f, 0.0f, 0.0f, 0.0f), Vector4(0.0f, 1.0f, 0.0f, 0.0f), Vector4(0.0f, 0.0f, 1.0f, 0.0f), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+	const Matrix4x4 Matrix4x4::ZERO;
 
-	static std::ostream& operator << (std::ostream& stream, const mat4& mat) {
+	static std::ostream& operator << (std::ostream& stream, const Matrix4x4& mat) {
 		stream << mat.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const mat4& mat) {
+	static std::stringstream& operator << (std::stringstream& stream, const Matrix4x4& mat) {
 		stream << mat.str();
 		return stream;
 	}

@@ -33,7 +33,7 @@ namespace guarneri {
 		// *  screen space vertices ------------------------------------->  fragments ------> scissor test -------> alpha test -------> stencil test ---------> depth test -------> blending --------> framebuffer									*
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
-		void draw_primitive(std::shared_ptr<material>  material, const vertex& v1, const vertex& v2, const vertex& v3, const mat4& m, const mat4& v, const mat4& p) {
+		void draw_primitive(std::shared_ptr<material>  material, const vertex& v1, const vertex& v2, const vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			// early clip
 			/*if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
 				return;
@@ -80,10 +80,10 @@ namespace guarneri {
 			s3.position.w = c3.position.w;
 			s3.rhw = 1.0f / c3.position.w;
 
-			triangle tri(s1, s2, s3);
+			Triangle tri(s1, s2, s3);
 
 			// primitive assembly
-			std::vector<triangle> tris = tri.horizontal_split();
+			std::vector<Triangle> tris = tri.horizontal_split();
 
 			// rasterization
 			rasterize(tris, material);
@@ -108,17 +108,17 @@ namespace guarneri {
 			}
 		}
 
-		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p, const float2& screen_translation) {
-			float4 clip_start = p * v * float4(start);
-			float4 clip_end = p * v * float4(end);
+		void draw_line(const Vector3& start, const Vector3& end, const color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation) {
+			Vector4 clip_start = p * v * Vector4(start);
+			Vector4 clip_end = p * v * Vector4(end);
 
-			float4 n1 = clip2ndc(clip_start);
-			float4 n2 = clip2ndc(clip_end);
+			Vector4 n1 = clip2ndc(clip_start);
+			Vector4 n2 = clip2ndc(clip_end);
 
-			float4 s1 = ndc2viewport(n1);
-			float4 s2 = ndc2viewport(n2);
+			Vector4 s1 = ndc2viewport(n1);
+			Vector4 s2 = ndc2viewport(n2);
 
-			mat4 translation = mat4::translation(float3(screen_translation));
+			Matrix4x4 translation = Matrix4x4::translation(Vector3(screen_translation));
 
 			s1 = translation * s1;
 			s2 = translation * s2;
@@ -126,27 +126,27 @@ namespace guarneri {
 			line_drawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, color::encode_bgra(col));
 		}
 
-		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p, const float2& offset) {
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
 			graphics().draw_line(pos, pos + forward, color::BLUE, v, p, offset);
 			graphics().draw_line(pos, pos + right, color::RED, v, p, offset);
 			graphics().draw_line(pos, pos + up, color::GREEN, v, p, offset);
 		}
 
-		void draw_coordinates(const float3& pos, const float3& forward, const float3& up, const float3& right, const mat4& v, const mat4& p) {
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
 			graphics().draw_line(pos, pos + forward, color::BLUE, v, p);
 			graphics().draw_line(pos, pos + right, color::RED, v, p);
 			graphics().draw_line(pos, pos + up, color::GREEN, v, p);
 		}
 
-		void draw_line(const float3& start, const float3& end, const color& col, const mat4& v, const mat4& p) {
-			float4 clip_start = p * v * float4(start);
-			float4 clip_end = p * v * float4(end);
+		void draw_line(const Vector3& start, const Vector3& end, const color& col, const Matrix4x4& v, const Matrix4x4& p) {
+			Vector4 clip_start = p * v * Vector4(start);
+			Vector4 clip_end = p * v * Vector4(end);
 
-			float4 n1 = clip2ndc(clip_start);
-			float4 n2 = clip2ndc(clip_end);
+			Vector4 n1 = clip2ndc(clip_start);
+			Vector4 n2 = clip2ndc(clip_end);
 
-			float4 s1 = ndc2viewport(n1);
-			float4 s2 = ndc2viewport(n2);
+			Vector4 s1 = ndc2viewport(n1);
+			Vector4 s2 = ndc2viewport(n2);
 
 			line_drawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, color::encode_bgra(col));
 		}
@@ -160,7 +160,7 @@ namespace guarneri {
 			return shader->vertex_shader(input);
 		}
 
-		void rasterize(std::vector<triangle>& tris, const std::shared_ptr<material>& mat) {
+		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<material>& mat) {
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
 				bool flip = tri.flip;
@@ -176,7 +176,7 @@ namespace guarneri {
 					vertex lhs;
 					vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
-					// todo: clip triangle to polygons in order to avoid these two steps
+					// todo: clip Triangle to polygons in order to avoid these two steps
 					if (lhs.position.x <= 0.0f) {
 						float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
 						lhs = vertex::interpolate(lhs, rhs, t);
@@ -257,7 +257,7 @@ namespace guarneri {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					float3 depth_color = float3::ONE * linear_depth / 20.0f;
+					Vector3 depth_color = Vector3::ONE * linear_depth / 20.0f;
 					color_bgra c = color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					framebuffer->write(row, col, c);
 				}
@@ -314,8 +314,8 @@ namespace guarneri {
 			return ret;
 		}
 
-		float4 clip2ndc(const float4& v) {
-			float4 ndc_pos = v;
+		Vector4 clip2ndc(const Vector4& v) {
+			Vector4 ndc_pos = v;
 			float w = v.w;
 			if (w == 0.0f) {
 				w += EPSILON;
@@ -333,8 +333,8 @@ namespace guarneri {
 			return ret;
 		}
 
-		float4 ndc2viewport(const float4& v) {
-			float4 viewport_pos;
+		Vector4 ndc2viewport(const Vector4& v) {
+			Vector4 viewport_pos;
 			viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
 			viewport_pos.y = (1.0f - v.y) * this->height * 0.5f;
 			viewport_pos.z = v.z;
@@ -348,13 +348,13 @@ namespace guarneri {
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
 		}
 
-		bool clipping(const float4& v1, const float4& v2, const float4& v3, const mat4& m, const mat4& v, const mat4& p) {
+		bool clipping(const Vector4& v1, const Vector4& v2, const Vector4& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto mvp = p * v * m;
-			float4 c1 = mvp * v1; float4 c2 = mvp * v2; float4 c3 = mvp * v3;
+			Vector4 c1 = mvp * v1; Vector4 c2 = mvp * v2; Vector4 c3 = mvp * v3;
 			return clipping(c1) && clipping(c2) && clipping(c3);
 		}
 
-		bool clipping(const float4& v) {
+		bool clipping(const Vector4& v) {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
 			// y: [-w, w]
@@ -363,13 +363,13 @@ namespace guarneri {
 		}
 
 		// todo
-		void generate_frustum(mat4 v, mat4 p)
+		void generate_frustum(Matrix4x4 v, Matrix4x4 p)
 		{
 			REF(p);
 			REF(v);
 		}
 
-		bool in_frustum(const triangle& tri) {
+		bool in_frustum(const Triangle& tri) {
 			REF(tri);
 			return false;
 		}

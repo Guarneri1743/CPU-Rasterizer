@@ -5,17 +5,17 @@ namespace guarneri {
 	struct vertex {
 	public:
 		vertex() {
-			position = float4();
-			world_pos = float3();
-			color = float4();
-			uv = float2();
-			normal = float3();
-			tangent = float3();
-			bitangent = float3();
+			position = Vector4();
+			world_pos = Vector3();
+			color = Vector4();
+			uv = Vector2();
+			normal = Vector3();
+			tangent = Vector3();
+			bitangent = Vector3();
 			this->rhw = 1.0f;
 		}
 
-		vertex(const float4& position, const float3& world_pos, const float4& color, const float3& normal, const float2& uv, const float3& tangent, const float3& bitangent) {
+		vertex(const Vector4& position, const Vector3& world_pos, const Vector4& color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
 			this->position = position;
 			this->world_pos = world_pos;
 			this->color = color;
@@ -26,25 +26,25 @@ namespace guarneri {
 			this->rhw = 1.0f / this->position.w;
 		}
 
-		vertex(const float4& position, const float3& normal, const float2& uv) {
+		vertex(const Vector4& position, const Vector3& normal, const Vector2& uv) {
 			this->position = position;
 			this->world_pos = position.xyz();
-			this->color = float4::ONE;
+			this->color = Vector4::ONE;
 			this->normal = normal;
 			this->uv = uv;
-			this->tangent = float3::ZERO;
-			this->bitangent = float3::ZERO;
+			this->tangent = Vector3::ZERO;
+			this->bitangent = Vector3::ZERO;
 			this->rhw = 1.0f / this->position.w;
 		}
 
 	public:
-		float4 position;
-		float3 world_pos;
-		float4 color;
-		float3 normal;
-		float2 uv;
-		float3 tangent;
-		float3 bitangent;
+		Vector4 position;
+		Vector3 world_pos;
+		Vector4 color;
+		Vector3 normal;
+		Vector2 uv;
+		Vector3 tangent;
+		Vector3 bitangent;
 		float rhw;
 
 	public:

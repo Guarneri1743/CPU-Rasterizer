@@ -71,7 +71,7 @@ namespace guarneri {
             for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
             {
                 vertex vertex;
-                float3 vector; 
+                Vector3 vector; 
             
                 vector.x = ai_mesh->mVertices[i].x;
                 vector.y = ai_mesh->mVertices[i].y;
@@ -88,7 +88,7 @@ namespace guarneri {
 
                 if (ai_mesh->mTextureCoords[0]) 
                 {
-                    float2 vec;
+                    Vector2 vec;
 
                     vec.x = ai_mesh->mTextureCoords[0][i].x;
                     vec.y = ai_mesh->mTextureCoords[0][i].y;
@@ -105,7 +105,7 @@ namespace guarneri {
                     vertex.bitangent = vector;
                 }
                 else
-                    vertex.uv = float2(0.0f, 0.0f);
+                    vertex.uv = Vector2(0.0f, 0.0f);
 
                 vertex.color = vertex.tangent;
                 vertices.push_back(vertex);

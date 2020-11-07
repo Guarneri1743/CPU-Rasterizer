@@ -2,46 +2,46 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct ray {
+	struct Ray {
 	public:
-		ray() {
-			origin = guarneri::float3();
-			direction = guarneri::float3();
-			inversed_direction = guarneri::float3();
+		Ray() {
+			origin = guarneri::Vector3();
+			direction = guarneri::Vector3();
+			inversed_direction = guarneri::Vector3();
 		}
 
-		ray(const guarneri::float3& origin_t, const guarneri::float3& direction_t){
-			this->origin = origin_t;
-			this->direction = direction_t;
-			this->inversed_direction = guarneri::float3(1 / direction.x, 1 / direction.y, 1 / direction.z);
+		Ray(const guarneri::Vector3& origin, const guarneri::Vector3& direction){
+			this->origin = origin;
+			this->direction = direction;
+			this->inversed_direction = guarneri::Vector3(1 / direction.x, 1 / direction.y, 1 / direction.z);
 		}
 
-		ray(const ray& other) {
+		Ray(const Ray& other) {
 			this->origin = other.origin;
 			this->direction = other.direction;
 			this->inversed_direction = other.inversed_direction;
 		}
 
 	public:
-		guarneri::float3 origin;
-		guarneri::float3 direction;
-		guarneri::float3 inversed_direction;
+		guarneri::Vector3 origin;
+		guarneri::Vector3 direction;
+		guarneri::Vector3 inversed_direction;
 
 	public:
 		std::string str() const {
 			std::stringstream ss;
-			ss << "ray: [origin: " << this->origin << ", direction: " << this->direction << ", inversed_direction: " << inversed_direction << "]";
+			ss << "Ray: [origin: " << this->origin << ", direction: " << this->direction << ", inversed_direction: " << inversed_direction << "]";
 			return ss.str();
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const ray& ray) {
-		stream << ray.str();
+	static std::ostream& operator << (std::ostream& stream, const Ray& Ray) {
+		stream << Ray.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const ray& ray) {
-		stream << ray.str();
+	static std::stringstream& operator << (std::stringstream& stream, const Ray& Ray) {
+		stream << Ray.str();
 		return stream;
 	}
 }

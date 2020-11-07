@@ -39,7 +39,7 @@ namespace guarneri {
 		blend_operator blend_op;
 		bool transparent;
 		std::unordered_map<property_name, float> name2float;
-		std::unordered_map<property_name, float4> name2float4;
+		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 		lighting_data lighting_param;
@@ -69,7 +69,7 @@ namespace guarneri {
 			name2int[name] = val;
 		}
 
-		void set_float4(const property_name& name, const float4& val) {
+		void set_float4(const property_name& name, const Vector4& val) {
 			name2float4[name] = val;
 		}
 
@@ -91,7 +91,7 @@ namespace guarneri {
 			return 0;
 		}
 
-		float4 get_float4(const property_name& name) const {
+		Vector4 get_float4(const property_name& name) const {
 			if (name2float4.count(name) > 0) {
 				return name2float4.at(name);
 			}

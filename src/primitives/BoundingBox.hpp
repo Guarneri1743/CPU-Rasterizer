@@ -2,69 +2,69 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct aabb {
+	struct BoundingBox {
 	public:
-		aabb() {
-			center = guarneri::float3();
-			extents = guarneri::float3();
+		BoundingBox() {
+			center = guarneri::Vector3();
+			extents = guarneri::Vector3();
 		}
 
-		aabb(const guarneri::float3& center_t, const guarneri::float3& size) {
+		BoundingBox(const guarneri::Vector3& center_t, const guarneri::Vector3& size) {
 			this->center = center_t;
 			this->extents = size / 2;
 		}
 
-		aabb(const guarneri::float3& p) {
+		BoundingBox(const guarneri::Vector3& p) {
 			this->center = p;
 			this->extents = p;
 		}
 
-		aabb(const aabb& b)
+		BoundingBox(const BoundingBox& b)
 		{
 			this->center = b.center;
 			this->extents = b.extents;
 		}
 
 	public:
-		guarneri::float3 center;
-		guarneri::float3 extents;
+		guarneri::Vector3 center;
+		guarneri::Vector3 extents;
 
 	public:
-		guarneri::float3 size() const{
+		guarneri::Vector3 size() const{
 			return extents * 2;
 		}
 
-		guarneri::float3 min() const {
+		guarneri::Vector3 min() const {
 			return center - extents;
 		}
 
-		guarneri::float3 max() const {
+		guarneri::Vector3 max() const {
 			return center + extents;
 		}
 
-		void set_min_max(const guarneri::float3& min, const guarneri::float3& max) {
+		void set_min_max(const guarneri::Vector3& min, const guarneri::Vector3& max) {
 			this->extents = (max - min) * 0.5f;
 			this->center = min + this->extents;
 		}
 
-		void set_min(const guarneri::float3& m) {
+		void set_min(const guarneri::Vector3& m) {
 			set_min_max(m, this->max());
 		}
 
-		void set_max(const guarneri::float3& m) {
+		void set_max(const guarneri::Vector3& m) {
 			set_min_max(this->min(), m);
 		}
 
-		guarneri::float3 corner(const int& n) const
+		guarneri::Vector3 corner(const int& n) const
 		{
-			guarneri::float3 p;
+			guarneri::Vector3 p;
 			p.x = ((n & 1) ? max().x : min().x);
 			p.y = ((n & 1) ? max().y : min().y);
 			p.z = ((n & 1) ? max().z : min().z);
 			return p;
 		}
 
-		bool contains(const guarneri::float3& pos) const {
+		bool contains(const guarneri::Vector3& pos) const {
 			if (pos.x < min().x) {
 				return false;
 			}
@@ -88,7 +88,7 @@ namespace guarneri {
 
 		int maximum_extent() const
 		{
-			guarneri::float3 d = size();
+			guarneri::Vector3 d = size();
 			if (d.x > d.y && d.x > d.z)
 				return 0;
 			else if (d.y > d.z)
@@ -99,7 +99,7 @@ namespace guarneri {
 
 		float surface() const
 		{
-			guarneri::float3 d = size();
+			guarneri::Vector3 d = size();
 			return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
 		}
 
@@ -107,22 +107,22 @@ namespace guarneri {
 			return std::abs(a - b) < 1e-5f;
 		}
 
-		guarneri::float3 get_normal(const guarneri::float3& hit_position) const
+		guarneri::Vector3 get_normal(const guarneri::Vector3& hit_position) const
 		{
-			guarneri::float3 v = hit_position - min();
+			guarneri::Vector3 v = hit_position - min();
 			if (approx(v.x, 0.0f) || approx(v.y, 0.0f) || approx(v.z, 0.0f))
 			{
 				if (approx(v.x, 0.0f))
 				{
-					return guarneri::float3::LEFT;
+					return guarneri::Vector3::LEFT;
 				}
 				else if (approx(v.y, 0.0f))
 				{
-					return guarneri::float3::DOWN;
+					return guarneri::Vector3::DOWN;
 				}
 				else if (approx(v.z, 0.0f))
 				{
-					return guarneri::float3::BACK;
+					return guarneri::Vector3::BACK;
 				}
 			}
 			else
@@ -130,21 +130,21 @@ namespace guarneri {
 				v = max() - hit_position;
 				if (approx(v.x, 0.0f))
 				{
-					return guarneri::float3::RIGHT;
+					return guarneri::Vector3::RIGHT;
 				}
 				else if (approx(v.y, 0.0f))
 				{
-					return guarneri::float3::UP;
+					return guarneri::Vector3::UP;
 				}
 				else if (approx(v.z, 0.0f))
 				{
-					return guarneri::float3::FORWARD;
+					return guarneri::Vector3::FORWARD;
 				}
 			}
-			return guarneri::float3::ZERO;
+			return guarneri::Vector3::ZERO;
 		}
 
-		void expand(const guarneri::float3& p)
+		void expand(const guarneri::Vector3& p)
 		{
 			auto mi = min();
 			auto ma = max();
@@ -163,7 +163,7 @@ namespace guarneri {
 			center.z = (mi.z + ma.z) / 2;
 		}
 
-		void expand(const aabb& p)
+		void expand(const BoundingBox& p)
 		{
 			auto pmi = p.min();
 			auto pma = p.max();
@@ -184,20 +184,20 @@ namespace guarneri {
 			center.z = (mi.z + ma.z) / 2;
 		}
 
-		guarneri::float3 offset(const guarneri::float3& p) const
+		guarneri::Vector3 offset(const guarneri::Vector3& p) const
 		{
 			auto mi = min();
 			auto ma = max();
-			guarneri::float3 o = p - mi;
+			guarneri::Vector3 o = p - mi;
 			if (ma.x > mi.x) o.x /= ma.x - mi.x;
 			if (ma.y > mi.y) o.y /= ma.y - mi.y;
 			if (ma.z > mi.z) o.z /= ma.z - mi.z;
 			return o;
 		}
 
-		guarneri::float3 inv_offset(const guarneri::float3& p) const
+		guarneri::Vector3 inv_offset(const guarneri::Vector3& p) const
 		{
-			guarneri::float3 o;
+			guarneri::Vector3 o;
 			o.x = p.x * (max().x - min().x) + min().x;
 			o.y = p.y * (max().y - min().y) + min().y;
 			o.z = p.z * (max().z - min().z) + min().z;
@@ -206,18 +206,18 @@ namespace guarneri {
 
 		std::string str() const {
 			std::stringstream ss;
-			ss << "aabb: [center: " << this->center << ", size: " << this->size() << "]";
+			ss << "BoundingBox: [center: " << this->center << ", size: " << this->size() << "]";
 			return ss.str();
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const aabb& aabb) {
-		stream << aabb.str();
+	static std::ostream& operator << (std::ostream& stream, const BoundingBox& BoundingBox) {
+		stream << BoundingBox.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const aabb& aabb) {
-		stream << aabb.str();
+	static std::stringstream& operator << (std::stringstream& stream, const BoundingBox& BoundingBox) {
+		stream << BoundingBox.str();
 		return stream;
 	}
 }

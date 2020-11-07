@@ -13,26 +13,26 @@ namespace guarneri {
 		float near;
 		float far;
 		// todo: transform transform; 
-		float3 forward;
-		float3 right;
-		float3 up;
-		float3 position;
+		Vector3 forward;
+		Vector3 right;
+		Vector3 up;
+		Vector3 position;
 
 	private:
-		mat4 p;
-		mat4 v;
+		Matrix4x4 p;
+		Matrix4x4 v;
 		float yaw;
 		float pitch;
 		projection proj_type;
 
 	public:
-		static std::unique_ptr<camera> create(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+		static std::unique_ptr<camera> create(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
 			auto ret = std::make_unique<camera>();
 			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
 			return ret;
 		}
 
-		void initialize(const float3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+		void initialize(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
 			this->position = position_t;
 			this->aspect = aspect_t;
 			this->fov = fov_t;
@@ -52,28 +52,28 @@ namespace guarneri {
 			update_camera();
 		}
 
-		void lookat(const float3& target) {
-			this->forward = float3::normalize(target - this->position);
-			float3::calculate_right_up(forward, right, up);
+		void lookat(const Vector3& target) {
+			this->forward = Vector3::normalize(target - this->position);
+			Vector3::calculate_right_up(forward, right, up);
 		}
 
 		void update_camera() {
 			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 			forward.y = sin(DEGREE2RAD(this->pitch));
 			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
-			forward = float3::normalize(forward);
-			float3::calculate_right_up(forward, right, up);
+			forward = Vector3::normalize(forward);
+			Vector3::calculate_right_up(forward, right, up);
 		}
 
-		mat4 view_matrix() const {
-			return  mat4::lookat(position, position + forward, float3::UP);
+		Matrix4x4 view_matrix() const {
+			return  Matrix4x4::lookat(position, position + forward, Vector3::UP);
 		}
 
-		const mat4 projection_matrix() const{
+		const Matrix4x4 projection_matrix() const{
 			return p;
 		}
 
-		void move(const float3& t) {
+		void move(const Vector3& t) {
 			this->position += t;
 		}
 
@@ -105,13 +105,13 @@ namespace guarneri {
 		void update_proj_mode(){
 			switch (this->proj_type) {
 			case projection::perspective:
-				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			case projection::orthographic:
-				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			default:
-				this->p = mat4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 			}
 		}
 

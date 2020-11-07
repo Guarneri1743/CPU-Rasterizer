@@ -2,58 +2,58 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct segment{
+	struct Segment{
 	public:
-		segment() {
-			start = guarneri::float3::ZERO;
-			end = guarneri::float3::ZERO;
+		Segment() {
+			start = guarneri::Vector3::ZERO;
+			end = guarneri::Vector3::ZERO;
 		}
 
-		segment(const guarneri::float3& center, const guarneri::float3& dir, const float& extent) {
+		Segment(const guarneri::Vector3& center, const guarneri::Vector3& dir, const float& extent) {
 			this->start = center - extent * dir;
 			this->end = center + extent * dir;
 		}
 
-		segment(const guarneri::float3& start, const guarneri::float3& end) {
+		Segment(const guarneri::Vector3& start, const guarneri::Vector3& end) {
 			this->start = start;
 			this->end = end;
 		}
 
-		segment(const segment& other) {
+		Segment(const Segment& other) {
 			this->start = other.start;
 			this->end = other.end;
 		}
 
 	public:
-		guarneri::float3 start;
-		guarneri::float3 end;
+		guarneri::Vector3 start;
+		guarneri::Vector3 end;
 
 	public:
-		guarneri::float3 center() const {
+		guarneri::Vector3 center() const {
 			return (this->start + this->end) / 2;
 		}
 
 		float extent() const {
-			return float3::length(end, start) / 2;
+			return Vector3::length(end, start) / 2;
 		}
 
-		guarneri::float3 dir() const {
-			return float3::normalize(end - start);
+		guarneri::Vector3 dir() const {
+			return Vector3::normalize(end - start);
 		}
 
 		std::string str() const {
 			std::stringstream ss;
-			ss << "segment: [start: " << this->start  << ", end: "<<this->end << "]";
+			ss << "Segment: [start: " << this->start  << ", end: "<<this->end << "]";
 			return ss.str();
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const segment& seg) {
+	static std::ostream& operator << (std::ostream& stream, const Segment& seg) {
 		stream << seg.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const segment& seg) {
+	static std::stringstream& operator << (std::stringstream& stream, const Segment& seg) {
 		stream << seg.str();
 		return stream;
 	}

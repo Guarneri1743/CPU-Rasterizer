@@ -133,12 +133,12 @@ namespace guarneri {
 		std::unordered_set<mouse_button> active_mouse_btns;
 
 	public:
-		float2 mouse_position;
+		Vector2 mouse_position;
 		int mouse_x;
 		int mouse_y;
 
 	private:
-		std::unordered_map<void (*)(float2 prev, float2 pos, void* ud), void*> on_mouse_move_events;
+		std::unordered_map<void (*)(Vector2 prev, Vector2 pos, void* ud), void*> on_mouse_move_events;
 		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_down_events;
 		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_up_events;
 		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_down_events;
@@ -188,8 +188,8 @@ namespace guarneri {
 			auto prev = mouse_position;
 			float x, y;
 			window().get_mouse_position(x, y, mouse_x, mouse_y);
-			mouse_position = float2(x, y);
-			if (float2::magnitude(prev - mouse_position) > EPSILON) {
+			mouse_position = Vector2(x, y);
+			if (Vector2::magnitude(prev - mouse_position) > EPSILON) {
 				for (auto& kv : on_mouse_move_events) {
 					auto evt = kv.first;
 					auto user_data = kv.second;
@@ -292,14 +292,14 @@ namespace guarneri {
 			on_mouse_up_events.erase(on_mouse_up);
 		}
 
-		void add_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos, void* ud), void* user_data) {
+		void add_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud), void* user_data) {
 			if (on_mouse_move_events.count(on_mouse_move) > 0) {
 				return;
 			}
 			on_mouse_move_events.insert(std::pair(on_mouse_move, user_data));
 		}
 
-		void remove_on_mouse_move_evt(void (*on_mouse_move)(float2 prev, float2 pos, void* ud), void* user_data) {
+		void remove_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud), void* user_data) {
 			on_mouse_move_events.erase(on_mouse_move);
 		}
 

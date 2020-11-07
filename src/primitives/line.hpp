@@ -2,42 +2,42 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct line {
+	struct Line {
 	public:
-		line() {
-			origin = guarneri::float3();
-			direction = guarneri::float3();
+		Line() {
+			origin = guarneri::Vector3();
+			direction = guarneri::Vector3();
 		}
 
-		line(const guarneri::float3& origin_t, const guarneri::float3& direction_t) {
+		Line(const guarneri::Vector3& origin_t, const guarneri::Vector3& direction_t) {
 			this->origin = origin_t;
 			this->direction = direction_t;
 		}
 
-		line(const line& other) {
+		Line(const Line& other) {
 			this->origin = other.origin;
 			this->direction = other.direction;
 		}
 
 	public:
-		guarneri::float3 origin;
-		guarneri::float3 direction;
+		guarneri::Vector3 origin;
+		guarneri::Vector3 direction;
 
 	public:
 		std::string str() const {
 			std::stringstream ss;
-			ss << "line: [origin: " << this->origin << ", direction: " << this->direction << "]";
+			ss << "Line: [origin: " << this->origin << ", direction: " << this->direction << "]";
 			return ss.str();
 		}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const line& line) {
-		stream << line.str();
+	static std::ostream& operator << (std::ostream& stream, const Line& Line) {
+		stream << Line.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const line& line) {
-		stream << line.str();
+	static std::stringstream& operator << (std::stringstream& stream, const Line& Line) {
+		stream << Line.str();
 		return stream;
 	}
 }

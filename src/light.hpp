@@ -10,12 +10,12 @@ namespace guarneri {
 	};
 
 	struct directional_light : light {
-		float3 direction;
+		Vector3 direction;
 	};
 
 	struct spot_light : light {
-		float3 position;
-		float3 spot_direction;
+		Vector3 position;
+		Vector3 spot_direction;
 		float phi;
 		float theta;
 	};

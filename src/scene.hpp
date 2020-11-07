@@ -26,26 +26,26 @@ namespace guarneri{
 	public:
 		// todo: serialzie & deserialize scene data
 		void initialize() {
-			main_light.direction = float3(1.0f, 1.0f, 1.0f);
+			main_light.direction = Vector3(1.0f, 1.0f, 1.0f);
 			main_light.intensity = 1.0f;
 			main_light.diffuse = color(1.0f, 0.8f, 0.8f, 1.0f);
 			main_light.ambient = color(0.1f, 0.05f, 0.2f, 1.0f);
 			main_light.specular = color(1.0f, 1.0f, 1.0f, 1.0f);
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
-			main_cam = std::move(camera::create(float3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
-			main_cam->lookat(float3::ZERO);
-			debug_cam = std::move(camera::create(main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
-			world_debug_cam = std::move(camera::create(float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
+			main_cam = std::move(camera::create(Vector3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
+			main_cam->lookat(Vector3::ZERO);
+			debug_cam = std::move(camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
+			world_debug_cam = std::move(camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
 
-			input_mgr().add_on_mouse_move_evt([](float2 prev, float2 pos, void* data) {
+			input_mgr().add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data) {
 				if (input_mgr().is_mouse_down(mouse_button::right)) {
-					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
+					Vector2 offset = (pos - prev) * Vector2(window().width, window().height) * CAMERA_ROTATE_SPEED;
 					scene* s = reinterpret_cast<scene*>(data);
 					s->main_cam->rotate(offset.x, offset.y);
 				}
 				if (input_mgr().is_mouse_down(mouse_button::middle)) {
-					float2 offset = (pos - prev) * float2(window().width, window().height) * CAMERA_ROTATE_SPEED;
+					Vector2 offset = (pos - prev) * Vector2(window().width, window().height) * CAMERA_ROTATE_SPEED;
 					scene* s = reinterpret_cast<scene*>(data);
 					s->main_cam->move_left(offset.x);
 					s->main_cam->move_ascend(offset.y);
@@ -148,29 +148,29 @@ namespace guarneri{
 		}
 
 		void draw_camera_coords() {
-			float2 offset = float2(-(window().width / 2 - 50.0f), window().height / 2 - 50.0f);
-			float3 pos = main_cam->position;
-			float3 forward = main_cam->forward;
-			float3 right = main_cam->right;
-			float3 up = main_cam->up;
+			Vector2 offset = Vector2(-(window().width / 2 - 50.0f), window().height / 2 - 50.0f);
+			Vector3 pos = main_cam->position;
+			Vector3 forward = main_cam->forward;
+			Vector3 right = main_cam->right;
+			Vector3 up = main_cam->up;
 			graphics().draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-			debug_cam->position = (main_cam->position + float3(1.0f, 1.0f, -1.0f) * debug_cam_distance);
+			debug_cam->position = (main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance);
 			debug_cam->lookat(main_cam->position);
 		}
 
 		void draw_world_coords() {
-			float2 offset = float2(-(window().width / 2 - 150.0f), -(window().height / 2 - 150.0f));
-			graphics().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-			graphics().draw_coordinates(float3::ZERO, float3::FORWARD * 3.0f, float3::UP * 3.0f, float3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
+			Vector2 offset = Vector2(-(window().width / 2 - 150.0f), -(window().height / 2 - 150.0f));
+			graphics().draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+			graphics().draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 	
-			float3 pos = main_cam->position;
-			float3 forward = main_cam->forward;
-			float3 right = main_cam->right;
-			float3 up = main_cam->up;
+			Vector3 pos = main_cam->position;
+			Vector3 forward = main_cam->forward;
+			Vector3 right = main_cam->right;
+			Vector3 up = main_cam->up;
 			graphics().draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
-			world_debug_cam->position = (float3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
-			world_debug_cam->lookat(float3::ZERO);
+			world_debug_cam->position = (Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
+			world_debug_cam->lookat(Vector3::ZERO);
 		}
 
 		void render() {
@@ -182,7 +182,7 @@ namespace guarneri{
 				obj->render();
 			}
 
-			draw_world_coords();
+			//draw_world_coords();
 			draw_camera_coords();
 		}
 	};

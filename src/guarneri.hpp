@@ -107,24 +107,24 @@ namespace guarneri {
 
 	// forward declarations
 	class object;
-	struct float2;
-	struct float3;
-	struct float4;
-	struct mat3;
-	struct mat4;
+	struct Vector2;
+	struct Vector3;
+	struct Vector4;
+	struct Matrix3x3;
+	struct Matrix4x4;
 	struct transform;
 	struct color;
 	struct light;
 	struct vertex;
-	struct ray;
-	struct line;
-	struct aabb;
-	struct aabb2d;
-	struct plane;
-	struct triangle;
-	struct segment;
-	struct cylinder;
-	struct capsule;
+	struct Ray;
+	struct Line;
+	struct BoundingBox;
+	struct BoundingBox2D;
+	struct Plane;
+	struct Triangle;
+	struct Segment;
+	struct Cylinder;
+	struct Capsule;
 	struct light;
 	class mesh;
 	class camera;
@@ -136,7 +136,7 @@ namespace guarneri {
 	class renderer;
 	class render_device;
 	class gdi_window;
-	class primitive_factory;
+	class PrimitiveFactory;
 	class scene;
 	class id_allocator;
 	class input_manager;
@@ -171,12 +171,12 @@ namespace guarneri {
 #include <id_allocator.hpp>
 
 // math
-#include <float2.hpp>
-#include <float3.hpp>
-#include <float4.hpp>
+#include <Vector2.hpp>
+#include <Vector3.hpp>
+#include <Vector4.hpp>
 #include <color.hpp>
-#include <mat4.hpp>
-#include <mat3.hpp>
+#include <Matrix4x4.hpp>
+#include <Matrix3x3.hpp>
 
 // lighting 
 #include <light.hpp>
@@ -234,9 +234,9 @@ namespace guarneri{
 		float cam_far;
 		float screen_width;
 		float screen_height;
-		float3 camera_pos;
-		mat4 view_matrix;
-		mat4 proj_matrix;
+		Vector3 camera_pos;
+		Matrix4x4 view_matrix;
+		Matrix4x4 proj_matrix;
 		directional_light main_light;
 		render_flag flag;
 	} misc_parameter;
@@ -267,15 +267,15 @@ namespace guarneri{
 #include <input_manager.hpp>
 #include <transform.hpp>
 #include <vertex.hpp>
-#include <plane.hpp>
-#include <ray.hpp>
-#include <line.hpp>
-#include <segment.hpp>
-#include <cylinder.hpp>
-#include <capsule.hpp>
-#include <aabb.hpp>
-#include <aabb2d.hpp>
-#include <triangle.hpp>
+#include <Plane.hpp>
+#include <Ray.hpp>
+#include <Line.hpp>
+#include <Segment.hpp>
+#include <Cylinder.hpp>
+#include <Capsule.hpp>
+#include <BoundingBox.hpp>
+#include <BoundingBox2D.hpp>
+#include <Triangle.hpp>
 #include <light.hpp>
 #include <raw_buffer.hpp>
 #include <texture.hpp>
@@ -288,7 +288,7 @@ namespace guarneri{
 #include <render_device.hpp>
 #include <camera.hpp>
 #include <renderer.hpp>
-#include <primitive_factory.hpp>
+#include <PrimitiveFactory.hpp>
 #include <scene.hpp>
 
 namespace guarneri {

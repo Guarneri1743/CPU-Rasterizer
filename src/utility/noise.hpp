@@ -20,7 +20,7 @@ namespace guarneri {
                     nextr = nexti = 0;
                     prevr = previ = 0;
 
-                    float4 c = float4(0.4f, 0.6f, 0.8f, 1.0f);
+                    Vector4 c = Vector4(0.4f, 0.6f, 0.8f, 1.0f);
                     image->write(x, y, c);
 
                     for (int i = 0; i < max_iterations; ++i)
@@ -38,7 +38,7 @@ namespace guarneri {
                             /*const uint32_t index = static_cast<uint32_t>
                                 (1000.0 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));*/
                             //float n = (float)(10 * log2(1.75 + i - log2(log2(z))) / log2(max_iterations));
-                            c = float4(0.2f, 0.4f, 0.6f, 1.0f);
+                            c = Vector4(0.2f, 0.4f, 0.6f, 1.0f);
                             image->write(x, y, c);
 
                             break;

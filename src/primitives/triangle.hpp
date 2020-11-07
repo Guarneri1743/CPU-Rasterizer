@@ -2,23 +2,23 @@
 #include <guarneri.hpp>
 
 namespace guarneri {
-	struct triangle {
+	struct Triangle {
 	public:
-		triangle(const vertex verts[3]) {
+		Triangle(const vertex verts[3]) {
 			for (int i = 0; i < 3; i++) {
 				vertices[i] = verts[i];
 			}
 			flip = false;
 		}
 
-		triangle(const vertex& v1, const vertex& v2, const vertex& v3) {
+		Triangle(const vertex& v1, const vertex& v2, const vertex& v3) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
 			flip = false;
 		}
 
-		triangle(const vertex& v1, const vertex& v2, const vertex& v3, const bool& flip) {
+		Triangle(const vertex& v1, const vertex& v2, const vertex& v3, const bool& flip) {
 			vertices[0] = v1;
 			vertices[1] = v2;
 			vertices[2] = v3;
@@ -30,7 +30,7 @@ namespace guarneri {
 		bool flip;
 
 	public:
-		// scan top/bottom triangle
+		// scan top/bottom Triangle
 		// top-left-right | bottom-left-right(flipped)
 		//===================================================
 		//       top[0]
@@ -66,7 +66,7 @@ namespace guarneri {
 			rhs = vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
 		}
 
-		// split a triangle to 1-2 triangles
+		// split a Triangle to 1-2 triangles
 		//===================================================
 		//       top[0]
 		//        /\
@@ -84,8 +84,8 @@ namespace guarneri {
 		//        \/
 		//	    bottom[0]
 		//====================================================
-		std::vector<triangle> horizontal_split() {
-			std::vector<triangle> ret;
+		std::vector<Triangle> horizontal_split() {
+			std::vector<Triangle> ret;
 
 			int max_idx = -1;
 			int min_idx = -1;
@@ -94,7 +94,7 @@ namespace guarneri {
 
 			// sort
 			for (int i = 0; i < 3; i++) {
-				float4 p = vertices[i].position;
+				Vector4 p = vertices[i].position;
 				if (p.y < min_y) {
 					min_y = p.y;
 					min_idx = i;
@@ -102,7 +102,7 @@ namespace guarneri {
 			}
 
 			for (int i = 0; i < 3; i++) {
-				float4 p = vertices[i].position;
+				Vector4 p = vertices[i].position;
 				if (p.y > max_y) {
 					max_y = p.y;
 					max_idx = i;
@@ -117,29 +117,29 @@ namespace guarneri {
 			sorted[1] = vertices[mid];
 			sorted[2] = vertices[max_idx];
 
-			// line
+			// Line
 			if (sorted[0].position.y == sorted[1].position.y && sorted[1].position.y == sorted[2].position.y) {
 				return ret;
 			}
 
-			// top triangle
+			// top Triangle
 			if (sorted[1].position.y == sorted[2].position.y) {
 				if (sorted[1].position.x >= sorted[2].position.x) {
-					ret.push_back(triangle(sorted[0], sorted[2], sorted[1]));
+					ret.push_back(Triangle(sorted[0], sorted[2], sorted[1]));
 				}
 				else {
-					ret.push_back(triangle(sorted[0], sorted[1], sorted[2]));
+					ret.push_back(Triangle(sorted[0], sorted[1], sorted[2]));
 				}
 				return ret;
 			}
 
-			// bottom triangle
+			// bottom Triangle
 			if (sorted[0].position.y == sorted[1].position.y) {
 				if (sorted[0].position.x >= sorted[1].position.x) {
-					ret.push_back(triangle(sorted[2], sorted[1], sorted[0], true));
+					ret.push_back(Triangle(sorted[2], sorted[1], sorted[0], true));
 				}
 				else {
-					ret.push_back(triangle(sorted[2], sorted[0], sorted[1], true));
+					ret.push_back(Triangle(sorted[2], sorted[0], sorted[1], true));
 				}
 				return ret;
 			}
@@ -152,23 +152,23 @@ namespace guarneri {
 			// interpolate new vertex
 			vertex v = vertex::interpolate(sorted[0], sorted[2], t);
 
-			// top triangle: top-left-right
+			// top Triangle: top-left-right
 			if (v.position.x >= sorted[1].position.x) {
-				ret.push_back(triangle(sorted[0], sorted[1], v));
+				ret.push_back(Triangle(sorted[0], sorted[1], v));
 			}
 			else {
-				ret.push_back(triangle(sorted[0], v, sorted[1]));
+				ret.push_back(Triangle(sorted[0], v, sorted[1]));
 			}
 
 			auto tri = ret[0];
 			assert(EQUALS(tri[1].position.y, tri[2].position.y));
 
-			// bottom triangle: bottom-left-right
+			// bottom Triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
-				ret.push_back(triangle(sorted[2], sorted[1], v, true));
+				ret.push_back(Triangle(sorted[2], sorted[1], v, true));
 			}
 			else {
-				ret.push_back(triangle(sorted[2], v, sorted[1], true));
+				ret.push_back(Triangle(sorted[2], v, sorted[1], true));
 			}
 
 			tri = ret[1];
@@ -184,17 +184,17 @@ namespace guarneri {
 		public:
 			std::string str() const {
 				std::stringstream ss;
-				ss << "triangle: [v0: " << this->vertices[0] << ", v1: " << this->vertices[1] << ", v2: " << this->vertices[2] << "]";
+				ss << "Triangle: [v0: " << this->vertices[0] << ", v1: " << this->vertices[1] << ", v2: " << this->vertices[2] << "]";
 				return ss.str();
 			}
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const triangle& tri) {
+	static std::ostream& operator << (std::ostream& stream, const Triangle& tri) {
 		stream << tri.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const triangle& tri) {
+	static std::stringstream& operator << (std::stringstream& stream, const Triangle& tri) {
 		stream << tri.str();
 		return stream;
 	}

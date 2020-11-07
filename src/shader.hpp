@@ -3,22 +3,22 @@
 
 namespace guarneri {
 	struct a2v {
-		float4 position;
-		float2 uv;
-		float4 color;
-		float3 normal;
+		Vector4 position;
+		Vector2 uv;
+		Vector4 color;
+		Vector3 normal;
 	};
 
 	struct v2f {
-		float4 position;
-		float3 world_pos;
-		float2 uv;
-		float4 color;
-		float3 normal;
-		float3 tangent;
-		float3 bitangent;
+		Vector4 position;
+		Vector3 world_pos;
+		Vector2 uv;
+		Vector4 color;
+		Vector3 normal;
+		Vector3 tangent;
+		Vector3 bitangent;
 		// todo: add userdata feature to vertex
-		float3 custom_data;
+		Vector3 custom_data;
 	};
 
 	class shader : public object{
@@ -40,9 +40,9 @@ namespace guarneri {
 		~shader() { }
 
 	private:
-		mat4 m, v, p;
+		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
-		std::unordered_map<property_name, float4> name2float4;
+		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<texture>> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
@@ -72,7 +72,7 @@ namespace guarneri {
 
 		void sync(
 			const std::unordered_map<property_name, float>& float_uniforms,
-			const std::unordered_map<property_name, float4>& float4_uniforms,
+			const std::unordered_map<property_name, Vector4>& float4_uniforms,
 			const std::unordered_map<property_name, int>& int_uniforms,
 			const std::unordered_map<property_name, std::shared_ptr<texture>>& tex_uniforms) {
 			this->name2float = float_uniforms;
@@ -85,7 +85,7 @@ namespace guarneri {
 			this->lighting_param = data;
 		}
 
-		void set_mvp_matrix(const mat4& model, const mat4& view, const mat4& proj) {
+		void set_mvp_matrix(const Matrix4x4& model, const Matrix4x4& view, const Matrix4x4& proj) {
 			this->m = model;
 			this->v = view;
 			this->p = proj;
@@ -97,7 +97,7 @@ namespace guarneri {
 			o.position = oo;
 			o.world_pos = (m * input.position).xyz();
 			o.color = input.color;
-			o.normal = mat3(m).inverse().transpose() * input.normal;
+			o.normal = Matrix3x3(m).inverse().transpose() * input.normal;
 			o.uv = input.uv;
 			return o;
 		}
@@ -107,17 +107,17 @@ namespace guarneri {
 			color specular = misc_param.main_light.specular;
 			color diffuse = misc_param.main_light.diffuse;
 			float intensity = misc_param.main_light.intensity;
-			float3 light_dir = misc_param.main_light.direction.normalized();
-			float3 cam_pos = misc_param.camera_pos;
-			float3 frag_pos = input.world_pos;
-			float4 screen_pos = input.position;
+			Vector3 light_dir = misc_param.main_light.direction.normalized();
+			Vector3 cam_pos = misc_param.camera_pos;
+			Vector3 frag_pos = input.world_pos;
+			Vector4 screen_pos = input.position;
 			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
 
-			float3 normal = input.normal.normalized();
-			float ndl = std::max(float3::dot(normal, light_dir), 0.0f);
-			float3 view_dir = (cam_pos - frag_pos).normalized();
-			float3 reflect_dir = light_dir - 2.0f * normal * ndl;
-			float spec = std::pow(std::max(float3::dot(view_dir, reflect_dir), 0.0f), 32.0f);
+			Vector3 normal = input.normal.normalized();
+			float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			Vector3 view_dir = (cam_pos - frag_pos).normalized();
+			Vector3 reflect_dir = light_dir - 2.0f * normal * ndl;
+			float spec = std::pow(std::max(Vector3::dot(view_dir, reflect_dir), 0.0f), glossiness);
 
 			color ret = ambient;
 			color main_tex;
