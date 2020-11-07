@@ -25,11 +25,11 @@ namespace Guarneri {
 	public:
 		Shader(const shader_id& id) {
 			this->id = id;
-			this->ztest_mode = ztest::less_equal;
-			this->zwrite_mode = zwrite::on;
-			this->src_factor = blend_factor::src_alpha;
-			this->dst_factor = blend_factor::one_minus_src_alpha;
-			this->blend_op = blend_operator::add;
+			this->ztest_mode = ZTest::LEQUAL;
+			this->zwrite_mode = ZWrite::ON;
+			this->src_factor = BlendFactor::SRC_ALPHA;
+			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+			this->blend_op = BlendOp::ADD;
 			this->transparent = false;
 		}
 
@@ -49,21 +49,21 @@ namespace Guarneri {
 
 	public:
 		shader_id id;
-		ztest ztest_mode;
-		zwrite zwrite_mode;
-		blend_factor src_factor;
-		blend_factor dst_factor;
-		blend_operator blend_op;
+		ZTest ztest_mode;
+		ZWrite zwrite_mode;
+		BlendFactor src_factor;
+		BlendFactor dst_factor;
+		BlendOp blend_op;
 		bool transparent;
 		lighting_data lighting_param;
 
 	public:
-		void sync(ztest ztest, zwrite zwrite) {
+		void sync(ZTest ztest, ZWrite zwrite) {
 			this->ztest_mode = ztest;
 			this->zwrite_mode = zwrite;
 		}
 
-		void sync(bool semi_trans, blend_factor src, blend_factor dst, blend_operator op) {
+		void sync(bool semi_trans, BlendFactor src, BlendFactor dst, BlendOp op) {
 			this->transparent = semi_trans;
 			this->src_factor = src;
 			this->dst_factor = dst;
@@ -142,15 +142,15 @@ namespace Guarneri {
 
 			}
 
-			if (((int)misc_param.flag & (int)render_flag::uv) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::UV) != 0) {
 				return input.uv;
 			}
 
-			if (((int)misc_param.flag & (int)render_flag::vertex_color) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::VERTEX_COLOR) != 0) {
 				return input.color;
 			}
 
-			if (((int)misc_param.flag & (int)render_flag::normal) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::NORMAL) != 0) {
 				return input.normal;
 			}
 

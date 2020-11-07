@@ -9,9 +9,9 @@ namespace Guarneri {
 			extents = Guarneri::Vector3();
 		}
 
-		BoundingBox(const Guarneri::Vector3& center_t, const Guarneri::Vector3& size) {
-			this->center = center_t;
-			this->extents = size / 2;
+		BoundingBox(const Guarneri::Vector3& _center, const Guarneri::Vector3& size) {
+			this->center = _center;
+			this->extents = size / 2.0f;
 		}
 
 		BoundingBox(const Guarneri::Vector3& p) {

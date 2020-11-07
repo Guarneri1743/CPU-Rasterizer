@@ -54,55 +54,137 @@ namespace Guarneri {
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef unsigned char stb_uchar;
 
-	enum class projection {
-		perspective,
-		orthographic
+	enum class Projection {
+		PERSPECTIVE,
+		ORTHO
 	};
 
-	enum class wrap_mode {
-		repeat,
-		clamp
+	enum class WrapMode {
+		REPEAT,
+		CLAMP
 	};
 
-	enum class filtering {
-		point,
-		bilinear
+	enum class Filtering {
+		POINT,
+		BILINEAR
 	};
 
 	// todo: support other formats
-	enum class texture_format {
-		invalid,
+	enum class TextureFormat {
+		INVALID,
 		rgb,
 		rgba
 	};
 
-	enum class ztest {
-		always,
-		less,
-		less_equal,
-		equal,
-		greater_equal,
-		greater,
-		not_equal
+	enum class ZTest {
+		ALWAYS,
+		LESS,
+		LEQUAL,
+		EQUAL,
+		GEQUAL,
+		GREATER,
+		NOT_EQUAL
 	};
 
-	enum class zwrite {
-		on,
-		off,
-		fragment_z,
-		early_z
+	enum class ZWrite {
+		ON,
+		OFF,
+		EARLY_Z
 	};
 
-	enum class render_flag {
-		disable = 0,
-		wire_frame = 1 << 0,
-		shaded = 1 << 1,
-		depth = 1 << 2,
-		uv = 1 << 3,
-		vertex_color = 1 << 4,
-		normal = 1 << 5,
-		scanline = 1 << 6,
-		transparent = 1 << 7
+	enum class BlendFactor {
+		ONE,
+		SRC_COLOR,
+		SRC_ALPHA,
+		ONE_MINUS_SRC_ALPHA,
+		ONE_MINUS_SRC_COLOR,
+		DST_COLOR,
+		DST_ALPHA,
+		ONE_MINUS_DST_ALPHA,
+		ONE_MINUS_DST_COLOR
+	};
+
+	enum class BlendOp {
+		ADD,
+		SUB
+	};
+
+	enum class RenderFlag {
+		DISABLE = 0,
+		WIREFRAME = 1 << 0,
+		SHADED = 1 << 1,
+		DEPTH = 1 << 2,
+		UV = 1 << 3,
+		VERTEX_COLOR = 1 << 4,
+		NORMAL = 1 << 5,
+		SCANLINE = 1 << 6,
+		SEMI_TRANSPARENT = 1 << 7
+	};
+
+	enum class KeyCode {
+		A,
+		B,
+		C,
+		D,
+		E,
+		F,
+		G,
+		H,
+		I,
+		J,
+		K,
+		L,
+		M,
+		N,
+		O,
+		P,
+		Q,
+		R,
+		S,
+		T,
+		U,
+		V,
+		W,
+		X,
+		Y,
+		Z,
+		F1,
+		F2,
+		F3,
+		F4,
+		F5,
+		F6,
+		F7,
+		F8,
+		F9,
+		F10,
+		F11,
+		F12,
+		ESC,
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+		SPACE,
+		CTRL_L,
+		ALT_L,
+		CTRL_R,
+		ALT_R,
+		SHIFT_L,
+		SHIFT_R,
+		ENTER,
+		WIN
+	};
+
+	enum class MouseButton {
+		LEFT,
+		RIGHT,
+		MIDDLE
+	};
+
+	enum class MouseWheel {
+		UP,
+		DOWN
 	};
 
 	// forward declarations
@@ -142,24 +224,29 @@ namespace Guarneri {
 	class InputManager;
 	struct directional_light;
 
-	static std::string to_string(const texture_format& fmt) {
+	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
+	uint32_t CLAMP_UINT(uint32_t x, uint32_t min, uint32_t max) { return (x < min) ? min : ((x > max) ? max : x); }
+	int CLAMP_INT(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
+	float CLAMP_FLT(float x, float min, float max) { return (x < min) ? min : ((x > max) ? max : x); }
+
+	static std::string to_string(const TextureFormat& fmt) {
 		switch (fmt) {
-		case texture_format::invalid:
+		case TextureFormat::INVALID:
 			return "invalid";
-		case texture_format::rgb:
+		case TextureFormat::rgb:
 			return "rgb";
-		case texture_format::rgba:
+		case TextureFormat::rgba:
 			return "rgba";
 		}
 		return "invalid";
 	};
 
-	static std::ostream& operator <<(std::ostream& os, const texture_format& fmt) {
+	static std::ostream& operator <<(std::ostream& os, const TextureFormat& fmt) {
 		os << to_string(fmt);
 		return os;
 	};
 
-	static std::stringstream& operator <<(std::stringstream& ss, const texture_format& fmt) {
+	static std::stringstream& operator <<(std::stringstream& ss, const TextureFormat& fmt) {
 		ss << to_string(fmt);
 		return ss;
 	};
@@ -238,7 +325,7 @@ namespace Guarneri{
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;
 		directional_light main_light;
-		render_flag flag;
+		RenderFlag flag;
 	} misc_parameter;
 	static misc_parameter misc_param;
 
@@ -294,7 +381,7 @@ namespace Guarneri{
 namespace Guarneri {
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 		window().initialize(w, h, title, input_mgr().event_callback);
-		input_mgr().add_on_key_down_evt([](key_code code, void* data) { if (code == key_code::ESC) window().dispose(); }, nullptr);
+		input_mgr().add_on_key_down_evt([](KeyCode code, void* data) { if (code == KeyCode::ESC) window().dispose(); }, nullptr);
 		graphics().initialize(window().framebuffer, window().width, window().height);
 	}
 

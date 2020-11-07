@@ -26,7 +26,7 @@ namespace Guarneri {
 
 		// =============================================================================================================Pipeline======================================================================================================================
 		// *																																																										*
-		// *												 Model matrix					view matrix							projection matrix                clipping, clip2ndc					    screen mapping								*
+		// *												 Model matrix					view matrix							Projection matrix                clipping, clip2ndc					    screen mapping								*
 		// *  Vertex data ------------>local(Model) space  ----------------> world space ----------------> view(Camera) space ---------------------> clip space ---------------------> ndc(cvv) space --------------------> screen space(viewport)  *
 		// *																																																										*
 		// *						  primitive assembly/rasterization																																												*
@@ -89,7 +89,7 @@ namespace Guarneri {
 			rasterize(tris, Material);
 
 			// wireframe
-			if (((int)misc_param.flag & (int)render_flag::wire_frame) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::WIREFRAME) != 0) {
 
 				SegmentDrawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 				SegmentDrawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
@@ -97,7 +97,7 @@ namespace Guarneri {
 			}
 
 			// wireframe & scanline
-			if (((int)misc_param.flag & (int)render_flag::scanline) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::SCANLINE) != 0) {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
@@ -207,17 +207,17 @@ namespace Guarneri {
 			auto s = mat->get_shader();
 			float z = v.position.z;
 
-			ztest ztest_mode = s->ztest_mode;
-			zwrite zwrite_mode = s->zwrite_mode;
-			blend_factor src_factor = s->src_factor;
-			blend_factor dst_factor = s->dst_factor;
-			blend_operator blend_op = s->blend_op;
+			ZTest ztest_mode = s->ztest_mode;
+			ZWrite zwrite_mode = s->zwrite_mode;
+			BlendFactor src_factor = s->src_factor;
+			BlendFactor dst_factor = s->dst_factor;
+			BlendOp blend_op = s->blend_op;
 
 			color_bgra pixel_color;
 
 			// fragment Shader
 			Color fragment_result;
-			if (((int)misc_param.flag & (int)render_flag::shaded) != 0 && s != nullptr) {
+			if (((int)misc_param.flag & (int)RenderFlag::SHADED) != 0 && s != nullptr) {
 				v2f v_out;
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
@@ -232,7 +232,7 @@ namespace Guarneri {
 			// todo: scissor test
 
 			// alpha blend
-			if (s != nullptr && s->transparent && ((int)misc_param.flag & (int)render_flag::transparent) != 0) {
+			if (s != nullptr && s->transparent && ((int)misc_param.flag & (int)RenderFlag::SEMI_TRANSPARENT) != 0) {
 				color_bgra dst;
 				if (framebuffer->read(row, col, dst)) {
 					Color dst_color = Color::decode(dst);
@@ -253,7 +253,7 @@ namespace Guarneri {
 			}
 
 			// depth buffer visualization
-			if (((int)misc_param.flag & (int)render_flag::depth) != 0) {
+			if (((int)misc_param.flag & (int)RenderFlag::DEPTH) != 0) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
@@ -264,38 +264,38 @@ namespace Guarneri {
 			}
 		}
 
-		bool depth_test(const ztest& ztest_mode, const zwrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
+		bool depth_test(const ZTest& ztest_mode, const ZWrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {
 				pass = z <= depth;
 				switch (ztest_mode) {
-				case ztest::always:
+				case ZTest::ALWAYS:
 					pass = true;
 					break;
-				case ztest::equal:
+				case ZTest::EQUAL:
 					pass = EQUALS(z, depth); // percision concern
 					break;
-				case ztest::greater:
+				case ZTest::GREATER:
 					pass = z > depth;
 					break;
-				case ztest::less_equal:
+				case ZTest::LEQUAL:
 					pass = z <= depth;
 					break;
-				case ztest::not_equal:
+				case ZTest::NOT_EQUAL:
 					pass = z != depth;
 					break;
-				case ztest::greater_equal:
+				case ZTest::GEQUAL:
 					pass = z >= depth;
 					break;
-				case ztest::less:
+				case ZTest::LESS:
 					pass = z < depth;
 					break;
 				}
 
 				if (pass) {
 					// write z buffer 
-					if (zwrite_mode == zwrite::on || ((int)misc_param.flag & (int)render_flag::transparent) == 0) {
+					if (zwrite_mode == ZWrite::ON || ((int)misc_param.flag & (int)RenderFlag::SEMI_TRANSPARENT) == 0) {
 						zbuffer->write(row, col, z);
 					}
 				}
@@ -376,7 +376,7 @@ namespace Guarneri {
 
 		void clear_buffer() {
 			zbuffer->clear(1.0f);
-			if (((int)misc_param.flag & (int)render_flag::depth) != 0)
+			if (((int)misc_param.flag & (int)RenderFlag::DEPTH) != 0)
 			{
 				framebuffer->clear(Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
 			}

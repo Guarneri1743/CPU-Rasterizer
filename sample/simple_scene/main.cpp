@@ -29,7 +29,7 @@ int main()
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	auto plane_tex = Texture::create(tex_path);
-	/*auto Noise = Texture::create(512, 512, texture_format::rgba);
+	/*auto Noise = Texture::create(512, 512, TextureFormat::rgba);
 	Noise::generate_fractal_image(Noise, 512, 512);*/
 	auto plane_material = Material::create();
 	plane_material->transparent = false;
@@ -42,10 +42,10 @@ int main()
 	auto cube_tex = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
 	auto box_material = Material::create();
 	box_material->transparent = true;
-	box_material->blend_op = blend_operator::add;
-	box_material->src_factor = blend_factor::src_alpha;
-	box_material->dst_factor = blend_factor::one_minus_src_alpha;
-	box_material->zwrite_mode = zwrite::off;
+	box_material->blend_op = BlendOp::ADD;
+	box_material->src_factor = BlendFactor::SRC_ALPHA;
+	box_material->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+	box_material->zwrite_mode = ZWrite::OFF;
 	box_material->set_texture(albedo_prop, cube_tex);
 	auto cube = PrimitiveFactory::cube(std::move(box_material));
 	cube->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
@@ -54,26 +54,26 @@ int main()
 	demo_scene.add(cube_renderer, true);
 	demo_scene.add_on_update_evt([](void* user_data) {
 		std::shared_ptr<Renderer> cb = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
-		if (input_mgr().is_key_down(key_code::W)) {
+		if (input_mgr().is_key_down(KeyCode::W)) {
 			cb->target->transform.move_forward(0.2f);
 		}
-		if (input_mgr().is_key_down(key_code::A)) {
+		if (input_mgr().is_key_down(KeyCode::A)) {
 			cb->target->transform.move_left(0.2f);
 		}
-		if (input_mgr().is_key_down(key_code::S)) {
+		if (input_mgr().is_key_down(KeyCode::S)) {
 			cb->target->transform.move_backward(0.2f);
 		}
-		if (input_mgr().is_key_down(key_code::D)) {
+		if (input_mgr().is_key_down(KeyCode::D)) {
 			cb->target->transform.move_right(0.2f);
 		}
 	}, &cube_renderer);
 
 	demo_scene.add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);
-		if (input_mgr().is_key_down(key_code::R)) {
+		if (input_mgr().is_key_down(KeyCode::R)) {
 			s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
 		}
-		if (input_mgr().is_key_down(key_code::T)) {
+		if (input_mgr().is_key_down(KeyCode::T)) {
 			s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
 		}
 		}, & demo_scene);

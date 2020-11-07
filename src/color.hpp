@@ -2,28 +2,6 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	enum class blend_factor {
-		one,
-		src_color,
-		src_alpha,
-		one_minus_src_alpha,
-		one_minus_src_color,
-		dst_color,
-		dst_alpha,
-		one_minus_dst_alpha,
-		one_minus_dst_color
-	};
-
-	enum class blend_operator {
-		add,
-		sub
-	};
-
-	unsigned char CLAMP(unsigned char x, unsigned char min, unsigned char max) { return (x < min) ? min : ((x > max) ? max : x); }
-	uint32_t CLAMP_UINT(uint32_t x, uint32_t min, uint32_t max) { return (x < min) ? min : ((x > max) ? max : x); }
-	int CLAMP_INT(int x, int min, int max) { return (x < min) ? min : ((x > max) ? max : x); }
-	float CLAMP_FLT(float x, float min, float max) { return (x < min) ? min : ((x > max) ? max : x); }
-
 	static Color operator +(const float& other, const Color& c);
 	static Color operator -(const float& other, const Color& c);
 	static Color operator *(const float& other, const Color& c);
@@ -184,72 +162,72 @@ namespace Guarneri {
 		}
 
 		// todo: alpha factor
-		static Color blend(Color src_color, Color dst_color, blend_factor src_factor, blend_factor dst_factor, blend_operator op) {
+		static Color blend(Color src_color, Color dst_color, BlendFactor src_factor, BlendFactor dst_factor, BlendOp op) {
 			Color lhs, rhs;
 			switch (src_factor) {
-			case blend_factor::one:
+			case BlendFactor::ONE:
 				lhs = src_color;
 				break;
-			case blend_factor::src_alpha:
+			case BlendFactor::SRC_ALPHA:
 				lhs = src_color * src_color.a;
 				break;
-			case blend_factor::src_color:
+			case BlendFactor::SRC_COLOR:
 				lhs = src_color * src_color;
 				break;
-			case blend_factor::one_minus_src_alpha:
+			case BlendFactor::ONE_MINUS_SRC_ALPHA:
 				lhs = src_color * (1.0f - src_color);
 				break;
-			case blend_factor::one_minus_src_color:
+			case BlendFactor::ONE_MINUS_SRC_COLOR:
 				lhs = src_color * (1.0f - dst_color);
 				break;
-			case blend_factor::dst_alpha:
+			case BlendFactor::DST_ALPHA:
 				lhs = src_color * dst_color.a;
 				break;
-			case blend_factor::dst_color:
+			case BlendFactor::DST_COLOR:
 				lhs = src_color * dst_color;
 				break;
-			case blend_factor::one_minus_dst_alpha:
+			case BlendFactor::ONE_MINUS_DST_ALPHA:
 				lhs = src_color * (1.0f - dst_color.a);
 				break;
-			case blend_factor::one_minus_dst_color:
+			case BlendFactor::ONE_MINUS_DST_COLOR:
 				lhs = src_color * (1.0f - dst_color);
 				break;
 			}
 
 			switch (dst_factor) {
-			case blend_factor::one:
+			case BlendFactor::ONE:
 				rhs = src_color;
 				break;
-			case blend_factor::src_alpha:
+			case BlendFactor::SRC_ALPHA:
 				rhs = dst_color * src_color.a;
 				break;
-			case blend_factor::src_color:
+			case BlendFactor::SRC_COLOR:
 				rhs = dst_color * src_color;
 				break;
-			case blend_factor::one_minus_src_alpha:
+			case BlendFactor::ONE_MINUS_SRC_ALPHA:
 				rhs = dst_color * (1.0f - src_color);
 				break;
-			case blend_factor::one_minus_src_color:
+			case BlendFactor::ONE_MINUS_SRC_COLOR:
 				rhs = dst_color * (1.0f - dst_color);
 				break;
-			case blend_factor::dst_alpha:
+			case BlendFactor::DST_ALPHA:
 				rhs = dst_color * dst_color.a;
 				break;
-			case blend_factor::dst_color:
+			case BlendFactor::DST_COLOR:
 				rhs = dst_color * dst_color;
 				break;
-			case blend_factor::one_minus_dst_alpha:
+			case BlendFactor::ONE_MINUS_DST_ALPHA:
 				rhs = dst_color * (1.0f - dst_color.a);
 				break;
-			case blend_factor::one_minus_dst_color:
+			case BlendFactor::ONE_MINUS_DST_COLOR:
 				rhs = dst_color * (1.0f - dst_color);
 				break;
 			}
 
 			switch (op) {
-			case blend_operator::add:
+			case BlendOp::ADD:
 				return lhs + rhs;
-			case blend_operator::sub:
+			case BlendOp::SUB:
 				return lhs - rhs;
 			}
 			return lhs + rhs;

@@ -2,135 +2,69 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	enum class key_code {
-		A,
-		B,
-		C,
-		D,
-		E,
-		F,
-		G,
-		H,
-		I,
-		J,
-		K,
-		L,
-		M,
-		N,
-		O,
-		P,
-		Q,
-		R,
-		S,
-		T,
-		U,
-		V,
-		W,
-		X,
-		Y,
-		Z,
-		F1,
-		F2,
-		F3,
-		F4,
-		F5,
-		F6,
-		F7,
-		F8,
-		F9,
-		F10,
-		F11,
-		F12,
-		ESC,
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT,
-		SPACE,
-		CTRL_L,
-		ALT_L,
-		CTRL_R,
-		ALT_R,
-		SHIFT_L,
-		SHIFT_R,
-		ENTER,
-		WIN
-	};
-
-	enum class mouse_button {
-		left,
-		right,
-		middle
-	};
-
-	enum class mouse_wheel_rolling {
-		up,
-		down
-	};
-
 	class InputManager {
-		const std::unordered_map<WPARAM, key_code> vk2key =
+		const std::unordered_map<WPARAM, KeyCode> vk2key =
 		{
-			{ 'A', key_code::A},
-			{ 'B', key_code::B},
-			{ 'C', key_code::C},
-			{ 'D', key_code::D},
-			{ 'E', key_code::E},
-			{ 'F', key_code::F},
-			{ 'G', key_code::G},
-			{ 'H', key_code::H},
-			{ 'I', key_code::I},
-			{ 'J', key_code::J},
-			{ 'K', key_code::K},
-			{ 'L', key_code::L},
-			{ 'M', key_code::M},
-			{ 'N', key_code::N},
-			{ 'O', key_code::O},
-			{ 'P', key_code::P},
-			{ 'Q', key_code::Q},
-			{ 'R', key_code::R},
-			{ 'S', key_code::S},
-			{ 'T', key_code::T},
-			{ 'U', key_code::U},
-			{ 'V', key_code::V},
-			{ 'W', key_code::W},
-			{ 'X', key_code::X},
-			{ 'Y', key_code::Y},
-			{ 'Z', key_code::Z},
-			{ VK_F1, key_code::F1},
-			{ VK_F2, key_code::F2},
-			{ VK_F3, key_code::F3},
-			{ VK_F4, key_code::F4},
-			{ VK_F5, key_code::F5},
-			{ VK_F6, key_code::F6},
-			{ VK_F7, key_code::F7},
-			{ VK_F8, key_code::F8},
-			{ VK_F9, key_code::F9},
-			{ VK_F10, key_code::F10},
-			{ VK_F11, key_code::F11},
-			{ VK_F12, key_code::F12},
-			{ VK_ESCAPE, key_code::ESC},
-			{ VK_UP, key_code::UP},
-			{ VK_DOWN, key_code::DOWN},
-			{ VK_LEFT, key_code::LEFT},
-			{ VK_RIGHT, key_code::RIGHT},
-			{ VK_SPACE, key_code::SPACE},
-			{ VK_LCONTROL, key_code::CTRL_L},
-			{ VK_RCONTROL, key_code::CTRL_R},
-			{ VK_LSHIFT, key_code::SHIFT_L},
-			{ VK_RSHIFT, key_code::SHIFT_R},
-			{ VK_RETURN, key_code::ENTER}
+			{ 'A', KeyCode::A},
+			{ 'B', KeyCode::B},
+			{ 'C', KeyCode::C},
+			{ 'D', KeyCode::D},
+			{ 'E', KeyCode::E},
+			{ 'F', KeyCode::F},
+			{ 'G', KeyCode::G},
+			{ 'H', KeyCode::H},
+			{ 'I', KeyCode::I},
+			{ 'J', KeyCode::J},
+			{ 'K', KeyCode::K},
+			{ 'L', KeyCode::L},
+			{ 'M', KeyCode::M},
+			{ 'N', KeyCode::N},
+			{ 'O', KeyCode::O},
+			{ 'P', KeyCode::P},
+			{ 'Q', KeyCode::Q},
+			{ 'R', KeyCode::R},
+			{ 'S', KeyCode::S},
+			{ 'T', KeyCode::T},
+			{ 'U', KeyCode::U},
+			{ 'V', KeyCode::V},
+			{ 'W', KeyCode::W},
+			{ 'X', KeyCode::X},
+			{ 'Y', KeyCode::Y},
+			{ 'Z', KeyCode::Z},
+			{ VK_F1, KeyCode::F1},
+			{ VK_F2, KeyCode::F2},
+			{ VK_F3, KeyCode::F3},
+			{ VK_F4, KeyCode::F4},
+			{ VK_F5, KeyCode::F5},
+			{ VK_F6, KeyCode::F6},
+			{ VK_F7, KeyCode::F7},
+			{ VK_F8, KeyCode::F8},
+			{ VK_F9, KeyCode::F9},
+			{ VK_F10, KeyCode::F10},
+			{ VK_F11, KeyCode::F11},
+			{ VK_F12, KeyCode::F12},
+			{ VK_ESCAPE, KeyCode::ESC},
+			{ VK_UP, KeyCode::UP},
+			{ VK_DOWN, KeyCode::DOWN},
+			{ VK_LEFT, KeyCode::LEFT},
+			{ VK_RIGHT, KeyCode::RIGHT},
+			{ VK_SPACE, KeyCode::SPACE},
+			{ VK_LCONTROL, KeyCode::CTRL_L},
+			{ VK_RCONTROL, KeyCode::CTRL_R},
+			{ VK_LSHIFT, KeyCode::SHIFT_L},
+			{ VK_RSHIFT, KeyCode::SHIFT_R},
+			{ VK_RETURN, KeyCode::ENTER}
 		};
 
-		const std::unordered_map<WPARAM, mouse_button> vk2mouse =
+		const std::unordered_map<WPARAM, MouseButton> vk2mouse =
 		{
-			{VK_LBUTTON, mouse_button::left},
-			{VK_RBUTTON, mouse_button::right},
-			{VK_MBUTTON, mouse_button::middle}
+			{VK_LBUTTON, MouseButton::LEFT},
+			{VK_RBUTTON, MouseButton::RIGHT},
+			{VK_MBUTTON, MouseButton::MIDDLE}
 		};
 
-		std::unordered_set<key_code> active_keys;
-		std::unordered_set<mouse_button> active_mouse_btns;
+		std::unordered_set<KeyCode> active_keys;
+		std::unordered_set<MouseButton> active_mouse_btns;
 
 	public:
 		Vector2 mouse_position;
@@ -139,11 +73,11 @@ namespace Guarneri {
 
 	private:
 		std::unordered_map<void (*)(Vector2 prev, Vector2 pos, void* ud), void*> on_mouse_move_events;
-		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_down_events;
-		std::unordered_map<void (*)(key_code code, void* ud), void*> on_key_up_events;
-		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_down_events;
-		std::unordered_map<void (*)(mouse_button code, void* ud), void*> on_mouse_up_events;
-		std::unordered_map<void (*)(mouse_wheel_rolling rolling, void* ud), void*> on_wheel_rolling_events;
+		std::unordered_map<void (*)(KeyCode code, void* ud), void*> on_key_down_events;
+		std::unordered_map<void (*)(KeyCode code, void* ud), void*> on_key_up_events;
+		std::unordered_map<void (*)(MouseButton code, void* ud), void*> on_mouse_down_events;
+		std::unordered_map<void (*)(MouseButton code, void* ud), void*> on_mouse_up_events;
+		std::unordered_map<void (*)(MouseWheel rolling, void* ud), void*> on_wheel_rolling_events;
 
 	public:
 		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -202,7 +136,7 @@ namespace Guarneri {
 			for (auto& kv : on_wheel_rolling_events) {
 				auto evt = kv.first;
 				auto user_data = kv.second;
-				evt(delta > 0 ? mouse_wheel_rolling::up : mouse_wheel_rolling::down, user_data);
+				evt(delta > 0 ? MouseWheel::UP : MouseWheel::DOWN, user_data);
 			}
 		}
 
@@ -248,47 +182,47 @@ namespace Guarneri {
 			}
 		}
 
-		void add_on_key_down_evt(void (*on_key_down)(key_code code, void* ud), void* user_data) {
+		void add_on_key_down_evt(void (*on_key_down)(KeyCode code, void* ud), void* user_data) {
 			if (on_key_down_events.count(on_key_down) > 0) {
 				return;
 			}
 			on_key_down_events.insert(std::pair(on_key_down, user_data));
 		}
 
-		void remove_on_key_down_evt(void (*on_key_down)(key_code code, void* ud)) {
+		void remove_on_key_down_evt(void (*on_key_down)(KeyCode code, void* ud)) {
 			on_key_down_events.erase(on_key_down);
 		}
 
-		void add_on_key_up_evt(void (*on_key_up)(key_code code, void* ud), void* user_data) {
+		void add_on_key_up_evt(void (*on_key_up)(KeyCode code, void* ud), void* user_data) {
 			if (on_key_up_events.count(on_key_up) > 0) {
 				return;
 			}
 			on_key_up_events.insert(std::pair(on_key_up, user_data));
 		}
 
-		void remove_on_key_up_evt(void (*on_key_up)(key_code code, void* ud)) {
+		void remove_on_key_up_evt(void (*on_key_up)(KeyCode code, void* ud)) {
 			on_key_up_events.erase(on_key_up);
 		}
 
-		void add_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud), void* user_data) {
+		void add_on_mouse_down_evt(void (*on_mouse_down)(MouseButton code, void* ud), void* user_data) {
 			if (on_mouse_down_events.count(on_mouse_down) > 0) {
 				return;
 			}
 			on_mouse_down_events.insert(std::pair(on_mouse_down, user_data));
 		}
 
-		void remove_on_mouse_down_evt(void (*on_mouse_down)(mouse_button code, void* ud)) {
+		void remove_on_mouse_down_evt(void (*on_mouse_down)(MouseButton code, void* ud)) {
 			on_mouse_down_events.erase(on_mouse_down);
 		}
 
-		void add_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud), void* user_data) {
+		void add_on_mouse_up_evt(void (*on_mouse_up)(MouseButton code, void* ud), void* user_data) {
 			if (on_mouse_up_events.count(on_mouse_up) > 0) {
 				return;
 			}
 			on_mouse_up_events.insert(std::pair(on_mouse_up, user_data));
 		}
 
-		void remove_on_mouse_up_evt(void (*on_mouse_up)(mouse_button code, void* ud)) {
+		void remove_on_mouse_up_evt(void (*on_mouse_up)(MouseButton code, void* ud)) {
 			on_mouse_up_events.erase(on_mouse_up);
 		}
 
@@ -303,22 +237,22 @@ namespace Guarneri {
 			on_mouse_move_events.erase(on_mouse_move);
 		}
 
-		void add_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud), void* user_data) {
+		void add_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(MouseWheel rolling, void* ud), void* user_data) {
 			if (on_wheel_rolling_events.count(on_mouse_wheel_rolling) > 0) {
 				return;
 			}
 			on_wheel_rolling_events.insert(std::pair(on_mouse_wheel_rolling, user_data));
 		}
 
-		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(mouse_wheel_rolling rolling, void* ud)) {
+		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(MouseWheel rolling, void* ud)) {
 			on_wheel_rolling_events.erase(on_mouse_wheel_rolling);
 		}
 
-		bool is_key_down(key_code code) {
+		bool is_key_down(KeyCode code) {
 			return active_keys.count(code) > 0;
 		}
 
-		bool is_mouse_down(mouse_button btn) {
+		bool is_mouse_down(MouseButton btn) {
 			return active_mouse_btns.count(btn) > 0;
 		}
 	};

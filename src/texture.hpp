@@ -7,34 +7,34 @@
 namespace Guarneri {
 	class Texture : public Object{
 	public:
-		Texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		Texture(const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
 			release();
 			switch (fmt) {
-				case texture_format::rgb:
+				case TextureFormat::rgb:
 					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(width, height);
 					break;
-				case texture_format::rgba:
+				case TextureFormat::rgba:
 					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(width, height);
 					break;
 			}
 			std::cout << this->str() << " created" << std::endl;
 		}
 
-		Texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		Texture(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
 			this->fmt = fmt;
 			this->width = width;
 			this->height = height;
 			release();
 			switch (fmt) {
-				case texture_format::rgb:
+				case TextureFormat::rgb:
 				{
 					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
 				}
 				break;
-				case texture_format::rgba:
+				case TextureFormat::rgba:
 				{
 					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
 				}
@@ -45,7 +45,7 @@ namespace Guarneri {
 
 		Texture(const char* path) {
 			this->path = path;
-			this->fmt = texture_format::invalid;
+			this->fmt = TextureFormat::INVALID;
 			release();
 			int w, h, channels;
 			if (!FS::exists(path)) {
@@ -61,11 +61,11 @@ namespace Guarneri {
 				assert(h <= 4096);
 				if (channels == 3) {
 					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex, w, h, [](color_rgb* ptr) { stbi_image_free((void*)ptr); });
-					this->fmt = texture_format::rgb;
+					this->fmt = TextureFormat::rgb;
 				}
 				else if (channels == 4) {
 					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex, w, h, [](color_rgba* ptr) { stbi_image_free((void*)ptr); });
-					this->fmt = texture_format::rgba;
+					this->fmt = TextureFormat::rgba;
 				}
 				else {
 					std::cerr << "invalid channels: " << channels << std::endl;
@@ -85,9 +85,9 @@ namespace Guarneri {
 		}
 
 	public:
-		wrap_mode wrap_mode;
-		filtering filtering;
-		texture_format fmt;
+		WrapMode WrapMode;
+		Filtering Filtering;
+		TextureFormat fmt;
 
 	private:
 		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
@@ -98,11 +98,11 @@ namespace Guarneri {
 		uint32_t height;
 
 	public:
-		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
 			return std::make_shared<Texture>(width, height, fmt);
 		}
 
-		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
+		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& fmt) {
 			return std::make_shared<Texture>(tex_buffer, width, height, fmt);
 		}
 
@@ -125,7 +125,7 @@ namespace Guarneri {
 			float wv = v;
 			this->wrap(wu, wv);
 			switch (fmt) {
-				case texture_format::rgb:
+				case TextureFormat::rgb:
 				{
 					if (rgb_buffer == nullptr) return false;
 					color_rgb pixel;
@@ -133,7 +133,7 @@ namespace Guarneri {
 					ret = Color::decode(pixel);
 					return ok;
 				}
-				case texture_format::rgba:
+				case TextureFormat::rgba:
 				{
 					if(rgba_buffer == nullptr) return false;
 					color_rgba pixel;
@@ -147,7 +147,7 @@ namespace Guarneri {
 
 		bool sample(const uint32_t& row, const uint32_t& col, Color& ret) const {
 			switch (fmt) {
-				case texture_format::rgb:
+				case TextureFormat::rgb:
 				{
 					if (rgb_buffer == nullptr) return false;
 					color_rgb pixel;
@@ -155,7 +155,7 @@ namespace Guarneri {
 					ret = Color::decode(pixel);
 					return ok;
 				}
-				case texture_format::rgba:
+				case TextureFormat::rgba:
 				{
 					if (rgba_buffer == nullptr) return false;
 					color_rgba pixel;
@@ -169,10 +169,10 @@ namespace Guarneri {
 
 		bool write(const uint32_t& x, const uint32_t& y, const Color& data) {
 			switch (fmt) {
-				case texture_format::rgb:
+				case TextureFormat::rgb:
 					if (rgba_buffer == nullptr) return false;
 					return rgb_buffer->write(x, y, Color::encode_rgb(data));
-				case texture_format::rgba:
+				case TextureFormat::rgba:
 					{
 						if (rgba_buffer == nullptr) return false;
 						return rgba_buffer->write(x, y, Color::encode_rgba(data));
@@ -183,9 +183,9 @@ namespace Guarneri {
 
 		void save2file() {
 			switch (fmt) {
-			case texture_format::rgb:
+			case TextureFormat::rgb:
 				break;
-			case texture_format::rgba:
+			case TextureFormat::rgba:
 				break;
 			}
 		}
@@ -202,8 +202,8 @@ namespace Guarneri {
 
 	private:
 		void wrap(float& u, float& v) const {
-			switch (wrap_mode) {
-			case wrap_mode::clamp:
+			switch (WrapMode) {
+			case WrapMode::CLAMP:
 				if (u < 0.0f) {
 					u = 0.0f;
 				}
@@ -217,7 +217,7 @@ namespace Guarneri {
 					v = 1.0f;
 				}
 				break;
-			case wrap_mode::repeat:
+			case WrapMode::REPEAT:
 				if (u < 0.0f) {
 					u += 1.0f;
 				}
@@ -236,10 +236,10 @@ namespace Guarneri {
 
 		void clear() {
 			switch (fmt) {
-			case texture_format::rgb:
+			case TextureFormat::rgb:
 				rgb_buffer->clear(color_rgb());
 				break;
-			case texture_format::rgba:
+			case TextureFormat::rgba:
 				rgba_buffer->clear(color_rgba());
 				break;
 			}
@@ -252,8 +252,8 @@ namespace Guarneri {
 
 		void copy(const Texture& other) {
 			this->id = other.id;
-			this->wrap_mode = other.wrap_mode;
-			this->filtering = other.filtering;
+			this->WrapMode = other.WrapMode;
+			this->Filtering = other.Filtering;
 			this->fmt = other.fmt;
 			this->rgba_buffer = other.rgba_buffer;
 			this->rgb_buffer = other.rgb_buffer;

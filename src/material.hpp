@@ -6,21 +6,21 @@ namespace Guarneri {
 	public:
 		Material() {
 			this->target_shader = std::make_unique<Shader>("default");
-			this->ztest_mode = ztest::less_equal;
-			this->zwrite_mode = zwrite::on;
-			this->src_factor = blend_factor::src_alpha;
-			this->dst_factor = blend_factor::one_minus_src_alpha;
-			this->blend_op = blend_operator::add;
+			this->ztest_mode = ZTest::LEQUAL;
+			this->zwrite_mode = ZWrite::ON;
+			this->src_factor = BlendFactor::SRC_ALPHA;
+			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+			this->blend_op = BlendOp::ADD;
 			this->transparent = false;
 		}
 
 		Material(std::unique_ptr<Shader>& Shader) {
 			this->target_shader = std::move(Shader);
-			this->ztest_mode = ztest::less_equal;
-			this->zwrite_mode = zwrite::on;
-			this->src_factor = blend_factor::src_alpha;
-			this->dst_factor = blend_factor::one_minus_src_alpha;
-			this->blend_op = blend_operator::add;
+			this->ztest_mode = ZTest::LEQUAL;
+			this->zwrite_mode = ZWrite::ON;
+			this->src_factor = BlendFactor::SRC_ALPHA;
+			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+			this->blend_op = BlendOp::ADD;
 			this->transparent = false;
 		}
 
@@ -32,11 +32,11 @@ namespace Guarneri {
 
 	public:
 		std::shared_ptr<Shader> target_shader;
-		ztest ztest_mode;
-		zwrite zwrite_mode;
-		blend_factor src_factor;
-		blend_factor dst_factor;
-		blend_operator blend_op;
+		ZTest ztest_mode;
+		ZWrite zwrite_mode;
+		BlendFactor src_factor;
+		BlendFactor dst_factor;
+		BlendOp blend_op;
 		bool transparent;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
