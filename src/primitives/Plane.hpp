@@ -14,6 +14,12 @@ namespace Guarneri {
 			this->constant = constant;
 		}
 
+
+		Plane(const float& a, const float& b, const float& c, const float& d) {
+			this->normal = Vector3(a, b, c);
+			this->constant = d;
+		}
+
 		Plane(const Guarneri::Vector3& normal, const Guarneri::Vector3& p) {
 			this->normal = normal;
 			this->constant = Vector3::dot(normal, p);
@@ -29,6 +35,10 @@ namespace Guarneri {
 		float constant;
 
 	public:
+		float distance(const Vector3& pt) {
+			return Vector3::dot(normal, pt) + constant;
+		}
+
 		std::string str() const {
 			std::stringstream ss;
 			ss << "Plane: [normal: " << this->normal << ", constant: " << this->constant << "]";

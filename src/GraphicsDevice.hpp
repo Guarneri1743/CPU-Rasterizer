@@ -34,28 +34,27 @@ namespace Guarneri {
 		// *																																																										*
 		// ===========================================================================================================================================================================================================================================
 		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			// early clip
-			if (clipping(v1.position, v2.position, v3.position, m, v, p)) {
-				return;
-			}
+			auto shader = material->get_shader();
 
-			auto Shader = material->get_shader();
+			shader->set_mvp_matrix(m, v, p);
+			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
+			shader->sync(material->ztest_mode, material->zwrite_mode);
+			shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
+			shader->sync(material->lighting_param);
 
-			Shader->set_mvp_matrix(m, v, p);
-			Shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
-			Shader->sync(material->ztest_mode, material->zwrite_mode);
-			Shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
-			Shader->sync(material->lighting_param);
+			assert(shader != nullptr);
 
-			assert(Shader != nullptr);
-
-			v2f o1 = process_vertex(Shader, v1);
-			v2f o2 = process_vertex(Shader, v2);
-			v2f o3 = process_vertex(Shader, v3);
+			v2f o1 = process_vertex(shader, v1);
+			v2f o2 = process_vertex(shader, v2);
+			v2f o3 = process_vertex(shader, v3);
 
 			Vertex c1(o1.position, o1.world_pos, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
 			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+
+			if (clipping(c1.position, c2.position, c3.position)) {
+				return;
+			}
 
 			// position perspective division
 			Vertex n1 = clip2ndc(c1);
@@ -158,13 +157,13 @@ namespace Guarneri {
 			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
 		}
 
-		v2f process_vertex(const std::shared_ptr<Shader>& Shader, const Vertex& vert) {
+		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
 			input.color = vert.color;
 			input.normal = vert.normal;
-			return Shader->vertex_shader(input);
+			return shader->vertex_shader(input);
 		}
 
 		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Material>& mat) {
@@ -177,13 +176,16 @@ namespace Guarneri {
 				int bottom = CEIL(tri[bottom_idx].position.y);
 				top = CLAMP_INT(top, 0, this->height);
 				bottom = CLAMP_INT(bottom, 0, this->height);
+
 				assert(bottom >= top);
+
 				// interpolate vertically
 				for (int row = top; row < bottom; row++) {
 					Vertex lhs;
 					Vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
-					// todo: clip Triangle to polygons in order to avoid these two steps
+
+					// clipping
 					if (lhs.position.x <= 0.0f) {
 						float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
 						lhs = Vertex::interpolate(lhs, rhs, t);
@@ -255,7 +257,7 @@ namespace Guarneri {
 			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
 
 			if (z_pass) {
-				// write to Color buffer
+				// write to color buffer
 				framebuffer->write(row, col, pixel_color);
 			}
 
@@ -264,7 +266,7 @@ namespace Guarneri {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					Vector3 depth_color = Vector3::ONE * linear_depth / 20.0f;
+					Vector3 depth_color = Vector3::ONE * linear_depth / 30.0f;
 					color_bgra c = Color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
 					framebuffer->write(row, col, c);
 				}
@@ -359,36 +361,47 @@ namespace Guarneri {
 			auto v1v2 = v2 - v2;
 			auto v1v3 = v3 - v1;
 			float ndv = Vector3::dot(Vector3::cross(v1v2.xyz(), v1v3.xyz()), Vector3::BACK);
-			return ndv < 0;
+			return ndv < 0; // front face: ndv > 0
 		}
 
-		bool clipping(const Vector4& v1, const Vector4& v2, const Vector4& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			auto mvp = p * v * m;
-			Vector4 c1 = mvp * v1; Vector4 c2 = mvp * v2; Vector4 c3 = mvp * v3;
-			if (c1.w <= 0 || c2.w <= 0 || c3.w <= 0) {
-				return true;
-			}
-			return clipping(c1) && clipping(c2) && clipping(c3);
-		}
-
-		bool clipping(const Vector4& v) {
+		bool clipping(const Vector4& c1, const Vector4& c2, const Vector4& c3) {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
 			// y: [-w, w]
-			float w = v.w; float x = v.x; float y = v.y; float z = v.z;
-			return (z < -w) || (z > w) || (x < -w) || (x > w) || (y < -w) || (y > w);
-		}
 
-		// todo
-		void generate_frustum(Matrix4x4 v, Matrix4x4 p)
-		{
-			REF(p);
-			REF(v);
-		}
-
-		bool in_frustum(const Triangle& tri) {
-			REF(tri);
+			// clip near and far planes here, clip left, right, top and bottom planes at scanline stage
+			if (c1.w <= 0.0f || c2.w <= 0.0f || c3.w <= 0.0f) {
+				return true;
+			}
+			if (c1.z > c1.w || c2.z > c2.w || c3.z > c3.w) {
+				return true;
+			}
+			if (c1.z < -c1.w || c2.z < -c2.w || c3.z < -c3.w) {
+				return true;
+			}
 			return false;
+		}
+
+		bool frustum_culling(const BoundingBox& aabb, const Matrix4x4& v, const Matrix4x4& p) {
+			auto frustum = Frustum::create(v, p);
+			auto bmin = aabb.min();
+			auto bmax = aabb.max();
+			Vector3 corners[8];
+			corners[0] = Vector3(bmin.x, bmin.y, bmin.z);
+			corners[1] = Vector3(bmin.x, bmin.y, bmax.z);
+			corners[2] = Vector3(bmin.x, bmax.y, bmin.z);
+			corners[3] = Vector3(bmin.x, bmax.y, bmax.z);
+			corners[4] = Vector3(bmax.x, bmin.y, bmin.z);
+			corners[5] = Vector3(bmax.x, bmin.y, bmax.z);
+			corners[6] = Vector3(bmax.x, bmax.y, bmin.z);
+			corners[7] = Vector3(bmax.x, bmax.y, bmax.z);
+			for (int i = 0; i < 6; i++) {
+				auto plane = frustum[i];
+				for (int j = 0; j < 8; j++) {
+					if (plane.distance(corners[8]) > 0) return false;
+				}
+			}
+			return true;
 		}
 
 		void clear_buffer() {

@@ -87,42 +87,14 @@ namespace Guarneri {
 		std::vector<Triangle> horizontal_split() {
 			std::vector<Triangle> ret;
 
-			int max_idx = -1;
-			int min_idx = -1;
-			float max_y = FLT_MIN;
-			float min_y = FLT_MAX;
+			std::vector<Vertex> sorted;
+			sorted.push_back(vertices[0]);
+			sorted.push_back(vertices[1]);
+			sorted.push_back(vertices[2]);
+			std::sort(sorted.begin(), sorted.end(), [](const Vertex& lhs, const Vertex& rhs) { return lhs.position.y < rhs.position.y; });
 
-			// sort
-			for (int i = 0; i < 3; i++) {
-				Vector4 p = vertices[i].position;
-				if (p.y < min_y) {
-					min_y = p.y;
-					min_idx = i;
-				}
-			}
-
-			for (int i = 0; i < 3; i++) {
-				Vector4 p = vertices[i].position;
-				if (p.y > max_y) {
-					max_y = p.y;
-					max_idx = i;
-				}
-			}
-
-			int mid = min_idx == 0 ? (max_idx == 1 ? 2 : 1) : (max_idx == 0 ? (min_idx == 1 ? 2 : 1) : 0);
-
-			Vertex sorted[3];
-
-			sorted[0] = vertices[min_idx];
-			sorted[1] = vertices[mid];
-			sorted[2] = vertices[max_idx];
-
-			if (vertices[min_idx].position.y > vertices[mid].position.y) {
-				std::cerr << "fatal: min > mid: " << vertices[min_idx].position << ", " << vertices[mid].position << std::endl;
-			}
-			if (vertices[mid].position.y > vertices[max_idx].position.y) {
-				std::cerr << "fatal: mid > max_idx: " << vertices[mid].position << ", " << vertices[max_idx].position << std::endl;
-			}
+			assert(sorted[0].position.y <= sorted[1].position.y);
+			assert(sorted[1].position.y <= sorted[2].position.y);
 
 			// Line
 			if (sorted[0].position.y == sorted[1].position.y && sorted[1].position.y == sorted[2].position.y) {

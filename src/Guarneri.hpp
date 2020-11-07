@@ -199,6 +199,7 @@ namespace Guarneri {
 	struct Light;
 	struct Vertex;
 	struct Ray;
+	struct Ray2D;
 	struct Line;
 	struct BoundingBox;
 	struct BoundingBox2D;
@@ -264,6 +265,16 @@ namespace Guarneri {
 #include <Color.hpp>
 #include <Matrix4x4.hpp>
 #include <Matrix3x3.hpp>
+#include <Plane.hpp>
+#include <Ray.hpp>
+#include <Ray2D.hpp>
+#include <Line.hpp>
+#include <Segment.hpp>
+#include <Cylinder.hpp>
+#include <Capsule.hpp>
+#include <BoundingBox.hpp>
+#include <BoundingBox2D.hpp>
+#include <Frustum.hpp>
 
 // lighting 
 #include <Light.hpp>
@@ -354,14 +365,6 @@ namespace Guarneri{
 #include <InputManager.hpp>
 #include <Transform.hpp>
 #include <Vertex.hpp>
-#include <Plane.hpp>
-#include <Ray.hpp>
-#include <Line.hpp>
-#include <Segment.hpp>
-#include <Cylinder.hpp>
-#include <Capsule.hpp>
-#include <BoundingBox.hpp>
-#include <BoundingBox2D.hpp>
 #include <Triangle.hpp>
 #include <Light.hpp>
 #include <RawBuffer.hpp>

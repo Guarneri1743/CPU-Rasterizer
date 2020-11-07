@@ -135,6 +135,53 @@ namespace Guarneri {
 			return o;
 		}
 
+		bool intersect(Ray2D ray, float& dnear, float& dfar)
+		{
+			float tmin;
+			float tmax;
+			float div = ray.inversed_direction.x;
+			if (div >= 0.0f)
+			{
+				tmin = (min().x - ray.origin.x) * div;
+				tmax = (max().x - ray.origin.x) * div;
+			}
+			else
+			{
+				tmin = (max().x - ray.origin.x) * div;
+				tmax = (min().x - ray.origin.x) * div;
+			}
+			dnear = tmin;
+			dfar = tmax;
+			if (dnear > dfar || dfar < 0.0f)
+			{
+				return false;
+			}
+			div = ray.inversed_direction.y;
+			if (div >= 0.0f)
+			{
+				tmin = (min().y - ray.origin.y) * div;
+				tmax = (max().y - ray.origin.y) * div;
+			}
+			else
+			{
+				tmin = (max().y - ray.origin.y) * div;
+				tmax = (min().y - ray.origin.y) * div;
+			}
+			if (tmin > dnear)
+			{
+				dnear = tmin;
+			}
+			if (tmax < dfar)
+			{
+				dfar = tmax;
+			}
+			if (dnear > dfar || dfar < 0.0f)
+			{
+				return false;
+			}
+			return true;
+		}
+
 		std::string str() const {
 			std::stringstream ss;
 			ss << "BoundingBox2D: [center: " << this->center << ", size: " << this->size() << "]";

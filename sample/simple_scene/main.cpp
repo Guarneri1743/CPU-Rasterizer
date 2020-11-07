@@ -24,7 +24,7 @@ int main()
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	//demo_scene.add(Renderer::create(std::move(backpack)), false);
+	demo_scene.add(Renderer::create(std::move(backpack)), false);
 
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
@@ -35,7 +35,7 @@ int main()
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto Plane = PrimitiveFactory::Plane(std::move(plane_material));
-	Plane->transform.scale(Vector3(50.0f, 1.0f, 50.0f));
+	Plane->transform.scale(Vector3(10.0f, 0.0f, 10.0f));
 	demo_scene.add(Renderer::create(std::move(Plane)), false);
 
 	// transparent cube
