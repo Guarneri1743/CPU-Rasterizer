@@ -1,15 +1,15 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Sphere {
 	public:
 		Sphere() {
-			center = guarneri::Vector3();
+			center = Guarneri::Vector3();
 			radius = 0;
 		}
 
-		Sphere(const guarneri::Vector3& center_t, const float& radius_t) {
+		Sphere(const Guarneri::Vector3& center_t, const float& radius_t) {
 			this->center = center_t;
 			this->radius = radius_t;
 		}
@@ -20,7 +20,7 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 center;
+		Guarneri::Vector3 center;
 		float radius;	
 	
 	public:

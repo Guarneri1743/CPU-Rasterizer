@@ -1,11 +1,11 @@
 #pragma once
-#include <guarneri.hpp>
-#include <singleton.hpp>
+#include <Guarneri.hpp>
+#include <Singleton.hpp>
 
-namespace guarneri {
-	class camera : public object {
+namespace Guarneri {
+	class Camera : public Object {
 	public:
-		~camera(){}
+		~Camera(){}
 
 	public:
 		float fov;
@@ -26,8 +26,8 @@ namespace guarneri {
 		projection proj_type;
 
 	public:
-		static std::unique_ptr<camera> create(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
-			auto ret = std::make_unique<camera>();
+		static std::unique_ptr<Camera> create(const Vector3& position_t, const float& aspect_t, const float& fov_t, const float& near_t, const float& far_t, const projection& proj_type_t) {
+			auto ret = std::make_unique<Camera>();
 			ret->initialize(position_t, aspect_t, fov_t, near_t, far_t, proj_type_t);
 			return ret;
 		}

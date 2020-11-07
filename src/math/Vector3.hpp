@@ -1,7 +1,7 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	static Vector3 operator +(const float& other, const Vector3& vec);
 	static Vector3 operator -(const float& other, const Vector3& vec);
 	static Vector3 operator *(const float& other, const Vector3& vec);

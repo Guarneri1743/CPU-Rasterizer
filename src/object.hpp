@@ -1,11 +1,11 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	class object {
+namespace Guarneri {
+	class Object {
 	public:
-		object() { id = ALLOC_ID(); }
-		virtual ~object() { FREE_ID(id); }
+		Object() { id = ALLOC_ID(); }
+		virtual ~Object() { FREE_ID(id); }
 
 	protected:
 		uint32_t id;
@@ -18,12 +18,12 @@ namespace guarneri {
 		virtual std::string str() const = 0;
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const object& obj) {
+	static std::ostream& operator << (std::ostream& stream, const Object& obj) {
 		stream << obj.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const object& obj) {
+	static std::stringstream& operator << (std::stringstream& stream, const Object& obj) {
 		stream << obj.str();
 		return stream;
 	}

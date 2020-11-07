@@ -1,11 +1,11 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct a2v {
 		Vector4 position;
 		Vector2 uv;
-		Vector4 color;
+		Vector4 Color;
 		Vector3 normal;
 	};
 
@@ -13,7 +13,7 @@ namespace guarneri {
 		Vector4 position;
 		Vector3 world_pos;
 		Vector2 uv;
-		Vector4 color;
+		Vector4 Color;
 		Vector3 normal;
 		Vector3 tangent;
 		Vector3 bitangent;
@@ -21,7 +21,7 @@ namespace guarneri {
 		Vector3 custom_data;
 	};
 
-	class shader : public object{
+	class shader : public Object{
 	public:
 		shader(const shader_id& id) {
 			this->id = id;
@@ -85,8 +85,8 @@ namespace guarneri {
 			this->lighting_param = data;
 		}
 
-		void set_mvp_matrix(const Matrix4x4& model, const Matrix4x4& view, const Matrix4x4& proj) {
-			this->m = model;
+		void set_mvp_matrix(const Matrix4x4& Model, const Matrix4x4& view, const Matrix4x4& proj) {
+			this->m = Model;
 			this->v = view;
 			this->p = proj;
 		}
@@ -96,16 +96,16 @@ namespace guarneri {
 			auto oo = p * v * m * input.position;
 			o.position = oo;
 			o.world_pos = (m * input.position).xyz();
-			o.color = input.color;
+			o.Color = input.Color;
 			o.normal = Matrix3x3(m).inverse().transpose() * input.normal;
 			o.uv = input.uv;
 			return o;
 		}
 
-		color fragment_shader(const v2f& input) {
-			color ambient = misc_param.main_light.ambient;
-			color specular = misc_param.main_light.specular;
-			color diffuse = misc_param.main_light.diffuse;
+		Color fragment_shader(const v2f& input) {
+			Color ambient = misc_param.main_light.ambient;
+			Color specular = misc_param.main_light.specular;
+			Color diffuse = misc_param.main_light.diffuse;
 			float intensity = misc_param.main_light.intensity;
 			Vector3 light_dir = misc_param.main_light.direction.normalized();
 			Vector3 cam_pos = misc_param.camera_pos;
@@ -119,23 +119,23 @@ namespace guarneri {
 			Vector3 reflect_dir = light_dir - 2.0f * normal * ndl;
 			float spec = std::pow(std::max(Vector3::dot(view_dir, reflect_dir), 0.0f), glossiness);
 
-			color ret = ambient;
-			color main_tex;
+			Color ret = ambient;
+			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 				ret += diffuse * ndl * main_tex;
 			}
 
-			color normal_tex;
+			Color normal_tex;
 			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, normal_tex)) {
 
 			}
 
-			color spec_tex;
+			Color spec_tex;
 			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
 				ret += specular * spec * spec_tex;
 			}
 
-			color height_tex;
+			Color height_tex;
 			if (name2tex.count(height_prop) > 0 && name2tex[height_prop]->sample(input.uv.x, input.uv.y, height_tex)) {
 
 			}
@@ -145,14 +145,14 @@ namespace guarneri {
 			}
 
 			if (((int)misc_param.flag & (int)render_flag::vertex_color) != 0) {
-				return input.color;
+				return input.Color;
 			}
 
 			if (((int)misc_param.flag & (int)render_flag::normal) != 0) {
 				return input.normal;
 			}
 
-			return color(ret.r, ret.g, ret.b, 1.0f);
+			return Color(ret.r, ret.g, ret.b, 1.0f);
 		}
 
 		shader& operator =(const shader& other) {

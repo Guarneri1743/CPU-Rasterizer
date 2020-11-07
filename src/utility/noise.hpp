@@ -1,8 +1,8 @@
 #pragma once 
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	struct noise {
+namespace Guarneri {
+	struct Noise {
 		static void generate_fractal_image(std::shared_ptr<texture> image, int w, int h) {
             double    cr, ci;
             double nextr, nexti;

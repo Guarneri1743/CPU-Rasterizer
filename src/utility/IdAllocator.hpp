@@ -1,15 +1,15 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	#define INVALID_ID 0
-	struct id_spin {
+	struct IdSpin {
 	public:
-		id_spin(uint32_t left, uint32_t right) :left_id(left), right_id(right) {}
+		IdSpin(uint32_t left, uint32_t right) :left_id(left), right_id(right) {}
 		uint32_t left()const { return left_id; }
 		uint32_t right()const { return right_id; }
 
-		bool operator < (const id_spin& rhs)const {
+		bool operator < (const IdSpin& rhs)const {
 			return left_id < rhs.left() && right_id < rhs.left();
 		}
 	private:
@@ -17,21 +17,21 @@ namespace guarneri {
 		uint32_t right_id;
 	};
 
-	class id_allocator {
+	class IdAllocator {
 	public:
-		id_allocator(uint32_t min_id, uint32_t max_id)
+		IdAllocator(uint32_t min_id, uint32_t max_id)
 		{
 			assert(min_id > INVALID_ID);
 			assert(min_id <= max_id);
 			this->min_id = min_id;
 			this->max_id = max_id;
-			free_ids.insert(id_spin(min_id, max_id));
+			free_ids.insert(IdSpin(min_id, max_id));
 		}
 
 	private:
 		uint32_t min_id;
 		uint32_t max_id;
-		std::set<id_spin> free_ids;
+		std::set<IdSpin> free_ids;
 
 	public:
 		uint32_t alloc() {
@@ -53,7 +53,7 @@ namespace guarneri {
 			auto next = ileft + 1;
 			free_ids.erase(first);
 			if (next <= iright) {
-				free_ids.insert(id_spin(next, iright));
+				free_ids.insert(IdSpin(next, iright));
 			}
 			iid = ileft;
 			return true;
@@ -64,7 +64,7 @@ namespace guarneri {
 			if (iid > max_id || iid < min_id) {
 				return;
 			}
-			auto current = id_spin(iid, iid);
+			auto current = IdSpin(iid, iid);
 			uint32_t left, right;
 			auto iterator = free_ids.upper_bound(current);
 			if (iterator == free_ids.end()) {
@@ -72,10 +72,10 @@ namespace guarneri {
 				if (last != free_ids.rend() && last->right() + 1 == iid) {
 					left = last->left();
 					free_ids.erase(std::next(last).base());
-					free_ids.insert(id_spin(left, iid));
+					free_ids.insert(IdSpin(left, iid));
 				}
 				else {
-					free_ids.insert(id_spin(iid, iid));
+					free_ids.insert(IdSpin(iid, iid));
 				}
 			}
 			else {
@@ -84,7 +84,7 @@ namespace guarneri {
 					if (iterator == free_ids.begin()) {
 						right = iterator->right();
 						free_ids.erase(iterator);
-						free_ids.insert(id_spin(iid, right));
+						free_ids.insert(IdSpin(iid, right));
 					}
 					else {
 						auto prev = iterator;
@@ -94,12 +94,12 @@ namespace guarneri {
 							right = iterator->right();
 							free_ids.erase(iterator);
 							free_ids.erase(prev);
-							free_ids.insert(id_spin(left, right));
+							free_ids.insert(IdSpin(left, right));
 						}
 						else {
 							right = iterator->right();
 							free_ids.erase(iterator);
-							free_ids.insert(id_spin(iid, right));
+							free_ids.insert(IdSpin(iid, right));
 						}
 					}
 				}
@@ -110,7 +110,7 @@ namespace guarneri {
 						if (prev->right() + 1 == iid) {
 							left = prev->left();
 							free_ids.erase(prev);
-							free_ids.insert(id_spin(left, iid));
+							free_ids.insert(IdSpin(left, iid));
 							return;
 						}
 					}

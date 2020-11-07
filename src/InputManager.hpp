@@ -1,7 +1,7 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	enum class key_code {
 		A,
 		B,
@@ -68,7 +68,7 @@ namespace guarneri {
 		down
 	};
 
-	class input_manager {
+	class InputManager {
 		const std::unordered_map<WPARAM, key_code> vk2key =
 		{
 			{ 'A', key_code::A},

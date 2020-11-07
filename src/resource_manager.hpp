@@ -1,8 +1,8 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
 // simple cache based on weak_ptr
-namespace guarneri {
+namespace Guarneri {
 	template<typename T>
 	class resource_manager {
 	public:

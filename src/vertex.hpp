@@ -1,13 +1,13 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct vertex {
 	public:
 		vertex() {
 			position = Vector4();
 			world_pos = Vector3();
-			color = Vector4();
+			Color = Vector4();
 			uv = Vector2();
 			normal = Vector3();
 			tangent = Vector3();
@@ -15,10 +15,10 @@ namespace guarneri {
 			this->rhw = 1.0f;
 		}
 
-		vertex(const Vector4& position, const Vector3& world_pos, const Vector4& color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
+		vertex(const Vector4& position, const Vector3& world_pos, const Vector4& Color, const Vector3& normal, const Vector2& uv, const Vector3& tangent, const Vector3& bitangent) {
 			this->position = position;
 			this->world_pos = world_pos;
-			this->color = color;
+			this->Color = Color;
 			this->normal = normal;
 			this->uv = uv;
 			this->tangent = tangent;
@@ -29,7 +29,7 @@ namespace guarneri {
 		vertex(const Vector4& position, const Vector3& normal, const Vector2& uv) {
 			this->position = position;
 			this->world_pos = position.xyz();
-			this->color = Vector4::ONE;
+			this->Color = Vector4::ONE;
 			this->normal = normal;
 			this->uv = uv;
 			this->tangent = Vector3::ZERO;
@@ -40,7 +40,7 @@ namespace guarneri {
 	public:
 		Vector4 position;
 		Vector3 world_pos;
-		Vector4 color;
+		Vector4 Color;
 		Vector3 normal;
 		Vector2 uv;
 		Vector3 tangent;
@@ -50,7 +50,7 @@ namespace guarneri {
 	public:
 		void perspective_division(const float& rhw) {
 			world_pos *= rhw;
-			color *= rhw;
+			Color *= rhw;
 			normal *= rhw;
 			uv *= rhw;
 			tangent *= rhw;
@@ -62,7 +62,7 @@ namespace guarneri {
 			ret.position = left.position + (right.position - left.position) * t;
 			ret.position.w = 1.0f;
 			ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
-			ret.color = left.color + (right.color - left.color) * t;
+			ret.Color = left.Color + (right.Color - left.Color) * t;
 			ret.normal = left.normal + (right.normal - left.normal) * t;
 			ret.uv = left.uv + (right.uv - left.uv) * t;
 			ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
@@ -77,7 +77,7 @@ namespace guarneri {
 			vertex ret;
 			ret.position = (rhs.position - lhs.position) * segmentation;
 			ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;
-			ret.color = (rhs.color - lhs.color) * segmentation;
+			ret.Color = (rhs.Color - lhs.Color) * segmentation;
 			ret.uv = (rhs.uv - lhs.uv) * segmentation;
 			ret.normal = (rhs.normal - lhs.normal) * segmentation;
 			ret.tangent = (rhs.tangent - lhs.tangent) * segmentation;
@@ -90,7 +90,7 @@ namespace guarneri {
 			vertex ret;
 			ret.position = (left.position + differential.position);
 			ret.world_pos = (left.world_pos + differential.world_pos);
-			ret.color = (left.color + differential.color);
+			ret.Color = (left.Color + differential.Color);
 			ret.normal = (left.normal + differential.normal);
 			ret.uv = (left.uv + differential.uv);
 			ret.tangent = (left.tangent + differential.tangent);
@@ -102,7 +102,7 @@ namespace guarneri {
 	public:
 		std::string str() const {
 			std::stringstream ss;
-			ss << "vertex: [pos: " << this->position << ", color: " << this->color << ", uv: " << uv << "]";
+			ss << "vertex: [pos: " << this->position << ", Color: " << this->Color << ", uv: " << uv << "]";
 			return ss.str();
 		}
 	};

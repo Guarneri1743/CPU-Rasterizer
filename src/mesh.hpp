@@ -1,16 +1,16 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	class mesh : public object{
+namespace Guarneri {
+	class Mesh : public Object{
 	public:
-		mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
+		Mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
 			this->vertices = vertices;
 			this->indices = indices;
-			this->mat = std::move(material);
+			this->mat = std::move(Material);
 		}
 
-		mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
+		Mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
 			this->vertices = vertices;
 			this->indices = indices;
 		}
@@ -18,19 +18,19 @@ namespace guarneri {
 	public:
 		std::vector<vertex> vertices;
 		std::vector<uint32_t> indices;
-		std::shared_ptr<material> mat;
+		std::shared_ptr<Material> mat;
 
 	public:
-		std::unique_ptr<mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<material> material) {
-			return std::make_unique<mesh>(vertices, indices, std::move(material));
+		std::unique_ptr<Mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> Material) {
+			return std::make_unique<Mesh>(vertices, indices, std::move(Material));
 		}
 
-		std::unique_ptr<mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
-			return std::make_unique<mesh>(vertices, indices);
+		std::unique_ptr<Mesh> create(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices) {
+			return std::make_unique<Mesh>(vertices, indices);
 		}
 
-		std::unique_ptr<mesh> create(const mesh& other) {
-			return std::make_unique<mesh>(other);
+		std::unique_ptr<Mesh> create(const Mesh& other) {
+			return std::make_unique<Mesh>(other);
 		}
 
 		std::string str() const {

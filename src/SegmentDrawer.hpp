@@ -1,8 +1,8 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	class line_drawer {
+namespace Guarneri {
+	class SegmentDrawer {
 	public:
 		template<typename T>
 		static void dda(const std::shared_ptr<raw_buffer<T>>& buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c){

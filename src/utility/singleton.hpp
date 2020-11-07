@@ -1,11 +1,11 @@
 #pragma once
 
-namespace guarneri {
+namespace Guarneri {
 	template<typename T>
-	class singleton {
+	class Singleton {
 	public:
-		singleton() {}
-		~singleton() {}
+		Singleton() {}
+		~Singleton() {}
 		
 		static T& get() {
 			static T _inst;
@@ -13,7 +13,7 @@ namespace guarneri {
 		}
 
 	private:
-		singleton(const singleton&) = delete;
-		void operator=(const singleton&) = delete;
+		Singleton(const Singleton&) = delete;
+		void operator=(const Singleton&) = delete;
 	};
 }

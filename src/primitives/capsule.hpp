@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Capsule {
 	public:
 		Capsule() {
@@ -9,12 +9,12 @@ namespace guarneri {
 			radius = 0;
 		}
 
-		Capsule(const guarneri::Vector3& center, const guarneri::Vector3& dir, const float& extent, const float& radius_t) {
+		Capsule(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent, const float& radius_t) {
 			this->Segment = Segment::Segment(center, dir, extent);
 			this->radius = radius_t;
 		}
 
-		Capsule(const guarneri::Vector3& start, const guarneri::Vector3& end, const float& radius) {
+		Capsule(const Guarneri::Vector3& start, const Guarneri::Vector3& end, const float& radius) {
 			this->Segment = Segment::Segment(start, end);
 			this->radius = radius;
 		}

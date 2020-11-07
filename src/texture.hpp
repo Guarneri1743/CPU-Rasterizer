@@ -1,11 +1,11 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>
 
-namespace guarneri {
-	class texture : public object{
+namespace Guarneri {
+	class texture : public Object{
 	public:
 		texture(const uint32_t& width, const uint32_t& height, const texture_format& fmt) {
 			this->fmt = fmt;
@@ -117,7 +117,7 @@ namespace guarneri {
 			return ret;
 		}
 
-		bool sample(const float& u, const float& v, color& ret) const {
+		bool sample(const float& u, const float& v, Color& ret) const {
 			float wu = u;
 			float wv = v;
 			this->wrap(wu, wv);
@@ -127,7 +127,7 @@ namespace guarneri {
 					if (rgb_buffer == nullptr) return false;
 					color_rgb pixel;
 					bool ok = rgb_buffer->read(wu, wv, pixel);
-					ret = color::decode(pixel);
+					ret = Color::decode(pixel);
 					return ok;
 				}
 				case texture_format::rgba:
@@ -135,21 +135,21 @@ namespace guarneri {
 					if(rgba_buffer == nullptr) return false;
 					color_rgba pixel;
 					bool ok =rgba_buffer->read(wu, wv, pixel);
-					ret = color::decode(pixel);
+					ret = Color::decode(pixel);
 					return ok;
 				}
 			}
 			return false;
 		}
 
-		bool sample(const uint32_t& row, const uint32_t& col, color& ret) const {
+		bool sample(const uint32_t& row, const uint32_t& col, Color& ret) const {
 			switch (fmt) {
 				case texture_format::rgb:
 				{
 					if (rgb_buffer == nullptr) return false;
 					color_rgb pixel;
 					bool ok = rgb_buffer->read(row, col, pixel);
-					ret = color::decode(pixel);
+					ret = Color::decode(pixel);
 					return ok;
 				}
 				case texture_format::rgba:
@@ -157,22 +157,22 @@ namespace guarneri {
 					if (rgba_buffer == nullptr) return false;
 					color_rgba pixel;
 					bool ok = rgba_buffer->read(row, col, pixel);
-					ret = color::decode(pixel);
+					ret = Color::decode(pixel);
 					return ok;
 				}
 			}
 			return false;
 		}
 
-		bool write(const uint32_t& x, const uint32_t& y, const color& data) {
+		bool write(const uint32_t& x, const uint32_t& y, const Color& data) {
 			switch (fmt) {
 				case texture_format::rgb:
 					if (rgba_buffer == nullptr) return false;
-					return rgb_buffer->write(x, y, color::encode_rgb(data));
+					return rgb_buffer->write(x, y, Color::encode_rgb(data));
 				case texture_format::rgba:
 					{
 						if (rgba_buffer == nullptr) return false;
-						return rgba_buffer->write(x, y, color::encode_rgba(data));
+						return rgba_buffer->write(x, y, Color::encode_rgba(data));
 					}
 			}
 			return false;

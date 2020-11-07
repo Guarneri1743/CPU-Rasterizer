@@ -1,20 +1,20 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct BoundingBox {
 	public:
 		BoundingBox() {
-			center = guarneri::Vector3();
-			extents = guarneri::Vector3();
+			center = Guarneri::Vector3();
+			extents = Guarneri::Vector3();
 		}
 
-		BoundingBox(const guarneri::Vector3& center_t, const guarneri::Vector3& size) {
+		BoundingBox(const Guarneri::Vector3& center_t, const Guarneri::Vector3& size) {
 			this->center = center_t;
 			this->extents = size / 2;
 		}
 
-		BoundingBox(const guarneri::Vector3& p) {
+		BoundingBox(const Guarneri::Vector3& p) {
 			this->center = p;
 			this->extents = p;
 		}
@@ -26,45 +26,45 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 center;
-		guarneri::Vector3 extents;
+		Guarneri::Vector3 center;
+		Guarneri::Vector3 extents;
 
 	public:
-		guarneri::Vector3 size() const{
+		Guarneri::Vector3 size() const{
 			return extents * 2;
 		}
 
-		guarneri::Vector3 min() const {
+		Guarneri::Vector3 min() const {
 			return center - extents;
 		}
 
-		guarneri::Vector3 max() const {
+		Guarneri::Vector3 max() const {
 			return center + extents;
 		}
 
-		void set_min_max(const guarneri::Vector3& min, const guarneri::Vector3& max) {
+		void set_min_max(const Guarneri::Vector3& min, const Guarneri::Vector3& max) {
 			this->extents = (max - min) * 0.5f;
 			this->center = min + this->extents;
 		}
 
-		void set_min(const guarneri::Vector3& m) {
+		void set_min(const Guarneri::Vector3& m) {
 			set_min_max(m, this->max());
 		}
 
-		void set_max(const guarneri::Vector3& m) {
+		void set_max(const Guarneri::Vector3& m) {
 			set_min_max(this->min(), m);
 		}
 
-		guarneri::Vector3 corner(const int& n) const
+		Guarneri::Vector3 corner(const int& n) const
 		{
-			guarneri::Vector3 p;
+			Guarneri::Vector3 p;
 			p.x = ((n & 1) ? max().x : min().x);
 			p.y = ((n & 1) ? max().y : min().y);
 			p.z = ((n & 1) ? max().z : min().z);
 			return p;
 		}
 
-		bool contains(const guarneri::Vector3& pos) const {
+		bool contains(const Guarneri::Vector3& pos) const {
 			if (pos.x < min().x) {
 				return false;
 			}
@@ -88,7 +88,7 @@ namespace guarneri {
 
 		int maximum_extent() const
 		{
-			guarneri::Vector3 d = size();
+			Guarneri::Vector3 d = size();
 			if (d.x > d.y && d.x > d.z)
 				return 0;
 			else if (d.y > d.z)
@@ -99,7 +99,7 @@ namespace guarneri {
 
 		float surface() const
 		{
-			guarneri::Vector3 d = size();
+			Guarneri::Vector3 d = size();
 			return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
 		}
 
@@ -107,22 +107,22 @@ namespace guarneri {
 			return std::abs(a - b) < 1e-5f;
 		}
 
-		guarneri::Vector3 get_normal(const guarneri::Vector3& hit_position) const
+		Guarneri::Vector3 get_normal(const Guarneri::Vector3& hit_position) const
 		{
-			guarneri::Vector3 v = hit_position - min();
+			Guarneri::Vector3 v = hit_position - min();
 			if (approx(v.x, 0.0f) || approx(v.y, 0.0f) || approx(v.z, 0.0f))
 			{
 				if (approx(v.x, 0.0f))
 				{
-					return guarneri::Vector3::LEFT;
+					return Guarneri::Vector3::LEFT;
 				}
 				else if (approx(v.y, 0.0f))
 				{
-					return guarneri::Vector3::DOWN;
+					return Guarneri::Vector3::DOWN;
 				}
 				else if (approx(v.z, 0.0f))
 				{
-					return guarneri::Vector3::BACK;
+					return Guarneri::Vector3::BACK;
 				}
 			}
 			else
@@ -130,21 +130,21 @@ namespace guarneri {
 				v = max() - hit_position;
 				if (approx(v.x, 0.0f))
 				{
-					return guarneri::Vector3::RIGHT;
+					return Guarneri::Vector3::RIGHT;
 				}
 				else if (approx(v.y, 0.0f))
 				{
-					return guarneri::Vector3::UP;
+					return Guarneri::Vector3::UP;
 				}
 				else if (approx(v.z, 0.0f))
 				{
-					return guarneri::Vector3::FORWARD;
+					return Guarneri::Vector3::FORWARD;
 				}
 			}
-			return guarneri::Vector3::ZERO;
+			return Guarneri::Vector3::ZERO;
 		}
 
-		void expand(const guarneri::Vector3& p)
+		void expand(const Guarneri::Vector3& p)
 		{
 			auto mi = min();
 			auto ma = max();
@@ -184,20 +184,20 @@ namespace guarneri {
 			center.z = (mi.z + ma.z) / 2;
 		}
 
-		guarneri::Vector3 offset(const guarneri::Vector3& p) const
+		Guarneri::Vector3 offset(const Guarneri::Vector3& p) const
 		{
 			auto mi = min();
 			auto ma = max();
-			guarneri::Vector3 o = p - mi;
+			Guarneri::Vector3 o = p - mi;
 			if (ma.x > mi.x) o.x /= ma.x - mi.x;
 			if (ma.y > mi.y) o.y /= ma.y - mi.y;
 			if (ma.z > mi.z) o.z /= ma.z - mi.z;
 			return o;
 		}
 
-		guarneri::Vector3 inv_offset(const guarneri::Vector3& p) const
+		Guarneri::Vector3 inv_offset(const Guarneri::Vector3& p) const
 		{
-			guarneri::Vector3 o;
+			Guarneri::Vector3 o;
 			o.x = p.x * (max().x - min().x) + min().x;
 			o.y = p.y * (max().y - min().y) + min().y;
 			o.z = p.z * (max().z - min().z) + min().z;

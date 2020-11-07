@@ -1,7 +1,7 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Matrix4x4 {
 	public:
 		static const Matrix4x4 IDENTITY;

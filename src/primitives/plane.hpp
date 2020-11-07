@@ -1,20 +1,20 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Plane {
 	public:
 		Plane() {
-			normal = guarneri::Vector3();
+			normal = Guarneri::Vector3();
 			constant = 0;
 		}
 
-		Plane(const guarneri::Vector3& normal, const float& constant) {
+		Plane(const Guarneri::Vector3& normal, const float& constant) {
 			this->normal = normal;
 			this->constant = constant;
 		}
 
-		Plane(const guarneri::Vector3& normal, const guarneri::Vector3& p) {
+		Plane(const Guarneri::Vector3& normal, const Guarneri::Vector3& p) {
 			this->normal = normal;
 			this->constant = Vector3::dot(normal, p);
 		}
@@ -25,7 +25,7 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 normal;
+		Guarneri::Vector3 normal;
 		float constant;
 
 	public:

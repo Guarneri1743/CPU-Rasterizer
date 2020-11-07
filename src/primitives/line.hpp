@@ -1,15 +1,15 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Line {
 	public:
 		Line() {
-			origin = guarneri::Vector3();
-			direction = guarneri::Vector3();
+			origin = Guarneri::Vector3();
+			direction = Guarneri::Vector3();
 		}
 
-		Line(const guarneri::Vector3& origin_t, const guarneri::Vector3& direction_t) {
+		Line(const Guarneri::Vector3& origin_t, const Guarneri::Vector3& direction_t) {
 			this->origin = origin_t;
 			this->direction = direction_t;
 		}
@@ -20,8 +20,8 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 origin;
-		guarneri::Vector3 direction;
+		Guarneri::Vector3 origin;
+		Guarneri::Vector3 direction;
 
 	public:
 		std::string str() const {

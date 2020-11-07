@@ -1,19 +1,19 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Ray {
 	public:
 		Ray() {
-			origin = guarneri::Vector3();
-			direction = guarneri::Vector3();
-			inversed_direction = guarneri::Vector3();
+			origin = Guarneri::Vector3();
+			direction = Guarneri::Vector3();
+			inversed_direction = Guarneri::Vector3();
 		}
 
-		Ray(const guarneri::Vector3& origin, const guarneri::Vector3& direction){
+		Ray(const Guarneri::Vector3& origin, const Guarneri::Vector3& direction){
 			this->origin = origin;
 			this->direction = direction;
-			this->inversed_direction = guarneri::Vector3(1 / direction.x, 1 / direction.y, 1 / direction.z);
+			this->inversed_direction = Guarneri::Vector3(1 / direction.x, 1 / direction.y, 1 / direction.z);
 		}
 
 		Ray(const Ray& other) {
@@ -23,9 +23,9 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 origin;
-		guarneri::Vector3 direction;
-		guarneri::Vector3 inversed_direction;
+		Guarneri::Vector3 origin;
+		Guarneri::Vector3 direction;
+		Guarneri::Vector3 inversed_direction;
 
 	public:
 		std::string str() const {

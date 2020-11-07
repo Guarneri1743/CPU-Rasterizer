@@ -1,20 +1,20 @@
 ﻿#pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct Segment{
 	public:
 		Segment() {
-			start = guarneri::Vector3::ZERO;
-			end = guarneri::Vector3::ZERO;
+			start = Guarneri::Vector3::ZERO;
+			end = Guarneri::Vector3::ZERO;
 		}
 
-		Segment(const guarneri::Vector3& center, const guarneri::Vector3& dir, const float& extent) {
+		Segment(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent) {
 			this->start = center - extent * dir;
 			this->end = center + extent * dir;
 		}
 
-		Segment(const guarneri::Vector3& start, const guarneri::Vector3& end) {
+		Segment(const Guarneri::Vector3& start, const Guarneri::Vector3& end) {
 			this->start = start;
 			this->end = end;
 		}
@@ -25,11 +25,11 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector3 start;
-		guarneri::Vector3 end;
+		Guarneri::Vector3 start;
+		Guarneri::Vector3 end;
 
 	public:
-		guarneri::Vector3 center() const {
+		Guarneri::Vector3 center() const {
 			return (this->start + this->end) / 2;
 		}
 
@@ -37,7 +37,7 @@ namespace guarneri {
 			return Vector3::length(end, start) / 2;
 		}
 
-		guarneri::Vector3 dir() const {
+		Guarneri::Vector3 dir() const {
 			return Vector3::normalize(end - start);
 		}
 

@@ -1,19 +1,19 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	struct light {
-		color ambient;
-		color diffuse;
-		color specular;
+namespace Guarneri {
+	struct Light {
+		Color ambient;
+		Color diffuse;
+		Color specular;
 		float intensity;
 	};
 
-	struct directional_light : light {
+	struct directional_light : Light {
 		Vector3 direction;
 	};
 
-	struct spot_light : light {
+	struct spot_light : Light {
 		Vector3 position;
 		Vector3 spot_direction;
 		float phi;

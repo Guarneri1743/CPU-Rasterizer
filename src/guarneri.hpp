@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <filesystem>
 
-namespace guarneri {
+namespace Guarneri {
 	#define LEFT_HANDED
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
@@ -48,7 +48,7 @@ namespace guarneri {
 	const property_name normal_prop = "texture_normal";
 	const property_name height_prop = "texture_height";
 
-	// color 
+	// Color 
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
@@ -106,15 +106,15 @@ namespace guarneri {
 	};
 
 	// forward declarations
-	class object;
+	class Object;
 	struct Vector2;
 	struct Vector3;
 	struct Vector4;
 	struct Matrix3x3;
 	struct Matrix4x4;
 	struct transform;
-	struct color;
-	struct light;
+	struct Color;
+	struct Light;
 	struct vertex;
 	struct Ray;
 	struct Line;
@@ -125,21 +125,21 @@ namespace guarneri {
 	struct Segment;
 	struct Cylinder;
 	struct Capsule;
-	struct light;
-	class mesh;
-	class camera;
-	class line_drawer;
+	struct Light;
+	class Mesh;
+	class Camera;
+	class SegmentDrawer;
 	class texture;
 	class shader;
-	class material;
-	class model;
+	class Material;
+	class Model;
 	class renderer;
 	class render_device;
-	class gdi_window;
+	class GDIWindow;
 	class PrimitiveFactory;
 	class scene;
-	class id_allocator;
-	class input_manager;
+	class IdAllocator;
+	class InputManager;
 	struct directional_light;
 
 	static std::string to_string(const texture_format& fmt) {
@@ -166,22 +166,22 @@ namespace guarneri {
 }
 
 // common
-#include <singleton.hpp>
+#include <Singleton.hpp>
 #include <resource_manager.hpp>
-#include <id_allocator.hpp>
+#include <IdAllocator.hpp>
 
 // math
 #include <Vector2.hpp>
 #include <Vector3.hpp>
 #include <Vector4.hpp>
-#include <color.hpp>
+#include <Color.hpp>
 #include <Matrix4x4.hpp>
 #include <Matrix3x3.hpp>
 
 // lighting 
-#include <light.hpp>
+#include <Light.hpp>
 
-namespace guarneri{
+namespace Guarneri{
 	// utils
 	static std::string replace(std::string str, std::string pattern, std::string content) {
 		while (str.find(pattern) != std::string::npos) {
@@ -210,22 +210,22 @@ namespace guarneri{
 	#define REF(obj) unused(obj)
 
 	render_device& graphics() {
-		return singleton<render_device>::get();
+		return Singleton<render_device>::get();
 	}
 
-	input_manager& input_mgr() {
-		return singleton<input_manager>::get();
+	InputManager& input_mgr() {
+		return Singleton<InputManager>::get();
 	}
 
-	gdi_window& window() {
-		return singleton<gdi_window>::get();
+	GDIWindow& window() {
+		return Singleton<GDIWindow>::get();
 	}
 
 	resource_manager<texture>& tex_mgr() {
-		return singleton<resource_manager<texture>>::get();
+		return Singleton<resource_manager<texture>>::get();
 	}
 
-	id_allocator idalloc(INVALID_ID + 1, MAX_ID);
+	IdAllocator idalloc(INVALID_ID + 1, MAX_ID);
 	#define ALLOC_ID() idalloc.alloc();
 	#define FREE_ID(id) idalloc.free(id);
 
@@ -251,7 +251,7 @@ namespace guarneri{
 #define NOMINMAX
 #include <windows.h>
 #include <tchar.h>
-#include <gdi_window.hpp>
+#include <GDIWindow.hpp>
 #ifdef near
 #undef near
 #endif
@@ -263,8 +263,8 @@ namespace guarneri{
 #endif
 
 // rasterizer
-#include <object.hpp>
-#include <input_manager.hpp>
+#include <Object.hpp>
+#include <InputManager.hpp>
 #include <transform.hpp>
 #include <vertex.hpp>
 #include <Plane.hpp>
@@ -276,22 +276,22 @@ namespace guarneri{
 #include <BoundingBox.hpp>
 #include <BoundingBox2D.hpp>
 #include <Triangle.hpp>
-#include <light.hpp>
+#include <Light.hpp>
 #include <raw_buffer.hpp>
 #include <texture.hpp>
-#include <line_drawer.hpp>
-#include <noise.hpp>
+#include <SegmentDrawer.hpp>
+#include <Noise.hpp>
 #include <shader.hpp>
-#include <material.hpp>
-#include <mesh.hpp>
-#include <model.hpp>
+#include <Material.hpp>
+#include <Mesh.hpp>
+#include <Model.hpp>
 #include <render_device.hpp>
-#include <camera.hpp>
+#include <Camera.hpp>
 #include <renderer.hpp>
 #include <PrimitiveFactory.hpp>
 #include <scene.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 		window().initialize(w, h, title, input_mgr().event_callback);
 		input_mgr().add_on_key_down_evt([](key_code code, void* data) { if (code == key_code::ESC) window().dispose(); }, nullptr);

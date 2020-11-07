@@ -1,7 +1,7 @@
 #pragma once 
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	vertex cube_vertices[36] = {
 		vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(0.0f,  0.0f)),
 		vertex(Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(1.0f,  0.0f)),
@@ -68,16 +68,16 @@ namespace guarneri {
 
 	class PrimitiveFactory {
 	public:
-		static std::unique_ptr<model> Plane(std::unique_ptr<material> material) {
+		static std::unique_ptr<Model> Plane(std::unique_ptr<Material> Material) {
 			const std::vector<vertex> vert(plane_vertices, plane_vertices + 4);
 			const std::vector<uint32_t> ind(plane_indices, plane_indices + 6);
-			return model::create(vert, ind, std::move(material));
+			return Model::create(vert, ind, std::move(Material));
 		}
 
-		static std::unique_ptr<model> cube(std::unique_ptr<material> material) {
+		static std::unique_ptr<Model> cube(std::unique_ptr<Material> Material) {
 			const std::vector<vertex> vert(cube_vertices, cube_vertices + 36);
 			const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
-			return model::create(vert, ind, std::move(material));
+			return Model::create(vert, ind, std::move(Material));
 		}
 	};
 }

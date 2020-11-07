@@ -1,7 +1,7 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri{
+namespace Guarneri{
 	class scene{
 	public:
 		scene() {
@@ -16,9 +16,9 @@ namespace guarneri{
 		directional_light main_light;
 		std::vector<std::shared_ptr<renderer>> objects;
 		std::vector<std::shared_ptr<renderer>> transparent_objects;
-		std::shared_ptr<camera> main_cam;
-		std::shared_ptr<camera> debug_cam;
-		std::shared_ptr<camera> world_debug_cam;
+		std::shared_ptr<Camera> main_cam;
+		std::shared_ptr<Camera> debug_cam;
+		std::shared_ptr<Camera> world_debug_cam;
 		float debug_cam_distance;
 		float debug_world_cam_distance;
 		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
@@ -28,15 +28,15 @@ namespace guarneri{
 		void initialize() {
 			main_light.direction = Vector3(1.0f, 1.0f, 1.0f);
 			main_light.intensity = 1.0f;
-			main_light.diffuse = color(1.0f, 0.8f, 0.8f, 1.0f);
-			main_light.ambient = color(0.1f, 0.05f, 0.2f, 1.0f);
-			main_light.specular = color(1.0f, 1.0f, 1.0f, 1.0f);
+			main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
+			main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
+			main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
-			main_cam = std::move(camera::create(Vector3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
+			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), window().aspect, 45.0f, 0.5f, 500.0f, projection::perspective));
 			main_cam->lookat(Vector3::ZERO);
-			debug_cam = std::move(camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
-			world_debug_cam = std::move(camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
+			debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
+			world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, window().aspect, 45.0f, 0.5f, 10.0f, projection::perspective));
 
 			input_mgr().add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data) {
 				if (input_mgr().is_mouse_down(mouse_button::right)) {

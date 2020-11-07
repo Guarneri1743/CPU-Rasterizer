@@ -1,10 +1,10 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	class material : public object {
+namespace Guarneri {
+	class Material : public Object {
 	public:
-		material() {
+		Material() {
 			this->target_shader = std::make_unique<shader>("default");
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
@@ -14,7 +14,7 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-		material(std::unique_ptr<shader>& shader) {
+		Material(std::unique_ptr<shader>& shader) {
 			this->target_shader = std::move(shader);
 			this->ztest_mode = ztest::less_equal;
 			this->zwrite_mode = zwrite::on;
@@ -24,11 +24,11 @@ namespace guarneri {
 			this->transparent = false;
 		}
 
-		material(const material& other) {
+		Material(const Material& other) {
 			copy(other);
 		}
 
-		~material() { }
+		~Material() { }
 
 	public:
 		std::shared_ptr<shader> target_shader;
@@ -45,16 +45,16 @@ namespace guarneri {
 		lighting_data lighting_param;
 
 	public:
-		static std::unique_ptr<material> create() {
-			return std::make_unique<material>();
+		static std::unique_ptr<Material> create() {
+			return std::make_unique<Material>();
 		}
 
-		static std::unique_ptr<material> create(std::unique_ptr<shader>& shader) {
-			return std::make_unique<material>(shader);
+		static std::unique_ptr<Material> create(std::unique_ptr<shader>& shader) {
+			return std::make_unique<Material>(shader);
 		}
 
-		static std::unique_ptr<material> create(const material& other) {
-			return std::make_unique<material>(other);
+		static std::unique_ptr<Material> create(const Material& other) {
+			return std::make_unique<Material>(other);
 		}
 
 		void set_shader(std::shared_ptr<shader> shader) {
@@ -112,12 +112,12 @@ namespace guarneri {
 			return nullptr;
 		}
 
-		material& operator =(const material& other) {
+		Material& operator =(const Material& other) {
 			copy(other);
 			return *this;
 		}
 
-		void copy(const material& other) {
+		void copy(const Material& other) {
 			this->target_shader = other.target_shader;
 			this->ztest_mode = other.ztest_mode;
 			this->zwrite_mode = other.zwrite_mode;

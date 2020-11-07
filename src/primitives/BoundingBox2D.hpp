@@ -1,20 +1,20 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
+namespace Guarneri {
 	struct BoundingBox2D {
 	public:
 		BoundingBox2D() {
-			center = guarneri::Vector2();
-			extents = guarneri::Vector2();
+			center = Guarneri::Vector2();
+			extents = Guarneri::Vector2();
 		}
 
-		BoundingBox2D(const guarneri::Vector2& center, const guarneri::Vector2& size) {
+		BoundingBox2D(const Guarneri::Vector2& center, const Guarneri::Vector2& size) {
 			this->center = center;
 			this->extents = size / 2;
 		}
 
-		BoundingBox2D(const guarneri::Vector2& p) {
+		BoundingBox2D(const Guarneri::Vector2& p) {
 			this->center = p;
 			this->extents = p;
 		}
@@ -26,44 +26,44 @@ namespace guarneri {
 		}
 
 	public:
-		guarneri::Vector2 center;
-		guarneri::Vector2 extents;
+		Guarneri::Vector2 center;
+		Guarneri::Vector2 extents;
 
 	public:
-		guarneri::Vector2 size() const {
+		Guarneri::Vector2 size() const {
 			return extents * 2;
 		}
 
-		guarneri::Vector2 min() const {
+		Guarneri::Vector2 min() const {
 			return center - extents;
 		}
 
-		guarneri::Vector2 max() const {
+		Guarneri::Vector2 max() const {
 			return center + extents;
 		}
 
-		void set_min_max(const guarneri::Vector2& min, const guarneri::Vector2& max) {
+		void set_min_max(const Guarneri::Vector2& min, const Guarneri::Vector2& max) {
 			this->extents = (max - min) * 0.5f;
 			this->center = min + this->extents;
 		}
 
-		void set_min(const guarneri::Vector2& m) {
+		void set_min(const Guarneri::Vector2& m) {
 			set_min_max(m, this->max());
 		}
 
-		void set_max(const guarneri::Vector2& m) {
+		void set_max(const Guarneri::Vector2& m) {
 			set_min_max(this->min(), m);
 		}
 
-		guarneri::Vector2 corner(const int& n) const
+		Guarneri::Vector2 corner(const int& n) const
 		{
-			guarneri::Vector2 p;
+			Guarneri::Vector2 p;
 			p.x = ((n & 1) ? max().x : min().x);
 			p.y = ((n & 1) ? max().y : min().y);
 			return p;
 		}
 
-		bool contains(const guarneri::Vector2& pos) const {
+		bool contains(const Guarneri::Vector2& pos) const {
 			if (pos.x < min().x) {
 				return false;
 			}
@@ -83,7 +83,7 @@ namespace guarneri {
 			return std::abs(a - b) < 1e-5f;
 		}
 
-		void expand(const guarneri::Vector2& p)
+		void expand(const Guarneri::Vector2& p)
 		{
 			auto mi = min();
 			auto ma = max();
@@ -117,19 +117,19 @@ namespace guarneri {
 			center.y = (mi.y + ma.y) / 2;
 		}
 
-		guarneri::Vector2 offset(const guarneri::Vector2& p) const
+		Guarneri::Vector2 offset(const Guarneri::Vector2& p) const
 		{
 			auto mi = min();
 			auto ma = max();
-			guarneri::Vector2 o = p - mi;
+			Guarneri::Vector2 o = p - mi;
 			if (ma.x > mi.x) o.x /= ma.x - mi.x;
 			if (ma.y > mi.y) o.y /= ma.y - mi.y;
 			return o;
 		}
 
-		guarneri::Vector2 inv_offset(const guarneri::Vector2& p) const
+		Guarneri::Vector2 inv_offset(const Guarneri::Vector2& p) const
 		{
-			guarneri::Vector2 o;
+			Guarneri::Vector2 o;
 			o.x = p.x * (max().x - min().x) + min().x;
 			o.y = p.y * (max().y - min().y) + min().y;
 			return o;

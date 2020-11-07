@@ -1,11 +1,11 @@
 #pragma once
-#include <guarneri.hpp>
+#include <Guarneri.hpp>
 
-namespace guarneri {
-	class renderer : public object {
+namespace Guarneri {
+	class renderer : public Object {
 	public:
-		renderer(std::unique_ptr<model> model) {
-			this->target = std::move(model);
+		renderer(std::unique_ptr<Model> Model) {
+			this->target = std::move(Model);
 		}
 
 		renderer(const renderer& other) {
@@ -15,12 +15,12 @@ namespace guarneri {
 		~renderer() { }
 
 	public:
-		std::shared_ptr<model> target;
+		std::shared_ptr<Model> target;
 		vertex vertices[3];
 
 	public:
-		static std::unique_ptr<renderer> create(std::unique_ptr<model> model) {
-			return std::make_unique<renderer>(std::move(model));
+		static std::unique_ptr<renderer> create(std::unique_ptr<Model> Model) {
+			return std::make_unique<renderer>(std::move(Model));
 		}
 
 		static std::unique_ptr<renderer> create(const renderer& other) {
@@ -30,7 +30,7 @@ namespace guarneri {
 		void render() {
 			auto view = misc_param.view_matrix;
 			auto proj = misc_param.proj_matrix;
-			auto model = target->transform.local2world;
+			auto Model = target->transform.local2world;
 			auto pos = target->transform.position();
 			auto up = target->transform.up();
 			auto forward = target->transform.forward();
@@ -45,7 +45,7 @@ namespace guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], model, view, proj);
+							graphics().draw_primitive(m->mat, vertices[0], vertices[1], vertices[2], Model, view, proj);
 							idx = 0;
 						}
 					}
@@ -65,7 +65,7 @@ namespace guarneri {
 
 		std::string str() const {
 			std::stringstream ss;
-			ss << "Renderer[" << this->id << " model: " << *target << "]";
+			ss << "Renderer[" << this->id << " Model: " << *target << "]";
 			return ss.str();
 		}
 	};
