@@ -52,9 +52,10 @@ namespace Guarneri {
 			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-			if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
-				return;
-			}
+			// clip in screen space
+			//if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
+			//	return;
+			//}
 
 			// position perspective division
 			Vertex n1 = clip2ndc(c1);

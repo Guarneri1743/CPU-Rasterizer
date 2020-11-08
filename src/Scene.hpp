@@ -108,8 +108,6 @@ namespace Guarneri{
 			misc_param.cam_near = main_cam->near;
 			misc_param.view_matrix = main_cam->view_matrix();
 			misc_param.proj_matrix = main_cam->projection_matrix();
-			misc_param.screen_width = Window().width;
-			misc_param.screen_height = Window().height;
 			misc_param.main_light = main_light;
 			misc_param.camera_pos = main_cam->position;
 			/*if (input_mgr().is_key_down(KeyCode::W)) {

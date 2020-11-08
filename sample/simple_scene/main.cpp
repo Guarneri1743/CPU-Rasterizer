@@ -21,11 +21,11 @@ int main()
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
 	// backpack
-	//auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
-	//backpack->material->lighting_param.glossiness = 64.0f;
-	//backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
-	//backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	//demo_scene.add(Renderer::create(backpack), false);
+	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
+	backpack->material->lighting_param.glossiness = 64.0f;
+	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
+	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
+	demo_scene.add(Renderer::create(backpack), false);
 
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";

@@ -6,8 +6,6 @@ namespace Guarneri {
 	struct MiscParameter {
 		float cam_near;
 		float cam_far;
-		int screen_width;
-		int screen_height;
 		Vector3 camera_pos;
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;

@@ -30,7 +30,7 @@ namespace Guarneri {
 
 		static void update() {
 			frame_count++;
-			fps = (float)frame_count / now();
+			fps = (float)frame_count / (now() / 1000.0f);
 		}
 	};
 
