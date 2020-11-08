@@ -144,7 +144,7 @@ namespace Guarneri {
 				CloseWindow(window_handle);
 				window_handle = nullptr;
 			}
-			closed = false;
+			closed = true;
 		}
 
 		void send_message() {

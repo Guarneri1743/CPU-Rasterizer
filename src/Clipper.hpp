@@ -44,7 +44,7 @@ namespace Guarneri {
 				triangles.push_back(Triangle(list_out[0], list_out[1], list_out[2]));
 				triangles.push_back(Triangle(list_out[2], list_out[3], list_out[0]));
 			}
-			else {
+			else if(list_out.size() != 0){
 				std::cerr << "clipping error, size of vertices: " << list_out.size() << std::endl;
 			}
 			

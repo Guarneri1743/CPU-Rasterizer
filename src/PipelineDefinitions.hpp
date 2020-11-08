@@ -86,40 +86,6 @@ namespace Guarneri{
 		SCANLINE = 1 << 6,
 		SEMI_TRANSPARENT = 1 << 7
 	};
-
-	GraphicsDevice& Graphics() {
-		return Singleton<GraphicsDevice>::get();
-	}
-
-	InputManager& InputMgr() {
-		return Singleton<InputManager>::get();
-	}
-
-	GDIWindow& Window() {
-		return Singleton<GDIWindow>::get();
-	}
-
-	ResourceManager<Texture>& TextureMgr() {
-		return Singleton<ResourceManager<Texture>>::get();
-	}
-
-	struct MiscParameter {
-		float cam_near;
-		float cam_far;
-		int screen_width;
-		int screen_height;
-		Vector3 camera_pos;
-		Matrix4x4 view_matrix;
-		Matrix4x4 proj_matrix;
-		DirectionalLight main_light;
-		RenderFlag flag;
-	};
-
-	struct LightingData {
-		float glossiness;
-	};
-
-	static MiscParameter misc_param;
 }
 
 #endif

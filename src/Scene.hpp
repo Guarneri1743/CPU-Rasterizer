@@ -175,7 +175,7 @@ namespace Guarneri{
 
 			//skybox->render();
 
-			//draw_world_coords();
+			draw_world_coords();
 			draw_camera_coords();
 		}
 	};

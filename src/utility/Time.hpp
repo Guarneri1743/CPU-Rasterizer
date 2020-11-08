@@ -29,9 +29,8 @@ namespace Guarneri {
 		}
 
 		static void update() {
-			cost += now() / 1000.0f;
 			frame_count++;
-			fps = (float)frame_count / cost;
+			fps = (float)frame_count / now();
 		}
 	};
 

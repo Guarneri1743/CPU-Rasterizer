@@ -31,6 +31,7 @@
 #endif
 
 // Rasterizer Core
+#include <PipelineDefinitions.hpp>
 #include <GDIWindow.hpp>
 #include <Singleton.hpp>
 #include <IdAllocator.hpp>
@@ -58,7 +59,7 @@
 #include <Vertex.hpp>
 #include <Triangle.hpp>
 #include <Light.hpp>
-#include <PipelineDefinitions.hpp>
+#include <GraphicsUtility.hpp>
 #include <Object.hpp>
 #include <Clipper.hpp>
 #include <InputManager.hpp>
@@ -86,7 +87,7 @@ namespace Guarneri {
 		static void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
 			Window().initialize(w, h, title, InputMgr().event_callback);
 			InputMgr().add_on_key_down_evt([](KeyCode code, void* data) {
-				REF(data)
+					REF(data)
 					if (code == KeyCode::ESC) Window().dispose();
 				}, nullptr);
 			Graphics().initialize(Window().framebuffer, Window().width, Window().height);
