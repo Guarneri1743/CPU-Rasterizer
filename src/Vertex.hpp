@@ -61,7 +61,6 @@ namespace Guarneri {
 		static Vertex interpolate(const Vertex& left, const Vertex& right, const float& t) {
 			Vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
-			ret.position.w = 1.0f;
 			ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
 			ret.color = left.color + (right.color - left.color) * t;
 			ret.normal = left.normal + (right.normal - left.normal) * t;

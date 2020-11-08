@@ -52,7 +52,7 @@ int main()
 	cube->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
 	cube->transform.translate(Vector3(5.0f, 3.0f, 5.0f));
 	std::shared_ptr<Renderer> cube_renderer = Renderer::create(cube);
-	demo_scene.add(cube_renderer, true);
+	//demo_scene.add(cube_renderer, true);
 	demo_scene.add_on_update_evt([](void* user_data) {
 		std::shared_ptr<Renderer> cb = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
 		if (input_mgr().is_key_down(KeyCode::W)) {

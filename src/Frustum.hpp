@@ -24,50 +24,48 @@ namespace Guarneri {
 
 		// http://www8.cs.umu.se/kurser/5DV180/VT18/lab/plane_extraction.pdf
 		// represent cvv clipping equation by this combination of vp matrix elements
-		static Frustum create(const Matrix4x4& v, const Matrix4x4& p) {
-			auto vp = p * v;
-
+		static Frustum create(const Matrix4x4& mat) {
 			float a, b, c, d;
 
-			a = vp.at(3, 0) + vp.at(0, 0);
-			b = vp.at(3, 1) + vp.at(0, 1);
-			c = vp.at(3, 2) + vp.at(0, 2);
-			d = vp.at(3, 3) + vp.at(0, 3);
+			a = mat.at(3, 0) + mat.at(0, 0);
+			b = mat.at(3, 1) + mat.at(0, 1);
+			c = mat.at(3, 2) + mat.at(0, 2);
+			d = mat.at(3, 3) + mat.at(0, 3);
 
 			Plane left = Plane(a, b, c, d);
 
-			a = vp.at(3, 0) - vp.at(0, 0);
-			b = vp.at(3, 1) - vp.at(0, 1);
-			c = vp.at(3, 2) - vp.at(0, 2);
-			d = vp.at(3, 3) - vp.at(0, 3);
+			a = mat.at(3, 0) - mat.at(0, 0);
+			b = mat.at(3, 1) - mat.at(0, 1);
+			c = mat.at(3, 2) - mat.at(0, 2);
+			d = mat.at(3, 3) - mat.at(0, 3);
 
 			Plane right = Plane(a, b, c, d);
 
-			a = vp.at(3, 0) + vp.at(1, 0);
-			b = vp.at(3, 1) + vp.at(1, 1);
-			c = vp.at(3, 2) + vp.at(1, 2);
-			d = vp.at(3, 3) + vp.at(1, 3);
+			a = mat.at(3, 0) + mat.at(1, 0);
+			b = mat.at(3, 1) + mat.at(1, 1);
+			c = mat.at(3, 2) + mat.at(1, 2);
+			d = mat.at(3, 3) + mat.at(1, 3);
 
 			Plane bottom = Plane(a, b, c, d);
 
-			a = vp.at(3, 0) - vp.at(1, 0);
-			b = vp.at(3, 1) - vp.at(1, 1);
-			c = vp.at(3, 2) - vp.at(1, 2);
-			d = vp.at(3, 3) - vp.at(1, 3);
+			a = mat.at(3, 0) - mat.at(1, 0);
+			b = mat.at(3, 1) - mat.at(1, 1);
+			c = mat.at(3, 2) - mat.at(1, 2);
+			d = mat.at(3, 3) - mat.at(1, 3);
 
 			Plane top = Plane(a, b, c, d);
 
-			a = vp.at(3, 0) + vp.at(2, 0);
-			b = vp.at(3, 1) + vp.at(2, 1);
-			c = vp.at(3, 2) + vp.at(2, 2);
-			d = vp.at(3, 3) + vp.at(2, 3);
+			a = mat.at(3, 0) + mat.at(2, 0);
+			b = mat.at(3, 1) + mat.at(2, 1);
+			c = mat.at(3, 2) + mat.at(2, 2);
+			d = mat.at(3, 3) + mat.at(2, 3);
 
 			Plane near = Plane(a, b, c, d);
 
-			a = vp.at(3, 0) - vp.at(2, 0);
-			b = vp.at(3, 1) - vp.at(2, 1);
-			c = vp.at(3, 2) - vp.at(2, 2);
-			d = vp.at(3, 3) - vp.at(2, 3);
+			a = mat.at(3, 0) - mat.at(2, 0);
+			b = mat.at(3, 1) - mat.at(2, 1);
+			c = mat.at(3, 2) - mat.at(2, 2);
+			d = mat.at(3, 3) - mat.at(2, 3);
 
 			Plane far = Plane(a, b, c, d);
 

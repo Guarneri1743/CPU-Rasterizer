@@ -21,20 +21,19 @@ namespace Guarneri {
 			zbuffer->clear(1.0f);
 		}
 
-		void update() {
-			
+		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			auto object_space_frustum = Frustum::create(p * v * m);
+			auto triangles = Clipper::poly_clipping(object_space_frustum, v1, v2, v3);
+			if (triangles.size() == 0) {
+				return;
+			}
+			for (uint32_t idx = 0; idx < triangles.size(); idx++) {
+				auto tri = triangles[idx];
+				draw_triangle(material, tri[0], tri[1], tri[2], m, v, p);
+			}
 		}
 
-		// =============================================================================================================Pipeline======================================================================================================================
-		// *																																																										*
-		// *												 Model matrix					view matrix							Projection matrix                clipping, clip2ndc					    screen mapping								*
-		// *  Vertex data ------------>local(Model) space  ----------------> world space ----------------> view(Camera) space ---------------------> clip space ---------------------> ndc(cvv) space --------------------> screen space(viewport)  *
-		// *																																																										*
-		// *						  primitive assembly/rasterization																																												*
-		// *  screen space vertices ------------------------------------->  fragments ------> scissor test -------> alpha test -------> stencil test ---------> depth test -------> blending --------> framebuffer									*
-		// *																																																										*
-		// ===========================================================================================================================================================================================================================================
-		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw_triangle(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto shader = material->target_shader;
 
 			shader->set_mvp_matrix(m, v, p);
@@ -54,14 +53,6 @@ namespace Guarneri {
 			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
-			/*	std::cout << "P: " << p << std::endl << "V: " << v << std::endl << "M: " << m << std::endl;
-				std::cout << "PV: " << p * v << std::endl;
-				std::cout << "PVM: " << p * v * m << std::endl;
-				std::cout << "v: " << v1.position << ", " << v2.position << ", " << v3.position << std::endl;
-				std::cout << "world: " << m * v1.position << ", " << m * v2.position << ", " << m * v3.position << std::endl;
-				std::cout << "view; " << v * m * v1.position << ", " << v * m * v2.position << ", " << v * m * v3.position << std::endl;
-				std::cout << "clip: " << p * v * m * v1.position << ", " << p * v * m * v2.position << ", " << p * v * m * v3.position << std::endl;
-				std::cout << "ndc: " << clip2ndc(p * v * m * v1.position) << ", " << clip2ndc(p * v * m * v2.position) << ", " << clip2ndc(p * v * m * v3.position) << std::endl;*/
 				return;
 			}
 
@@ -364,28 +355,6 @@ namespace Guarneri {
 		{
 			float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
-		}
-
-		bool frustum_culling(const BoundingBox& aabb, const Matrix4x4& v, const Matrix4x4& p) {
-			auto frustum = Frustum::create(v, p);
-			auto bmin = aabb.min();
-			auto bmax = aabb.max();
-			Vector3 corners[8];
-			corners[0] = Vector3(bmin.x, bmin.y, bmin.z);
-			corners[1] = Vector3(bmin.x, bmin.y, bmax.z);
-			corners[2] = Vector3(bmin.x, bmax.y, bmin.z);
-			corners[3] = Vector3(bmin.x, bmax.y, bmax.z);
-			corners[4] = Vector3(bmax.x, bmin.y, bmin.z);
-			corners[5] = Vector3(bmax.x, bmin.y, bmax.z);
-			corners[6] = Vector3(bmax.x, bmax.y, bmin.z);
-			corners[7] = Vector3(bmax.x, bmax.y, bmax.z);
-			for (int i = 0; i < 6; i++) {
-				auto plane = frustum[i];
-				for (int j = 0; j < 8; j++) {
-					if (plane.distance(corners[8]) > 0) return false;
-				}
-			}
-			return true;
 		}
 
 		void clear_buffer() {

@@ -421,7 +421,6 @@ namespace Guarneri {
 			start_watch();
 			graphics().clear_buffer();
 			input_mgr().update();
-			graphics().update();
 			scene.update();
 			scene.render();
 			window().flush();
