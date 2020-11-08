@@ -84,26 +84,26 @@ namespace Guarneri {
 	class GuarneriRasterizer {
 	public:
 		static void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
-			window().initialize(w, h, title, input_mgr().event_callback);
-			input_mgr().add_on_key_down_evt([](KeyCode code, void* data) {
+			Window().initialize(w, h, title, InputMgr().event_callback);
+			InputMgr().add_on_key_down_evt([](KeyCode code, void* data) {
 				REF(data)
-					if (code == KeyCode::ESC) window().dispose();
+					if (code == KeyCode::ESC) Window().dispose();
 				}, nullptr);
-			graphics().initialize(window().framebuffer, window().width, window().height);
+			Graphics().initialize(Window().framebuffer, Window().width, Window().height);
 			Time::start();
 		}
 
 		static void kick_off(Scene& scene) {
-			while (window().is_valid()) {
-				graphics().clear_buffer();
-				input_mgr().update();
+			while (Window().is_valid()) {
+				Graphics().clear_buffer();
+				InputMgr().update();
 				scene.update();
 				scene.render();
-				window().flush();
+				Window().flush();
 				Time::update();
 				std::stringstream ss;
 				ss << "SoftRasterizer  FPS: " << (int)Time::fps;
-				window().set_title(ss.str().c_str());
+				Window().set_title(ss.str().c_str());
 				Sleep(0);
 			}
 		}

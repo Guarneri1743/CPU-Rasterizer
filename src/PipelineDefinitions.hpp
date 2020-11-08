@@ -87,19 +87,19 @@ namespace Guarneri{
 		SEMI_TRANSPARENT = 1 << 7
 	};
 
-	GraphicsDevice& graphics() {
+	GraphicsDevice& Graphics() {
 		return Singleton<GraphicsDevice>::get();
 	}
 
-	InputManager& input_mgr() {
+	InputManager& InputMgr() {
 		return Singleton<InputManager>::get();
 	}
 
-	GDIWindow& window() {
+	GDIWindow& Window() {
 		return Singleton<GDIWindow>::get();
 	}
 
-	ResourceManager<Texture>& tex_mgr() {
+	ResourceManager<Texture>& TextureMgr() {
 		return Singleton<ResourceManager<Texture>>::get();
 	}
 

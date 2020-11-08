@@ -53,28 +53,28 @@ int main()
 	cube->transform.translate(Vector3(5.0f, 3.0f, 5.0f));
 	std::shared_ptr<Renderer> cube_renderer = Renderer::create(cube);
 	demo_scene.add(cube_renderer, true);
-	demo_scene.add_on_update_evt([](void* user_data) {
+	InputMgr().add_on_update_evt([](void* user_data) {
 		std::shared_ptr<Renderer> cb = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
-		if (input_mgr().is_key_down(KeyCode::W)) {
+		if (InputMgr().is_key_down(KeyCode::W)) {
 			cb->target->transform.move_forward(0.2f);
 		}
-		if (input_mgr().is_key_down(KeyCode::A)) {
+		if (InputMgr().is_key_down(KeyCode::A)) {
 			cb->target->transform.move_left(0.2f);
 		}
-		if (input_mgr().is_key_down(KeyCode::S)) {
+		if (InputMgr().is_key_down(KeyCode::S)) {
 			cb->target->transform.move_backward(0.2f);
 		}
-		if (input_mgr().is_key_down(KeyCode::D)) {
+		if (InputMgr().is_key_down(KeyCode::D)) {
 			cb->target->transform.move_right(0.2f);
 		}
 	}, &cube_renderer);
 
-	demo_scene.add_on_update_evt([](void* user_data) {
+	InputMgr().add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);
-		if (input_mgr().is_key_down(KeyCode::R)) {
+		if (InputMgr().is_key_down(KeyCode::R)) {
 			s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
 		}
-		if (input_mgr().is_key_down(KeyCode::T)) {
+		if (InputMgr().is_key_down(KeyCode::T)) {
 			s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
 		}
 		}, & demo_scene);

@@ -77,10 +77,10 @@ namespace Guarneri {
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
 	typedef unsigned char stb_uchar;
 
-	GraphicsDevice& graphics();
-	InputManager& input_mgr();
-	GDIWindow& window();
-	ResourceManager<Texture>& tex_mgr();
+	GraphicsDevice& Graphics();
+	InputManager& InputMgr();
+	GDIWindow& Window();
+	ResourceManager<Texture>& TextureMgr();
 
 	enum class MouseButton {
 		LEFT,

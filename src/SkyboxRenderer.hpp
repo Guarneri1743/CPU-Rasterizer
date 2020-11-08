@@ -38,7 +38,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view4x4, proj);
+							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view4x4, proj);
 							idx = 0;
 						}
 					}

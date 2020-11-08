@@ -133,15 +133,15 @@ namespace Guarneri {
 		}
 
 		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
-			graphics().draw_line(pos, pos + forward, Color::BLUE, v, p, offset);
-			graphics().draw_line(pos, pos + right, Color::RED, v, p, offset);
-			graphics().draw_line(pos, pos + up, Color::GREEN, v, p, offset);
+			Graphics().draw_line(pos, pos + forward, Color::BLUE, v, p, offset);
+			Graphics().draw_line(pos, pos + right, Color::RED, v, p, offset);
+			Graphics().draw_line(pos, pos + up, Color::GREEN, v, p, offset);
 		}
 
 		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
-			graphics().draw_line(pos, pos + forward, Color::BLUE, v, p);
-			graphics().draw_line(pos, pos + right, Color::RED, v, p);
-			graphics().draw_line(pos, pos + up, Color::GREEN, v, p);
+			Graphics().draw_line(pos, pos + forward, Color::BLUE, v, p);
+			Graphics().draw_line(pos, pos + right, Color::RED, v, p);
+			Graphics().draw_line(pos, pos + up, Color::GREEN, v, p);
 		}
 
 		void draw_line(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {

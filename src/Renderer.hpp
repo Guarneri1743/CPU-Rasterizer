@@ -36,7 +36,7 @@ namespace Guarneri {
 			auto up = target->transform.up();
 			auto forward = target->transform.forward();
 			auto right = target->transform.right();
-			graphics().draw_coordinates(pos, forward, up, right, view, proj);
+			Graphics().draw_coordinates(pos, forward, up, right, view, proj);
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);
@@ -46,7 +46,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view, proj);
+							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view, proj);
 							idx = 0;
 						}
 					}

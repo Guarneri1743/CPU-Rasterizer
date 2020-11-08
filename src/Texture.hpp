@@ -84,7 +84,7 @@ namespace Guarneri {
 
 		~Texture() {
 			release();
-			tex_mgr().free(this->path);
+			TextureMgr().free(this->path);
 			std::cout << this->str() << " freed." << std::endl;
 		}
 
@@ -116,11 +116,11 @@ namespace Guarneri {
 
 		static std::shared_ptr<Texture> create(const std::string& path) {
 			std::shared_ptr<Texture> ret = nullptr;
-			if (tex_mgr().get(path, ret)) {
+			if (TextureMgr().get(path, ret)) {
 				return ret;
 			}
 			ret = std::make_shared<Texture>(path.c_str());
-			tex_mgr().cache(path, ret);
+			TextureMgr().cache(path, ret);
 			return ret;
 		}
 

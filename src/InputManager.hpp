@@ -79,6 +79,7 @@ namespace Guarneri {
 		std::unordered_map<void (*)(MouseButton code, void* ud), void*> on_mouse_down_events;
 		std::unordered_map<void (*)(MouseButton code, void* ud), void*> on_mouse_up_events;
 		std::unordered_map<void (*)(MouseWheel rolling, void* ud), void*> on_wheel_rolling_events;
+		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
 
 	public:
 		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -89,31 +90,31 @@ namespace Guarneri {
 			case WM_MOUSEMOVE:
 				break;
 			case WM_LBUTTONDOWN:
-				input_mgr().on_vk_down(VK_LBUTTON);
+				InputMgr().on_vk_down(VK_LBUTTON);
 				break;
 			case WM_LBUTTONUP:
-				input_mgr().on_vk_up(VK_LBUTTON);
+				InputMgr().on_vk_up(VK_LBUTTON);
 				break;
 			case WM_RBUTTONDOWN:
-				input_mgr().on_vk_down(VK_RBUTTON);
+				InputMgr().on_vk_down(VK_RBUTTON);
 				break;
 			case WM_RBUTTONUP:
-				input_mgr().on_vk_up(VK_RBUTTON);
+				InputMgr().on_vk_up(VK_RBUTTON);
 				break;
 			case WM_MBUTTONDOWN:
-				input_mgr().on_vk_down(VK_MBUTTON);
+				InputMgr().on_vk_down(VK_MBUTTON);
 				break;
 			case WM_MBUTTONUP:
-				input_mgr().on_vk_up(VK_MBUTTON);
+				InputMgr().on_vk_up(VK_MBUTTON);
 				break;
 			case WM_MOUSEWHEEL:
-				input_mgr().on_wheel_rolling(GET_WHEEL_DELTA_WPARAM(wParam));
+				InputMgr().on_wheel_rolling(GET_WHEEL_DELTA_WPARAM(wParam));
 				break;
 			case WM_KEYDOWN:
-				input_mgr().on_vk_down(wParam);
+				InputMgr().on_vk_down(wParam);
 				break;
 			case WM_KEYUP:
-				input_mgr().on_vk_up(wParam);
+				InputMgr().on_vk_up(wParam);
 				break;
 			}
 			return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -122,7 +123,7 @@ namespace Guarneri {
 		void update() {
 			auto prev = mouse_position;
 			float x, y;
-			window().get_mouse_position(x, y, mouse_x, mouse_y);
+			Window().get_mouse_position(x, y, mouse_x, mouse_y);
 			mouse_position = Vector2(x, y);
 			if (Vector2::magnitude(prev - mouse_position) > EPSILON) {
 				for (auto& kv : on_mouse_move_events) {
@@ -130,6 +131,11 @@ namespace Guarneri {
 					auto user_data = kv.second;
 					evt(prev, mouse_position, user_data);
 				}
+			}
+			for (auto& kv : on_update_evts) {
+				auto evt = kv.first;
+				auto user_data = kv.second;
+				evt(user_data);
 			}
 		}
 
@@ -181,6 +187,17 @@ namespace Guarneri {
 					evt(key, user_data);
 				}
 			}
+		}		
+		
+		void add_on_update_evt(void (*on_update)(void* ud), void* user_data) {
+			if (on_update_evts.count(on_update) > 0) {
+				return;
+			}
+			on_update_evts[on_update] = user_data;
+		}
+
+		void remove_on_update_evt(void (*on_update)(void* ud)) {
+			on_update_evts.erase(on_update);
 		}
 
 		void add_on_key_down_evt(void (*on_key_down)(KeyCode code, void* ud), void* user_data) {
