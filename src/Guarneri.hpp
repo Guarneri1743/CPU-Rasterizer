@@ -206,6 +206,7 @@ namespace Guarneri {
 	struct BoundingBox;
 	struct BoundingBox2D;
 	struct Plane;
+	struct Sphere;
 	struct Triangle;
 	struct Segment;
 	struct Cylinder;
@@ -287,6 +288,7 @@ namespace Guarneri {
 #include <Ray2D.hpp>
 #include <Line.hpp>
 #include <Segment.hpp>
+#include <Sphere.hpp>
 #include <Cylinder.hpp>
 #include <Capsule.hpp>
 #include <BoundingBox.hpp>

@@ -21,9 +21,9 @@ namespace Guarneri {
 			zbuffer->clear(1.0f);
 		}
 
-		void draw_primitive(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
-			auto triangles = Clipper::poly_clipping(object_space_frustum, v1, v2, v3);
+			auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
 			if (triangles.size() == 0) {
 				return;
 			}
@@ -176,7 +176,6 @@ namespace Guarneri {
 				int bottom = CEIL(tri[bottom_idx].position.y);
 				top = CLAMP_INT(top, 0, this->height);
 				bottom = CLAMP_INT(bottom, 0, this->height);
-
 				assert(bottom >= top);
 
 				// interpolate vertically
@@ -185,21 +184,13 @@ namespace Guarneri {
 					Vertex rhs;
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
 
-					// clipping
-					if (lhs.position.x <= 0.0f) {
-						float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
-						lhs = Vertex::interpolate(lhs, rhs, t);
-					}
+					// screen space clipping
+					Clipper::screen_clipping(lhs, rhs, this->width);
+
 					int left = CEIL(lhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
-
-					if (rhs.position.x >= this->width) {
-						float t = ((float)this->width - lhs.position.x) / (rhs.position.x - lhs.position.x);
-						rhs = Vertex::interpolate(lhs, rhs, t);
-					}
 					int right = CEIL(rhs.position.x);
 					right = CLAMP_INT(right, 0, this->width);
-
 					assert(right >= left);
 
 					// interpolate horizontally
@@ -240,6 +231,11 @@ namespace Guarneri {
 
 			// todo: scissor test
 
+			// todo: stencil test
+
+			// depth-test
+			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
+
 			// alpha blend
 			if (s != nullptr && s->transparent && ((int)misc_param.flag & (int)RenderFlag::SEMI_TRANSPARENT) != 0) {
 				color_bgra dst;
@@ -250,11 +246,6 @@ namespace Guarneri {
 					pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 				}
 			}
-
-			// todo: stencil test
-
-			// depth-test
-			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
 
 			if (z_pass) {
 				// write to color buffer

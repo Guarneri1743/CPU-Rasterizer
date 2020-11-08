@@ -6,11 +6,10 @@ namespace Guarneri {
 	class Clipper {
 	public:
 		// near plane clipping
-		static std::vector<Triangle> poly_clipping(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
+		static std::vector<Triangle> near_plane_clipping(const Plane& near_plane, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
 			std::vector<Vertex> list_in = {v1, v2, v3};
 
 			std::vector<Vertex> list_out;
-			auto plane = frustum.near;
 			for (uint32_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++) {
 				uint32_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
 
@@ -18,8 +17,8 @@ namespace Guarneri {
 				Vertex last = list_in[last_idx];
 
 				float d1, d2;
-				d1 = plane.distance(cur.position.xyz());
-				d2 = plane.distance(last.position.xyz());
+				d1 = near_plane.distance(cur.position.xyz());
+				d2 = near_plane.distance(last.position.xyz());
 				float t = d1 / (d1 - d2);
 
 				// clip segment
@@ -52,6 +51,17 @@ namespace Guarneri {
 			return triangles;
 		}
 
+		static void screen_clipping(Vertex& lhs, Vertex& rhs, const int& width) {
+			if (lhs.position.x <= 0.0f) {
+				float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
+				lhs = Vertex::interpolate(lhs, rhs, t);
+			}
+			if (rhs.position.x >= width) {
+				float t = ((float)width - lhs.position.x) / (rhs.position.x - lhs.position.x);
+				rhs = Vertex::interpolate(lhs, rhs, t);
+			}
+		}
+
 		static bool cvv_clipping(const Vector4& c1, const Vector4& c2, const Vector4& c3) {
 			// z: [-w, w](GL) [0, w](DX)
 			// x: [-w, w]
@@ -78,6 +88,19 @@ namespace Guarneri {
 			// front face: ndv >= 0
 			// back face: ndv < 0
 			return ndv < 0; 
+		}
+
+		// todo: frustum & aabb, frustum & obb, etc.
+		static bool frustum_culling_sphere(const Frustum& frustum, const Sphere& bounding_sphere) {
+			for (int i = 0; i < 6; i++) {
+				auto plane = frustum[i];
+				auto d = plane.distance(bounding_sphere.center);
+				auto r = bounding_sphere.radius;
+				if (d < 0 && -d < r) {
+					return true;
+				}
+			}
+			return false;
 		}
 	};
 }

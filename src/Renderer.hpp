@@ -46,7 +46,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							graphics().draw_primitive(target->material, vertices[0], vertices[1], vertices[2], model, view, proj);
+							graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view, proj);
 							idx = 0;
 						}
 					}
