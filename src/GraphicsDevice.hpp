@@ -242,7 +242,7 @@ namespace Guarneri {
 				if (framebuffer->read(row, col, dst)) {
 					Color dst_color = Color::decode(dst);
 					Color src_color = fragment_result;
-					Color blended_color = Color::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+					Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
 					pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 				}
 			}
@@ -262,6 +262,78 @@ namespace Guarneri {
 					framebuffer->write(row, col, c);
 				}
 			}
+		}
+
+		// todo: alpha factor
+		static Color blend(Color src_color, Color dst_color, BlendFactor src_factor, BlendFactor dst_factor, BlendOp op) {
+			Color lhs, rhs;
+			switch (src_factor) {
+			case BlendFactor::ONE:
+				lhs = src_color;
+				break;
+			case BlendFactor::SRC_ALPHA:
+				lhs = src_color * src_color.a;
+				break;
+			case BlendFactor::SRC_COLOR:
+				lhs = src_color * src_color;
+				break;
+			case BlendFactor::ONE_MINUS_SRC_ALPHA:
+				lhs = src_color * (1.0f - src_color);
+				break;
+			case BlendFactor::ONE_MINUS_SRC_COLOR:
+				lhs = src_color * (1.0f - dst_color);
+				break;
+			case BlendFactor::DST_ALPHA:
+				lhs = src_color * dst_color.a;
+				break;
+			case BlendFactor::DST_COLOR:
+				lhs = src_color * dst_color;
+				break;
+			case BlendFactor::ONE_MINUS_DST_ALPHA:
+				lhs = src_color * (1.0f - dst_color.a);
+				break;
+			case BlendFactor::ONE_MINUS_DST_COLOR:
+				lhs = src_color * (1.0f - dst_color);
+				break;
+			}
+
+			switch (dst_factor) {
+			case BlendFactor::ONE:
+				rhs = src_color;
+				break;
+			case BlendFactor::SRC_ALPHA:
+				rhs = dst_color * src_color.a;
+				break;
+			case BlendFactor::SRC_COLOR:
+				rhs = dst_color * src_color;
+				break;
+			case BlendFactor::ONE_MINUS_SRC_ALPHA:
+				rhs = dst_color * (1.0f - src_color);
+				break;
+			case BlendFactor::ONE_MINUS_SRC_COLOR:
+				rhs = dst_color * (1.0f - dst_color);
+				break;
+			case BlendFactor::DST_ALPHA:
+				rhs = dst_color * dst_color.a;
+				break;
+			case BlendFactor::DST_COLOR:
+				rhs = dst_color * dst_color;
+				break;
+			case BlendFactor::ONE_MINUS_DST_ALPHA:
+				rhs = dst_color * (1.0f - dst_color.a);
+				break;
+			case BlendFactor::ONE_MINUS_DST_COLOR:
+				rhs = dst_color * (1.0f - dst_color);
+				break;
+			}
+
+			switch (op) {
+			case BlendOp::ADD:
+				return lhs + rhs;
+			case BlendOp::SUB:
+				return lhs - rhs;
+			}
+			return lhs + rhs;
 		}
 
 		bool depth_test(const ZTest& ztest_mode, const ZWrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {

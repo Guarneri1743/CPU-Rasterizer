@@ -9,11 +9,11 @@ namespace Guarneri {
 		~SkyboxShader(){}
 
 	private:
-		std::shared_ptr<CubeMap> cube_map;
+		std::shared_ptr<CubeMap> cubemap;
 
 	public:
-		void sync(const std::shared_ptr<CubeMap>& cube_map) {
-			this->cube_map = cube_map;
+		void sync(const std::shared_ptr<CubeMap>& _cubemap) {
+			this->cubemap = _cubemap;
 		}
 
 		v2f vertex_shader(const a2v& input) {
@@ -27,7 +27,7 @@ namespace Guarneri {
 		Color fragment_shader(const v2f& input)  {
 			Color sky_color;
 			return Color::BLUE;
-			if (cube_map != nullptr && cube_map->sample(input.shadow_coord.xyz(), sky_color)) {
+			if (cubemap != nullptr && cubemap->sample(input.shadow_coord.xyz(), sky_color)) {
 				return sky_color;
 			}
 			return Color::BLACK;

@@ -136,12 +136,12 @@ namespace Guarneri {
             return std::make_unique<Mesh>(vertices, indices);
         }
 
-        std::shared_ptr<Texture> load_textures(aiMaterial* material, aiTextureType type, std::string property_name)
+        std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, std::string property_name)
         {
-            for (uint32_t i = 0; i < material->GetTextureCount(type); i++)
+            for (uint32_t i = 0; i < ai_material->GetTextureCount(type); i++)
             {
                 aiString str;
-                material->GetTexture(type, i, &str);
+                ai_material->GetTexture(type, i, &str);
                 std::string relative_path = str.C_Str();
                 std::string tex_path = parent_dir + "/" + relative_path;
                 return Texture::create(tex_path);

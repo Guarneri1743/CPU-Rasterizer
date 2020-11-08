@@ -10,8 +10,8 @@ namespace Guarneri {
 			std::vector<Vertex> list_in = {v1, v2, v3};
 
 			std::vector<Vertex> list_out;
-			for (uint32_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++) {
-				uint32_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
+			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++) {
+				size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
 
 				Vertex cur = list_in[cur_idx];
 				Vertex last = list_in[last_idx];

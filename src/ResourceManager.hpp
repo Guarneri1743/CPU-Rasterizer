@@ -1,6 +1,7 @@
 #ifndef _RES_MGR_
 #define _RES_MGR_
-#include <Guarneri.hpp>
+#include <string>
+#include <unordered_map>
 
 // simple cache based on weak_ptr
 namespace Guarneri {

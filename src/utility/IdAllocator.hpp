@@ -1,6 +1,6 @@
 #ifndef _ID_ALLOC_
 #define _ID_ALLOC_
-#include <Guarneri.hpp>
+#include <set>
 
 namespace Guarneri {
 	#define INVALID_ID 0

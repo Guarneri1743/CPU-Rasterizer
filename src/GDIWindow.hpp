@@ -93,8 +93,8 @@ namespace Guarneri {
 			initialized = true;
 		}
 
-		void set_title(LPCSTR title) {
-			SetWindowText(window_handle, title);
+		void set_title(LPCSTR _title) {
+			SetWindowText(window_handle, _title);
 		}
 
 		bool is_valid(){
@@ -114,8 +114,8 @@ namespace Guarneri {
 				ScreenToClient(window_handle, &pt);
 				xi = (int)pt.x;
 				yi = (int)pt.y;
-				x = (float)pt.x / (float)window().width;
-				y = (float)pt.y / (float)window().height;
+				x = (float)pt.x / (float)this->width;
+				y = (float)pt.y / (float)this->height;
 			}
 		}
 

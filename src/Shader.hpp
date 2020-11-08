@@ -53,7 +53,7 @@ namespace Guarneri {
 		BlendFactor dst_factor;
 		BlendOp blend_op;
 		bool transparent;
-		lighting_data lighting_param;
+		LightingData lighting_param;
 
 	public:
 		void sync(ZTest ztest, ZWrite zwrite) {
@@ -79,7 +79,7 @@ namespace Guarneri {
 			this->name2tex = tex_uniforms;
 		}
 
-		void sync(const lighting_data& data) {
+		void sync(const LightingData& data) {
 			this->lighting_param = data;
 		}
 

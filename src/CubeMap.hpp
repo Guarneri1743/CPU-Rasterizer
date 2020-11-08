@@ -42,19 +42,19 @@ namespace Guarneri {
 			if (dir_abs.z >= dir_abs.x && dir_abs.z >= dir_abs.y)
 			{
 				index = dir.z < 0.0 ? 5 : 4;
-				ma = 0.5 / dir_abs.z;
+				ma = 0.5f / dir_abs.z;
 				uv = Vector2(dir.z < 0.0 ? -dir.x : dir.x, -dir.y);
 			}
 			else if (dir_abs.y >= dir_abs.x)
 			{
 				index = dir.y < 0.0 ? 3 : 2;
-				ma = 0.5 / dir_abs.y;
+				ma = 0.5f / dir_abs.y;
 				uv = Vector2(dir.x, dir.y < 0.0 ? -dir.z : dir.z);
 			}
 			else
 			{
 				index = dir.x < 0.0 ? 1 : 0;
-				ma = 0.5 / dir_abs.x;
+				ma = 0.5f / dir_abs.x;
 				uv = Vector2(dir.x < 0.0 ? dir.z : -dir.z, -dir.y);
 			}
 			return uv * ma + 0.5;

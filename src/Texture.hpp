@@ -298,7 +298,7 @@ namespace Guarneri {
 		public:
 			std::string str() const {
 				std::stringstream ss;
-				ss << "Texture[" << this->id << "], w["<< this->width <<"], h["<< this->height << "], fmt[" << fmt << "], path[" << this->path << "]";
+				ss << "Texture[" << this->id << "], w["<< this->width <<"], h["<< this->height << "]" << path << "]";
 				return ss.str();
 			}
 	};

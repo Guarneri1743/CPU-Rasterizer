@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	prepare(800, 600, "SoftRasterizer");
+	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
 
 	// setup main Light
 	Scene demo_scene;
@@ -79,6 +79,6 @@ int main()
 		}
 		}, & demo_scene);
 
-	kick_off(demo_scene);
+	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }
