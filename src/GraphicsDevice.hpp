@@ -9,8 +9,12 @@ namespace Guarneri {
 		uint32_t height;
 
 	private:
+		// use 32 bits zbuffer here, for convenience 
 		std::shared_ptr<RawBuffer<float>> zbuffer;
+		// 32 bits bgra framebuffer, 8-bit per channel
 		std::shared_ptr<RawBuffer<color_bgra>> framebuffer;
+		// 8 bits stencil buffer
+		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
@@ -18,7 +22,10 @@ namespace Guarneri {
 			this->height = height_t;
 			zbuffer = std::make_shared<RawBuffer<float>>(width_t, height_t);
 			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
-			zbuffer->clear(1.0f);
+			stencilbuffer = std::make_shared<RawBuffer<uint8_t>>(width_t, height_t);
+			zbuffer->clear(FAR_Z);
+			stencilbuffer->clear(DEFAULT_STENCIL);
+			framebuffer->clear(DEFAULT_COLOR);
 		}
 
 		void draw(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
@@ -27,12 +34,31 @@ namespace Guarneri {
 			if (triangles.size() == 0) {
 				return;
 			}
-			for (uint32_t idx = 0; idx < triangles.size(); idx++) {
+			for (size_t idx = 0; idx < triangles.size(); idx++) {
 				auto tri = triangles[idx];
 				draw_triangle(material, tri[0], tri[1], tri[2], m, v, p);
 			}
 		}
 
+		void clear_buffer(const BufferFlag& flag) {
+			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
+				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+				{
+					framebuffer->clear(DEFAULT_DEPTH_COLOR);
+				}
+				else {
+					framebuffer->clear(DEFAULT_COLOR);
+				}
+			}
+			if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) {
+				zbuffer->clear(FAR_Z);
+			}
+			if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) {
+				stencilbuffer->clear(DEFAULT_STENCIL);
+			}
+		}
+
+	private:
 		void draw_triangle(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto shader = material->target_shader;
 
@@ -79,7 +105,7 @@ namespace Guarneri {
 
 			s1.position.w = c1.position.w;
 			s1.rhw = 1.0f / c1.position.w;
-		
+
 			s2.position.w = c2.position.w;
 			s2.rhw = 1.0f / c2.position.w;
 
@@ -87,15 +113,15 @@ namespace Guarneri {
 			s3.rhw = 1.0f / c3.position.w;
 
 			Triangle tri(s1, s2, s3);
-			
+
 			// primitive assembly
-			std::vector<Triangle> tris = tri.horizontal_split();
+			std::vector<Triangle> tris = tri.horizontally_split();
 
 			// rasterization
 			rasterize(tris, material);
 
 			// wireframe
-			if (((int)misc_param.flag & (int)RenderFlag::WIREFRAME) != 0) {
+			if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
 
 				draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 				draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -103,7 +129,7 @@ namespace Guarneri {
 			}
 
 			// wireframe & scanline
-			if (((int)misc_param.flag & (int)RenderFlag::SCANLINE) != 0) {
+			if ((misc_param.render_flag & RenderFlag::SCANLINE) != RenderFlag::DISABLE) {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
@@ -114,53 +140,7 @@ namespace Guarneri {
 			}
 		}
 
-		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation) {
-			Vector4 clip_start = p * v * Vector4(start);
-			Vector4 clip_end = p * v * Vector4(end);
-
-			Vector4 n1 = clip2ndc(clip_start);
-			Vector4 n2 = clip2ndc(clip_end);
-
-			Vector4 s1 = ndc2viewport(n1);
-			Vector4 s2 = ndc2viewport(n2);
-
-			Matrix4x4 translation = Matrix4x4::translation(Vector3(screen_translation));
-
-			s1 = translation * s1;
-			s2 = translation * s2;
-
-			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
-		}
-
-		void draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col) {
-			SegmentDrawer::bresenham(framebuffer, (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
-		}
-
-		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {
-			Vector4 clip_start = p * v * Vector4(start);
-			Vector4 clip_end = p * v * Vector4(end);
-
-			Vector4 n1 = clip2ndc(clip_start);
-			Vector4 n2 = clip2ndc(clip_end);
-
-			Vector4 s1 = ndc2viewport(n1);
-			Vector4 s2 = ndc2viewport(n2);
-
-			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
-		}
-
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
-			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
-			Graphics().draw_segment(pos, pos + right, Color::RED, v, p, offset);
-			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
-		}
-
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
-			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p);
-			Graphics().draw_segment(pos, pos + right, Color::RED, v, p);
-			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p);
-		}
-
+		// per vertex processing
 		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) {
 			a2v input;
 			input.position = vert.position;
@@ -170,6 +150,7 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
+		// rasterization
 		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Material>& mat) {
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
@@ -207,6 +188,7 @@ namespace Guarneri {
 			}
 		}
 
+		// per fragment processing
 		void process_fragment(Vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
 			auto s = mat->target_shader;
 			float z = v.position.z;
@@ -219,9 +201,9 @@ namespace Guarneri {
 
 			color_bgra pixel_color;
 
-			// fragment Shader
+			// fragment shader
 			Color fragment_result;
-			if (((int)misc_param.flag & (int)RenderFlag::SHADED) != 0 && s != nullptr) {
+			if ((misc_param.render_flag & RenderFlag::SHADED) != RenderFlag::DISABLE && s != nullptr) {
 				v2f v_out;
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
@@ -241,7 +223,7 @@ namespace Guarneri {
 			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
 
 			// alpha blend
-			if (s != nullptr && s->transparent && ((int)misc_param.flag & (int)RenderFlag::SEMI_TRANSPARENT) != 0) {
+			if (s != nullptr && s->transparent && (misc_param.render_flag & RenderFlag::SEMI_TRANSPARENT) != RenderFlag::DISABLE) {
 				color_bgra dst;
 				if (framebuffer->read(row, col, dst)) {
 					Color dst_color = Color::decode(dst);
@@ -257,7 +239,7 @@ namespace Guarneri {
 			}
 
 			// depth buffer visualization
-			if (((int)misc_param.flag & (int)RenderFlag::DEPTH) != 0) {
+			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
@@ -371,7 +353,7 @@ namespace Guarneri {
 
 				if (pass) {
 					// write z buffer 
-					if (zwrite_mode == ZWrite::ON || ((int)misc_param.flag & (int)RenderFlag::SEMI_TRANSPARENT) == 0) {
+					if (zwrite_mode == ZWrite::ON || (misc_param.render_flag & RenderFlag::SEMI_TRANSPARENT) == RenderFlag::DISABLE) {
 						zbuffer->write(row, col, z);
 					}
 				}
@@ -424,15 +406,52 @@ namespace Guarneri {
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
 		}
 
-		void clear_buffer() {
-			zbuffer->clear(1.0f);
-			if (((int)misc_param.flag & (int)RenderFlag::DEPTH) != 0)
-			{
-				framebuffer->clear(Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-			}
-			else {
-				framebuffer->clear(Color::encode_bgra(0.0f, 0.0f, 0.0f, 0.0f));
-			}
+	public:
+		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation) {
+			Vector4 clip_start = p * v * Vector4(start);
+			Vector4 clip_end = p * v * Vector4(end);
+
+			Vector4 n1 = clip2ndc(clip_start);
+			Vector4 n2 = clip2ndc(clip_end);
+
+			Vector4 s1 = ndc2viewport(n1);
+			Vector4 s2 = ndc2viewport(n2);
+
+			Matrix4x4 translation = Matrix4x4::translation(Vector3(screen_translation));
+
+			s1 = translation * s1;
+			s2 = translation * s2;
+
+			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+		}
+
+		void draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col) {
+			SegmentDrawer::bresenham(framebuffer, (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
+		}
+
+		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {
+			Vector4 clip_start = p * v * Vector4(start);
+			Vector4 clip_end = p * v * Vector4(end);
+
+			Vector4 n1 = clip2ndc(clip_start);
+			Vector4 n2 = clip2ndc(clip_end);
+
+			Vector4 s1 = ndc2viewport(n1);
+			Vector4 s2 = ndc2viewport(n2);
+
+			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+		}
+
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
+			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
+			Graphics().draw_segment(pos, pos + right, Color::RED, v, p, offset);
+			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
+		}
+
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
+			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p);
+			Graphics().draw_segment(pos, pos + right, Color::RED, v, p);
+			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p);
 		}
 	};
 }

@@ -31,6 +31,7 @@
 #endif
 
 // Rasterizer Core
+#include <BitwiseEnum.hpp>
 #include <PipelineDefinitions.hpp>
 #include <GDIWindow.hpp>
 #include <Singleton.hpp>
@@ -96,7 +97,7 @@ namespace Guarneri {
 
 		static void kick_off(Scene& scene) {
 			while (Window().is_valid()) {
-				Graphics().clear_buffer();
+				Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
 				InputMgr().update();
 				scene.update();
 				scene.render();

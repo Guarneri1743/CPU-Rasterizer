@@ -68,28 +68,28 @@ namespace Guarneri{
 			InputMgr().add_on_key_down_evt([](KeyCode code, void* data){			
 				REF(data)
 				if (code == KeyCode::F1) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::SHADED);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::SHADED);
 				}
 				else if (code == KeyCode::F2) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::SCANLINE);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::SCANLINE);
 				}
 				else if (code == KeyCode::F3) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::WIREFRAME);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::WIREFRAME);
 				}
 				else if (code == KeyCode::F4) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::DEPTH);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::DEPTH);
 				}
 				else if (code == KeyCode::F5) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::UV);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::UV);
 				}
 				else if (code == KeyCode::F6) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::VERTEX_COLOR);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::VERTEX_COLOR);
 				}
 				else if (code == KeyCode::F7) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::SEMI_TRANSPARENT);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::SEMI_TRANSPARENT);
 				}
 				else if (code == KeyCode::F8) {
-					misc_param.flag = (RenderFlag)((int)misc_param.flag ^ (int)RenderFlag::NORMAL);
+					misc_param.render_flag = (RenderFlag)(misc_param.render_flag ^ RenderFlag::NORMAL);
 				}
 				}, nullptr);
 		}

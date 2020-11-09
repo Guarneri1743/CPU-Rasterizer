@@ -7,6 +7,9 @@ namespace Guarneri {
 	static Color operator -(const float& other, const Color& c);
 	static Color operator *(const float& other, const Color& c);
 
+	#define DEFAULT_COLOR Color::encode_bgra(Color::BLACK)
+	#define DEFAULT_DEPTH_COLOR Color::encode_bgra(Color::WHITE)
+
 	struct Color {
 	public:
 		static const Color WHITE;

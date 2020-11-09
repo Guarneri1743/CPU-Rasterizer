@@ -11,7 +11,9 @@ namespace Guarneri {
 			view_matrix = Matrix4x4::IDENTITY;
 			proj_matrix = Matrix4x4::IDENTITY;
 			main_light = DirectionalLight();
-			flag = RenderFlag::SHADED;
+			render_flag = RenderFlag::SHADED;
+			persample_op_flag = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST | PerSampleOperation::BLENDING;
+			culling_clipping_flag = CullingAndClippingFlag::APP_FRUSTUM_CULLING | CullingAndClippingFlag::NEAR_PLANE_CLIPPING | CullingAndClippingFlag::SCREEN_CLIPPING | CullingAndClippingFlag::BACK_FACE_CULLING;
 		}
 
 		float cam_near;
@@ -20,17 +22,11 @@ namespace Guarneri {
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;
 		DirectionalLight main_light;
-		RenderFlag flag;
+		RenderFlag render_flag;
+		PerSampleOperation persample_op_flag;
+		CullingAndClippingFlag culling_clipping_flag;
 	};
 	static MiscParameter misc_param;
-
-	struct LightingData {
-		LightingData() {
-			glossiness = 32.0f;
-		}
-
-		float glossiness;
-	};
 
 	GraphicsDevice& Graphics() {
 		return Singleton<GraphicsDevice>::get();

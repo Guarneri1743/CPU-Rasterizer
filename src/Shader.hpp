@@ -21,6 +21,14 @@ namespace Guarneri {
 		Vector4 shadow_coord;
 	};
 
+	struct LightingData {
+		LightingData() {
+			glossiness = 32.0f;
+		}
+
+		float glossiness;
+	};
+
 	class Shader : public Object{
 	public:
 		Shader() {
@@ -141,15 +149,15 @@ namespace Guarneri {
 
 			}
 
-			if (((int)misc_param.flag & (int)RenderFlag::UV) != 0) {
+			if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
 				return input.uv;
 			}
 
-			if (((int)misc_param.flag & (int)RenderFlag::VERTEX_COLOR) != 0) {
+			if ((misc_param.render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE) {
 				return input.color;
 			}
 
-			if (((int)misc_param.flag & (int)RenderFlag::NORMAL) != 0) {
+			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
 				return input.normal;
 			}
 

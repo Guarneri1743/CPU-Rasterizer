@@ -85,7 +85,7 @@ namespace Guarneri {
 		//        \/
 		//	    bottom[0]
 		//====================================================
-		std::vector<Triangle> horizontal_split() {
+		std::vector<Triangle> horizontally_split() {
 			std::vector<Triangle> ret;
 
 			std::vector<Vertex> sorted;

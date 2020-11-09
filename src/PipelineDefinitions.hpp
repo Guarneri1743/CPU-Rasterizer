@@ -3,6 +3,8 @@
 
 namespace Guarneri{
 	#define LEFT_HANDED
+	#define FAR_Z 1.0f
+	#define DEFAULT_STENCIL 0
 
 	enum class Projection {
 		PERSPECTIVE,
@@ -19,7 +21,6 @@ namespace Guarneri{
 		BILINEAR
 	};
 
-	// todo: support other formats
 	enum class TextureFormat {
 		INVALID,
 		rgb,
@@ -75,6 +76,13 @@ namespace Guarneri{
 		BLENDING = 1 << 4
 	};
 
+	enum class BufferFlag {
+		NONE = 0,
+		COLOR = 1 << 0,
+		DEPTH = 1 << 1,
+		STENCIL = 1 << 2
+	};
+
 	enum class RenderFlag {
 		DISABLE = 0,
 		WIREFRAME = 1 << 0,
@@ -86,6 +94,18 @@ namespace Guarneri{
 		SCANLINE = 1 << 6,
 		SEMI_TRANSPARENT = 1 << 7
 	};
+
+	template<>
+	struct support_bitwise_enum<RenderFlag> : std::true_type {};
+
+	template<>
+	struct support_bitwise_enum<BufferFlag> : std::true_type {};
+
+	template<>
+	struct support_bitwise_enum<PerSampleOperation> : std::true_type {};
+
+	template<>
+	struct support_bitwise_enum<CullingAndClippingFlag> : std::true_type {};
 }
 
 #endif
