@@ -42,16 +42,16 @@ int main()
 			rdr->target->transform.rotate(Vector3::UP, -5.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::W)) {
-			rdr->target->transform.move_forward(5.0f);
+			rdr->target->transform.move_forward(0.5f);
 		}
 		if (InputMgr().is_key_down(KeyCode::A)) {
-			rdr->target->transform.move_left(5.0f);
+			rdr->target->transform.move_left(0.5f);
 		}
 		if (InputMgr().is_key_down(KeyCode::S)) {
-			rdr->target->transform.move_forward(-5.0f);
+			rdr->target->transform.move_forward(-0.5f);
 		}
 		if (InputMgr().is_key_down(KeyCode::D)) {
-			rdr->target->transform.move_right(5.0f);
+			rdr->target->transform.move_right(0.5f);
 		}
 		}, & stencil_cube_renderer);
 

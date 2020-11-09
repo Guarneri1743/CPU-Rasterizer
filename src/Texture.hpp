@@ -13,6 +13,7 @@ namespace Guarneri {
 			this->width = _width;
 			this->height = _height;
 			this->filtering = Filtering::BILINEAR;
+			this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
@@ -30,6 +31,7 @@ namespace Guarneri {
 			this->width = _width;
 			this->height = _height;
 			this->filtering = Filtering::BILINEAR;
+			this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
@@ -50,6 +52,7 @@ namespace Guarneri {
 			this->path = path;
 			this->fmt = TextureFormat::INVALID;
 			this->filtering = Filtering::BILINEAR;
+			this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
 			release();
 			int w, h, channels;
 			if (!FS::exists(path)) {
