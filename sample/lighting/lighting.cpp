@@ -26,8 +26,8 @@ int main()
 	backpack->material->lighting_param.glossiness = 64.0f;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	auto backpack_renderer = Renderer::create(backpack);
-	demo_scene.add(backpack_renderer, false);
+	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);
+	demo_scene.add(backpack_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {
 		auto bp = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
@@ -48,7 +48,7 @@ int main()
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
 	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
-	demo_scene.add(Renderer::create(Plane), false);
+	demo_scene.add(Renderer::create(Plane));
 
 	InputMgr().add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);

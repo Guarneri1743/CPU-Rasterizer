@@ -5,7 +5,11 @@ namespace Guarneri {
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
 	#define ONE_MINUS_EPSILON 1 - EPSILON
-	#define EQUALS(a, b) (std::abs(a-b) <= EPSILON)
+	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
+	#define LESS_THAN(a, b) (a - b < -EPSILON)
+	#define GREATER_THAN(a, b) (a - b > EPSILON)
+	#define GREATAER_EQUAL(a, b) (a - b > EPSILON || EQUALS(a, b))
+	#define LESS_EQUAL(a, b) (a - b < -EPSILON || EQUALS(a, b))
 	#define FLOAT_LOG_PRECISION 6
 	#define DEGREE2RAD(degree) degree * 0.0174532925f
 	#define PI 3.1415926

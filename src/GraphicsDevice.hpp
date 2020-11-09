@@ -157,8 +157,8 @@ namespace Guarneri {
 				bool flip = tri.flip;
 				int top_idx = flip ? 2 : 0;
 				int bottom_idx = flip ? 0 : 2;
-				int top = (int)std::ceil(tri[top_idx].position.y + 0.5f);
-				int bottom = (int)std::ceil(tri[bottom_idx].position.y + 0.5f);
+				int top = (int)(tri[top_idx].position.y + 0.5f);
+				int bottom = (int)(tri[bottom_idx].position.y + 0.5f);
 				top = CLAMP_INT(top, 0, this->height);
 				bottom = CLAMP_INT(bottom, 0, this->height);
 				assert(bottom >= top);
@@ -175,9 +175,9 @@ namespace Guarneri {
 						Clipper::screen_clipping(lhs, rhs, this->width);
 					}
 
-					int left = (int)std::ceil(lhs.position.x + 0.5f);
+					int left = (int)(lhs.position.x + 0.5f);
 					left = CLAMP_INT(left, 0, this->width);
-					int right = (int)std::ceil(rhs.position.x + 0.5f);
+					int right = (int)(rhs.position.x + 0.5f);
 					right = CLAMP_INT(right, 0, this->width);
 					assert(right >= left);
 

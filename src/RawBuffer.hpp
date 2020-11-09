@@ -78,8 +78,8 @@ namespace Guarneri {
 
 		void uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const {
 			// [0.0, 1.0) -> [0, width-1]
-			row = (uint32_t)std::floor(v * this->width);
-			col = (uint32_t)std::floor(u * this->height);
+			row = (uint32_t)(std::floor(v * this->width + 0.5f));
+			col = (uint32_t)(std::floor(u * this->height + 0.5f));
 		}
 
 		void clear(const T& val) {

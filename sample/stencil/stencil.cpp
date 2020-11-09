@@ -23,11 +23,37 @@ int main()
 
 	// stencil demo cube
 	auto stencil_test_material = Material::create();
+	stencil_test_material->stencil_pass_op = StencilOp::REPLACE;
+	stencil_test_material->stencil_ref_val = 1;
+	stencil_test_material->zwrite_mode = ZWrite::OFF;
+	stencil_test_material->stencil_func = CompareFunc::ALWAYS;
 	auto stencil_cube = PrimitiveFactory::cube(stencil_test_material);
 	stencil_cube->transform.scale(Vector3(5.0f, 5.0f, 5.0f));
 	stencil_cube->transform.translate(Vector3(0.0f, 3.0f, 0.0f));
 	std::shared_ptr<Renderer> stencil_cube_renderer = Renderer::create(stencil_cube);
-	demo_scene.add(stencil_cube_renderer, false);
+	demo_scene.add(stencil_cube_renderer);
+
+	InputMgr().add_on_update_evt([](void* user_data) {
+		auto rdr = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
+		if (InputMgr().is_key_down(KeyCode::LEFT)) {
+			rdr->target->transform.rotate(Vector3::UP, 5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::RIGHT)) {
+			rdr->target->transform.rotate(Vector3::UP, -5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::W)) {
+			rdr->target->transform.move_forward(5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::A)) {
+			rdr->target->transform.move_left(5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::S)) {
+			rdr->target->transform.move_forward(-5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::D)) {
+			rdr->target->transform.move_right(5.0f);
+		}
+		}, & stencil_cube_renderer);
 
 	// backpack
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
@@ -36,7 +62,7 @@ int main()
 	backpack->material->stencil_func = CompareFunc::EQUAL;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	demo_scene.add(Renderer::create(backpack), false);
+	demo_scene.add(Renderer::create(backpack));
 
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
@@ -46,7 +72,7 @@ int main()
 	plane_material->set_texture(albedo_prop, plane_tex);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
 	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
-	demo_scene.add(Renderer::create(Plane), false);
+	demo_scene.add(Renderer::create(Plane));
 
 	InputMgr().add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);

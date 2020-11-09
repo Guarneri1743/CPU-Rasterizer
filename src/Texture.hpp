@@ -125,8 +125,8 @@ namespace Guarneri {
 		}
 
 		bool bilinear(const float& u, const float& v, Color& ret) const {
-			float rf = v * (float)this->width;
-			float cf = u * (float)this->height;
+			float rf = v * (float)this->width + 0.5f;
+			float cf = u * (float)this->height + 0.5f;
 
 			uint32_t row = (uint32_t)std::floor(rf);
 			uint32_t col = (uint32_t)std::floor(cf);
@@ -241,44 +241,44 @@ namespace Guarneri {
 		void wrap(float& u, float& v) const {
 			switch (wrap_mode) {
 			case WrapMode::CLAMP_TO_BORDER:
-				if (u < 0.0f) {
+				if (LESS_EQUAL(u, 0.0f)) {
 					u = 0.0f;
 				}
-				if (u > 1.0f) {
+				if (GREATAER_EQUAL(u, 1.0f)) {
 					u = 1.0f;
 				}
-				if (v < 0.0f) {
+				if (LESS_EQUAL(v, 0.0f)) {
 					v = 0.0f;
 				}
-				if (v > 1.0f) {
+				if (GREATAER_EQUAL(v, 1.0f)) {
 					v = 1.0f;
 				}
 				break;
 			case WrapMode::CLAMP_TO_EDGE:
-				if (u < 0.0f) {
+				if (LESS_EQUAL(u, 0.0f)) {
 					u = 0.0f;
 				}
-				if (u > 1.0f) {
+				if (GREATAER_EQUAL(u, 1.0f)) {
 					u = 1.0f;
 				}
-				if (v < 0.0f) {
+				if (LESS_EQUAL(v, 0.0f)) {
 					v = 0.0f;
 				}
-				if (v > 1.0f) {
+				if (GREATAER_EQUAL(v, 1.0f)) {
 					v = 1.0f;
 				}
 				break;
 			case WrapMode::REPEAT:
-				if (u < 0.0f) {
+				if (LESS_EQUAL(u, 0.0f)) {
 					u += 1.0f;
 				}
-				if (u > 1.0f) {
+				if (GREATAER_EQUAL(u, 1.0f)) {
 					u -= 1.0f;
 				}
-				if (v < 0.0f) {
+				if (LESS_EQUAL(v, 0.0f)) {
 					v += 1.0f;
 				}
-				if (v > 1.0f) {
+				if (GREATAER_EQUAL(v, 1.0f)) {
 					v -= 1.0f;
 				}
 				break;

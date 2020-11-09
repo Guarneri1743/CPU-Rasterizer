@@ -80,8 +80,8 @@ function setupSlotion()
          links { "assimp" }
 end
 
-function setupSoftRasterizerProj()
-   project "SoftRasterizer"
+function setupCommonDemo()
+   project "CommonDemo"
    kind "ConsoleApp"
    language "C++"
 
@@ -94,6 +94,52 @@ function setupSoftRasterizerProj()
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/simple_scene/*.*"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+function setupStencilDemo()
+   project "StencilDemo"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/math/*.*",
+      src_dir .. "/primitives/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
+      sample_dir .. "/stencil/*.*"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+function setupLightingDemo()
+   project "LightingDemo"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/math/*.*",
+      src_dir .. "/primitives/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
+      sample_dir .. "/lighting/*.*"
    }
 
    filter { "configurations:Debug*" }
@@ -152,6 +198,8 @@ end
 
 setupIncludeDirs()
 setupSlotion()
-setupSoftRasterizerProj()
+setupCommonDemo()
+setupStencilDemo()
+setupLightingDemo()
 setupPLYProj()
 setupUnitTestProj()
