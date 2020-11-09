@@ -4,15 +4,12 @@
 namespace Guarneri {
 	#define MAX_ID UINT_MAX
 	#define EPSILON 1e-04f
+	#define ONE_MINUS_EPSILON 1 - EPSILON
 	#define EQUALS(a, b) (std::abs(a-b) <= EPSILON)
 	#define FLOAT_LOG_PRECISION 6
 	#define DEGREE2RAD(degree) degree * 0.0174532925f
 	#define PI 3.1415926
 	#define INVALID_TEXTURE_ID 0
-	#define FLOOR(val) (int)(val)
-	#define CEIL(val) (int)(val + 0.5f)
-	#define FLOOR_UINT(val) (uint32_t)(val)
-	#define CEIL_UINT(val) (uint32_t)(val + 0.5f)
 	#define FRAC(val) val - (long)val
 	#define STEP(y, x) x >= y ? 1 : 0 
 	#define FS std::filesystem

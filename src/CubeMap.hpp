@@ -51,7 +51,7 @@ namespace Guarneri {
 					index = 0;
 					return Vector2(1.0f - (normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
 				}
-				else if (dir.x < 0) {
+				else {
 					index = 1;
 					return Vector2((normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
 				}
@@ -59,11 +59,11 @@ namespace Guarneri {
 			else if (abs_dir.y > abs_dir.x && abs_dir.y > abs_dir.z) {
 				if (dir.y >= 0) {
 					index = 2;
-					return Vector2((normalized_dir.z + 1.0f) / 2.0f, 1.0f - (normalized_dir.x + 1.0f) / 2.0f);
+					return Vector2((normalized_dir.x + 1.0f) / 2.0f, 1.0f - (normalized_dir.z + 1.0f) / 2.0f);
 				}
-				else if (dir.x < 0) {
+				else {
 					index = 3;
-					return Vector2(1.0f - (normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.x + 1.0f) / 2.0f);
+					return Vector2((normalized_dir.x + 1.0f) / 2.0f, (normalized_dir.z + 1.0f) / 2.0f);
 				}
 			}
 			else {
@@ -71,7 +71,7 @@ namespace Guarneri {
 					index = 4;
 					return Vector2((normalized_dir.x + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
 				}
-				else if (dir.z < 0) {
+				else {
 					index = 5;
 					return Vector2(1.0f - (normalized_dir.x + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
 				}

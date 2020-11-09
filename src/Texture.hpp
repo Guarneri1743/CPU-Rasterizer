@@ -128,8 +128,8 @@ namespace Guarneri {
 			float rf = v * (float)this->width;
 			float cf = u * (float)this->height;
 
-			uint32_t row = FLOOR_UINT(rf - EPSILON);
-			uint32_t col = FLOOR_UINT(cf - EPSILON);
+			uint32_t row = (uint32_t)std::floor(rf);
+			uint32_t col = (uint32_t)std::floor(cf);
 		
 			float frac_row = rf - (float)row;
 			float frac_col = cf - (float)col;
@@ -237,34 +237,35 @@ namespace Guarneri {
 		}
 
 	private:
+		//todo:
 		void wrap(float& u, float& v) const {
 			switch (wrap_mode) {
 			case WrapMode::CLAMP_TO_BORDER:
-				if (u <= 0.0f) {
+				if (u < 0.0f) {
 					u = 0.0f;
 				}
-				if (u >= 1.0f) {
+				if (u > 1.0f) {
 					u = 1.0f;
 				}
-				if (v <= 0.0f) {
+				if (v < 0.0f) {
 					v = 0.0f;
 				}
-				if (v >= 1.0f) {
+				if (v > 1.0f) {
 					v = 1.0f;
 				}
 				break;
 			case WrapMode::CLAMP_TO_EDGE:
-				if (u <= 0.0f) {
-					u = 0.0f + EPSILON;
+				if (u < 0.0f) {
+					u = 0.0f;
 				}
-				if (u >= 1.0f) {
-					u = 1.0f - EPSILON;
+				if (u > 1.0f) {
+					u = 1.0f;
 				}
-				if (v <= 0.0f) {
-					v = 0.0f + EPSILON;
+				if (v < 0.0f) {
+					v = 0.0f;
 				}
-				if (v >= 1.0f) {
-					v = 1.0f - EPSILON;
+				if (v > 1.0f) {
+					v = 1.0f;
 				}
 				break;
 			case WrapMode::REPEAT:
