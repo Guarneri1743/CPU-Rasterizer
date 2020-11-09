@@ -289,8 +289,8 @@ namespace Guarneri {
 			m.at(0, 3) = -(right + left) / (right - left);
 			m.at(1, 1) = 2.0f / (top - bottom);
 			m.at(1, 3) = -(top + bottom) / (top - bottom);
-			m.at(2, 2) = -2.0f / (far - near);
-			m.at(2, 3) = -(far + near) / (far - near);
+			m.at(2, 2) = -2.0f / (-far - near);
+			m.at(2, 3) = -(-far + near) / (-far - near);
 			return m;
 		}
 

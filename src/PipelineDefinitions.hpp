@@ -27,7 +27,8 @@ namespace Guarneri{
 		rgba
 	};
 
-	enum class ZTest {
+	enum class CompareFunc {
+		NEVER,
 		ALWAYS,
 		LESS,
 		LEQUAL,
@@ -40,6 +41,17 @@ namespace Guarneri{
 	enum class ZWrite {
 		ON,
 		OFF
+	};
+
+	enum class StencilOp {
+		KEEP,
+		ZERO,
+		REPLACE,
+		INCR,
+		INCR_WRAP,
+		DECR,
+		DECR_WRAP,
+		INVERT
 	};
 
 	enum class BlendFactor {

@@ -8,7 +8,7 @@ namespace Guarneri {
 		SkyboxRenderer() {
 			auto shader = std::make_unique<SkyboxShader>();
 			auto mat = std::make_unique<Material>(shader);
-			mat->ztest_mode = ZTest::LEQUAL;
+			mat->ztest_func = CompareFunc::LEQUAL;
 			target = PrimitiveFactory::skybox(mat);
 		}
 

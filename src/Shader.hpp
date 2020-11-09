@@ -32,7 +32,9 @@ namespace Guarneri {
 	class Shader : public Object{
 	public:
 		Shader() {
-			this->ztest_mode = ZTest::LEQUAL;
+			this->stencil_func = CompareFunc::ALWAYS;
+			this->stencil_op = StencilOp::KEEP;
+			this->ztest_func = CompareFunc::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
@@ -56,17 +58,20 @@ namespace Guarneri {
 		std::unordered_map<property_name, std::string> keywords;
 
 	public:
-		ZTest ztest_mode;
+		CompareFunc stencil_func;
+		StencilOp stencil_op;
+		CompareFunc ztest_func;
 		ZWrite zwrite_mode;
 		BlendFactor src_factor;
 		BlendFactor dst_factor;
 		BlendOp blend_op;
 		bool transparent;
 		LightingData lighting_param;
+		bool discarded = false;
 
 	public:
-		void sync(ZTest ztest, ZWrite zwrite) {
-			this->ztest_mode = ztest;
+		void sync(CompareFunc ztest, ZWrite zwrite) {
+			this->ztest_func = ztest;
 			this->zwrite_mode = zwrite;
 		}
 
@@ -96,6 +101,10 @@ namespace Guarneri {
 			this->m = model;
 			this->v = view;
 			this->p = proj;
+		}
+
+		void discard() {
+			discarded = true;
 		}
 
 		virtual v2f vertex_shader(const a2v& input) {
@@ -128,6 +137,7 @@ namespace Guarneri {
 			Vector3 reflect_dir = light_dir - 2.0f * normal * ndl;
 			float spec = std::pow(std::max(Vector3::dot(view_dir, reflect_dir), 0.0f), glossiness);
 
+		
 			Color ret = ambient;
 			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
@@ -171,7 +181,7 @@ namespace Guarneri {
 
 		void copy(const Shader& other) {
 			this->id = other.id;
-			this->ztest_mode = other.ztest_mode;
+			this->ztest_func = other.ztest_func;
 			this->zwrite_mode = other.zwrite_mode;
 			this->src_factor = other.src_factor;
 			this->dst_factor = other.dst_factor;
@@ -182,6 +192,8 @@ namespace Guarneri {
 			this->name2tex = other.name2tex;
 			this->name2int = other.name2int;
 			this->keywords = other.keywords;
+			this->stencil_func = other.stencil_func;
+			this->stencil_op = other.stencil_op;
 		}
 
 		std::string str() const {

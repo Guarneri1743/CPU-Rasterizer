@@ -48,6 +48,8 @@
 #include <Light.hpp>
 #include <Matrix4x4.hpp>
 #include <Matrix3x3.hpp>
+#include <RawBuffer.hpp>
+#include <Texture.hpp>
 #include <Misc.hpp>
 #include <Plane.hpp>
 #include <Ray.hpp>
@@ -65,15 +67,13 @@
 #include <Clipper.hpp>
 #include <InputManager.hpp>
 #include <Transform.hpp>
-#include <RawBuffer.hpp>
-#include <Texture.hpp>
 #include <SegmentDrawer.hpp>
-#include <Noise.hpp>
 #include <Shader.hpp>
 #include <Material.hpp>
+#include <GraphicsDevice.hpp>
+#include <Noise.hpp>
 #include <Mesh.hpp>
 #include <Model.hpp>
-#include <GraphicsDevice.hpp>
 #include <Camera.hpp>
 #include <Renderer.hpp>
 #include <PrimitiveFactory.hpp>

@@ -69,7 +69,7 @@ namespace Guarneri {
 
 			shader->set_mvp_matrix(m, v, p);
 			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
-			shader->sync(material->ztest_mode, material->zwrite_mode);
+			shader->sync(material->ztest_func, material->zwrite_mode);
 			shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
 			shader->sync(material->lighting_param);
 
@@ -180,7 +180,7 @@ namespace Guarneri {
 					if (enable_screen_clipping) {
 						Clipper::screen_clipping(lhs, rhs, this->width);
 					}
-					
+
 					int left = CEIL(lhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
 					int right = CEIL(rhs.position.x);
@@ -209,7 +209,7 @@ namespace Guarneri {
 			auto s = mat->target_shader;
 			float z = v.position.z;
 
-			ZTest ztest_mode = s->ztest_mode;
+			CompareFunc ztest_func = s->ztest_func;
 			ZWrite zwrite_mode = s->zwrite_mode;
 			BlendFactor src_factor = s->src_factor;
 			BlendFactor dst_factor = s->dst_factor;
@@ -229,31 +229,36 @@ namespace Guarneri {
 				v_out.color = v.color * w;
 				v_out.normal = v.normal * w;
 				v_out.uv = v.uv * w;
+				s->discarded = false;
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = Color::encode_bgra(fragment_result);
 			}
 
 			// todo: scissor test
-			if (enable_scissor_test) 
+			if (enable_scissor_test)
 			{
-				
+
 			}
 
-			// todo: alpha test
-			if (enable_alpha_test) 
-			{ 
-				
+			// acctually alpha test is a deprecated feature in newer graphics API, cuz it can be emulated by discard() or clip()
+			if (enable_alpha_test)
+			{
+				if (s->discarded) {
+					return;
+				}
 			}
 
 			// todo: stencil test
-			if (enable_stencil_test) 
+			if (enable_stencil_test)
 			{
-				
+				if (!stencil_test(row, col)) {
+					op_pass &= ~PerSampleOperation::STENCIL_TEST;
+				}
 			}
 
 			// depth test
 			if (enable_depth_test) {
-				if (!depth_test(ztest_mode, zwrite_mode, row, col, z)) {
+				if (!depth_test(ztest_func, zwrite_mode, row, col, z)) {
 					op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				}
 			}
@@ -269,18 +274,18 @@ namespace Guarneri {
 				}
 			}
 
+			// write color
 			if (validate_fragment(op_pass)) {
-				// write to color buffer
 				framebuffer->write(row, col, pixel_color);
 			}
 
+			// write depth
 			if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE) {
-				// write z buffer 
 				if (zwrite_mode == ZWrite::ON || !enable_blending) {
 					zbuffer->write(row, col, z);
 				}
 			}
-
+			
 			// depth buffer visualization
 			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
 				float cur_depth;
@@ -301,13 +306,49 @@ namespace Guarneri {
 			return true;
 		}
 
+		bool stencil_test(const uint32_t& row, const uint32_t& col) {
+			return true;
+		}
+
+		bool depth_test(const CompareFunc& ztest_func, const ZWrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
+			float depth;
+			bool pass = false;
+			if (zbuffer->read(row, col, depth)) {
+				pass = z <= depth;
+				switch (ztest_func) {
+				case CompareFunc::ALWAYS:
+					pass = true;
+					break;
+				case CompareFunc::EQUAL:
+					pass = EQUALS(z, depth); // percision concern
+					break;
+				case CompareFunc::GREATER:
+					pass = z > depth;
+					break;
+				case CompareFunc::LEQUAL:
+					pass = z <= depth;
+					break;
+				case CompareFunc::NOT_EQUAL:
+					pass = z != depth;
+					break;
+				case CompareFunc::GEQUAL:
+					pass = z >= depth;
+					break;
+				case CompareFunc::LESS:
+					pass = z < depth;
+					break;
+				}
+			}
+			return pass;
+		}
+
 		// todo: alpha factor
 		static Color blend(const Color& src_color, const Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op) {
 			Color lhs, rhs;
 			switch (src_factor) {
 			case BlendFactor::ONE:
 				lhs = src_color;
-				break; 
+				break;
 			case BlendFactor::SRC_ALPHA:
 				lhs = src_color * src_color.a;
 				break;
@@ -371,38 +412,6 @@ namespace Guarneri {
 				return lhs - rhs;
 			}
 			return lhs + rhs;
-		}
-
-		bool depth_test(const ZTest& ztest_mode, const ZWrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
-			float depth;
-			bool pass = false;
-			if (zbuffer->read(row, col, depth)) {
-				pass = z <= depth;
-				switch (ztest_mode) {
-				case ZTest::ALWAYS:
-					pass = true;
-					break;
-				case ZTest::EQUAL:
-					pass = EQUALS(z, depth); // percision concern
-					break;
-				case ZTest::GREATER:
-					pass = z > depth;
-					break;
-				case ZTest::LEQUAL:
-					pass = z <= depth;
-					break;
-				case ZTest::NOT_EQUAL:
-					pass = z != depth;
-					break;
-				case ZTest::GEQUAL:
-					pass = z >= depth;
-					break;
-				case ZTest::LESS:
-					pass = z < depth;
-					break;
-				}
-			}
-			return pass;
 		}
 
 		Vertex clip2ndc(const Vertex& v) {

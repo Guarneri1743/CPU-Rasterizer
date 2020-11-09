@@ -7,7 +7,9 @@ namespace Guarneri {
 	public:
 		Material() {
 			this->target_shader = std::make_shared<Shader>();
-			this->ztest_mode = ZTest::LESS;
+			this->stencil_func = CompareFunc::ALWAYS;
+			this->stencil_op = StencilOp::KEEP;
+			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
@@ -19,7 +21,9 @@ namespace Guarneri {
 
 		Material(std::unique_ptr<Shader>& shader) {
 			this->target_shader = std::move(shader);
-			this->ztest_mode = ZTest::LESS;
+			this->stencil_func = CompareFunc::ALWAYS;
+			this->stencil_op = StencilOp::KEEP;
+			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
@@ -32,7 +36,9 @@ namespace Guarneri {
 		Material(std::unique_ptr<SkyboxShader>& shader) {
 			auto shader_ptr = shader.release();
 			this->target_shader = std::shared_ptr<Shader>((Shader*)(shader_ptr));
-			this->ztest_mode = ZTest::LESS;
+			this->stencil_func = CompareFunc::ALWAYS;
+			this->stencil_op = StencilOp::KEEP;
+			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
@@ -50,7 +56,9 @@ namespace Guarneri {
 
 	public:
 		std::shared_ptr<Shader> target_shader;
-		ZTest ztest_mode;
+		CompareFunc stencil_func;
+		StencilOp stencil_op;
+		CompareFunc ztest_func;
 		ZWrite zwrite_mode;
 		BlendFactor src_factor;
 		BlendFactor dst_factor;
@@ -131,7 +139,7 @@ namespace Guarneri {
 
 		void copy(const Material& other) {
 			this->target_shader = other.target_shader;
-			this->ztest_mode = other.ztest_mode;
+			this->ztest_func = other.ztest_func;
 			this->zwrite_mode = other.zwrite_mode;
 			this->src_factor = other.src_factor;
 			this->dst_factor = other.dst_factor;
@@ -142,6 +150,8 @@ namespace Guarneri {
 			this->name2float4 = other.name2float4;
 			this->name2int = other.name2int;
 			this->name2tex = other.name2tex;
+			this->stencil_func = other.stencil_func;
+			this->stencil_op = other.stencil_op;
 		}
 
 		std::string str() const {

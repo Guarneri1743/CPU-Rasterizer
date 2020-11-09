@@ -23,7 +23,7 @@ namespace Guarneri {
 		Matrix4x4 v;
 		float yaw;
 		float pitch;
-		Projection proj_type;
+		Projection projection;
 
 	public:
 		static std::unique_ptr<Camera> create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type) {
@@ -40,7 +40,7 @@ namespace Guarneri {
 			this->far = _far;
 			this->yaw = -210.0f;
 			this->pitch = -45.0f;
-			this->proj_type = _proj_type;
+			this->projection = _proj_type;
 			update_camera();
 			update_proj_mode();
 		}
@@ -101,14 +101,34 @@ namespace Guarneri {
 			this->position -= distance * this->up;
 		}
 
+		void set_near(const float& _near) {
+			near = _near;
+			update_proj_mode();
+		}
+
+		void set_far(const float& _far) {
+			far = _far;
+			update_proj_mode();
+		}
+
+		void set_fov(const float& _fov) {
+			fov = _fov;
+			update_proj_mode();
+		}
+
+		void set_projection(const Projection& proj) {
+			this->projection = proj;
+			update_proj_mode();
+		}
+
 		//todo: ortho
 		void update_proj_mode(){
-			switch (this->proj_type) {
+			switch (this->projection) {
 			case Projection::PERSPECTIVE:
 				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			case Projection::ORTHO:
-				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
+				this->p = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, this->near, this->far);
 				break;
 			default:
 				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
