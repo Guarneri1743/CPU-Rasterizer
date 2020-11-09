@@ -89,7 +89,7 @@ namespace Guarneri {
 		}
 
 	public:
-		WrapMode wrapMode;
+		WrapMode wrap_mode;
 		Filtering filtering;
 		TextureFormat fmt;
 
@@ -238,19 +238,33 @@ namespace Guarneri {
 
 	private:
 		void wrap(float& u, float& v) const {
-			switch (wrapMode) {
-			case WrapMode::CLAMP:
-				if (u < 0.0f) {
+			switch (wrap_mode) {
+			case WrapMode::CLAMP_TO_BORDER:
+				if (u <= 0.0f) {
 					u = 0.0f;
 				}
-				if (u > 1.0f) {
+				if (u >= 1.0f) {
 					u = 1.0f;
 				}
-				if (v < 0.0f) {
+				if (v <= 0.0f) {
 					v = 0.0f;
 				}
-				if (v > 1.0f) {
+				if (v >= 1.0f) {
 					v = 1.0f;
+				}
+				break;
+			case WrapMode::CLAMP_TO_EDGE:
+				if (u <= 0.0f) {
+					u = 0.0f + EPSILON;
+				}
+				if (u >= 1.0f) {
+					u = 1.0f - EPSILON;
+				}
+				if (v <= 0.0f) {
+					v = 0.0f + EPSILON;
+				}
+				if (v >= 1.0f) {
+					v = 1.0f - EPSILON;
 				}
 				break;
 			case WrapMode::REPEAT:
@@ -288,7 +302,7 @@ namespace Guarneri {
 
 		void copy(const Texture& other) {
 			this->id = other.id;
-			this->wrapMode = other.wrapMode;
+			this->wrap_mode = other.wrap_mode;
 			this->filtering = other.filtering;
 			this->fmt = other.fmt;
 			this->rgba_buffer = other.rgba_buffer;

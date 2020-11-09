@@ -93,6 +93,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		LightingData lighting_param;
 		std::shared_ptr<Shader> target_shader;
 
@@ -123,6 +124,7 @@ namespace Guarneri {
 			target_shader->name2float4 = name2float4;
 			target_shader->name2tex = name2tex;
 			target_shader->name2int = name2int;
+			target_shader->name2cubemap = name2cubemap;
 			target_shader->stencil_func = stencil_func;
 			target_shader->stencil_pass_op = stencil_pass_op;
 			target_shader->stencil_fail_op = stencil_fail_op;
@@ -150,6 +152,13 @@ namespace Guarneri {
 				return;
 			}
 			name2tex[name] = tex;
+		}
+
+		void set_cubemap(const property_name& name, std::shared_ptr<CubeMap> cubemap) {
+			if (cubemap == nullptr) {
+				return;
+			}
+			name2cubemap[name] = cubemap;
 		}
 
 		int get_int(const property_name& name) const {
@@ -180,6 +189,13 @@ namespace Guarneri {
 			return nullptr;
 		}
 
+		std::shared_ptr<CubeMap> get_cubemap(const property_name& name) const {
+			if (name2cubemap.count(name) > 0) {
+				return name2cubemap.at(name);
+			}
+			return nullptr;
+		}
+
 		Material& operator =(const Material& other) {
 			copy(other);
 			return *this;
@@ -205,6 +221,7 @@ namespace Guarneri {
 			this->name2float4 = other.name2float4;
 			this->name2int = other.name2int;
 			this->name2tex = other.name2tex;
+			this->name2cubemap = other.name2cubemap;
 		}
 
 		std::string str() const {

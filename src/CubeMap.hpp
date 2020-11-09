@@ -19,12 +19,19 @@ namespace Guarneri {
 			textures.push_back(bottom);
 			textures.push_back(front);
 			textures.push_back(back);
+			for (auto& tex : textures) {
+				tex->wrap_mode = WrapMode::CLAMP_TO_EDGE;
+			}
 		}
 
 	private:
 		std::vector<std::shared_ptr<Texture>> textures;
 
 	public:
+		static std::unique_ptr<CubeMap> create(std::vector<std::string> path) {
+			return std::make_unique<CubeMap>(path);
+		}
+
 		bool sample(const Vector3& dir, Color& ret) {
 			int index = -1;
 			auto uv = sample(dir, index);
@@ -36,28 +43,39 @@ namespace Guarneri {
 
 		Vector2 sample(const Vector3& dir, int& index)
 		{
-			Vector3 dir_abs = Vector3::abs(dir);
-			float ma;
-			Vector2 uv;
-			if (dir_abs.z >= dir_abs.x && dir_abs.z >= dir_abs.y)
-			{
-				index = dir.z < 0.0f ? 5 : 4;
-				ma = 0.5f / dir_abs.z;
-				uv = Vector2(dir.z < 0.0f ? -dir.x : dir.x, -dir.y);
+			Vector3 abs_dir = Vector3::abs(dir);
+			float max_axis = std::max(std::max(abs_dir.x, abs_dir.y), abs_dir.z);
+			Vector3 normalized_dir = dir / max_axis;
+			if (abs_dir.x > abs_dir.y && abs_dir.x > abs_dir.z) {
+				if (dir.x >= 0) {
+					index = 0;
+					return Vector2(1.0f - (normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
+				}
+				else if (dir.x < 0) {
+					index = 1;
+					return Vector2((normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
+				}
 			}
-			else if (dir_abs.y >= dir_abs.x)
-			{
-				index = dir.y < 0.0f ? 3 : 2;
-				ma = 0.5f / dir_abs.y;
-				uv = Vector2(dir.x, dir.y < 0.0f ? -dir.z : dir.z);
+			else if (abs_dir.y > abs_dir.x && abs_dir.y > abs_dir.z) {
+				if (dir.y >= 0) {
+					index = 2;
+					return Vector2((normalized_dir.z + 1.0f) / 2.0f, 1.0f - (normalized_dir.x + 1.0f) / 2.0f);
+				}
+				else if (dir.x < 0) {
+					index = 3;
+					return Vector2(1.0f - (normalized_dir.z + 1.0f) / 2.0f, (normalized_dir.x + 1.0f) / 2.0f);
+				}
 			}
-			else
-			{
-				index = dir.x < 0.0f ? 1 : 0;
-				ma = 0.5f / dir_abs.x;
-				uv = Vector2(dir.x < 0.0f ? dir.z : -dir.z, -dir.y);
+			else {
+				if (dir.z >= 0) {
+					index = 4;
+					return Vector2((normalized_dir.x + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
+				}
+				else if (dir.z < 0) {
+					index = 5;
+					return Vector2(1.0f - (normalized_dir.x + 1.0f) / 2.0f, (normalized_dir.y + 1.0f) / 2.0f);
+				}
 			}
-			return uv * ma + 0.5;
 		}
 	};
 }

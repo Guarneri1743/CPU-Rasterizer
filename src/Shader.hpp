@@ -61,6 +61,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		std::unordered_map<property_name, std::string> keywords;
 		ColorMask color_mask;
 		CompareFunc stencil_func;
@@ -89,6 +90,7 @@ namespace Guarneri {
 			auto oo = p * v * m * Vector4(input.position.x, input.position.y, input.position.z, 1.0f);
 			o.position = oo;
 			o.world_pos = (m * input.position).xyz();
+			o.shadow_coord = Vector4(input.uv, 0.0f, 1.0f);
 			o.color = input.color;
 			o.normal = Matrix3x3(m).inverse().transpose() * input.normal;
 			o.uv = input.uv;
@@ -167,6 +169,7 @@ namespace Guarneri {
 			this->name2float = other.name2float;
 			this->name2float4 = other.name2float4;
 			this->name2tex = other.name2tex;
+			this->name2cubemap = other.name2cubemap;
 			this->name2int = other.name2int;
 			this->keywords = other.keywords;
 			this->stencil_func = other.stencil_func;

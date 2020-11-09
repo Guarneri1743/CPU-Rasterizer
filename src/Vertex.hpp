@@ -8,6 +8,7 @@ namespace Guarneri {
 		Vertex() {
 			position = Vector4();
 			world_pos = Vector3();
+			shadow_coord = Vector4();
 			color = Vector4();
 			uv = Vector2();
 			normal = Vector3();
@@ -16,9 +17,10 @@ namespace Guarneri {
 			this->rhw = 1.0f;
 		}
 
-		Vertex(const Vector4& _position, const Vector3& _world_pos, const Vector4& _color, const Vector3& _normal, const Vector2& _uv, const Vector3& _tangent, const Vector3& _bitangent) {
+		Vertex(const Vector4& _position, const Vector3& _world_pos, Vector4& _shadow_coord, const Vector4& _color, const Vector3& _normal, const Vector2& _uv, const Vector3& _tangent, const Vector3& _bitangent) {
 			this->position = _position;
 			this->world_pos = _world_pos;
+			this->shadow_coord = _shadow_coord;
 			this->color = _color;
 			this->normal = _normal;
 			this->uv = _uv;
@@ -30,6 +32,7 @@ namespace Guarneri {
 		Vertex(const Vector4& _position, const Vector3& _normal, const Vector2& _uv) {
 			this->position = _position;
 			this->world_pos = _position.xyz();
+			this->shadow_coord = Vector4::ZERO;
 			this->color = Vector4::ONE;
 			this->normal = _normal;
 			this->uv = _uv;
@@ -41,6 +44,7 @@ namespace Guarneri {
 	public:
 		Vector4 position;
 		Vector3 world_pos;
+		Vector4 shadow_coord;
 		Vector4 color;
 		Vector3 normal;
 		Vector2 uv;
@@ -51,6 +55,7 @@ namespace Guarneri {
 	public:
 		void perspective_division(const float& _rhw) {
 			world_pos *= _rhw;
+			shadow_coord *= _rhw;
 			color *= _rhw;
 			normal *= _rhw;
 			uv *= _rhw;
@@ -62,6 +67,7 @@ namespace Guarneri {
 			Vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;
 			ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
+			ret.shadow_coord = left.shadow_coord + (right.shadow_coord - left.shadow_coord) * t;
 			ret.color = left.color + (right.color - left.color) * t;
 			ret.normal = left.normal + (right.normal - left.normal) * t;
 			ret.uv = left.uv + (right.uv - left.uv) * t;
@@ -77,6 +83,7 @@ namespace Guarneri {
 			Vertex ret;
 			ret.position = (rhs.position - lhs.position) * segmentation;
 			ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;
+			ret.shadow_coord = (rhs.shadow_coord - lhs.shadow_coord) * segmentation;
 			ret.color = (rhs.color - lhs.color) * segmentation;
 			ret.uv = (rhs.uv - lhs.uv) * segmentation;
 			ret.normal = (rhs.normal - lhs.normal) * segmentation;
@@ -90,6 +97,7 @@ namespace Guarneri {
 			Vertex ret;
 			ret.position = (left.position + differential.position);
 			ret.world_pos = (left.world_pos + differential.world_pos);
+			ret.shadow_coord = (left.shadow_coord + differential.shadow_coord);
 			ret.color = (left.color + differential.color);
 			ret.normal = (left.normal + differential.normal);
 			ret.uv = (left.uv + differential.uv);

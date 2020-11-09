@@ -13,6 +13,11 @@ namespace Guarneri {
 		}
 
 	public:
+		void load_cubemap(std::vector<std::string> path_list) {
+			auto cubemap = CubeMap::create(path_list);
+			target->material->set_cubemap(skybox_cubemap_prop, std::move(cubemap));
+		}
+
 		Matrix4x4 view_matrix() const {
 			auto view = misc_param.view_matrix;
 			auto view3x3 = Matrix3x3(view);

@@ -106,3 +106,15 @@ vs2019/bin/release/res/textures/Carpet_OfficePlain_2k_h_1.jpg
 vs2019/bin/release/res/textures/Carpet_OfficePlain_2k_n_1.jpg
 vs2019/bin/release/res/textures/Carpet_OfficePlain_2k_nY+_1.jpg
 vs2019/bin/release/res/textures/Carpet_OfficePlain_2k_s_1.jpg
+vs2019/bin/Debug/res/cubemap/lake_back.jpg
+vs2019/bin/Debug/res/cubemap/lake_bottom.jpg
+vs2019/bin/Debug/res/cubemap/lake_front.jpg
+vs2019/bin/Debug/res/cubemap/lake_left.jpg
+vs2019/bin/Debug/res/cubemap/lake_right.jpg
+vs2019/bin/Debug/res/cubemap/lake_top.jpg
+vs2019/bin/release/res/cubemap/lake_back.jpg
+vs2019/bin/release/res/cubemap/lake_bottom.jpg
+vs2019/bin/release/res/cubemap/lake_front.jpg
+vs2019/bin/release/res/cubemap/lake_left.jpg
+vs2019/bin/release/res/cubemap/lake_right.jpg
+vs2019/bin/release/res/cubemap/lake_top.jpg

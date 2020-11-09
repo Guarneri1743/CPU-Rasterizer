@@ -73,9 +73,9 @@ namespace Guarneri {
 			v2f o2 = process_vertex(shader, v2);
 			v2f o3 = process_vertex(shader, v3);
 
-			Vertex c1(o1.position, o1.world_pos, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
-			Vertex c2(o2.position, o2.world_pos, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
-			Vertex c3(o3.position, o3.world_pos, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+			Vertex c1(o1.position,o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
+			Vertex c2(o2.position,o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
+			Vertex c3(o3.position,o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			// clip in screen space
 			//if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
@@ -228,6 +228,7 @@ namespace Guarneri {
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;
 				v_out.world_pos = v.world_pos * w;
+				v_out.shadow_coord = v.shadow_coord * w;
 				v_out.color = v.color * w;
 				v_out.normal = v.normal * w;
 				v_out.uv = v.uv * w;

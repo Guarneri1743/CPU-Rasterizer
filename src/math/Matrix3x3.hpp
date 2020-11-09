@@ -17,13 +17,13 @@ namespace Guarneri {
 
 		Matrix3x3(const Vector3& row0, const Vector3& row1, const Vector3& row2) {
 			m00 = row0.x;
-			m01 = row1.x;
-			m02 = row2.x;
-			m10 = row0.y;
+			m01 = row0.y;
+			m02 = row0.z;
+			m10 = row1.x;
 			m11 = row1.y;
-			m12 = row2.y;
-			m20 = row0.z;
-			m21 = row1.z;
+			m12 = row1.z;
+			m20 = row2.x;
+			m21 = row2.y;
 			m22 = row2.z;
 		}
 

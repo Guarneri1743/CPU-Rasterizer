@@ -73,6 +73,7 @@ namespace Guarneri {
 	const property_name specular_prop = "texture_specular";
 	const property_name normal_prop = "texture_normal";
 	const property_name height_prop = "texture_height";
+	const property_name skybox_cubemap_prop = "skybox_cubemap";
 
 	// framebuffer color 
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;

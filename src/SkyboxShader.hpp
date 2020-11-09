@@ -8,17 +8,10 @@ namespace Guarneri {
 		SkyboxShader() {}
 		~SkyboxShader(){}
 
-	private:
-		std::shared_ptr<CubeMap> cubemap;
-
 	public:
-		void sync(const std::shared_ptr<CubeMap>& _cubemap) {
-			this->cubemap = _cubemap;
-		}
-
 		v2f vertex_shader(const a2v& input) {
 			v2f o;
-			auto clip_pos = p * v * input.position;
+			auto clip_pos = p * v * Vector4(input.position.xyz(), 1.0f);
 			o.position = Vector4(clip_pos.xy(), clip_pos.ww());
 			o.shadow_coord = input.position;
 			return o;
@@ -26,9 +19,15 @@ namespace Guarneri {
 
 		Color fragment_shader(const v2f& input)  {
 			Color sky_color;
-			if (cubemap != nullptr && cubemap->sample(input.shadow_coord.xyz(), sky_color)) {
+
+			if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap[skybox_cubemap_prop]->sample(input.shadow_coord.xyz(), sky_color)) {
+				if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
+					int index;
+					return name2cubemap[skybox_cubemap_prop]->sample(input.shadow_coord.xyz(), index);
+				}
 				return sky_color;
 			}
+
 			return Color::BLACK;
 		}
 

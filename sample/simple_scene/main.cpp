@@ -8,7 +8,7 @@ int main()
 	// initialize rasterizer
 	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
 
-	// setup main Light
+	// setup main light
 	Scene demo_scene;
 	demo_scene.main_light.direction = Vector3(1, 1, 1);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
@@ -16,12 +16,23 @@ int main()
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.intensity = 1.0f;
 
-	// setup Camera
+	// setup camera
 	demo_scene.main_cam->position = Vector3(20.0f, 20.0f, 20.0f);
 	demo_scene.main_cam->set_near(0.5f);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
-	// Plane
+	// setup skybox
+	std::vector<std::string> cubemap_path = {
+		res_path() + "/cubemap/lake_right.jpg",
+		res_path() + "/cubemap/lake_left.jpg",
+		res_path() + "/cubemap/lake_top.jpg",
+		res_path() + "/cubemap/lake_bottom.jpg",
+		res_path() + "/cubemap/lake_front.jpg",
+		res_path() + "/cubemap/lake_back.jpg",
+	};
+	demo_scene.skybox->load_cubemap(cubemap_path);
+
+	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	auto plane_tex = Texture::create(tex_path);
 	auto plane_material = Material::create();

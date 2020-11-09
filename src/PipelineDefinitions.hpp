@@ -13,7 +13,8 @@ namespace Guarneri{
 
 	enum class WrapMode {
 		REPEAT,
-		CLAMP
+		CLAMP_TO_EDGE,
+		CLAMP_TO_BORDER
 	};
 
 	enum class Filtering {

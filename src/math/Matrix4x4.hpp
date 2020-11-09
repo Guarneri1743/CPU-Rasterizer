@@ -17,20 +17,20 @@ namespace Guarneri {
 
 		Matrix4x4(const Vector4& row0, const Vector4& row1, const Vector4& row2, const Vector4& row3) {
 			m00 = row0.x;
-			m01 = row1.x;
-			m02 = row2.x;
-			m03 = row3.x;
-			m10 = row0.y;
+			m01 = row0.y;
+			m02 = row0.z;
+			m03 = row0.w;
+			m10 = row1.x;
 			m11 = row1.y;
-			m12 = row2.y;
-			m13 = row3.y;
-			m20 = row0.z;
-			m21 = row1.z;
+			m12 = row1.z;
+			m13 = row1.w;
+			m20 = row2.x;
+			m21 = row2.y;
 			m22 = row2.z;
-			m23 = row3.z;
-			m30 = row0.w;
-			m31 = row1.w;
-			m32 = row2.w;
+			m23 = row2.w;
+			m30 = row3.x;
+			m31 = row3.y;
+			m32 = row3.z;
 			m33 = row3.w;
 		}
 
