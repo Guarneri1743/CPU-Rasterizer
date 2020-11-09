@@ -4,7 +4,7 @@
 namespace Guarneri{
 	#define LEFT_HANDED
 	#define FAR_Z 1.0f
-	#define DEFAULT_STENCIL 0
+	#define DEFAULT_STENCIL 0x00
 
 	enum class Projection {
 		PERSPECTIVE,
@@ -71,6 +71,14 @@ namespace Guarneri{
 		SUB
 	};
 
+	enum class ColorMask {
+		ZERO = 0,
+		R = 1 << 0,
+		G = 1 << 1,
+		B = 1 << 2,
+		A = 1 << 3
+	};
+
 	enum class CullingAndClippingFlag {
 		DISABLE = 0,
 		APP_FRUSTUM_CULLING = 1 << 0,
@@ -104,7 +112,7 @@ namespace Guarneri{
 		VERTEX_COLOR = 1 << 4,
 		NORMAL = 1 << 5,
 		SCANLINE = 1 << 6,
-		SEMI_TRANSPARENT = 1 << 7
+		STENCIL = 1 << 7
 	};
 
 	template<>
@@ -118,6 +126,9 @@ namespace Guarneri{
 
 	template<>
 	struct support_bitwise_enum<CullingAndClippingFlag> : std::true_type {};
+
+	template<>
+	struct support_bitwise_enum<ColorMask> : std::true_type {};
 }
 
 #endif

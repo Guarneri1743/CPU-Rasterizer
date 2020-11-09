@@ -19,15 +19,29 @@ int main()
 	// setup Camera
 	demo_scene.main_cam->position = Vector3(20.0f, 20.0f, 20.0f);
 	demo_scene.main_cam->set_near(0.5f);
-	demo_scene.main_cam->set_projection(Projection::ORTHO);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
+	// stencil demo cube
+	auto stencil_test_material = Material::create();
+	stencil_test_material->zwrite_mode = ZWrite::OFF;
+	stencil_test_material->stencil_ref_val = 1;
+	stencil_test_material->color_mask = ColorMask::ZERO;
+	stencil_test_material->stencil_func = CompareFunc::ALWAYS;
+	stencil_test_material->stencil_pass_op = StencilOp::REPLACE;
+	auto stencil_cube = PrimitiveFactory::cube(stencil_test_material);
+	stencil_cube->transform.scale(Vector3(5.0f, 5.0f, 5.0f));
+	stencil_cube->transform.translate(Vector3(0.0f, 3.0f, 0.0f));
+	std::shared_ptr<Renderer> stencil_cube_renderer = Renderer::create(stencil_cube);
+	demo_scene.add(stencil_cube_renderer, false);
+
 	// backpack
-	//auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
-	//backpack->material->lighting_param.glossiness = 64.0f;
-	//backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
-	//backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
-	//demo_scene.add(Renderer::create(backpack), false);
+	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
+	backpack->material->lighting_param.glossiness = 64.0f;
+	backpack->material->stencil_ref_val = 1;
+	backpack->material->stencil_func = CompareFunc::EQUAL;
+	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
+	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
+	demo_scene.add(Renderer::create(backpack), false);
 
 	// Plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
@@ -69,7 +83,7 @@ int main()
 		if (InputMgr().is_key_down(KeyCode::D)) {
 			cb->target->transform.move_right(0.2f);
 		}
-	}, &cube_renderer);
+	}, & stencil_cube_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);

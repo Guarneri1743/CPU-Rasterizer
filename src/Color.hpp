@@ -256,6 +256,15 @@ namespace Guarneri {
 			return c;
 		}
 
+		static color_bgra encode_bgra(const uint8_t& r, const uint8_t& g, const uint8_t& b, const uint8_t& a) {
+			color_bgra c;
+			c.a = a;
+			c.r = r;
+			c.g = g;
+			c.b = b;
+			return c;
+		}
+
 		static Color decode(const int& c) {
 			int mask = 0xff;
 			int a = (c >> 24) & mask;

@@ -91,6 +91,9 @@ namespace Guarneri{
 				else if (code == KeyCode::F8) {
 					misc_param.persample_op_flag = misc_param.persample_op_flag ^ PerSampleOperation::BLENDING;
 				}
+				else if (code == KeyCode::F9) {
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::STENCIL;
+				}
 				}, nullptr);
 		}
 

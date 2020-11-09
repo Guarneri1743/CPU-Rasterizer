@@ -32,8 +32,14 @@ namespace Guarneri {
 	class Shader : public Object{
 	public:
 		Shader() {
+			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
-			this->stencil_op = StencilOp::KEEP;
+			this->stencil_pass_op = StencilOp::KEEP;
+			this->stencil_fail_op = StencilOp::KEEP;
+			this->stencil_zfail_op = StencilOp::KEEP;
+			this->stencil_read_mask = 0xFF;
+			this->stencil_write_mask = 0xFF;
+			this->stencil_ref_val = 0;
 			this->ztest_func = CompareFunc::LEQUAL;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -49,17 +55,21 @@ namespace Guarneri {
 
 		virtual ~Shader() { }
 
-	protected:
+	public:		
 		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::string> keywords;
-
-	public:
+		ColorMask color_mask;
 		CompareFunc stencil_func;
-		StencilOp stencil_op;
+		StencilOp stencil_pass_op;
+		StencilOp stencil_fail_op;
+		StencilOp stencil_zfail_op;
+		uint8_t stencil_ref_val;
+		uint8_t stencil_write_mask;
+		uint8_t stencil_read_mask;
 		CompareFunc ztest_func;
 		ZWrite zwrite_mode;
 		BlendFactor src_factor;
@@ -70,39 +80,6 @@ namespace Guarneri {
 		bool discarded = false;
 
 	public:
-		void sync(CompareFunc ztest, ZWrite zwrite) {
-			this->ztest_func = ztest;
-			this->zwrite_mode = zwrite;
-		}
-
-		void sync(bool semi_trans, BlendFactor src, BlendFactor dst, BlendOp op) {
-			this->transparent = semi_trans;
-			this->src_factor = src;
-			this->dst_factor = dst;
-			this->blend_op = op;
-		}
-
-		void sync(
-			const std::unordered_map<property_name, float>& float_uniforms,
-			const std::unordered_map<property_name, Vector4>& float4_uniforms,
-			const std::unordered_map<property_name, int>& int_uniforms,
-			const std::unordered_map<property_name, std::shared_ptr<Texture>>& tex_uniforms) {
-			this->name2float = float_uniforms;
-			this->name2float4 = float4_uniforms;
-			this->name2int = int_uniforms;
-			this->name2tex = tex_uniforms;
-		}
-
-		void sync(const LightingData& data) {
-			this->lighting_param = data;
-		}
-
-		void set_mvp_matrix(const Matrix4x4& model, const Matrix4x4& view, const Matrix4x4& proj) {
-			this->m = model;
-			this->v = view;
-			this->p = proj;
-		}
-
 		void discard() {
 			discarded = true;
 		}
@@ -193,7 +170,12 @@ namespace Guarneri {
 			this->name2int = other.name2int;
 			this->keywords = other.keywords;
 			this->stencil_func = other.stencil_func;
-			this->stencil_op = other.stencil_op;
+			this->stencil_pass_op = other.stencil_pass_op;
+			this->stencil_fail_op = other.stencil_fail_op;
+			this->stencil_zfail_op = other.stencil_zfail_op;
+			this->stencil_read_mask = other.stencil_read_mask;
+			this->stencil_write_mask = other.stencil_write_mask;
+			this->stencil_ref_val = other.stencil_ref_val;
 		}
 
 		std::string str() const {

@@ -106,7 +106,7 @@ namespace Guarneri {
 				std::stringstream ss;
 				ss << "SoftRasterizer  FPS: " << (int)Time::fps;
 				Window().set_title(ss.str().c_str());
-				Sleep(0);
+				Sleep(1);
 			}
 		}
 	};

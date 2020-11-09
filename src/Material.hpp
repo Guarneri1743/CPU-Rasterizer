@@ -7,8 +7,14 @@ namespace Guarneri {
 	public:
 		Material() {
 			this->target_shader = std::make_shared<Shader>();
+			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
-			this->stencil_op = StencilOp::KEEP;
+			this->stencil_pass_op = StencilOp::KEEP;
+			this->stencil_fail_op = StencilOp::KEEP;
+			this->stencil_zfail_op = StencilOp::KEEP;
+			this->stencil_read_mask = 0xFF;
+			this->stencil_write_mask = 0xFF;
+			this->stencil_ref_val = 0;
 			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -21,8 +27,14 @@ namespace Guarneri {
 
 		Material(std::unique_ptr<Shader>& shader) {
 			this->target_shader = std::move(shader);
+			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
-			this->stencil_op = StencilOp::KEEP;
+			this->stencil_pass_op = StencilOp::KEEP;
+			this->stencil_fail_op = StencilOp::KEEP;
+			this->stencil_zfail_op = StencilOp::KEEP;
+			this->stencil_read_mask = 0xFF;
+			this->stencil_write_mask = 0xFF;
+			this->stencil_ref_val = 0;
 			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -36,8 +48,14 @@ namespace Guarneri {
 		Material(std::unique_ptr<SkyboxShader>& shader) {
 			auto shader_ptr = shader.release();
 			this->target_shader = std::shared_ptr<Shader>((Shader*)(shader_ptr));
+			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
-			this->stencil_op = StencilOp::KEEP;
+			this->stencil_pass_op = StencilOp::KEEP;
+			this->stencil_fail_op = StencilOp::KEEP;
+			this->stencil_zfail_op = StencilOp::KEEP;
+			this->stencil_read_mask = 0xFF;
+			this->stencil_write_mask = 0xFF;
+			this->stencil_ref_val = 0;
 			this->ztest_func = CompareFunc::LESS;
 			this->zwrite_mode = ZWrite::ON;
 			this->src_factor = BlendFactor::SRC_ALPHA;
@@ -55,9 +73,14 @@ namespace Guarneri {
 		~Material() { }
 
 	public:
-		std::shared_ptr<Shader> target_shader;
+		ColorMask color_mask;
 		CompareFunc stencil_func;
-		StencilOp stencil_op;
+		StencilOp stencil_pass_op;
+		StencilOp stencil_fail_op;
+		StencilOp stencil_zfail_op;
+		uint8_t stencil_ref_val;
+		uint8_t stencil_write_mask;
+		uint8_t stencil_read_mask;
 		CompareFunc ztest_func;
 		ZWrite zwrite_mode;
 		BlendFactor src_factor;
@@ -71,6 +94,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, int> name2int;
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		LightingData lighting_param;
+		std::shared_ptr<Shader> target_shader;
 
 	public:
 		static std::unique_ptr<Material> create() {
@@ -83,6 +107,30 @@ namespace Guarneri {
 
 		static std::unique_ptr<Material> create(const Material& other) {
 			return std::make_unique<Material>(other);
+		}
+
+		void sync(const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			target_shader->m = m;
+			target_shader->v = v;
+			target_shader->p = p;
+			target_shader->ztest_func = ztest_func;
+			target_shader->zwrite_mode = zwrite_mode;
+			target_shader->src_factor = src_factor;
+			target_shader->dst_factor = dst_factor;
+			target_shader->blend_op = blend_op;
+			target_shader->transparent = transparent;
+			target_shader->name2float = name2float;
+			target_shader->name2float4 = name2float4;
+			target_shader->name2tex = name2tex;
+			target_shader->name2int = name2int;
+			target_shader->stencil_func = stencil_func;
+			target_shader->stencil_pass_op = stencil_pass_op;
+			target_shader->stencil_fail_op = stencil_fail_op;
+			target_shader->stencil_zfail_op = stencil_zfail_op;
+			target_shader->stencil_read_mask = stencil_read_mask;
+			target_shader->stencil_write_mask = stencil_write_mask;
+			target_shader->stencil_ref_val = stencil_ref_val;
+			target_shader->color_mask = color_mask;
 		}
 
 		void set_int(const property_name& name, const int& val) {
@@ -141,6 +189,13 @@ namespace Guarneri {
 			this->target_shader = other.target_shader;
 			this->ztest_func = other.ztest_func;
 			this->zwrite_mode = other.zwrite_mode;
+			this->stencil_func = other.stencil_func;
+			this->stencil_pass_op = other.stencil_pass_op;
+			this->stencil_fail_op = other.stencil_fail_op;
+			this->stencil_zfail_op = other.stencil_zfail_op;
+			this->stencil_read_mask = other.stencil_read_mask;
+			this->stencil_write_mask = other.stencil_write_mask;
+			this->stencil_ref_val = other.stencil_ref_val;
 			this->src_factor = other.src_factor;
 			this->dst_factor = other.dst_factor;
 			this->blend_op = other.blend_op;
@@ -150,8 +205,6 @@ namespace Guarneri {
 			this->name2float4 = other.name2float4;
 			this->name2int = other.name2int;
 			this->name2tex = other.name2tex;
-			this->stencil_func = other.stencil_func;
-			this->stencil_op = other.stencil_op;
 		}
 
 		std::string str() const {

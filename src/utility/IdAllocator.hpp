@@ -9,7 +9,7 @@ namespace Guarneri {
 		IdAllocator(uint32_t _lhs, uint32_t _rhs)
 		{
 			assert(_lhs > INVALID_ID);
-			assert(_rhs <= _lhs);
+			assert(_lhs <= _rhs);
 			this->lhs = _lhs;
 			this->rhs = _rhs;
 			this->cur = _lhs;

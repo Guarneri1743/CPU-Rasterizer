@@ -66,12 +66,7 @@ namespace Guarneri {
 	private:
 		void draw_triangle(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto shader = material->target_shader;
-
-			shader->set_mvp_matrix(m, v, p);
-			shader->sync(material->name2float, material->name2float4, material->name2int, material->name2tex);
-			shader->sync(material->ztest_func, material->zwrite_mode);
-			shader->sync(material->transparent, material->src_factor, material->dst_factor, material->blend_op);
-			shader->sync(material->lighting_param);
+			material->sync(m, v, p);
 
 			assert(shader != nullptr);
 
@@ -209,6 +204,14 @@ namespace Guarneri {
 			auto s = mat->target_shader;
 			float z = v.position.z;
 
+			ColorMask color_mask = s->color_mask;
+			CompareFunc stencil_func = s->stencil_func;
+			StencilOp stencil_pass_op = s->stencil_pass_op;
+			StencilOp stencil_fail_op = s->stencil_fail_op;
+			StencilOp stencil_zfail_op = s->stencil_zfail_op;
+			uint8_t stencil_read_mask = s->stencil_read_mask;
+			uint8_t stencil_write_mask = s->stencil_write_mask;
+			uint8_t stencil_ref_val = s->stencil_ref_val;
 			CompareFunc ztest_func = s->ztest_func;
 			ZWrite zwrite_mode = s->zwrite_mode;
 			BlendFactor src_factor = s->src_factor;
@@ -251,14 +254,14 @@ namespace Guarneri {
 			// todo: stencil test
 			if (enable_stencil_test)
 			{
-				if (!stencil_test(row, col)) {
+				if (!perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col)) {
 					op_pass &= ~PerSampleOperation::STENCIL_TEST;
 				}
 			}
 
 			// depth test
 			if (enable_depth_test) {
-				if (!depth_test(ztest_func, zwrite_mode, row, col, z)) {
+				if (!perform_depth_test(ztest_func, row, col, z)) {
 					op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				}
 			}
@@ -276,23 +279,63 @@ namespace Guarneri {
 
 			// write color
 			if (validate_fragment(op_pass)) {
-				framebuffer->write(row, col, pixel_color);
+				if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A)) {
+					framebuffer->write(row, col, pixel_color);
+				}
+				else {
+					color_bgra cur;
+					if (framebuffer->read(row, col, cur)) {
+						if ((color_mask & ColorMask::R) == ColorMask::ZERO) {
+							pixel_color.r = cur.r;
+						}
+						if ((color_mask & ColorMask::G) == ColorMask::ZERO) {
+							pixel_color.g = cur.g;
+						}
+						if ((color_mask & ColorMask::B) == ColorMask::ZERO) {
+							pixel_color.b = cur.b;
+						}
+						if ((color_mask & ColorMask::A) == ColorMask::ZERO) {
+							pixel_color.a = cur.a;
+						}
+						framebuffer->write(row, col, pixel_color);
+					}
+				}
+			}
+
+			// update stencilbuffer
+			if (enable_stencil_test) {
+				update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 			}
 
 			// write depth
 			if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE) {
-				if (zwrite_mode == ZWrite::ON || !enable_blending) {
+				if (zwrite_mode == ZWrite::ON) {
+					if (color_mask == ColorMask::ZERO || stencil_pass_op == StencilOp::REPLACE) {
+						std::cerr << "error " << std::endl;
+					}
 					zbuffer->write(row, col, z);
 				}
 			}
-			
+
+			// stencil visualization
+			if ((misc_param.render_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE) {
+				uint8_t stencil;
+				if (stencilbuffer->read(row, col, stencil)) {
+					color_bgra c = Color::encode_bgra(stencil, stencil, stencil, 255);
+					framebuffer->write(row, col, c);
+				}
+			}
+
 			// depth buffer visualization
 			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
 				float cur_depth;
 				if (zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					Vector3 depth_color = Vector3::ONE * linear_depth / 30.0f;
-					color_bgra c = Color::encode_bgra(depth_color.x, depth_color.y, depth_color.z, 1.0f);
+					Color depth_color = Color::WHITE * linear_depth / 30.0f;
+					if (EQUALS(cur_depth, FAR_Z)) {
+						depth_color = Color::WHITE;
+					}
+					color_bgra c = Color::encode_bgra(depth_color);
 					framebuffer->write(row, col, c);
 				}
 			}
@@ -306,16 +349,88 @@ namespace Guarneri {
 			return true;
 		}
 
-		bool stencil_test(const uint32_t& row, const uint32_t& col) {
-			return true;
+		bool perform_stencil_test(uint8_t ref_val, uint8_t read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) {
+			bool pass = false;
+			uint8_t stencil;
+			if (stencilbuffer->read(row, col, stencil)) {
+				switch (func) {
+				case CompareFunc::NEVER:
+					pass = false;
+					break;
+				case CompareFunc::ALWAYS:
+					pass = true;
+					break;
+				case CompareFunc::EQUAL:
+					pass = (ref_val & read_mask) == (stencil & read_mask);
+					break;
+				case CompareFunc::GREATER:
+					pass = (ref_val & read_mask) > (stencil & read_mask);
+					break;
+				case CompareFunc::LEQUAL:
+					pass = (ref_val & read_mask) <= (stencil & read_mask);
+					break;
+				case CompareFunc::NOT_EQUAL:
+					pass = (ref_val & read_mask) != (stencil & read_mask);
+					break;
+				case CompareFunc::GEQUAL:
+					pass = (ref_val & read_mask) > (stencil & read_mask);
+					break;
+				case CompareFunc::LESS:
+					pass = (ref_val & read_mask) < (stencil & read_mask);
+					break;
+				}
+			}
+			return pass;
 		}
 
-		bool depth_test(const CompareFunc& ztest_func, const ZWrite& zwrite_mode, const uint32_t& row, const uint32_t& col, const float& z) {
+		void update_stencil_buffer(const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) {
+			bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
+			bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+			uint8_t stencil;
+			stencilbuffer->read(row, col, stencil);
+			StencilOp stencil_op;
+			if (stencil_pass) {
+				stencil_op = z_pass ? stencil_pass_op : stencil_zfail_op;
+			}
+			else {
+				stencil_op = stencil_fail_op;
+			}
+			switch (stencil_op) {
+			case StencilOp::KEEP:
+				break;
+			case StencilOp::ZERO:
+				this->stencilbuffer->write(row, col, 0);
+				break;
+			case StencilOp::REPLACE:
+				this->stencilbuffer->write(row, col, ref_val);
+				break;
+			case StencilOp::INCR:
+				this->stencilbuffer->write(row, col, CLAMP((int)stencil + 1, 0, 255));
+				break;
+			case StencilOp::DECR:
+				this->stencilbuffer->write(row, col, CLAMP((int)stencil - 1, 0, 255));
+				break;
+			case StencilOp::INCR_WRAP:
+				this->stencilbuffer->write(row, col, stencil + 1);
+				break;
+			case StencilOp::DECR_WRAP:
+				this->stencilbuffer->write(row, col, stencil - 1);
+				break;
+			case StencilOp::INVERT:
+				this->stencilbuffer->write(row, col, ~stencil);
+				break;
+			}
+		}
+
+		bool perform_depth_test(const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {
 				pass = z <= depth;
-				switch (ztest_func) {
+				switch (func) {
+				case CompareFunc::NEVER:
+					pass = false;
+					break;
 				case CompareFunc::ALWAYS:
 					pass = true;
 					break;
