@@ -67,7 +67,6 @@ namespace Guarneri {
 		void draw_triangle(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto shader = material->target_shader;
 			material->sync(m, v, p);
-
 			assert(shader != nullptr);
 
 			v2f o1 = process_vertex(shader, v1);
@@ -597,10 +596,19 @@ namespace Guarneri {
 			SegmentDrawer::bresenham(framebuffer, (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
 		}
 
+		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			Vector4 clip_start = p * v * m * Vector4(start);
+			Vector4 clip_end = p * v * m * Vector4(end);
+			draw_segment(clip_start, clip_end, col);
+		}
+
 		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {
 			Vector4 clip_start = p * v * Vector4(start);
 			Vector4 clip_end = p * v * Vector4(end);
+			draw_segment(clip_start, clip_end, col);
+		}
 
+		void draw_segment(const Vector4& clip_start, const Vector4& clip_end, const Color& col) {
 			Vector4 n1 = clip2ndc(clip_start);
 			Vector4 n2 = clip2ndc(clip_end);
 
@@ -620,6 +628,12 @@ namespace Guarneri {
 			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p);
 			Graphics().draw_segment(pos, pos + right, Color::RED, v, p);
 			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p);
+		}
+
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			Graphics().draw_segment(pos, pos + forward, Color::BLUE, m, v, p);
+			Graphics().draw_segment(pos, pos + right, Color::RED, m, v, p);
+			Graphics().draw_segment(pos, pos + up, Color::GREEN, m, v, p);
 		}
 	};
 }

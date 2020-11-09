@@ -56,19 +56,18 @@ namespace Guarneri {
 							idx = 0;
 						}
 					}
-				}
+				} 
 			}
 		}
 
 		virtual void draw_gizmos() {
-			auto model = target->transform.local2world;
-			auto view = misc_param.view_matrix;
-			auto proj = misc_param.proj_matrix;
-			auto pos = target->transform.position;
-			auto up = target->transform.up();
-			auto forward = target->transform.forward();
-			auto right = target->transform.right();
-			Graphics().draw_coordinates(pos, forward, up, right, view, proj);
+			auto view = view_matrix();
+			auto proj = projection_matrix();
+			auto pos = Vector3::ZERO;
+			auto up = Vector3::UP;
+			auto forward = Vector3::FORWARD;
+			auto right = Vector3::RIGHT;
+			Graphics().draw_coordinates(pos, forward, up, right, model_matrix(), view, proj);
 		}
 
 		Renderer& operator =(const Renderer& other) {

@@ -77,7 +77,7 @@ namespace Guarneri {
 
 		void rotate(const Vector3& _axis, const float& angle) {
 			this->axis = _axis;
-			this->rotationTheta = angle;
+			this->rotationTheta += angle;
 			sync();
 		}
 
@@ -87,8 +87,8 @@ namespace Guarneri {
 		}
 
 		void sync() {
-			auto t = Matrix4x4::rotation(axis, rotationTheta);
-			auto r = Matrix4x4::translation(position);
+			auto r = Matrix4x4::rotation(axis, rotationTheta);
+			auto t = Matrix4x4::translation(position);
 			auto s = Matrix4x4::scale(local_scale);
 			this->local2world = t * r * s;
 		}

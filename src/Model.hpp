@@ -7,154 +7,155 @@
 
 namespace Guarneri {
 	class Model : public Object {
-    public:
-        Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material) {
-            if (vertices.size() == 0 || indices.size() == 0) {
-                std::cerr << "load vertices failed." << std::endl;
-            }
-            assert(indices.size() % 3 == 0);
-            auto m = std::make_unique<Mesh>(vertices, indices);
-            meshes.push_back(std::move(m));
-            this->material = std::move(material);
-        }
+	public:
+		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material) {
+			if (vertices.size() == 0 || indices.size() == 0) {
+				std::cerr << "load vertices failed." << std::endl;
+			}
+			assert(indices.size() % 3 == 0);
+			auto m = std::make_unique<Mesh>(vertices, indices);
+			meshes.push_back(std::move(m));
+			this->material = std::move(material);
+		}
 
-        Model(std::string path) {
-            this->material = std::make_shared<Material>();
-            Assimp::Importer importer;
-            const aiScene* Scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-            if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
-            {
-                std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
-                return;
-            }
-            auto parent_path = FS::path(path).parent_path();
-            auto p = parent_path.string();
-            parent_dir = p;
-            traverse_nodes(Scene->mRootNode, Scene);
-            importer.FreeScene();
-        }
+		Model(std::string path) {
+			this->material = std::make_shared<Material>();
+			Assimp::Importer importer;
+			const aiScene* Scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+			if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
+			{
+				std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
+				return;
+			}
+			auto parent_path = FS::path(path).parent_path();
+			auto p = parent_path.string();
+			parent_dir = p;
+			traverse_nodes(Scene->mRootNode, Scene);
+			importer.FreeScene();
+		}
 
-        ~Model() {}
+		~Model() {}
 
-    public:
-        std::vector<std::unique_ptr<Mesh>> meshes;
-        Transform transform;
-        std::shared_ptr<Material> material;
+	public:
+		std::vector<std::unique_ptr<Mesh>> meshes;
+		Transform transform;
+		std::shared_ptr<Material> material;
 
-    private:
-        std::string parent_dir;
+	private:
+		std::string parent_dir;
 
-    public:
-        static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material) {
-            return std::make_unique<Model>(vertices, indices, std::move(material));
-        }
+	public:
+		static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material) {
+			return std::make_unique<Model>(vertices, indices, std::move(material));
+		}
 
-        static std::unique_ptr<Model> create(std::string path) {
-            return std::make_unique<Model>(path);
-        }
+		static std::unique_ptr<Model> create(std::string path) {
+			return std::make_unique<Model>(path);
+		}
 
-    private:
-        void traverse_nodes(aiNode* node, const aiScene* Scene)
-        {
-            for (uint32_t i = 0; i < node->mNumMeshes; i++)
-            {
-                aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
-                meshes.push_back(std::move(load_mesh(Mesh, Scene)));
-            }
-            for (uint32_t i = 0; i < node->mNumChildren; i++)
-            {
-                traverse_nodes(node->mChildren[i], Scene);
-            }
-        }
+	private:
+		void traverse_nodes(aiNode* node, const aiScene* Scene)
+		{
+			for (uint32_t i = 0; i < node->mNumMeshes; i++)
+			{
+				aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
+				meshes.push_back(std::move(load_mesh(Mesh, Scene)));
+			}
+			for (uint32_t i = 0; i < node->mNumChildren; i++)
+			{
+				traverse_nodes(node->mChildren[i], Scene);
+			}
+		}
 
-        std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
-        {
-            std::vector<Vertex> vertices;
-            std::vector<uint32_t> indices;
+		std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene)
+		{
+			std::vector<Vertex> vertices;
+			std::vector<uint32_t> indices;
 
-            for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
-            {
-                Vertex Vertex;
-                Vector3 vector; 
-            
-                vector.x = ai_mesh->mVertices[i].x;
-                vector.y = ai_mesh->mVertices[i].y;
-                vector.z = ai_mesh->mVertices[i].z;
-                Vertex.position = vector;
-           
-                if (ai_mesh->HasNormals())
-                {
-                    vector.x = ai_mesh->mNormals[i].x;
-                    vector.y = ai_mesh->mNormals[i].y;
-                    vector.z = ai_mesh->mNormals[i].z;
-                    Vertex.normal = vector;
-                }
+			for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
+			{
+				Vertex Vertex;
+				Vector3 vector;
 
-                if (ai_mesh->mTextureCoords[0]) 
-                {
-                    Vector2 vec;
+				vector.x = ai_mesh->mVertices[i].x;
+				vector.y = ai_mesh->mVertices[i].y;
+				vector.z = ai_mesh->mVertices[i].z;
+				Vertex.position = vector;
 
-                    vec.x = ai_mesh->mTextureCoords[0][i].x;
-                    vec.y = ai_mesh->mTextureCoords[0][i].y;
-                    Vertex.uv = vec;
-                
-                    vector.x = ai_mesh->mTangents[i].x;
-                    vector.y = ai_mesh->mTangents[i].y;
-                    vector.z = ai_mesh->mTangents[i].z;
-                    Vertex.tangent = vector;
-              
-                    vector.x = ai_mesh->mBitangents[i].x;
-                    vector.y = ai_mesh->mBitangents[i].y;
-                    vector.z = ai_mesh->mBitangents[i].z;
-                    Vertex.bitangent = vector;
-                }
-                else
-                    Vertex.uv = Vector2(0.0f, 0.0f);
+				if (ai_mesh->HasNormals())
+				{
+					vector.x = ai_mesh->mNormals[i].x;
+					vector.y = ai_mesh->mNormals[i].y;
+					vector.z = ai_mesh->mNormals[i].z;
+					Vertex.normal = vector;
+				}
 
-                Vertex.color = Vertex.tangent;
-                vertices.push_back(Vertex);
-            }
-            for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
-            {
-                aiFace face = ai_mesh->mFaces[i];
-                for (uint32_t j = 0; j < face.mNumIndices; j++)
-                    indices.push_back(face.mIndices[j]);
-            }
+				if (ai_mesh->mTextureCoords[0])
+				{
+					Vector2 vec;
 
-            aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
+					vec.x = ai_mesh->mTextureCoords[0][i].x;
+					vec.y = ai_mesh->mTextureCoords[0][i].y;
+					Vertex.uv = vec;
 
-            auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
-            auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
-            auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
-            auto height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
-            
-            material->set_texture(albedo_prop, diffuse);
-            material->set_texture(specular_prop, specular);
-            material->set_texture(normal_prop, normal);
-            material->set_texture(height_prop, height);
+					vector.x = ai_mesh->mTangents[i].x;
+					vector.y = ai_mesh->mTangents[i].y;
+					vector.z = ai_mesh->mTangents[i].z;
+					Vertex.tangent = vector;
 
-            return std::make_unique<Mesh>(vertices, indices);
-        }
+					vector.x = ai_mesh->mBitangents[i].x;
+					vector.y = ai_mesh->mBitangents[i].y;
+					vector.z = ai_mesh->mBitangents[i].z;
+					Vertex.bitangent = vector;
+				}
+				else
+					Vertex.uv = Vector2(0.0f, 0.0f);
 
-        std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, std::string property_name)
-        {
-            for (uint32_t i = 0; i < ai_material->GetTextureCount(type); i++)
-            {
-                aiString str;
-                ai_material->GetTexture(type, i, &str);
-                std::string relative_path = str.C_Str();
-                std::string tex_path = parent_dir + "/" + relative_path;
-                return Texture::create(tex_path);
-            }
-            return nullptr;
-        }
+				Vertex.color = Vertex.tangent;
+				vertices.push_back(Vertex);
+			}
+			for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
+			{
+				aiFace face = ai_mesh->mFaces[i];
+				for (uint32_t j = 0; j < face.mNumIndices; j++)
+					indices.push_back(face.mIndices[j]);
+			}
 
-        public:
-            std::string str() const {
-                std::stringstream ss;
-                ss << "Model[" << this->id << " path: " << parent_dir << " Mesh count: " << meshes.size() << "]";
-                return ss.str();
-            }
+			aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
+
+			auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
+			auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
+			auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
+			auto height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
+
+			material->set_texture(albedo_prop, diffuse);
+			material->set_texture(specular_prop, specular);
+			material->set_texture(normal_prop, normal);
+			material->set_texture(height_prop, height);
+
+			return std::make_unique<Mesh>(vertices, indices);
+		}
+
+		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, std::string property_name) {
+			std::shared_ptr<Texture> ret;
+			for (unsigned int i = 0; i < ai_material->GetTextureCount(type); i++)
+			{
+				aiString str;
+				ai_material->GetTexture(type, i, &str);
+				std::string relative_path = str.C_Str();
+				std::string tex_path = parent_dir + "/" + relative_path;
+				ret = Texture::create(tex_path);
+				break;
+			}
+			return ret;
+		}
+
+	public:
+		std::string str() const {
+			std::stringstream ss;
+			ss << "Model[" << this->id << " path: " << parent_dir << " Mesh count: " << meshes.size() << "]";
+			return ss.str();
+		}
 	};
 }
 #endif

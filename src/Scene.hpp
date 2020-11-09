@@ -9,9 +9,7 @@ namespace Guarneri{
 			initialize();
 		}
 
-		~Scene() {
-
-		}
+		~Scene() { }
 
 	public:
 		DirectionalLight main_light;
@@ -89,20 +87,17 @@ namespace Guarneri{
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::NORMAL;
 				}
 				else if (code == KeyCode::F8) {
-					misc_param.persample_op_flag = misc_param.persample_op_flag ^ PerSampleOperation::BLENDING;
-				}
-				else if (code == KeyCode::F9) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::STENCIL;
 				}
 				}, nullptr);
 		}
 
-		void add(std::shared_ptr<Renderer> target, bool transparent) {
-			if (transparent) {
-				transparent_objects.push_back(target);
+		void add(std::shared_ptr<Renderer> rdr) {
+			if (rdr->target->material->transparent) {
+				transparent_objects.push_back(rdr);
 			}
 			else {
-				objects.push_back(target);
+				objects.push_back(rdr);
 			}
 		}
 
@@ -180,18 +175,19 @@ namespace Guarneri{
 		void render() {
 			bool enable_frustum_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE;
 			if (enable_frustum_culling) {
-				// todo
+				// todo: CPU Frustum Culling
 			}
 
 			for (auto& obj : objects) {
 				obj->render();
 			}
 
+			skybox->render();
+
+			// todo: OIT
 			for (auto& obj : transparent_objects) {
 				obj->render();
 			}
-
-			//skybox->render();
 
 			draw_gizmos();
 		}

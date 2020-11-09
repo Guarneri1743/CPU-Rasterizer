@@ -26,7 +26,6 @@ namespace Guarneri {
 
 		Color fragment_shader(const v2f& input)  {
 			Color sky_color;
-			return Color::BLUE;
 			if (cubemap != nullptr && cubemap->sample(input.shadow_coord.xyz(), sky_color)) {
 				return sky_color;
 			}

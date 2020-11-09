@@ -128,7 +128,11 @@ namespace Guarneri {
 			f.x = at(2, 0);
 			f.y = at(2, 1);
 			f.z = at(2, 2);
+#ifdef LEFT_HANDED
 			return f.normalized();
+#else
+			return -f.normalized();
+#endif
 		}
 
 		Vector3 up() const {
