@@ -1,6 +1,9 @@
 #ifndef _GRAPHICS_UTILITY_
 #define _GRAPHICS_UTILITY_
-#include <Guarneri.hpp>
+#include <Vector3.hpp>
+#include <Matrix4x4.hpp>
+#include <Light.hpp>
+#include <PipelineDefinitions.hpp>
 
 namespace Guarneri {
 	struct MiscParameter {
@@ -44,5 +47,4 @@ namespace Guarneri {
 		return Singleton<ResourceManager<Texture>>::get();
 	}
 }
-
 #endif

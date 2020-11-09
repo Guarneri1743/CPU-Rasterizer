@@ -1,5 +1,7 @@
 #ifndef _OBJECT_
 #define _OBJECT_
+#include <IdAllocator.hpp>
+#include <Utility.hpp>
 
 namespace Guarneri {
 	class Object {

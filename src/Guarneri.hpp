@@ -39,13 +39,16 @@
 #include <ResourceManager.hpp>
 #include <CommonDefinitions.hpp>
 #include <Utility.hpp>
+#include <Object.hpp>
 #include <Time.hpp>
 #include <Vector2.hpp>
 #include <Vector3.hpp>
 #include <Vector4.hpp>
 #include <Color.hpp>
+#include <Light.hpp>
 #include <Matrix4x4.hpp>
 #include <Matrix3x3.hpp>
+#include <Misc.hpp>
 #include <Plane.hpp>
 #include <Ray.hpp>
 #include <Ray2D.hpp>
@@ -59,9 +62,6 @@
 #include <Frustum.hpp>
 #include <Vertex.hpp>
 #include <Triangle.hpp>
-#include <Light.hpp>
-#include <GraphicsUtility.hpp>
-#include <Object.hpp>
 #include <Clipper.hpp>
 #include <InputManager.hpp>
 #include <Transform.hpp>
