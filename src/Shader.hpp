@@ -153,6 +153,9 @@ namespace Guarneri {
 			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
 				ret += Color::saturate(specular * spec * spec_tex);
 			}
+			else {
+				ret += Color::saturate(specular * spec);
+			}
 
 			Color ao;
 			if (name2tex.count(ao_prop) >0&&name2tex[ao_prop]->sample(input.uv.x, input.uv.y, ao)) {
