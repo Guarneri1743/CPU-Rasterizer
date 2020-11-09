@@ -20,12 +20,6 @@ namespace Guarneri {
 			this->buffer = std::shared_ptr<T>(buf_array, deletor);
 		}
 
-		RawBuffer(const std::shared_ptr<T>& _buffer, uint32_t _width, uint32_t _height) {
-			this->width = _width;
-			this->height = _height;
-			this->buffer = _buffer;
-		}
-
 		RawBuffer(const RawBuffer<T>& other) {
 			copy(other);
 		}
@@ -40,6 +34,18 @@ namespace Guarneri {
 		uint32_t height;
 
 	public:
+		static std::shared_ptr<RawBuffer> create(uint32_t _width, uint32_t _height) {
+			return std::make_shared<RawBuffer>(_width, _height);
+		}
+
+		static std::shared_ptr<RawBuffer> create(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr)) {
+			return std::make_shared<RawBuffer>(_buffer, _width, _height, deletor);
+		}
+
+		static std::shared_ptr<RawBuffer> create(const RawBuffer<T>& other) {
+			return std::make_shared<RawBuffer>(other);
+		}
+
 		bool read(const float& u, const float& v, T& out) const {
 			uint32_t row, col;
 			uv2pixel(u, v, row, col);

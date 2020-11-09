@@ -5,6 +5,8 @@
 namespace Guarneri {
 	class Renderer : public Object {
 	public:
+		Renderer() {}
+
 		Renderer(std::unique_ptr<Model> model) {
 			this->target = std::move(model);
 		}
@@ -28,15 +30,19 @@ namespace Guarneri {
 			return std::make_unique<Renderer>(other);
 		}
 
-		void render() {
-			auto view = misc_param.view_matrix;
-			auto proj = misc_param.proj_matrix;
-			auto model = target->transform.local2world;
-			auto pos = target->transform.position;
-			auto up = target->transform.up();
-			auto forward = target->transform.forward();
-			auto right = target->transform.right();
-			Graphics().draw_coordinates(pos, forward, up, right, view, proj);
+		virtual Matrix4x4 view_matrix() const {
+			return misc_param.view_matrix;
+		}
+
+		virtual Matrix4x4 projection_matrix() const {
+			return misc_param.proj_matrix;
+		}
+
+		virtual Matrix4x4 model_matrix() const {
+			return target->transform.local2world;
+		}
+
+		virtual void render() {
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);
@@ -46,12 +52,23 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view, proj);
+							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(), projection_matrix());
 							idx = 0;
 						}
 					}
 				}
 			}
+		}
+
+		virtual void draw_gizmos() {
+			auto model = target->transform.local2world;
+			auto view = misc_param.view_matrix;
+			auto proj = misc_param.proj_matrix;
+			auto pos = target->transform.position;
+			auto up = target->transform.up();
+			auto forward = target->transform.forward();
+			auto right = target->transform.right();
+			Graphics().draw_coordinates(pos, forward, up, right, view, proj);
 		}
 
 		Renderer& operator =(const Renderer& other) {

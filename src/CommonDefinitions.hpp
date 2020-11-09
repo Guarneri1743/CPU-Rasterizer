@@ -19,6 +19,9 @@ namespace Guarneri {
 	#define CAMERA_ROTATE_SPEED 0.25f
 	#define CAMERA_MOVE_SPEED 0.1f
 	#define CAMERA_ZOOM_SPEED 1.0f
+	#define RGB_CHANNEL 3
+	#define RGBA_CHANNEL 4
+	#define TEXTURE_MAX_SIZE 4096
 
 	// forward declarations
 	class Object;
@@ -75,7 +78,7 @@ namespace Guarneri {
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
 	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
-	typedef unsigned char stb_uchar;
+	typedef unsigned char image_ubyte;
 
 	GraphicsDevice& Graphics();
 	InputManager& InputMgr();

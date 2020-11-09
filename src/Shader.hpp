@@ -29,6 +29,7 @@ namespace Guarneri {
 			this->src_factor = BlendFactor::SRC_ALPHA;
 			this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 			this->blend_op = BlendOp::ADD;
+			this->lighting_param = LightingData();
 			this->transparent = false;
 		}
 

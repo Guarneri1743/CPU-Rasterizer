@@ -1,38 +1,24 @@
 #ifndef _ID_ALLOC_
 #define _ID_ALLOC_
-#include <set>
 
 namespace Guarneri {
 	#define INVALID_ID 0
-	struct IdSpin {
-	public:
-		IdSpin(uint32_t left, uint32_t right) :left_id(left), right_id(right) {}
-		uint32_t left()const { return left_id; }
-		uint32_t right()const { return right_id; }
-
-		bool operator < (const IdSpin& rhs)const {
-			return left_id < rhs.left() && right_id < rhs.left();
-		}
-	private:
-		uint32_t left_id;
-		uint32_t right_id;
-	};
 
 	class IdAllocator {
 	public:
-		IdAllocator(uint32_t min_id, uint32_t max_id)
+		IdAllocator(uint32_t _lhs, uint32_t _rhs)
 		{
-			assert(min_id > INVALID_ID);
-			assert(min_id <= max_id);
-			this->min_id = min_id;
-			this->max_id = max_id;
-			free_ids.insert(IdSpin(min_id, max_id));
+			assert(_lhs > INVALID_ID);
+			assert(_rhs <= _lhs);
+			this->lhs = _lhs;
+			this->rhs = _rhs;
+			this->cur = _lhs;
 		}
 
 	private:
-		uint32_t min_id;
-		uint32_t max_id;
-		std::set<IdSpin> free_ids;
+		uint32_t cur;
+		uint32_t lhs;
+		uint32_t rhs;
 
 	public:
 		uint32_t alloc() {
@@ -43,81 +29,20 @@ namespace Guarneri {
 			return INVALID_ID;
 		}
 
-		bool alloc(uint32_t& iid)
+		bool alloc(uint32_t& id)
 		{
-			auto first = free_ids.begin();
-			if (first == free_ids.end()) {
-				return false;
+			id = INVALID_ID;
+			if (cur < rhs) {
+				id = cur++;
+				return true;
 			}
-			auto ileft = first->left();
-			auto iright = first->right();
-			auto next = ileft + 1;
-			free_ids.erase(first);
-			if (next <= iright) {
-				free_ids.insert(IdSpin(next, iright));
-			}
-			iid = ileft;
-			return true;
+			return false;
 		}
 
-		void free(uint32_t iid)
+		// todo: use blanced binary tree tree to reuse id
+		void free(uint32_t id)
 		{
-			if (iid > max_id || iid < min_id) {
-				return;
-			}
-			auto current = IdSpin(iid, iid);
-			uint32_t left, right;
-			auto iterator = free_ids.upper_bound(current);
-			if (iterator == free_ids.end()) {
-				auto last = free_ids.rbegin();
-				if (last != free_ids.rend() && last->right() + 1 == iid) {
-					left = last->left();
-					free_ids.erase(std::next(last).base());
-					free_ids.insert(IdSpin(left, iid));
-				}
-				else {
-					free_ids.insert(IdSpin(iid, iid));
-				}
-			}
-			else {
-				auto next = iid + 1;
-				if (next == iterator->left()) {
-					if (iterator == free_ids.begin()) {
-						right = iterator->right();
-						free_ids.erase(iterator);
-						free_ids.insert(IdSpin(iid, right));
-					}
-					else {
-						auto prev = iterator;
-						--prev;
-						if (prev->right() + 1 == iid) {
-							left = prev->left();
-							right = iterator->right();
-							free_ids.erase(iterator);
-							free_ids.erase(prev);
-							free_ids.insert(IdSpin(left, right));
-						}
-						else {
-							right = iterator->right();
-							free_ids.erase(iterator);
-							free_ids.insert(IdSpin(iid, right));
-						}
-					}
-				}
-				else {
-					if (iterator != free_ids.begin()) {
-						auto prev = iterator;
-						--prev;
-						if (prev->right() + 1 == iid) {
-							left = prev->left();
-							free_ids.erase(prev);
-							free_ids.insert(IdSpin(left, iid));
-							return;
-						}
-					}
-					free_ids.insert(current);
-				}
-			}
+			// do nothing
 		}
 	};
 }

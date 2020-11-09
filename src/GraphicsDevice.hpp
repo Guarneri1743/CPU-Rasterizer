@@ -57,7 +57,7 @@ namespace Guarneri {
 			//	return;
 			//}
 
-			// position perspective division
+			// perspective division, position.
 			Vertex n1 = clip2ndc(c1);
 			Vertex n2 = clip2ndc(c2);
 			Vertex n3 = clip2ndc(c3);
@@ -68,7 +68,7 @@ namespace Guarneri {
 				return;
 			}
 
-			// other channels perspective division
+			// perspective division, uv, color, normal, etc. 
 			n1.perspective_division(c1.rhw);
 			n2.perspective_division(c2.rhw);
 			n3.perspective_division(c3.rhw);
@@ -88,7 +88,6 @@ namespace Guarneri {
 
 			Triangle tri(s1, s2, s3);
 			
-
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontal_split();
 
@@ -98,9 +97,9 @@ namespace Guarneri {
 			// wireframe
 			if (((int)misc_param.flag & (int)RenderFlag::WIREFRAME) != 0) {
 
-				SegmentDrawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[1].position.x, (int)tri[1].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				SegmentDrawer::bresenham(framebuffer, (int)tri[0].position.x, (int)tri[0].position.y, (int)tri[2].position.x, (int)tri[2].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-				SegmentDrawer::bresenham(framebuffer, (int)tri[2].position.x, (int)tri[2].position.y, (int)tri[1].position.x, (int)tri[1].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+				draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 
 			// wireframe & scanline
@@ -108,14 +107,14 @@ namespace Guarneri {
 
 				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 					auto& t = *iter;
-					SegmentDrawer::bresenham(framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[1].position.x, (int)t[1].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					SegmentDrawer::bresenham(framebuffer, (int)t[0].position.x, (int)t[0].position.y, (int)t[2].position.x, (int)t[2].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
-					SegmentDrawer::bresenham(framebuffer, (int)t[2].position.x, (int)t[2].position.y, (int)t[1].position.x, (int)t[1].position.y, Color::encode_bgra(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(t[0].position, t[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(t[0].position, t[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(t[2].position, t[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 			}
 		}
 
-		void draw_line(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation) {
+		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation) {
 			Vector4 clip_start = p * v * Vector4(start);
 			Vector4 clip_end = p * v * Vector4(end);
 
@@ -133,19 +132,11 @@ namespace Guarneri {
 			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
 		}
 
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
-			Graphics().draw_line(pos, pos + forward, Color::BLUE, v, p, offset);
-			Graphics().draw_line(pos, pos + right, Color::RED, v, p, offset);
-			Graphics().draw_line(pos, pos + up, Color::GREEN, v, p, offset);
+		void draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col) {
+			SegmentDrawer::bresenham(framebuffer, (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
 		}
 
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
-			Graphics().draw_line(pos, pos + forward, Color::BLUE, v, p);
-			Graphics().draw_line(pos, pos + right, Color::RED, v, p);
-			Graphics().draw_line(pos, pos + up, Color::GREEN, v, p);
-		}
-
-		void draw_line(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p) {
 			Vector4 clip_start = p * v * Vector4(start);
 			Vector4 clip_end = p * v * Vector4(end);
 
@@ -156,6 +147,18 @@ namespace Guarneri {
 			Vector4 s2 = ndc2viewport(n2);
 
 			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+		}
+
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
+			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
+			Graphics().draw_segment(pos, pos + right, Color::RED, v, p, offset);
+			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
+		}
+
+		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p) {
+			Graphics().draw_segment(pos, pos + forward, Color::BLUE, v, p);
+			Graphics().draw_segment(pos, pos + right, Color::RED, v, p);
+			Graphics().draw_segment(pos, pos + up, Color::GREEN, v, p);
 		}
 
 		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) {

@@ -162,6 +162,18 @@ namespace Guarneri{
 			world_debug_cam->lookat(Vector3::ZERO);
 		}
 
+		void draw_gizmos() {
+			for (auto& obj : objects) {
+				obj->draw_gizmos();
+			}
+
+			for (auto& obj : transparent_objects) {
+				obj->draw_gizmos();
+			}
+			draw_camera_coords();
+			//draw_world_coords();
+		}
+
 		void render() {
 			for (auto& obj : objects) {
 				obj->render();
@@ -173,8 +185,7 @@ namespace Guarneri{
 
 			//skybox->render();
 
-			draw_world_coords();
-			draw_camera_coords();
+			draw_gizmos();
 		}
 	};
 }

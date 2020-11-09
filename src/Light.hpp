@@ -11,6 +11,13 @@ namespace Guarneri {
 	};
 
 	struct DirectionalLight : Light {
+		DirectionalLight() {
+			ambient = Color::BLACK;
+			diffuse = Color::WHITE;
+			specular = Color::WHITE;
+			intensity = 1.0f;
+			direction = Vector3(1.0f, 1.0f, 1.0f);
+		}
 		Vector3 direction;
 	};
 

@@ -16,10 +16,10 @@ namespace Guarneri {
 			release();
 			switch (fmt) {
 				case TextureFormat::rgb:
-					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(width, height);
+					rgb_buffer = RawBuffer<color_rgb>::create(width, height);
 					break;
 				case TextureFormat::rgba:
-					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(width, height);
+					rgba_buffer = RawBuffer<color_rgba>::create(width, height);
 					break;
 			}
 			std::cout << this->str() << " created" << std::endl;
@@ -34,12 +34,12 @@ namespace Guarneri {
 			switch (fmt) {
 				case TextureFormat::rgb:
 				{
-					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
+					rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, width, height, [](color_rgb* ptr) { delete[] ptr; });
 				}
 				break;
 				case TextureFormat::rgba:
 				{
-					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
+					rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, width, height, [](color_rgba* ptr) { delete[] ptr; });
 				}
 				break;
 			}
@@ -53,7 +53,7 @@ namespace Guarneri {
 			release();
 			int w, h, channels;
 			if (!FS::exists(path)) {
-				std::cerr << "create Texture failed, path does not exist: " << path << std::endl;
+				std::cerr << "create texture failed, invalid path: " << path << std::endl;
 			}
 			else {
 				stbi_set_flip_vertically_on_load(true);
@@ -61,14 +61,14 @@ namespace Guarneri {
 				this->width = w;
 				this->height = h;
 				assert(channels > 0);
-				assert(w <= 4096);
-				assert(h <= 4096);
-				if (channels == 3) {
-					rgb_buffer = std::make_shared<RawBuffer<color_rgb>>(tex, w, h, [](color_rgb* ptr) { stbi_image_free((void*)ptr); });
+				assert(w <= TEXTURE_MAX_SIZE);
+				assert(h <= TEXTURE_MAX_SIZE);
+				if (channels == RGB_CHANNEL) {
+					rgb_buffer = RawBuffer<color_rgb>::create(tex, w, h, [](color_rgb* ptr) { stbi_image_free((void*)ptr); });
 					this->fmt = TextureFormat::rgb;
 				}
-				else if (channels == 4) {
-					rgba_buffer = std::make_shared<RawBuffer<color_rgba>>(tex, w, h, [](color_rgba* ptr) { stbi_image_free((void*)ptr); });
+				else if (channels == RGBA_CHANNEL) {
+					rgba_buffer = RawBuffer<color_rgba>::create(tex, w, h, [](color_rgba* ptr) { stbi_image_free((void*)ptr); });
 					this->fmt = TextureFormat::rgba;
 				}
 				else {

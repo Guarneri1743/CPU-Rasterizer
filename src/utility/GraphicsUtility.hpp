@@ -4,6 +4,16 @@
 
 namespace Guarneri {
 	struct MiscParameter {
+		MiscParameter() {
+			cam_near = 0.1f;
+			cam_far = 500.0f;
+			camera_pos = Vector3::ZERO;
+			view_matrix = Matrix4x4::IDENTITY;
+			proj_matrix = Matrix4x4::IDENTITY;
+			main_light = DirectionalLight();
+			flag = RenderFlag::SHADED;
+		}
+
 		float cam_near;
 		float cam_far;
 		Vector3 camera_pos;
@@ -15,6 +25,10 @@ namespace Guarneri {
 	static MiscParameter misc_param;
 
 	struct LightingData {
+		LightingData() {
+			glossiness = 32.0f;
+		}
+
 		float glossiness;
 	};
 

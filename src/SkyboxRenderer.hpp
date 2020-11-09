@@ -3,7 +3,7 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	class SkyboxRenderer {
+	class SkyboxRenderer : public Renderer{
 	public:
 		SkyboxRenderer() {
 			auto shader = std::make_unique<SkyboxShader>();
@@ -12,12 +12,8 @@ namespace Guarneri {
 			target = PrimitiveFactory::skybox(mat);
 		}
 
-	private:
-		std::unique_ptr<Model> target;
-		Vertex vertices[3];
-
 	public:
-		void render() {
+		Matrix4x4 view_matrix() const {
 			auto view = misc_param.view_matrix;
 			auto view3x3 = Matrix3x3(view);
 			auto view4x4 = Matrix4x4(
@@ -25,26 +21,18 @@ namespace Guarneri {
 				Vector4(view3x3.row(1), 0),
 				Vector4(view3x3.row(2), 0),
 				Vector4(0, 0, 0, 1));
-			auto proj = misc_param.proj_matrix;
-		
-			auto model = target->transform.local2world;
-
-			if (target != nullptr) {
-				for (auto& m : target->meshes) {
-					assert(m->indices.size() % 3 == 0);
-					uint32_t idx = 0;
-					for (auto& index : m->indices) {
-						assert(idx < 3 && index < m->vertices.size());
-						vertices[idx] = m->vertices[index];
-						idx++;
-						if (idx == 3) {
-							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model, view4x4, proj);
-							idx = 0;
-						}
-					}
-				}
-			}
+			return view4x4;
 		}
+
+		Matrix4x4 projection_matrix() const {
+			return misc_param.proj_matrix;
+		}
+
+		Matrix4x4 model_matrix() const {
+			return target->transform.local2world;
+		}
+
+		void draw_gizmos() { }
 	};
 }
 #endif
