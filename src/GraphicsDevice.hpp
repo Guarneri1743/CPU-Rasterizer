@@ -30,13 +30,18 @@ namespace Guarneri {
 
 		void draw(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
-			auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
-			if (triangles.size() == 0) {
-				return;
+			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE) {
+				auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
+				if (triangles.size() == 0) {
+					return;
+				}
+				for (size_t idx = 0; idx < triangles.size(); idx++) {
+					auto tri = triangles[idx];
+					draw_triangle(material, tri[0], tri[1], tri[2], m, v, p);
+				}
 			}
-			for (size_t idx = 0; idx < triangles.size(); idx++) {
-				auto tri = triangles[idx];
-				draw_triangle(material, tri[0], tri[1], tri[2], m, v, p);
+			else {
+				draw_triangle(material, v1, v2, v3, m, v, p);
 			}
 		}
 
@@ -89,8 +94,9 @@ namespace Guarneri {
 			Vertex n3 = clip2ndc(c3);
 
 			bool double_face = material->double_face;
+			bool enable_backface_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 
-			if (!double_face && !material->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
+			if (!double_face && enable_backface_culling && !material->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
 				return;
 			}
 
@@ -170,8 +176,11 @@ namespace Guarneri {
 					tri.interpolate((float)row + 0.5f, lhs, rhs);
 
 					// screen space clipping
-					Clipper::screen_clipping(lhs, rhs, this->width);
-
+					bool enable_screen_clipping = (misc_param.culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
+					if (enable_screen_clipping) {
+						Clipper::screen_clipping(lhs, rhs, this->width);
+					}
+					
 					int left = CEIL(lhs.position.x);
 					left = CLAMP_INT(left, 0, this->width);
 					int right = CEIL(rhs.position.x);
@@ -190,6 +199,13 @@ namespace Guarneri {
 
 		// per fragment processing
 		void process_fragment(Vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
+			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
+			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
+			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
+			bool enable_depth_test = (misc_param.persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+
+			PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
+
 			auto s = mat->target_shader;
 			float z = v.position.z;
 
@@ -198,6 +214,8 @@ namespace Guarneri {
 			BlendFactor src_factor = s->src_factor;
 			BlendFactor dst_factor = s->dst_factor;
 			BlendOp blend_op = s->blend_op;
+
+			bool enable_blending = (misc_param.persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
 
 			color_bgra pixel_color;
 
@@ -216,14 +234,32 @@ namespace Guarneri {
 			}
 
 			// todo: scissor test
+			if (enable_scissor_test) 
+			{
+				
+			}
+
+			// todo: alpha test
+			if (enable_alpha_test) 
+			{ 
+				
+			}
 
 			// todo: stencil test
+			if (enable_stencil_test) 
+			{
+				
+			}
 
-			// depth-test
-			bool z_pass = depth_test(ztest_mode, zwrite_mode, row, col, z);
+			// depth test
+			if (enable_depth_test) {
+				if (!depth_test(ztest_mode, zwrite_mode, row, col, z)) {
+					op_pass &= ~PerSampleOperation::DEPTH_TEST;
+				}
+			}
 
-			// alpha blend
-			if (s != nullptr && s->transparent && (misc_param.render_flag & RenderFlag::SEMI_TRANSPARENT) != RenderFlag::DISABLE) {
+			// blending
+			if (enable_blending && s != nullptr && s->transparent) {
 				color_bgra dst;
 				if (framebuffer->read(row, col, dst)) {
 					Color dst_color = Color::decode(dst);
@@ -233,9 +269,16 @@ namespace Guarneri {
 				}
 			}
 
-			if (z_pass) {
+			if (validate_fragment(op_pass)) {
 				// write to color buffer
 				framebuffer->write(row, col, pixel_color);
+			}
+
+			if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE) {
+				// write z buffer 
+				if (zwrite_mode == ZWrite::ON || !enable_blending) {
+					zbuffer->write(row, col, z);
+				}
 			}
 
 			// depth buffer visualization
@@ -250,13 +293,21 @@ namespace Guarneri {
 			}
 		}
 
+		bool validate_fragment(PerSampleOperation op_pass) {
+			if ((op_pass & PerSampleOperation::SCISSOR_TEST) == PerSampleOperation::DISABLE) return false;
+			if ((op_pass & PerSampleOperation::ALPHA_TEST) == PerSampleOperation::DISABLE) return false;
+			if ((op_pass & PerSampleOperation::STENCIL_TEST) == PerSampleOperation::DISABLE) return false;
+			if ((op_pass & PerSampleOperation::DEPTH_TEST) == PerSampleOperation::DISABLE) return false;
+			return true;
+		}
+
 		// todo: alpha factor
-		static Color blend(Color src_color, Color dst_color, BlendFactor src_factor, BlendFactor dst_factor, BlendOp op) {
+		static Color blend(const Color& src_color, const Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op) {
 			Color lhs, rhs;
 			switch (src_factor) {
 			case BlendFactor::ONE:
 				lhs = src_color;
-				break;
+				break; 
 			case BlendFactor::SRC_ALPHA:
 				lhs = src_color * src_color.a;
 				break;
@@ -349,13 +400,6 @@ namespace Guarneri {
 				case ZTest::LESS:
 					pass = z < depth;
 					break;
-				}
-
-				if (pass) {
-					// write z buffer 
-					if (zwrite_mode == ZWrite::ON || (misc_param.render_flag & RenderFlag::SEMI_TRANSPARENT) == RenderFlag::DISABLE) {
-						zbuffer->write(row, col, z);
-					}
 				}
 			}
 			return pass;
