@@ -141,7 +141,8 @@ namespace Guarneri {
 			ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
 			Vector3 half_dir = (light_dir + view_dir).normalized();
-			
+			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
+
 			Color ret = ambient;
 			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
@@ -150,7 +151,6 @@ namespace Guarneri {
 
 			Color spec_tex;
 			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
-				spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
 				ret += Color::saturate(specular * spec * spec_tex);
 			}
 
