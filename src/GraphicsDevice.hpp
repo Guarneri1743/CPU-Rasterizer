@@ -147,6 +147,7 @@ namespace Guarneri {
 			input.uv = vert.uv;
 			input.color = vert.color;
 			input.normal = vert.normal;
+			input.tangent = vert.tangent;
 			return shader->vertex_shader(input);
 		}
 
@@ -232,6 +233,8 @@ namespace Guarneri {
 				v_out.color = v.color * w;
 				v_out.normal = v.normal * w;
 				v_out.uv = v.uv * w;
+				v_out.tangent = v.tangent * w;
+				v_out.bitangent = v.bitangent * w;
 				s->discarded = false;
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = Color::encode_bgra(fragment_result);

@@ -46,10 +46,10 @@ namespace Guarneri {
 		Vector3 world_pos;
 		Vector4 shadow_coord;
 		Vector4 color;
-		Vector3 normal;
 		Vector2 uv;
 		Vector3 tangent;
 		Vector3 bitangent;
+		Vector3 normal;
 		float rhw;
 
 	public:

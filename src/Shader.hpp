@@ -8,6 +8,7 @@ namespace Guarneri {
 		Vector2 uv;
 		Vector4 color;
 		Vector3 normal;
+		Vector3 tangent;
 	};
 
 	struct v2f {
@@ -15,9 +16,9 @@ namespace Guarneri {
 		Vector3 world_pos;
 		Vector2 uv;
 		Vector4 color;
-		Vector3 normal;
 		Vector3 tangent;
 		Vector3 bitangent;
+		Vector3 normal;
 		Vector4 shadow_coord;
 	};
 
@@ -79,6 +80,7 @@ namespace Guarneri {
 		bool transparent;
 		LightingData lighting_param;
 		bool discarded = false;
+		bool normal_map = false;
 
 	public:
 		void discard() {
@@ -92,7 +94,19 @@ namespace Guarneri {
 			o.world_pos = (m * input.position).xyz();
 			o.shadow_coord = Vector4(input.uv, 0.0f, 1.0f);
 			o.color = input.color;
-			o.normal = Matrix3x3(m).inverse().transpose() * input.normal;
+			Matrix3x3 normal_matrix = Matrix3x3(m).inverse().transpose();
+			if (normal_map) {
+				Vector3 t = (normal_matrix * input.tangent).normalized();
+				Vector3 n = (normal_matrix * input.normal).normalized();
+				t = (t - Vector3::dot(t, n) * n).normalized();
+				Vector3 b = Vector3::cross(n, t);
+				o.tangent = t;
+				o.bitangent = b;
+				o.normal = n;
+			}
+			else {
+				o.normal = normal_matrix * input.normal;
+			}
 			o.uv = input.uv;
 			return o;
 		}
@@ -111,21 +125,28 @@ namespace Guarneri {
 			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
 
 			Vector3 normal = input.normal.normalized();
-			float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			float ndl = 0.0f;
 			Vector3 view_dir = (cam_pos - frag_pos).normalized();
-			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
-			float spec = std::pow(std::max(Vector3::dot(view_dir, reflect_dir), 0.0f), glossiness);
-
 		
+			Color normal_tex;
+			float spec;
+			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, normal_tex)) {
+				Matrix3x3 tbn = Matrix3x3(input.tangent, input.bitangent, input.normal);
+				light_dir = tbn * light_dir;
+				view_dir = tbn * view_dir;
+				auto packed_normal = Vector3(normal_tex.r, normal_tex.g, normal_tex.b);
+				normal = (packed_normal * 2.0f - 1.0f).normalized();
+			}
+
+			ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
+			Vector3 half_dir = (light_dir + view_dir).normalized();
+			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
+
 			Color ret = ambient;
 			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
 				ret += diffuse * ndl * main_tex;
-			}
-
-			Color normal_tex;
-			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, normal_tex)) {
-
 			}
 
 			Color spec_tex;
@@ -147,7 +168,7 @@ namespace Guarneri {
 			}
 
 			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
-				return input.normal;
+				return normal;
 			}
 
 			return Color(ret.r, ret.g, ret.b, 1.0f);
