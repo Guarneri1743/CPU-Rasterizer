@@ -141,22 +141,22 @@ namespace Guarneri {
 			ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
 			Vector3 half_dir = (light_dir + view_dir).normalized();
-			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
-
+			
 			Color ret = ambient;
 			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
-				ret += diffuse * ndl * main_tex;
+				ret += Color::saturate(diffuse * ndl * main_tex);
 			}
 
 			Color spec_tex;
 			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
-				ret += specular * spec * spec_tex;
+				spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
+				ret += Color::saturate(specular * spec * spec_tex);
 			}
 
-			Color height_tex;
-			if (name2tex.count(height_prop) > 0 && name2tex[height_prop]->sample(input.uv.x, input.uv.y, height_tex)) {
-
+			Color ao;
+			if (name2tex.count(ao_prop) >0&&name2tex[ao_prop]->sample(input.uv.x, input.uv.y, ao)) {
+				ret *= ao;
 			}
 
 			if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
@@ -168,9 +168,10 @@ namespace Guarneri {
 			}
 
 			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
-				return normal;
+				return spec;
 			}
-
+			
+			ret = Color::saturate(ret);
 			return Color(ret.r, ret.g, ret.b, 1.0f);
 		}
 

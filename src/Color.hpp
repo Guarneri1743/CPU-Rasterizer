@@ -173,6 +173,15 @@ namespace Guarneri {
 			return Color(r, g, b, w);
 		}
 
+		static Color saturate(const Color& c) {
+			Color ret = c;
+			ret.r = std::clamp(c.r, 0.0f, 1.0f);
+			ret.g = std::clamp(c.g, 0.0f, 1.0f);
+			ret.b = std::clamp(c.b, 0.0f, 1.0f);
+			ret.a = std::clamp(c.a, 0.0f, 1.0f);
+			return ret;
+		}
+
 		static color_rgb encode_rgb(const Color& c) {
 			return encode_rgb(c.r, c.g, c.b);
 		}

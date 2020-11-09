@@ -126,12 +126,12 @@ namespace Guarneri {
 			auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
 			auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
 			auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
-			auto height = load_textures(aiMat, aiTextureType_AMBIENT, height_prop);
+			auto ao = load_textures(aiMat, aiTextureType_AMBIENT, ao_prop);
 
 			material->set_texture(albedo_prop, diffuse);
 			material->set_texture(specular_prop, specular);
 			material->set_texture(normal_prop, normal);
-			material->set_texture(height_prop, height);
+			material->set_texture(ao_prop, ao);
 
 			return std::make_unique<Mesh>(vertices, indices);
 		}

@@ -34,23 +34,44 @@ int main()
 
 	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
-	auto plane_tex = Texture::create(tex_path);
+	auto plane_normal_path = res_path() + "/textures/pavingstones_decorative2_2k_n_1.jpg";
+	auto plane_albedo = Texture::create(tex_path);
+	auto plane_normal = Texture::create(plane_normal_path);
 	auto plane_material = Material::create();
 	plane_material->transparent = false;
-	plane_material->set_texture(albedo_prop, plane_tex);
+	plane_material->lighting_param.glossiness = 32.0f;
+	plane_material->set_texture(albedo_prop, plane_albedo);
+	plane_material->set_texture(normal_prop, plane_normal);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
 	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
-	demo_scene.add(Renderer::create(Plane));
+	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
+	demo_scene.add(plane_renderer);
+
+	InputMgr().add_on_update_evt([](void* user_data) {
+		auto bp = *reinterpret_cast<std::shared_ptr<Renderer>*>(user_data);
+		if (InputMgr().is_key_down(KeyCode::LEFT)) {
+			bp->target->transform.rotate(Vector3::UP, 5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::RIGHT)) {
+			bp->target->transform.rotate(Vector3::UP, -5.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::G)) {
+			bp->target->material->lighting_param.glossiness *= 2.0f;
+		}
+		if (InputMgr().is_key_down(KeyCode::H)) {
+			bp->target->material->lighting_param.glossiness /= 2.0f;
+		}
+		}, & plane_renderer);
 
 	// transparent cube
-	auto cube_tex = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
+	auto cube_albedo = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
 	auto box_material = Material::create();
 	box_material->transparent = true;
 	box_material->blend_op = BlendOp::ADD;
 	box_material->src_factor = BlendFactor::SRC_ALPHA;
 	box_material->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 	box_material->zwrite_mode = ZWrite::OFF;
-	box_material->set_texture(albedo_prop, cube_tex);
+	box_material->set_texture(albedo_prop, cube_albedo);
 	auto cube = PrimitiveFactory::cube(box_material);
 	cube->transform.scale(Vector3(5.0f, 5.0f, 5.0f));
 	cube->transform.translate(Vector3(0.0f, 3.0f, 0.0f));

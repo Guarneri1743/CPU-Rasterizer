@@ -72,8 +72,9 @@ namespace Guarneri {
 	typedef std::string property_name;
 	const property_name albedo_prop = "texture_diffuse";
 	const property_name specular_prop = "texture_specular";
+	const property_name glossiness_prop = "texture_glossiness";
 	const property_name normal_prop = "texture_normal";
-	const property_name height_prop = "texture_height";
+	const property_name ao_prop = "texture_ao";
 	const property_name skybox_cubemap_prop = "skybox_cubemap";
 
 	// framebuffer color 
