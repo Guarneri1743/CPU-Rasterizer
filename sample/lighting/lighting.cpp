@@ -23,7 +23,7 @@ int main()
 
 	// backpack
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
-	backpack->material->lighting_param.glossiness = 64.0f;
+	backpack->material->lighting_param.glossiness = 3.0f;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
 	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);

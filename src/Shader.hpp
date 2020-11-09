@@ -113,7 +113,7 @@ namespace Guarneri {
 			Vector3 normal = input.normal.normalized();
 			float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 			Vector3 view_dir = (cam_pos - frag_pos).normalized();
-			Vector3 reflect_dir = light_dir - 2.0f * normal * ndl;
+			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
 			float spec = std::pow(std::max(Vector3::dot(view_dir, reflect_dir), 0.0f), glossiness);
 
 		
