@@ -133,6 +133,7 @@ namespace Guarneri {
 			target_shader->stencil_write_mask = stencil_write_mask;
 			target_shader->stencil_ref_val = stencil_ref_val;
 			target_shader->color_mask = color_mask;
+			target_shader->lighting_param = lighting_param;
 		}
 
 		void set_int(const property_name& name, const int& val) {

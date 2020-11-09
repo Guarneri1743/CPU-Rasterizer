@@ -37,6 +37,12 @@ int main()
 		if (InputMgr().is_key_down(KeyCode::RIGHT)) {
 			bp->target->transform.rotate(Vector3::UP, -5.0f);
 		}
+		if (InputMgr().is_key_down(KeyCode::G)) {
+			bp->target->material->lighting_param.glossiness *= 2.0f;
+		}
+		if (InputMgr().is_key_down(KeyCode::H)) {
+			bp->target->material->lighting_param.glossiness /= 2.0f;
+		}
 		}, & backpack_renderer);
 
 
