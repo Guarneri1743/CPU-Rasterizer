@@ -3,10 +3,20 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
+	typedef struct {
+		uint32_t triangle_count;
+		uint32_t culled_triangle_count;
+		void clear() {
+			triangle_count = 0;
+			culled_triangle_count = 0;
+		}
+	}GraphicsStatistic;
+
 	class GraphicsDevice {
 	public:
 		uint32_t width;
 		uint32_t height;
+		GraphicsStatistic statistics;
 
 	private:
 		// use 32 bits zbuffer here, for convenience 
@@ -61,11 +71,14 @@ namespace Guarneri {
 			if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) {
 				stencilbuffer->clear(DEFAULT_STENCIL);
 			}
+			statistics.clear();
 		}
 
 	private:
 		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
+
+			statistics.triangle_count += 3;
 
 			v2f o1 = process_vertex(shader, v1);
 			v2f o2 = process_vertex(shader, v2);
@@ -87,9 +100,12 @@ namespace Guarneri {
 
 			bool double_face = shader->double_face;
 			bool enable_backface_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
-
-			if (!double_face && enable_backface_culling && !shader->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
-				return;
+	
+			if (!double_face && enable_backface_culling && !shader->skybox) {
+				if (Clipper::backface_culling(n1.position, n2.position, n3.position)) {
+					statistics.culled_triangle_count += 3;
+					return;
+				}
 			}
 
 			// perspective division, uv, color, normal, etc. 
@@ -139,7 +155,7 @@ namespace Guarneri {
 		}
 
 		// per vertex processing
-		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) {
+		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) const {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
@@ -150,7 +166,7 @@ namespace Guarneri {
 		}
 
 		// rasterization
-		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) {
+		void rasterize(const std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) const {
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
 				bool flip = tri.flip;
@@ -191,7 +207,7 @@ namespace Guarneri {
 		}
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const std::shared_ptr<Shader>&  shader) {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const std::shared_ptr<Shader>&  shader) const {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -342,7 +358,7 @@ namespace Guarneri {
 			}
 		}
 
-		bool validate_fragment(PerSampleOperation op_pass) {
+		bool validate_fragment(const PerSampleOperation& op_pass) const {
 			if ((op_pass & PerSampleOperation::SCISSOR_TEST) == PerSampleOperation::DISABLE) return false;
 			if ((op_pass & PerSampleOperation::ALPHA_TEST) == PerSampleOperation::DISABLE) return false;
 			if ((op_pass & PerSampleOperation::STENCIL_TEST) == PerSampleOperation::DISABLE) return false;
@@ -350,7 +366,7 @@ namespace Guarneri {
 			return true;
 		}
 
-		bool perform_stencil_test(uint8_t ref_val, uint8_t read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) {
+		bool perform_stencil_test(const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const {
 			bool pass = false;
 			uint8_t stencil;
 			if (stencilbuffer->read(row, col, stencil)) {
@@ -384,7 +400,7 @@ namespace Guarneri {
 			return pass;
 		}
 
-		void update_stencil_buffer(const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) {
+		void update_stencil_buffer(const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const {
 			bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
 			bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
 			uint8_t stencil;
@@ -423,7 +439,7 @@ namespace Guarneri {
 			}
 		}
 
-		bool perform_depth_test(const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) {
+		bool perform_depth_test(const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {
@@ -530,7 +546,7 @@ namespace Guarneri {
 			return lhs + rhs;
 		}
 
-		Vertex clip2ndc(const Vertex& v) {
+		Vertex clip2ndc(const Vertex& v) const {
 			Vertex ret = v;
 			ret.position = clip2ndc(v.position);
 			float w = ret.position.w;
@@ -541,7 +557,7 @@ namespace Guarneri {
 			return ret;
 		}
 
-		Vector4 clip2ndc(const Vector4& v) {
+		Vector4 clip2ndc(const Vector4& v) const {
 			Vector4 ndc_pos = v;
 			float w = v.w;
 			if (w == 0.0f) {
@@ -553,14 +569,14 @@ namespace Guarneri {
 			return ndc_pos;
 		}
 
-		Vertex ndc2viewport(const Vertex& v) {
+		Vertex ndc2viewport(const Vertex& v) const {
 			Vertex ret = v;
 			ret.position = ndc2viewport(v.position);
 			ret.rhw = 1.0f;
 			return ret;
 		}
 
-		Vector4 ndc2viewport(const Vector4& v) {
+		Vector4 ndc2viewport(const Vector4& v) const {
 			Vector4 viewport_pos;
 			viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
 			viewport_pos.y = (v.y + 1.0f) * this->height * 0.5f;
@@ -569,7 +585,7 @@ namespace Guarneri {
 			return viewport_pos;
 		}
 
-		float linearize_depth(const float& depth, const float& near, const float& far)
+		float linearize_depth(const float& depth, const float& near, const float& far) const
 		{
 			float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
 			return (2.0f * near * far) / (far + near - ndc_z * (far - near));

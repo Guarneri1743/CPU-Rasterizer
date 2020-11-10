@@ -52,7 +52,7 @@ namespace Guarneri {
 		//        \/
 		//		bottom[0]
 		//====================================================
-		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) {
+		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
 			len = flip ? len : -len;
 			float dy = flip ? screen_y - this->vertices[2].position.y : screen_y - this->vertices[0].position.y;
@@ -85,7 +85,7 @@ namespace Guarneri {
 		//        \/
 		//	    bottom[0]
 		//====================================================
-		std::vector<Triangle> horizontally_split() {
+		std::vector<Triangle> horizontally_split() const {
 			std::vector<Triangle> ret;
 
 			std::vector<Vertex> sorted;

@@ -48,6 +48,8 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->lighting_param = LightingData();
 			this->transparent = false;
+			this->double_face = false;
+			this->skybox = false;
 		}
 
 		Shader(const Shader& other) {

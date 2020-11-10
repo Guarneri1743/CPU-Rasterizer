@@ -105,7 +105,7 @@ namespace Guarneri {
 				Window().flush();
 				Time::update();
 				std::stringstream ss;
-				ss << "SoftRasterizer  FPS: " << (int)Time::fps;
+				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count;
 				Window().set_title(ss.str().c_str());
 				Sleep(1);
 			}

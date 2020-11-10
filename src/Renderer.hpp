@@ -19,7 +19,6 @@ namespace Guarneri {
 
 	public:
 		std::shared_ptr<Model> target;
-		Vertex vertices[3];
 
 	public:
 		static std::unique_ptr<Renderer> create(std::unique_ptr<Model>& model) {
@@ -42,7 +41,8 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
-		virtual void render() {
+		virtual void render() const {
+			Vertex vertices[3];
 			target->material->sync(model_matrix(), view_matrix(), projection_matrix());
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
@@ -61,7 +61,7 @@ namespace Guarneri {
 			}
 		}
 
-		virtual void draw_gizmos() {
+		virtual void draw_gizmos() const {
 			auto view = view_matrix();
 			auto proj = projection_matrix();
 			auto pos = Vector3::ZERO;
@@ -78,7 +78,6 @@ namespace Guarneri {
 
 		void copy(const Renderer& other) {
 			this->target = other.target;
-			std::copy(std::begin(other.vertices), std::end(other.vertices), std::begin(vertices));
 		}
 
 		std::string str() const {

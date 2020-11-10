@@ -13,7 +13,7 @@ namespace Guarneri {
 		}
 
 	public:
-		void load_cubemap(std::vector<std::string> path_list) {
+		void load_cubemap(std::vector<std::string> path_list) const {
 			auto cubemap = CubeMap::create(path_list);
 			target->material->set_cubemap(skybox_cubemap_prop, std::move(cubemap));
 		}
@@ -37,7 +37,7 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
-		void draw_gizmos() { }
+		void draw_gizmos() const { }
 	};
 }
 #endif

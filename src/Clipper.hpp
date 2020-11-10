@@ -82,7 +82,7 @@ namespace Guarneri {
 		}
 
 		static bool backface_culling(const Vector4& v1, const Vector4& v2, const Vector4& v3) {
-			auto v1v2 = v2 - v2;
+			auto v1v2 = v2 - v1;
 			auto v1v3 = v3 - v1;
 			float ndv = Vector3::dot(Vector3::cross(v1v2.xyz(), v1v3.xyz()), Vector3::BACK);
 			// front face: ndv >= 0
