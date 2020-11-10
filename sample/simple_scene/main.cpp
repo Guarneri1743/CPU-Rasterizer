@@ -71,6 +71,7 @@ int main()
 	box_material->src_factor = BlendFactor::SRC_ALPHA;
 	box_material->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
 	box_material->zwrite_mode = ZWrite::OFF;
+	box_material->double_face = true;
 	box_material->set_texture(albedo_prop, cube_albedo);
 	auto cube = PrimitiveFactory::cube(box_material);
 	cube->transform.scale(Vector3(5.0f, 5.0f, 5.0f));

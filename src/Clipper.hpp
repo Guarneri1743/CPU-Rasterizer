@@ -102,6 +102,19 @@ namespace Guarneri {
 			}
 			return false;
 		}
+
+		static bool conservative_frustum_culling(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3) {
+			for (int i = 0; i < 6; i++) {
+				auto plane = frustum[i];
+				auto d1 = plane.distance(v1.position.xyz());
+				auto d2 = plane.distance(v2.position.xyz());
+				auto d3 = plane.distance(v3.position.xyz());
+				if (d1 < 0 && d2 < 0 && d3 < 0) {
+					return true;
+				}
+			}
+			return false;
+		}
 	};
 }
 #endif

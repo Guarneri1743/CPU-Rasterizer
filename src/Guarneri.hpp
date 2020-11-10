@@ -98,12 +98,13 @@ namespace Guarneri {
 
 		static void kick_off(Scene& scene) {
 			while (Window().is_valid()) {
+				Time::frame_start();
 				Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
 				InputMgr().update();
 				scene.update();
 				scene.render();
 				Window().flush();
-				Time::update();
+				Time::frame_end();
 				std::stringstream ss;
 				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count;
 				Window().set_title(ss.str().c_str());

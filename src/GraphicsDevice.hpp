@@ -40,9 +40,17 @@ namespace Guarneri {
 
 		void draw(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
+			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
+			{
+				if (Clipper::conservative_frustum_culling(object_space_frustum, v1, v2, v3)) {
+					statistics.culled_triangle_count++;
+					return;
+				}
+			}
 			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE) {
 				auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
 				if (triangles.size() == 0) {
+					statistics.culled_triangle_count++;
 					return;
 				}
 				for (size_t idx = 0; idx < triangles.size(); idx++) {
@@ -78,7 +86,7 @@ namespace Guarneri {
 		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
 
-			statistics.triangle_count += 3;
+			statistics.triangle_count++;
 
 			v2f o1 = process_vertex(shader, v1);
 			v2f o2 = process_vertex(shader, v2);
@@ -103,7 +111,7 @@ namespace Guarneri {
 	
 			if (!double_face && enable_backface_culling && !shader->skybox) {
 				if (Clipper::backface_culling(n1.position, n2.position, n3.position)) {
-					statistics.culled_triangle_count += 3;
+					statistics.culled_triangle_count++;
 					return;
 				}
 			}

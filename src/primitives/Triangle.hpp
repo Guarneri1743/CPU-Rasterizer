@@ -141,10 +141,7 @@ namespace Guarneri {
 			}
 
 			auto tri = ret[0];
-			//assert(EQUALS(tri[1].position.y, tri[2].position.y));
-			if (!EQUALS(tri[1].position.y, tri[2].position.y)) {
-				//std::cerr << tri[1].position << ",   " << tri[2].position << std::endl;
-			}
+
 
 			// bottom Triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
@@ -155,10 +152,6 @@ namespace Guarneri {
 			}
 
 			tri = ret[1];
-			//assert(EQUALS(tri[1].position.y, tri[2].position.y));
-			if (!EQUALS(tri[1].position.y, tri[2].position.y)) {
-				//std::cerr << tri[1].position << ",   " << tri[2].position << std::endl;
-			}
 
 			return ret;
 		}

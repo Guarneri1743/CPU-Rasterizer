@@ -9,12 +9,9 @@ namespace Guarneri {
 		static float cost;
 		static int frame_count;
 
+		static std::chrono::steady_clock::time_point frame_start_time;
 		static std::chrono::steady_clock::time_point start_up_time;
 		static std::chrono::steady_clock::time_point stop_watch_start_time;
-
-		static float now() {
-			return (float)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start_up_time).count() / (float)1000.0f;
-		}
 
 		static void start_watch() {
 			stop_watch_start_time = std::chrono::steady_clock::now();
@@ -28,15 +25,21 @@ namespace Guarneri {
 			start_up_time = std::chrono::steady_clock::now();
 		}
 
-		static void update() {
+		static void frame_start() {
+			frame_start_time = std::chrono::steady_clock::now();
+		}
+
+		static void frame_end() {
 			frame_count++;
-			fps = (float)frame_count / (now() / 1000.0f);
+			float cost = (float)(std::chrono::steady_clock::now() - frame_start_time).count() / 1000000000.0f;
+			fps = 1.0f / cost;
 		}
 	};
 
 	float Time::fps;
 	float Time::cost;
 	int Time::frame_count;
+	std::chrono::steady_clock::time_point Time::frame_start_time;
 	std::chrono::steady_clock::time_point Time::start_up_time;
 	std::chrono::steady_clock::time_point Time::stop_watch_start_time;
 }
