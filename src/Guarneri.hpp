@@ -16,6 +16,7 @@
 #include <sstream>
 #include <assert.h>
 #include <filesystem>
+#include <thread>
 
 #define NOMINMAX
 #include <windows.h>

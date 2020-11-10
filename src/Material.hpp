@@ -134,6 +134,8 @@ namespace Guarneri {
 			target_shader->stencil_ref_val = stencil_ref_val;
 			target_shader->color_mask = color_mask;
 			target_shader->lighting_param = lighting_param;
+			target_shader->double_face = double_face;
+			target_shader->skybox = skybox;
 			if (name2tex.count(normal_prop) > 0) {
 				target_shader->normal_map = true;
 			}

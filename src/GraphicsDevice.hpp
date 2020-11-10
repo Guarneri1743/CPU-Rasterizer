@@ -28,7 +28,7 @@ namespace Guarneri {
 			framebuffer->clear(DEFAULT_COLOR);
 		}
 
-		void draw(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
 			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE) {
 				auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
@@ -37,11 +37,11 @@ namespace Guarneri {
 				}
 				for (size_t idx = 0; idx < triangles.size(); idx++) {
 					auto tri = triangles[idx];
-					draw_triangle(material, tri[0], tri[1], tri[2], m, v, p);
+					draw_triangle(shader, tri[0], tri[1], tri[2], m, v, p);
 				}
 			}
 			else {
-				draw_triangle(material, v1, v2, v3, m, v, p);
+				draw_triangle(shader, v1, v2, v3, m, v, p);
 			}
 		}
 
@@ -64,9 +64,7 @@ namespace Guarneri {
 		}
 
 	private:
-		void draw_triangle(std::shared_ptr<Material> material, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			auto shader = material->target_shader;
-			material->sync(m, v, p);
+		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
 
 			v2f o1 = process_vertex(shader, v1);
@@ -87,10 +85,10 @@ namespace Guarneri {
 			Vertex n2 = clip2ndc(c2);
 			Vertex n3 = clip2ndc(c3);
 
-			bool double_face = material->double_face;
+			bool double_face = shader->double_face;
 			bool enable_backface_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 
-			if (!double_face && enable_backface_culling && !material->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
+			if (!double_face && enable_backface_culling && !shader->skybox && Clipper::backface_culling(n1.position, n2.position, n3.position)) {
 				return;
 			}
 
@@ -118,7 +116,7 @@ namespace Guarneri {
 			std::vector<Triangle> tris = tri.horizontally_split();
 
 			// rasterization
-			rasterize(tris, material);
+			rasterize(tris, shader);
 
 			// wireframe
 			if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
@@ -152,7 +150,7 @@ namespace Guarneri {
 		}
 
 		// rasterization
-		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Material>& mat) {
+		void rasterize(std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) {
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
 				bool flip = tri.flip;
@@ -184,7 +182,7 @@ namespace Guarneri {
 
 					// interpolate horizontally
 					for (int col = left; col < right; col++) {
-						process_fragment(lhs, row, col, mat);
+						process_fragment(lhs, row, col, shader);
 						auto dx = Vertex::differential(lhs, rhs);
 						lhs = Vertex::intagral(lhs, dx);
 					}
@@ -193,7 +191,7 @@ namespace Guarneri {
 		}
 
 		// per fragment processing
-		void process_fragment(Vertex& v, const uint32_t& row, const uint32_t& col, std::shared_ptr<Material>  mat) {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const std::shared_ptr<Shader>&  shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -201,7 +199,7 @@ namespace Guarneri {
 
 			PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
-			auto s = mat->target_shader;
+			auto s = shader;
 			float z = v.position.z;
 
 			ColorMask color_mask = s->color_mask;

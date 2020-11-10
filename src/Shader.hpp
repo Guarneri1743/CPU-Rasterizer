@@ -78,6 +78,8 @@ namespace Guarneri {
 		BlendFactor dst_factor;
 		BlendOp blend_op;
 		bool transparent;
+		bool double_face;
+		bool skybox;
 		LightingData lighting_param;
 		bool discarded = false;
 		bool normal_map = false;
@@ -204,6 +206,8 @@ namespace Guarneri {
 			this->stencil_read_mask = other.stencil_read_mask;
 			this->stencil_write_mask = other.stencil_write_mask;
 			this->stencil_ref_val = other.stencil_ref_val;
+			this->double_face = other.double_face;
+			this->skybox = other.skybox;
 		}
 
 		std::string str() const {

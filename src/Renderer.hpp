@@ -43,6 +43,7 @@ namespace Guarneri {
 		}
 
 		virtual void render() {
+			target->material->sync(model_matrix(), view_matrix(), projection_matrix());
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);
@@ -52,7 +53,7 @@ namespace Guarneri {
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							Graphics().draw(target->material, vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(), projection_matrix());
+							Graphics().draw(target->material->target_shader, vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(), projection_matrix());
 							idx = 0;
 						}
 					}
