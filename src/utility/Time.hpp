@@ -6,7 +6,6 @@ namespace Guarneri {
 	class Time {
 	public:
 		static float fps;
-		static float cost;
 		static int frame_count;
 
 		static std::chrono::steady_clock::time_point frame_start_time;
@@ -37,7 +36,6 @@ namespace Guarneri {
 	};
 
 	float Time::fps;
-	float Time::cost;
 	int Time::frame_count;
 	std::chrono::steady_clock::time_point Time::frame_start_time;
 	std::chrono::steady_clock::time_point Time::start_up_time;

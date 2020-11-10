@@ -3,15 +3,6 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	typedef struct {
-		uint32_t triangle_count;
-		uint32_t culled_triangle_count;
-		void clear() {
-			triangle_count = 0;
-			culled_triangle_count = 0;
-		}
-	}GraphicsStatistic;
-
 	class GraphicsDevice {
 	public:
 		uint32_t width;
@@ -79,12 +70,18 @@ namespace Guarneri {
 			if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) {
 				stencilbuffer->clear(DEFAULT_STENCIL);
 			}
-			statistics.clear();
+			statistics.culled_triangle_count = 0;
+			statistics.triangle_count = 0;
 		}
 
 	private:
 		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+
 			assert(shader != nullptr);
+
+			REF(m);
+			REF(v);
+			REF(p);
 
 			statistics.triangle_count++;
 
@@ -239,6 +236,8 @@ namespace Guarneri {
 			BlendFactor src_factor = s->src_factor;
 			BlendFactor dst_factor = s->dst_factor;
 			BlendOp blend_op = s->blend_op;
+
+			REF(stencil_write_mask);
 
 			bool enable_blending = (misc_param.persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
 

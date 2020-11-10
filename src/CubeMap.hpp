@@ -5,7 +5,7 @@
 namespace Guarneri {
 	class CubeMap {
 	public:
-		CubeMap(std::vector<std::string> path) {
+		CubeMap(const std::vector<std::string>& path) {
 			assert(path.size() == 6);
 			auto right = Texture::create(path[0]);
 			auto left = Texture::create(path[1]);

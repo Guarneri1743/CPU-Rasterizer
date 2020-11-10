@@ -6,7 +6,7 @@ namespace Guarneri {
 
 	class IdAllocator {
 	public:
-		IdAllocator(uint32_t _lhs, uint32_t _rhs)
+		IdAllocator(const uint32_t& _lhs, const uint32_t& _rhs)
 		{
 			assert(_lhs > INVALID_ID);
 			assert(_lhs <= _rhs);
@@ -40,7 +40,7 @@ namespace Guarneri {
 		}
 
 		// todo: use blanced binary tree tree to reuse id
-		void free(uint32_t id)
+		void free(const uint32_t& id)
 		{
 			// do nothing
 		}

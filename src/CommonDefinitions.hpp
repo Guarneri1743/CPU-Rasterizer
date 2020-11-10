@@ -77,6 +77,12 @@ namespace Guarneri {
 	const property_name ao_prop = "texture_ao";
 	const property_name skybox_cubemap_prop = "skybox_cubemap";
 
+	// statistics
+	struct GraphicsStatistic{
+		uint32_t triangle_count;
+		uint32_t culled_triangle_count;
+	};
+
 	// framebuffer color 
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
