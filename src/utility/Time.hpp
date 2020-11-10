@@ -31,7 +31,7 @@ namespace Guarneri {
 
 		static void frame_end() {
 			frame_count++;
-			float cost = (float)(std::chrono::steady_clock::now() - frame_start_time).count() / 1000000000.0f;
+			float cost = (float)(std::chrono::steady_clock::now() - frame_start_time).count() / 1e+9f;
 			fps = 1.0f / cost;
 		}
 	};

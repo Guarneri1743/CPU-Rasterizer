@@ -140,9 +140,6 @@ namespace Guarneri {
 				ret.push_back(Triangle(sorted[0], v, sorted[1]));
 			}
 
-			auto tri = ret[0];
-
-
 			// bottom Triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
 				ret.push_back(Triangle(sorted[2], sorted[1], v, true));
@@ -150,8 +147,6 @@ namespace Guarneri {
 			else {
 				ret.push_back(Triangle(sorted[2], v, sorted[1], true));
 			}
-
-			tri = ret[1];
 
 			return ret;
 		}
