@@ -21,18 +21,6 @@ int main()
 	demo_scene.main_cam->set_near(0.5f);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
-	// setup skybox
-	std::vector<std::string> cubemap_path = {
-		res_path() + "/cubemap/lake_right.jpg",
-		res_path() + "/cubemap/lake_left.jpg",
-		res_path() + "/cubemap/lake_top.jpg",
-		res_path() + "/cubemap/lake_bottom.jpg",
-		res_path() + "/cubemap/lake_front.jpg",
-		res_path() + "/cubemap/lake_back.jpg",
-	};
-	demo_scene.skybox->load_cubemap(cubemap_path);
-	demo_scene.enable_skybox = true;
-
 	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	auto plane_normal_path = res_path() + "/textures/pavingstones_decorative2_2k_n_1.jpg";
