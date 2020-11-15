@@ -12,6 +12,7 @@ function setupIncludeDirs()
       src_dir .. "/math",
       src_dir .. "/primitives",
       include_dir,
+      include_dir .. "/threading",
       include_dir .. "/assimp",
       include_dir .. "/ply",
       include_dir .. "/stb_image",
@@ -91,6 +92,7 @@ function setupBlendingDemo()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/blending.cpp"
@@ -114,6 +116,7 @@ function setupStencilDemo()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/stencil_test.cpp"
@@ -137,6 +140,7 @@ function setupLightingDemo()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/lighting.cpp"
@@ -160,6 +164,7 @@ function setupFilteringDemo()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/filtering.cpp"
@@ -184,6 +189,7 @@ function setupSkyboxDemo()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/skybox.cpp"
@@ -207,6 +213,7 @@ function setupPLYProj()
          src_dir .. "/math/*.*",
          src_dir .. "/primitives/*.*",
          include_dir .. "/*.*",
+         include_dir .. "/threading/*.*",
          include_dir .. "/assimp/*.*",
          include_dir .. "/stb_image/*.*",
          include_dir .. "/ply/*.*",
@@ -231,6 +238,7 @@ function setupUnitTestProj()
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       include_dir .. "/*.*",
+      include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
       sample_dir .. "/unit_test.cpp"
