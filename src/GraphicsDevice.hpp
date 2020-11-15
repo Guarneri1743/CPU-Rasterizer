@@ -17,6 +17,7 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
+
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
 			this->width = width_t;
@@ -54,6 +55,10 @@ namespace Guarneri {
 			}
 		}
 
+		void end_frame() {
+			
+		}
+
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
 				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
@@ -74,9 +79,7 @@ namespace Guarneri {
 			statistics.triangle_count = 0;
 		}
 
-	private:
 		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-
 			assert(shader != nullptr);
 
 			REF(m);
@@ -170,8 +173,42 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
+		void rasterize_horizontally(const std::shared_ptr<Shader>& shader, const int& row, const int& col, Vertex& lhs, const Vertex& rhs) const {
+			process_fragment(lhs, row, col, shader);
+			auto dx = Vertex::differential(lhs, rhs);
+			lhs = Vertex::intagral(lhs, dx);
+		}
+
+		void rasterize_vertically(const std::shared_ptr<Shader>& shader, const Triangle& tri, const int& row) const {
+			Vertex lhs;
+			Vertex rhs;
+			tri.interpolate((float)row + 0.5f, lhs, rhs);
+
+			// screen space clipping
+			bool enable_screen_clipping = (misc_param.culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
+			if (enable_screen_clipping) {
+				Clipper::screen_clipping(lhs, rhs, this->width);
+			}
+
+			int left = (int)(lhs.position.x + 0.5f);
+			left = CLAMP_INT(left, 0, this->width);
+			int right = (int)(rhs.position.x + 0.5f);
+			right = CLAMP_INT(right, 0, this->width);
+			assert(right >= left);
+
+			for (auto col = left; col < right; col++) {
+				rasterize_horizontally(shader, row, col, lhs, rhs);
+			}
+		}
+
+		static void rasterize_task(const GraphicsDevice& device, const std::shared_ptr<Shader>& shader, const Triangle& tri, const std::vector<int>& rows, const int& width) {
+			for (auto& row : rows) {
+				device.rasterize_vertically(shader, tri, row);
+			}
+		}
+
 		// rasterization
-		void rasterize(const std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) const {
+		void rasterize(const std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) {
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto& tri = *iter;
 				bool flip = tri.flip;
@@ -183,30 +220,8 @@ namespace Guarneri {
 				bottom = CLAMP_INT(bottom, 0, this->height);
 				assert(bottom >= top);
 
-				// interpolate vertically
 				for (int row = top; row < bottom; row++) {
-					Vertex lhs;
-					Vertex rhs;
-					tri.interpolate((float)row + 0.5f, lhs, rhs);
-
-					// screen space clipping
-					bool enable_screen_clipping = (misc_param.culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
-					if (enable_screen_clipping) {
-						Clipper::screen_clipping(lhs, rhs, this->width);
-					}
-
-					int left = (int)(lhs.position.x + 0.5f);
-					left = CLAMP_INT(left, 0, this->width);
-					int right = (int)(rhs.position.x + 0.5f);
-					right = CLAMP_INT(right, 0, this->width);
-					assert(right >= left);
-
-					// interpolate horizontally
-					for (int col = left; col < right; col++) {
-						process_fragment(lhs, row, col, shader);
-						auto dx = Vertex::differential(lhs, rhs);
-						lhs = Vertex::intagral(lhs, dx);
-					}
+					rasterize_vertically(shader, tri, row);
 				}
 			}
 		}

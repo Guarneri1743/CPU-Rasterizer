@@ -27,6 +27,7 @@ int main()
 	stencil_test_material->stencil_ref_val = 1;
 	stencil_test_material->zwrite_mode = ZWrite::OFF;
 	stencil_test_material->stencil_func = CompareFunc::ALWAYS;
+	stencil_test_material->double_face = true;
 	auto stencil_cube = PrimitiveFactory::cube(stencil_test_material);
 	stencil_cube->transform.scale(Vector3(5.0f, 5.0f, 5.0f));
 	stencil_cube->transform.translate(Vector3(0.0f, 3.0f, 0.0f));

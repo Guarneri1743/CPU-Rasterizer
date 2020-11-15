@@ -121,7 +121,6 @@ namespace Guarneri {
 			update_proj_mode();
 		}
 
-		//todo: ortho
 		void update_proj_mode(){
 			switch (this->projection) {
 			case Projection::PERSPECTIVE:

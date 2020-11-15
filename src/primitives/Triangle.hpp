@@ -89,9 +89,9 @@ namespace Guarneri {
 			std::vector<Triangle> ret;
 
 			std::vector<Vertex> sorted;
-			sorted.push_back(vertices[0]);
-			sorted.push_back(vertices[1]);
-			sorted.push_back(vertices[2]);
+			sorted.emplace_back(vertices[0]);
+			sorted.emplace_back(vertices[1]);
+			sorted.emplace_back(vertices[2]);
 			std::sort(sorted.begin(), sorted.end(), [](const Vertex& lhs, const Vertex& rhs) { return lhs.position.y < rhs.position.y; });
 
 			assert(sorted[0].position.y <= sorted[1].position.y);
@@ -105,10 +105,10 @@ namespace Guarneri {
 			// top Triangle
 			if (sorted[1].position.y == sorted[2].position.y) {
 				if (sorted[1].position.x >= sorted[2].position.x) {
-					ret.push_back(Triangle(sorted[0], sorted[2], sorted[1]));
+					ret.emplace_back(Triangle(sorted[0], sorted[2], sorted[1]));
 				}
 				else {
-					ret.push_back(Triangle(sorted[0], sorted[1], sorted[2]));
+					ret.emplace_back(Triangle(sorted[0], sorted[1], sorted[2]));
 				}
 				return ret;
 			}
@@ -116,10 +116,10 @@ namespace Guarneri {
 			// bottom Triangle
 			if (sorted[0].position.y == sorted[1].position.y) {
 				if (sorted[0].position.x >= sorted[1].position.x) {
-					ret.push_back(Triangle(sorted[2], sorted[1], sorted[0], true));
+					ret.emplace_back(Triangle(sorted[2], sorted[1], sorted[0], true));
 				}
 				else {
-					ret.push_back(Triangle(sorted[2], sorted[0], sorted[1], true));
+					ret.emplace_back(Triangle(sorted[2], sorted[0], sorted[1], true));
 				}
 				return ret;
 			}
@@ -134,18 +134,18 @@ namespace Guarneri {
 
 			// top Triangle: top-left-right
 			if (v.position.x >= sorted[1].position.x) {
-				ret.push_back(Triangle(sorted[0], sorted[1], v));
+				ret.emplace_back(Triangle(sorted[0], sorted[1], v));
 			}
 			else {
-				ret.push_back(Triangle(sorted[0], v, sorted[1]));
+				ret.emplace_back(Triangle(sorted[0], v, sorted[1]));
 			}
 
 			// bottom Triangle: bottom-left-right
 			if (v.position.x >= sorted[1].position.x) {
-				ret.push_back(Triangle(sorted[2], sorted[1], v, true));
+				ret.emplace_back(Triangle(sorted[2], sorted[1], v, true));
 			}
 			else {
-				ret.push_back(Triangle(sorted[2], v, sorted[1], true));
+				ret.emplace_back(Triangle(sorted[2], v, sorted[1], true));
 			}
 
 			return ret;

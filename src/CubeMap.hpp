@@ -13,12 +13,12 @@ namespace Guarneri {
 			auto bottom = Texture::create(path[3]);
 			auto front = Texture::create(path[4]);
 			auto back = Texture::create(path[5]);
-			textures.push_back(right);
-			textures.push_back(left);
-			textures.push_back(top);
-			textures.push_back(bottom);
-			textures.push_back(front);
-			textures.push_back(back);
+			textures.emplace_back(right);
+			textures.emplace_back(left);
+			textures.emplace_back(top);
+			textures.emplace_back(bottom);
+			textures.emplace_back(front);
+			textures.emplace_back(back);
 			for (auto& tex : textures) {
 				tex->wrap_mode = WrapMode::CLAMP_TO_EDGE;
 			}

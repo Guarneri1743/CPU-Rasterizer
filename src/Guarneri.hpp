@@ -1,6 +1,8 @@
 #ifndef _GUARNERI_
 #define _GUARNERI_
 
+#define MULTI_THREAD
+
 #include <cstdlib>
 #include <cmath>
 #include <limits.h>
@@ -33,6 +35,7 @@
 
 // Rasterizer Core
 #include <BitwiseEnum.hpp>
+#include <ThreadPool.hpp>
 #include <PipelineDefinitions.hpp>
 #include <GDIWindow.hpp>
 #include <Singleton.hpp>
@@ -103,10 +106,11 @@ namespace Guarneri {
 				InputMgr().update();
 				scene.update();
 				scene.render();
+				Graphics().end_frame();
 				Window().flush();
 				Time::frame_end();
 				std::stringstream ss;
-				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count;
+				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " CameraPos: " << scene.main_cam->position;
 				Window().set_title(ss.str().c_str());
 				Sleep(1);
 			}

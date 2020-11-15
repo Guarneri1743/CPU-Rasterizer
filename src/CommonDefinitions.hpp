@@ -69,13 +69,15 @@ namespace Guarneri {
 	class SkyboxRenderer;
 	class Clipper;
 
-	typedef std::string property_name;
-	const property_name albedo_prop = "texture_diffuse";
-	const property_name specular_prop = "texture_specular";
-	const property_name glossiness_prop = "texture_glossiness";
-	const property_name normal_prop = "texture_normal";
-	const property_name ao_prop = "texture_ao";
-	const property_name skybox_cubemap_prop = "skybox_cubemap";
+	// optimize unordered_map performance
+	// typedef std::string property_name;
+	typedef uint32_t property_name;
+	const property_name albedo_prop = 0; //"texture_diffuse";
+	const property_name specular_prop = 1; // "texture_specular";
+	const property_name glossiness_prop = 2; // "texture_glossiness";
+	const property_name normal_prop = 3; // "texture_normal";
+	const property_name ao_prop = 4; // "texture_ao";
+	const property_name skybox_cubemap_prop = 5; // "skybox_cubemap";
 
 	// statistics
 	struct GraphicsStatistic{

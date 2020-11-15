@@ -14,7 +14,7 @@ namespace Guarneri {
 			}
 			assert(indices.size() % 3 == 0);
 			auto m = std::make_unique<Mesh>(vertices, indices);
-			meshes.push_back(std::move(m));
+			meshes.emplace_back(std::move(m));
 			this->material = std::move(material);
 		}
 
@@ -59,7 +59,7 @@ namespace Guarneri {
 			for (uint32_t i = 0; i < node->mNumMeshes; i++)
 			{
 				aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
-				meshes.push_back(std::move(load_mesh(Mesh, Scene)));
+				meshes.emplace_back(std::move(load_mesh(Mesh, Scene)));
 			}
 			for (uint32_t i = 0; i < node->mNumChildren; i++)
 			{
@@ -112,13 +112,13 @@ namespace Guarneri {
 					Vertex.uv = Vector2(0.0f, 0.0f);
 
 				Vertex.color = Vertex.tangent;
-				vertices.push_back(Vertex);
+				vertices.emplace_back(Vertex);
 			}
 			for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
 			{
 				aiFace face = ai_mesh->mFaces[i];
 				for (uint32_t j = 0; j < face.mNumIndices; j++)
-					indices.push_back(face.mIndices[j]);
+					indices.emplace_back(face.mIndices[j]);
 			}
 
 			aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
@@ -128,6 +128,19 @@ namespace Guarneri {
 			auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
 			auto ao = load_textures(aiMat, aiTextureType_AMBIENT, ao_prop);
 
+			if (diffuse != nullptr) {
+				diffuse->filtering = Filtering::POINT;
+			}
+			if (specular != nullptr) {
+				specular->filtering = Filtering::POINT;
+			}
+			if (normal != nullptr) {
+				normal->filtering = Filtering::POINT;
+			}
+			if (ao != nullptr) {
+				ao->filtering = Filtering::POINT;
+			}
+
 			material->set_texture(albedo_prop, diffuse);
 			material->set_texture(specular_prop, specular);
 			material->set_texture(normal_prop, normal);
@@ -136,7 +149,7 @@ namespace Guarneri {
 			return std::make_unique<Mesh>(vertices, indices);
 		}
 
-		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, std::string property_name) {
+		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, property_name property_name) {
 			std::shared_ptr<Texture> ret;
 			for (unsigned int i = 0; i < ai_material->GetTextureCount(type); i++)
 			{

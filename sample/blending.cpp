@@ -10,7 +10,7 @@ int main()
 
 	// setup main light
 	Scene demo_scene;
-	demo_scene.main_light.direction = Vector3(1, 1, 1);
+	demo_scene.main_light.direction = Vector3(-1.2f, 1.0f, -1.2f);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -31,6 +31,7 @@ int main()
 		res_path() + "/cubemap/lake_back.jpg",
 	};
 	demo_scene.skybox->load_cubemap(cubemap_path);
+	demo_scene.enable_skybox = true;
 
 	// plane
 	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";

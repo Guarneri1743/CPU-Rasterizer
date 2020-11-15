@@ -41,14 +41,43 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
+		static void draw_triangle(const std::shared_ptr<Shader>& shader, std::vector<Triangle> triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			for (auto& tri : triangles) {
+				Graphics().draw(shader, tri[0], tri[1], tri[2], m, v, p);
+			}
+		}
+
 		virtual void render() const {
+#ifdef MULTI_THREAD
+			auto thread_size = std::thread::hardware_concurrency();
+			ThreadPool tp(thread_size);
+#endif
 			Vertex vertices[3];
 			target->material->sync(model_matrix(), view_matrix(), projection_matrix());
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
 					assert(m->indices.size() % 3 == 0);
 					uint32_t idx = 0;
-					for(auto& index : m->indices) {
+#ifdef MULTI_THREAD
+					std::vector<Triangle> tris;
+					auto block_size =  m->indices.size() / thread_size;
+					tris.reserve(block_size);
+					for (auto& index : m->indices) {
+						assert(idx < 3 && index < m->vertices.size());
+						vertices[idx] = m->vertices[index];
+						idx++;
+						if (idx == 3) {
+							tris.emplace_back(Triangle(vertices[0], vertices[1], vertices[2]));
+							if (tris.size() == block_size) {
+								tp.enqueue(draw_triangle, target->material->target_shader, tris, model_matrix(), view_matrix(), projection_matrix());
+								tris.clear();
+							}
+							idx = 0;
+						}
+					}
+					tp.enqueue(draw_triangle, target->material->target_shader, tris, model_matrix(), view_matrix(), projection_matrix());
+#else
+					for (auto& index : m->indices) {
 						assert(idx < 3 && index < m->vertices.size());
 						vertices[idx] = m->vertices[index];
 						idx++;
@@ -57,6 +86,7 @@ namespace Guarneri {
 							idx = 0;
 						}
 					}
+#endif
 				} 
 			}
 		}

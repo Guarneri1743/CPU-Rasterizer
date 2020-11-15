@@ -80,8 +80,8 @@ function setupSlotion()
          links { "assimp" }
 end
 
-function setupCommonDemo()
-   project "CommonDemo"
+function setupBlendingDemo()
+   project "BlendingDemo"
    kind "ConsoleApp"
    language "C++"
 
@@ -93,7 +93,7 @@ function setupCommonDemo()
       include_dir .. "/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
-      sample_dir .. "/simple_scene/*.*"
+      sample_dir .. "/blending.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -116,7 +116,7 @@ function setupStencilDemo()
       include_dir .. "/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
-      sample_dir .. "/stencil/*.*"
+      sample_dir .. "/stencil_test.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -139,7 +139,54 @@ function setupLightingDemo()
       include_dir .. "/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
-      sample_dir .. "/lighting/*.*"
+      sample_dir .. "/lighting.cpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+function setupFilteringDemo()
+   project "FilteringDemo"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/math/*.*",
+      src_dir .. "/primitives/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
+      sample_dir .. "/filtering.cpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+
+function setupSkyboxDemo()
+   project "SkyboxDemo"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/math/*.*",
+      src_dir .. "/primitives/*.*",
+      include_dir .. "/*.*",
+      include_dir .. "/assimp/*.*",
+      include_dir .. "/stb_image/*.*",
+      sample_dir .. "/skybox.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -163,7 +210,7 @@ function setupPLYProj()
          include_dir .. "/assimp/*.*",
          include_dir .. "/stb_image/*.*",
          include_dir .. "/ply/*.*",
-         sample_dir .. "/ply/*.*"
+         sample_dir .. "/plytest.c"
       }
 
       filter { "configurations:Debug*" }
@@ -186,7 +233,7 @@ function setupUnitTestProj()
       include_dir .. "/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
-      sample_dir .. "/unit_test/*.*"
+      sample_dir .. "/unit_test.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -198,8 +245,10 @@ end
 
 setupIncludeDirs()
 setupSlotion()
-setupCommonDemo()
+setupBlendingDemo()
 setupStencilDemo()
 setupLightingDemo()
+setupFilteringDemo()
+setupSkyboxDemo()
 setupPLYProj()
 setupUnitTestProj()

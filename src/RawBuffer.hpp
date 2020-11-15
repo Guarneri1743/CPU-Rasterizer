@@ -9,27 +9,29 @@ namespace Guarneri {
 		RawBuffer(uint32_t _width, uint32_t _height) {
 			this->width = _width;
 			this->height = _height;
-			int size = _width * _height;
-			buffer = std::shared_ptr<T>(new T[size], [](T* ptr) { delete[] ptr; });
+			this->deletor = [](T* ptr) { delete[] ptr; };
+			this->buffer = new T[_width * _height];
 		}		
 
 		RawBuffer(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr)) {
 			this->width = _width;
 			this->height = _height;
-			auto buf_array = (T*)_buffer;
-			this->buffer = std::shared_ptr<T>(buf_array, deletor);
+			this->deletor = deletor;
+			this->buffer = (T*)_buffer;
 		}
 
 		RawBuffer(const RawBuffer<T>& other) {
 			copy(other);
 		}
 		
-		~RawBuffer() {
-			buffer.reset();
+		~RawBuffer() 
+		{
+			deletor(buffer);
 		}
 
 	private:
-		std::shared_ptr<T> buffer;
+		T* buffer;
+		void (*deletor)(T* ptr);
 		uint32_t width;
 		uint32_t height;
 
@@ -57,7 +59,7 @@ namespace Guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			out = buffer.get()[pos];
+			out = buffer[pos];
 			return true;
 		}
 
@@ -72,7 +74,7 @@ namespace Guarneri {
 			if (row >= height || col >= width || pos >= width * height) {
 				return false;
 			}
-			buffer.get()[pos] = data;
+			buffer[pos] = data;
 			return true;
 		}
 
@@ -84,7 +86,7 @@ namespace Guarneri {
 
 		void clear(const T& val) {
 			uint32_t size = width * height;
-			std::fill(buffer.get(), buffer.get() + size, val);
+			std::fill(buffer, buffer + size, val);
 		}
 
 		T* get_ptr(int& size) {

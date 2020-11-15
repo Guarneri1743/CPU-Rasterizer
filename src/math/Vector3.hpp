@@ -138,6 +138,10 @@ namespace Guarneri {
 			return ret;
 		}
 
+		float magnitude() const {
+			return magnitude(*this);
+		}
+
 		bool operator <=(const Vector3& other) const {
 			return Vector3::magnitude(*this) <= Vector3::magnitude(other);
 		}

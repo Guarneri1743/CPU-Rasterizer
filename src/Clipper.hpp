@@ -24,12 +24,12 @@ namespace Guarneri {
 				// clip segment
 				if (d1 >= 0) {
 					if (d2 < 0) {
-						list_out.push_back(Vertex::interpolate(cur, last, t));
+						list_out.emplace_back(Vertex::interpolate(cur, last, t));
 					}
-					list_out.push_back(cur);
+					list_out.emplace_back(cur);
 				}
 				else if(d2 >= 0){
-					list_out.push_back(Vertex::interpolate(cur, last, t));
+					list_out.emplace_back(Vertex::interpolate(cur, last, t));
 				}
 			}
 
@@ -38,11 +38,11 @@ namespace Guarneri {
 			std::vector<Triangle> triangles;
 			
 			if (list_out.size() == 3) {
-				triangles.push_back(Triangle(list_out[0], list_out[1], list_out[2]));
+				triangles.emplace_back(Triangle(list_out[0], list_out[1], list_out[2]));
 			}
 			else if(list_out.size() == 4){
-				triangles.push_back(Triangle(list_out[0], list_out[1], list_out[2]));
-				triangles.push_back(Triangle(list_out[2], list_out[3], list_out[0]));
+				triangles.emplace_back(Triangle(list_out[0], list_out[1], list_out[2]));
+				triangles.emplace_back(Triangle(list_out[2], list_out[3], list_out[0]));
 			}
 			else if(list_out.size() != 0){
 				std::cerr << "clipping error, size of vertices: " << list_out.size() << std::endl;

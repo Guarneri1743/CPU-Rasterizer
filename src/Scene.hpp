@@ -16,6 +16,7 @@ namespace Guarneri{
 		std::vector<std::shared_ptr<Renderer>> objects;
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::unique_ptr<SkyboxRenderer> skybox;
+		bool enable_skybox;
 		std::shared_ptr<Camera> main_cam;
 		std::shared_ptr<Camera> debug_cam;
 		std::shared_ptr<Camera> world_debug_cam;
@@ -25,6 +26,7 @@ namespace Guarneri{
 	public:
 		// todo: serialzie & deserialize Scene data
 		void initialize() {
+			enable_skybox = false;
 			main_light.direction = Vector3(1.0f, 1.0f, 1.0f);
 			main_light.intensity = 1.0f;
 			main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
@@ -94,10 +96,10 @@ namespace Guarneri{
 
 		void add(std::shared_ptr<Renderer> rdr) {
 			if (rdr->target->material->transparent) {
-				transparent_objects.push_back(rdr);
+				transparent_objects.emplace_back(rdr);
 			}
 			else {
-				objects.push_back(rdr);
+				objects.emplace_back(rdr);
 			}
 		}
 
@@ -182,7 +184,9 @@ namespace Guarneri{
 				obj->render();
 			}
 
-			skybox->render();
+			if (enable_skybox) {
+				skybox->render();
+			}
 
 			// todo: OIT
 			for (auto& obj : transparent_objects) {
