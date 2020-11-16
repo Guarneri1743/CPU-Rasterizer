@@ -110,7 +110,7 @@ namespace Guarneri {
 				Window().flush();
 				Time::frame_end();
 				std::stringstream ss;
-				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " CameraPos: " << scene.main_cam->position;
+				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
 				Window().set_title(ss.str().c_str());
 				Sleep(1);
 			}
