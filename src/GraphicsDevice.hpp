@@ -174,8 +174,8 @@ namespace Guarneri {
 		}
 
 		void rasterize_horizontally(const std::shared_ptr<Shader>& shader, const int& row, const int& col, Vertex& lhs, const Vertex& rhs) const {
-			process_fragment(lhs, row, col, shader);
 			auto dx = Vertex::differential(lhs, rhs);
+			process_fragment(lhs, row, col, shader);
 			lhs = Vertex::intagral(lhs, dx);
 		}
 
@@ -198,12 +198,6 @@ namespace Guarneri {
 
 			for (auto col = left; col < right; col++) {
 				rasterize_horizontally(shader, row, col, lhs, rhs);
-			}
-		}
-
-		static void rasterize_task(const GraphicsDevice& device, const std::shared_ptr<Shader>& shader, const Triangle& tri, const std::vector<int>& rows, const int& width) {
-			for (auto& row : rows) {
-				device.rasterize_vertically(shader, tri, row);
 			}
 		}
 
