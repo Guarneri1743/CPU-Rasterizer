@@ -83,6 +83,7 @@ namespace Guarneri {
 	struct GraphicsStatistic{
 		uint32_t triangle_count;
 		uint32_t culled_triangle_count;
+		uint32_t earlyz_optimized;
 	};
 
 	// framebuffer color 

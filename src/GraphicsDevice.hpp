@@ -77,6 +77,7 @@ namespace Guarneri {
 			}
 			statistics.culled_triangle_count = 0;
 			statistics.triangle_count = 0;
+			statistics.earlyz_optimized = 0;
 		}
 
 		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
@@ -173,13 +174,13 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
-		void rasterize_horizontally(const std::shared_ptr<Shader>& shader, const int& row, const int& col, Vertex& lhs, const Vertex& rhs) const {
+		void rasterize_pixel(const std::shared_ptr<Shader>& shader, const int& row, const int& col, Vertex& lhs, const Vertex& rhs) {
 			process_fragment(lhs, row, col, shader);
 			auto dx = Vertex::differential(lhs, rhs);
 			lhs = Vertex::intagral(lhs, dx);
 		}
 
-		void rasterize_vertically(const std::shared_ptr<Shader>& shader, const Triangle& tri, const int& row) const {
+		void rasterize_vertically(const std::shared_ptr<Shader>& shader, const Triangle& tri, const int& row) {
 			Vertex lhs;
 			Vertex rhs;
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
@@ -197,13 +198,7 @@ namespace Guarneri {
 			assert(right >= left);
 
 			for (auto col = left; col < right; col++) {
-				rasterize_horizontally(shader, row, col, lhs, rhs);
-			}
-		}
-
-		static void rasterize_task(const GraphicsDevice& device, const std::shared_ptr<Shader>& shader, const Triangle& tri, const std::vector<int>& rows, const int& width) {
-			for (auto& row : rows) {
-				device.rasterize_vertically(shader, tri, row);
+				rasterize_pixel(shader, row, col, lhs, rhs);
 			}
 		}
 
@@ -227,7 +222,7 @@ namespace Guarneri {
 		}
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const std::shared_ptr<Shader>&  shader) const {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const std::shared_ptr<Shader>&  shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -255,6 +250,15 @@ namespace Guarneri {
 			REF(stencil_write_mask);
 
 			bool enable_blending = (misc_param.persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
+
+			// early-z
+			// todo: early-z conditions
+			if (enable_depth_test && !(enable_blending && s != nullptr && s->transparent)) {
+				if (!perform_depth_test(ztest_func, row, col, z)) {
+					statistics.earlyz_optimized++;
+					return;
+				}
+			}
 
 			color_bgra pixel_color;
 
