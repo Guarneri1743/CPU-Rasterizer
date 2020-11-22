@@ -52,7 +52,7 @@ namespace Guarneri {
 		//        \/
 		//		bottom[0]
 		//====================================================
-		float interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const {
+		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const {
 			float len = this->vertices[0].position.y - this->vertices[2].position.y;
 			len = flip ? len : -len;
 			float dy = flip ? screen_y - this->vertices[2].position.y : screen_y - this->vertices[0].position.y;
@@ -65,7 +65,6 @@ namespace Guarneri {
 			r1 = flip ? 0 : 2;
 			lhs = Vertex::interpolate(this->vertices[l0], this->vertices[l1], t);
 			rhs = Vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
-			return dy;
 		}
 
 		// split a Triangle to 1-2 triangles
