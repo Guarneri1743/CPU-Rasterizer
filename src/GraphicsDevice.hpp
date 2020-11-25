@@ -55,10 +55,6 @@ namespace Guarneri {
 			}
 		}
 
-		void end_frame() {
-			
-		}
-
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
 				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
@@ -183,10 +179,34 @@ namespace Guarneri {
 			int row_end = (int)(bounds.max().y + 0.5f) + 1;
 			int col_start = (int)(bounds.min().x + 0.5f) - 1;
 			int col_end = (int)(bounds.max().x + 0.5f) + 1;
+
+			// build pixel block
+			int block_size = 2;
+			int row_rest = (row_end - row_start) % block_size;
+			if (row_rest != 0) {
+				if (row_end < this->height) {
+					row_end += block_size - row_rest;
+				}
+				else if (row_start > 0) {
+					row_start -= block_size - row_rest;;
+				}
+			}
+			int col_rest = (col_end - col_start) % block_size;
+			if (col_rest != 0) {
+				if (col_end < this->width) {
+					col_end += block_size - col_rest;;
+				}
+				else if (col_start > 0) {
+					col_start -= block_size - col_rest;;
+				}
+			}
 			row_start = CLAMP_INT(row_start, 0, this->height);
 			row_end = CLAMP_INT(row_end, 0, this->height);
 			col_start = CLAMP_INT(col_start, 0, this->width);
 			col_end = CLAMP_INT(col_end, 0, this->width);
+
+			int row_block_count = (row_end - row_start) / block_size;
+			int col_block_count = (col_end - col_start) / block_size;
 
 			bool flip = tri.flip;
 			int ccw_idx0 = 0;
@@ -198,24 +218,30 @@ namespace Guarneri {
 			auto v2 = tri[ccw_idx2].position.xy();
 
 			float area = Triangle::area_double(v0, v1, v2);
-			for (int row = row_start; row < row_end; row++) {
-				for (int col = col_start; col < col_end; col++) {
-					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
-					float w0 = Triangle::area_double(v1, v2, pixel);
-					float w1 = Triangle::area_double(v2, v0, pixel);
-					float w2 = Triangle::area_double(v0, v1, pixel);
-					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-						w0 /= area;
-						w1 /= area;
-						w2 /= area;
-						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-						process_fragment(vert, row, col, shader);
+
+			std::vector<Vertex> prev_row;
+			for (int block_row_start = row_start; block_row_start < row_end; block_row_start += block_size) {
+				std::vector<Vertex> prev_col;
+				for (int block_col_start = col_start; block_col_start < col_end; block_col_start += block_size) {
+					// process pixel block
+					for (int row = block_row_start; row < block_row_start + block_size; row ++) {
+						for (int col = block_col_start; col < block_col_start + block_size; col++ ) {
+							Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+							float w0 = Triangle::area_double(v1, v2, pixel);
+							float w1 = Triangle::area_double(v2, v0, pixel);
+							float w2 = Triangle::area_double(v0, v1, pixel);
+							if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+								w0 /= area; w1 /= area; w2 /= area;
+								Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
+								process_fragment(vert, row, col, shader);
+							}
+						}
 					}
 				}
 			}
 		}
 
-		void rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
+		void scanline_rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
 			bool flip = tri.flip;
 			int top_idx = flip ? 2 : 0;
 			int bottom_idx = flip ? 0 : 2;

@@ -86,6 +86,9 @@ namespace Guarneri {
 		uint32_t earlyz_optimized;
 	};
 
+	// pixel block
+	typedef struct { uint32_t start_x; uint32_t start_y; uint32_t size; } PixelBlock;
+
 	// framebuffer color 
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
 	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
