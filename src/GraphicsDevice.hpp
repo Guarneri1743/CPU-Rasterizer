@@ -179,17 +179,14 @@ namespace Guarneri {
 
 		void barycentric_rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
 			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
-
-			int top = (int)(bounds.min().y - 1.0f);
-			int bottom = (int)(bounds.max().y + 1.0f);
-			int left = (int)(bounds.min().x - 1.0f);
-			int right = (int)(bounds.max().x + 1.0f);
-			top = CLAMP_INT(top, 0, this->height);
-			bottom = CLAMP_INT(bottom, 0, this->height);
-			left = CLAMP_INT(left, 0, this->width);
-			right = CLAMP_INT(right, 0, this->width);
-			assert(top <= bottom);
-			assert(left <= right);
+			int row_start = (int)(bounds.min().y + 0.5f) - 1;
+			int row_end = (int)(bounds.max().y + 0.5f) + 1;
+			int col_start = (int)(bounds.min().x + 0.5f) - 1;
+			int col_end = (int)(bounds.max().x + 0.5f) + 1;
+			row_start = CLAMP_INT(row_start, 0, this->height);
+			row_end = CLAMP_INT(row_end, 0, this->height);
+			col_start = CLAMP_INT(col_start, 0, this->width);
+			col_end = CLAMP_INT(col_end, 0, this->width);
 
 			bool flip = tri.flip;
 			int ccw_idx0 = 0;
@@ -201,9 +198,9 @@ namespace Guarneri {
 			auto v2 = tri[ccw_idx2].position.xy();
 
 			float area = Triangle::area_double(v0, v1, v2);
-			for (int row = top; row < bottom; row++) {
-				for (int col = left; col < right; col++) {
-					Vector2 pixel((float)row + 0.5f, (float)col + 0.5f);
+			for (int row = row_start; row < row_end; row++) {
+				for (int col = col_start; col < col_end; col++) {
+					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
 					float w0 = Triangle::area_double(v1, v2, pixel);
 					float w1 = Triangle::area_double(v2, v0, pixel);
 					float w2 = Triangle::area_double(v0, v1, pixel);

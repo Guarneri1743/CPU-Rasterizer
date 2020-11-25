@@ -45,43 +45,43 @@ namespace Guarneri {
 			float min_y = FLT_MAX;
 			float max_y = FLT_MIN;
 
-			if (v1.x < min_x) {
+			if (LESS_THAN(v1.x, min_x)) {
 				min_x = v1.x;
 			}
-			if (v2.x < min_x) {
+			if (LESS_THAN(v2.x, min_x)) {
 				min_x = v2.x;
 			}
-			if (v3.x < min_x) {
+			if (LESS_THAN(v3.x, min_x)) {
 				min_x = v3.x;
 			}
 
-			if (v1.y < min_y) {
+			if (LESS_THAN(v1.y, min_y)) {
 				min_y = v1.y;
 			}
-			if (v2.y < min_y) {
+			if (LESS_THAN(v2.y, min_y)) {
 				min_y = v2.y;
 			}
-			if (v3.y < min_y) {
+			if (LESS_THAN(v3.y, min_y)) {
 				min_y = v3.y;
 			}
 
-			if (v1.x > max_x) {
+			if (GREATER_THAN(v1.x, max_x)) {
 				max_x = v1.x;
 			}
-			if (v2.x > max_x) {
+			if (GREATER_THAN(v2.x, max_x)) {
 				max_x = v2.x;
 			}
-			if (v3.x > max_x) {
+			if (GREATER_THAN(v3.x, max_x)) {
 				max_x = v3.x;
 			}
 
-			if (v1.y > max_y) {
+			if (GREATER_THAN(v1.y, max_y)) {
 				max_y = v1.y;
 			}
-			if (v2.y > max_y) {
+			if (GREATER_THAN(v2.y, max_y)) {
 				max_y = v2.y;
 			}
-			if (v3.y > max_y) {
+			if (GREATER_THAN(v3.y, max_y)) {
 				max_y = v3.y;
 			}
 
@@ -127,16 +127,16 @@ namespace Guarneri {
 		}
 
 		bool contains(const Guarneri::Vector2& pos) const {
-			if (pos.x < min().x) {
+			if (LESS_THAN(pos.x, min().x)) {
 				return false;
 			}
-			if (pos.x > max().x) {
+			if (GREATER_THAN(pos.x, max().x)) {
 				return false;
 			}
-			if (pos.y < min().y) {
+			if (LESS_THAN(pos.y, min().y)) {
 				return false;
 			}
-			if (pos.y > max().y) {
+			if (GREATER_THAN(pos.y, max().y)) {
 				return false;
 			}
 			return true;
