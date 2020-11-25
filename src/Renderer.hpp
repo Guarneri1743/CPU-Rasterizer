@@ -41,7 +41,7 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
-		static void draw_triangle(const std::shared_ptr<Shader>& shader, std::vector<Triangle> triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		static void draw_triangle(const std::shared_ptr<Shader>& shader, const std::vector<Triangle>& triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			for (auto& tri : triangles) {
 				Graphics().draw(shader, tri[0], tri[1], tri[2], m, v, p);
 			}

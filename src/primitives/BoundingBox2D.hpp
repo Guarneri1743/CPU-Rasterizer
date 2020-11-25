@@ -26,6 +26,68 @@ namespace Guarneri {
 			this->extents = b.extents;
 		}
 
+		BoundingBox2D(const Vector4& v1, const Vector4& v2, const Vector4& v3) {
+			from_triangle(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), Vector2(v3.x, v3.y));
+		}
+
+		BoundingBox2D(const Vector3& v1, const Vector3& v2, const Vector3& v3) {
+			from_triangle(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), Vector2(v3.x, v3.y));
+		}
+
+		BoundingBox2D(const Vector2& v1, const Vector2& v2, const Vector2& v3) {
+			from_triangle(v1, v2, v3);
+		}
+
+	private:
+		void from_triangle(const Vector2& v1, const Vector2& v2, const Vector2& v3) {
+			float min_x = FLT_MAX;
+			float max_x = FLT_MIN;
+			float min_y = FLT_MAX;
+			float max_y = FLT_MIN;
+
+			if (v1.x < min_x) {
+				min_x = v1.x;
+			}
+			if (v2.x < min_x) {
+				min_x = v2.x;
+			}
+			if (v3.x < min_x) {
+				min_x = v3.x;
+			}
+
+			if (v1.y < min_y) {
+				min_y = v1.y;
+			}
+			if (v2.y < min_y) {
+				min_y = v2.y;
+			}
+			if (v3.y < min_y) {
+				min_y = v3.y;
+			}
+
+			if (v1.x > max_x) {
+				max_x = v1.x;
+			}
+			if (v2.x > max_x) {
+				max_x = v2.x;
+			}
+			if (v3.x > max_x) {
+				max_x = v3.x;
+			}
+
+			if (v1.y > max_y) {
+				max_y = v1.y;
+			}
+			if (v2.y > max_y) {
+				max_y = v2.y;
+			}
+			if (v3.y > max_y) {
+				max_y = v3.y;
+			}
+
+			this->set_min_max(Vector2(min_x, min_y), Vector2(max_x, max_y));
+		}
+
 	public:
 		Guarneri::Vector2 center;
 		Guarneri::Vector2 extents;

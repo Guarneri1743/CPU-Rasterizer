@@ -63,6 +63,20 @@ namespace Guarneri {
 			bitangent *= _rhw;
 		}
 
+		static Vertex barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& w0, const float& w1, const float& w2) {
+			Vertex ret;
+			ret.position = v0.position * w0 + v1.position * w1 + v2.position * w2;
+			ret.world_pos = v0.world_pos * w0 + v1.world_pos * w1 + v2.world_pos * w2;
+			ret.shadow_coord = v0.shadow_coord * w0 + v1.shadow_coord * w1 + v2.shadow_coord * w2;
+			ret.color = v0.color * w0 + v1.color * w1 + v2.color * w2;
+			ret.normal = v0.normal * w0 + v1.normal * w1 + v2.normal * w2;
+			ret.uv = v0.uv * w0 + v1.uv * w1 + v2.uv * w2;
+			ret.tangent = v0.tangent * w0 + v1.tangent * w1 + v2.tangent * w2;
+			ret.bitangent = v0.bitangent * w0 + v1.bitangent * w1 + v2.bitangent * w2;
+			ret.rhw = v0.rhw * w0 + v1.rhw * w1 + v2.rhw * w2;
+			return ret;
+		}
+
 		static Vertex interpolate(const Vertex& left, const Vertex& right, const float& t) {
 			Vertex ret;
 			ret.position = left.position + (right.position - left.position) * t;

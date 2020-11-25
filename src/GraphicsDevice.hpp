@@ -141,7 +141,10 @@ namespace Guarneri {
 			std::vector<Triangle> tris = tri.horizontally_split();
 
 			// rasterization
-			rasterize(tris, shader);
+			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
+				barycentric_rasterize(*iter, shader);
+				//rasterize(*iter, shader);
+			}
 
 			// wireframe
 			if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
@@ -174,49 +177,76 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
-		void rasterize_pixel(const std::shared_ptr<Shader>& shader, const int& row, const int& col, Vertex& lhs, const Vertex& rhs) {
-			process_fragment(lhs, row, col, shader);
-			auto dx = Vertex::differential(lhs, rhs);
-			lhs = Vertex::intagral(lhs, dx);
-		}
+		void barycentric_rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
+			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
 
-		void rasterize_vertically(const std::shared_ptr<Shader>& shader, const Triangle& tri, const int& row) {
-			Vertex lhs;
-			Vertex rhs;
-			tri.interpolate((float)row + 0.5f, lhs, rhs);
-
-			// screen space clipping
-			bool enable_screen_clipping = (misc_param.culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
-			if (enable_screen_clipping) {
-				Clipper::screen_clipping(lhs, rhs, this->width);
-			}
-
-			int left = (int)(lhs.position.x + 0.5f);
+			int top = (int)(bounds.min().y - 1.0f);
+			int bottom = (int)(bounds.max().y + 1.0f);
+			int left = (int)(bounds.min().x - 1.0f);
+			int right = (int)(bounds.max().x + 1.0f);
+			top = CLAMP_INT(top, 0, this->height);
+			bottom = CLAMP_INT(bottom, 0, this->height);
 			left = CLAMP_INT(left, 0, this->width);
-			int right = (int)(rhs.position.x + 0.5f);
 			right = CLAMP_INT(right, 0, this->width);
-			assert(right >= left);
+			assert(top <= bottom);
+			assert(left <= right);
 
-			for (auto col = left; col < right; col++) {
-				rasterize_pixel(shader, row, col, lhs, rhs);
+			bool flip = tri.flip;
+			int ccw_idx0 = 0;
+			int ccw_idx1 = flip ? 2 : 1;
+			int ccw_idx2 = flip ? 1 : 2;
+				
+			auto v0 = tri[ccw_idx0].position.xy();
+			auto v1 = tri[ccw_idx1].position.xy();
+			auto v2 = tri[ccw_idx2].position.xy();
+
+			float area = Triangle::area_double(v0, v1, v2);
+			for (int row = top; row < bottom; row++) {
+				for (int col = left; col < right; col++) {
+					Vector2 pixel((float)row + 0.5f, (float)col + 0.5f);
+					float w0 = Triangle::area_double(v1, v2, pixel);
+					float w1 = Triangle::area_double(v2, v0, pixel);
+					float w2 = Triangle::area_double(v0, v1, pixel);
+					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+						w0 /= area;
+						w1 /= area;
+						w2 /= area;
+						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
+						process_fragment(vert, row, col, shader);
+					}
+				}
 			}
 		}
 
-		// rasterization
-		void rasterize(const std::vector<Triangle>& tris, const std::shared_ptr<Shader>& shader) {
-			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-				auto& tri = *iter;
-				bool flip = tri.flip;
-				int top_idx = flip ? 2 : 0;
-				int bottom_idx = flip ? 0 : 2;
-				int top = (int)(tri[top_idx].position.y + 0.5f);
-				int bottom = (int)(tri[bottom_idx].position.y + 0.5f);
-				top = CLAMP_INT(top, 0, this->height);
-				bottom = CLAMP_INT(bottom, 0, this->height);
-				assert(bottom >= top);
+		void rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
+			bool flip = tri.flip;
+			int top_idx = flip ? 2 : 0;
+			int bottom_idx = flip ? 0 : 2;
+			int top = (int)(tri[top_idx].position.y + 0.5f);
+			int bottom = (int)(tri[bottom_idx].position.y + 0.5f);
+			top = CLAMP_INT(top, 0, this->height);
+			bottom = CLAMP_INT(bottom, 0, this->height);
+			assert(bottom >= top);
 
-				for (int row = top; row < bottom; row++) {
-					rasterize_vertically(shader, tri, row);
+			for (int row = top; row < bottom; row ++) {
+				Vertex lhs, rhs;
+				tri.interpolate((float)row + 0.5f, lhs, rhs);
+
+				// screen space clipping
+				bool enable_screen_clipping = (misc_param.culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
+				if (enable_screen_clipping) {
+					Clipper::screen_clipping(lhs, rhs, this->width);
+				}
+				int left = (int)(lhs.position.x + 0.5f);
+				left = CLAMP_INT(left, 0, this->width);
+				int right = (int)(rhs.position.x + 0.5f);
+				right = CLAMP_INT(right, 0, this->width);
+				assert(right >= left);
+
+				for (auto col = left; col < right; col++) {
+					process_fragment(lhs, row, col, shader);
+					auto dx = Vertex::differential(lhs, rhs);
+					lhs = Vertex::intagral(lhs, dx);
 				}
 			}
 		}

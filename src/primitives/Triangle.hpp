@@ -5,6 +5,8 @@
 namespace Guarneri {
 	struct Triangle {
 	public:
+		Triangle() { this->flip = false; }
+
 		Triangle(const Vertex verts[3]) {
 			for (int i = 0; i < 3; i++) {
 				vertices[i] = verts[i];
@@ -149,6 +151,34 @@ namespace Guarneri {
 			}
 
 			return ret;
+		}
+
+		float area() const {
+			auto e1 = vertices[1].position - vertices[0].position;
+			auto e2 = vertices[2].position - vertices[0].position;
+			return Vector3::cross(e1.xyz(), e2.xyz()).magnitude() / 2.0f;
+		}
+
+		float area_double() const {
+			auto e1 = vertices[1].position - vertices[0].position;
+			auto e2 = vertices[2].position - vertices[0].position;
+			return Vector3::cross(e1.xyz(), e2.xyz()).magnitude();
+		}
+
+		static float area_double(const Vector2& v1, const Vector2& v2, const Vector2& v3) {
+			return (v3.x - v1.x) * (v2.y - v1.y) - (v3.y - v1.y) * (v2.x - v1.x);
+		}
+
+		static float area_double(const Vector3& v1, const Vector3& v2, const Vector3& v3) {
+			auto e1 = v2 - v1;
+			auto e2 = v3 - v1;
+			return Vector3::cross(e1, e2).magnitude();
+		}
+
+		static float area(const Vector3& v1, const Vector3& v2, const Vector3& v3) {
+			auto e1 = v2 - v1;
+			auto e2 = v3 - v1;
+			return Vector3::cross(e1, e2).magnitude() / 2.0f;
 		}
 
 		Vertex& operator[](const uint32_t i) { return vertices[i]; }

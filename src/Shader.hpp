@@ -195,12 +195,12 @@ namespace Guarneri {
 			this->dst_factor = other.dst_factor;
 			this->blend_op = other.blend_op;
 			this->transparent = other.transparent;
-			this->name2float = other.name2float;
-			this->name2float4 = other.name2float4;
-			this->name2tex = other.name2tex;
-			this->name2cubemap = other.name2cubemap;
-			this->name2int = other.name2int;
-			this->keywords = other.keywords;
+			this->name2float.insert(other.name2float.begin(), other.name2float.end());
+			this->name2float4.insert(other.name2float4.begin(), other.name2float4.end());
+			this->name2tex.insert(other.name2tex.begin(), other.name2tex.end());
+			this->name2cubemap.insert(other.name2cubemap.begin(), other.name2cubemap.end());
+			this->name2int.insert(other.name2int.begin(), other.name2int.end());
+			this->keywords.insert(other.keywords.begin(), other.keywords.end());
 			this->stencil_func = other.stencil_func;
 			this->stencil_pass_op = other.stencil_pass_op;
 			this->stencil_fail_op = other.stencil_fail_op;
@@ -209,6 +209,7 @@ namespace Guarneri {
 			this->stencil_write_mask = other.stencil_write_mask;
 			this->stencil_ref_val = other.stencil_ref_val;
 			this->double_face = other.double_face;
+			this->lighting_param = other.lighting_param;
 			this->skybox = other.skybox;
 		}
 
