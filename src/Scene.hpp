@@ -71,7 +71,7 @@ namespace Guarneri{
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::SHADED;
 				}
 				else if (code == KeyCode::F2) {
-					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::SCANLINE;
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::MIPMAP;
 				}
 				else if (code == KeyCode::F3) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::WIREFRAME;

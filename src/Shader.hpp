@@ -115,7 +115,7 @@ namespace Guarneri {
 			return o;
 		}
 
-		virtual Color fragment_shader(const v2f& input) {
+		virtual Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) {
 			Color ambient = misc_param.main_light.ambient;
 			Color specular = misc_param.main_light.specular;
 			Color diffuse = misc_param.main_light.diffuse;
@@ -165,6 +165,41 @@ namespace Guarneri {
 			if (name2tex.count(ao_prop) >0&&name2tex[ao_prop]->sample(input.uv.x, input.uv.y, ao)) {
 				ret *= ao;
 			}
+
+			if ((misc_param.render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
+				Vector2 ddx_uv = ddx.uv;
+				Vector2 ddy_uv = ddy.uv;
+				float rho = std::max(std::sqrt(Vector2::dot(ddx_uv, ddx_uv)), std::sqrt(Vector2::dot(ddy_uv, ddy_uv)));
+				float logrho = std::log2(rho);
+				int mip = std::max(int(logrho + 0.5f), 0);
+				if (mip == 0) {
+					return Color(1.0f, 0.0f, 0.0f, 1.0f);
+				}
+				else if (mip == 1) {
+					return Color(0.0f, 1.0f, 0.0f, 1.0f);
+				}
+				else if (mip == 2) {
+					return Color(0.0f, 0.0f, 1.0f, 1.0f);
+				}
+				else if (mip == 3) {
+					return Color(1.0f, 0.0f, 1.0f, 1.0f);
+				}
+				else if (mip == 4) {
+					return Color(0.0f, 1.0f, 1.0f, 1.0f);
+				}
+				else if (mip == 5) {
+					return Color(1.0f, 1.0f, 1.0f, 1.0f);
+				}
+				else if (mip == 6) {
+					return Color(0.5f, 0.0f, 0.5f, 1.0f);
+				}
+				else if (mip == 7) {
+					return Color(0.0f, 0.5f, 0.5f, 1.0f);
+				}
+				else {
+					return Color(0.5f, 0.5f, 0.5f, 1.0f);
+				}
+ 			}
 
 			if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
 				return input.uv;

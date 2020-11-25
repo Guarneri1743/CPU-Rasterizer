@@ -112,8 +112,9 @@ namespace Guarneri{
 		UV = 1 << 3,
 		VERTEX_COLOR = 1 << 4,
 		NORMAL = 1 << 5,
-		SCANLINE = 1 << 6,
-		STENCIL = 1 << 7
+		MIPMAP = 1 << 6,
+		STENCIL = 1 << 7,
+		SCANLINE = 1 << 8
 	};
 
 	template<>
