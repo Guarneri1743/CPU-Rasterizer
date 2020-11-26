@@ -107,6 +107,7 @@ namespace Guarneri {
 				InputMgr().update();
 				scene.update();
 				scene.render();
+				Graphics().fence();
 				Window().flush();
 				Time::frame_end();
 				std::stringstream ss;

@@ -87,11 +87,7 @@ namespace Guarneri {
 		bool normal_map = false;
 
 	public:
-		void discard() {
-			discarded = true;
-		}
-
-		virtual v2f vertex_shader(const a2v& input) {
+		virtual v2f vertex_shader(const a2v& input) const {
 			v2f o;
 			auto oo = p * v * m * Vector4(input.position.x, input.position.y, input.position.z, 1.0f);
 			o.position = oo;
@@ -115,7 +111,7 @@ namespace Guarneri {
 			return o;
 		}
 
-		virtual Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) {
+		virtual Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const {
 			Color ambient = misc_param.main_light.ambient;
 			Color specular = misc_param.main_light.specular;
 			Color diffuse = misc_param.main_light.diffuse;
@@ -134,7 +130,7 @@ namespace Guarneri {
 		
 			Color normal_tex;
 			float spec;
-			if (name2tex.count(normal_prop) > 0 && name2tex[normal_prop]->sample(input.uv.x, input.uv.y, normal_tex)) {
+			if (name2tex.count(normal_prop) > 0 && name2tex.at(normal_prop)->sample(input.uv.x, input.uv.y, normal_tex)) {
 				Matrix3x3 tbn = Matrix3x3(input.tangent, input.bitangent, input.normal);
 				light_dir = tbn * light_dir;
 				view_dir = tbn * view_dir;
@@ -149,12 +145,12 @@ namespace Guarneri {
 
 			Color ret = ambient;
 			Color main_tex;
-			if (name2tex.count(albedo_prop) > 0 && name2tex[albedo_prop]->sample(input.uv.x, input.uv.y, main_tex)) {
+			if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex)) {
 				ret += Color::saturate(diffuse * ndl * main_tex);
 			}
 
 			Color spec_tex;
-			if (name2tex.count(specular_prop) > 0 && name2tex[specular_prop]->sample(input.uv.x, input.uv.y, spec_tex)) {
+			if (name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(input.uv.x, input.uv.y, spec_tex)) {
 				ret += Color::saturate(specular * spec * spec_tex);
 			}
 			else {
@@ -162,7 +158,7 @@ namespace Guarneri {
 			}
 
 			Color ao;
-			if (name2tex.count(ao_prop) >0&&name2tex[ao_prop]->sample(input.uv.x, input.uv.y, ao)) {
+			if (name2tex.count(ao_prop) >0&&name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao)) {
 				ret *= ao;
 			}
 

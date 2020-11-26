@@ -6,7 +6,7 @@ namespace Guarneri {
 	class Material : public Object {
 	public:
 		Material() {
-			this->target_shader = std::make_shared<Shader>();
+			this->target_shader = std::make_unique<Shader>();
 			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
 			this->stencil_pass_op = StencilOp::KEEP;
@@ -47,7 +47,7 @@ namespace Guarneri {
 
 		Material(std::unique_ptr<SkyboxShader>& shader) {
 			auto shader_ptr = shader.release();
-			this->target_shader = std::shared_ptr<Shader>((Shader*)(shader_ptr));
+			this->target_shader = std::unique_ptr <Shader>((Shader*)(shader_ptr));
 			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
 			this->stencil_pass_op = StencilOp::KEEP;
@@ -95,7 +95,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		LightingData lighting_param;
-		std::shared_ptr<Shader> target_shader;
+		std::unique_ptr<Shader> target_shader;
 
 	public:
 		static std::unique_ptr<Material> create() {
@@ -211,7 +211,7 @@ namespace Guarneri {
 		}
 
 		void copy(const Material& other) {
-			this->target_shader = other.target_shader;
+			this->target_shader = std::make_unique<Shader>(Shader(*other.target_shader.get()));
 			this->ztest_func = other.ztest_func;
 			this->zwrite_mode = other.zwrite_mode;
 			this->stencil_func = other.stencil_func;

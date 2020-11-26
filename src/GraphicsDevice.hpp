@@ -3,6 +3,15 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
+	struct PrimitiveCommand{
+		PrimitiveCommand(const Triangle& triangle, Shader* shader) {
+			this->triangle = triangle;
+			this->shader = shader;
+		}
+		Triangle triangle;
+		Shader* shader;
+	};
+
 	class GraphicsDevice {
 	public:
 		uint32_t width;
@@ -17,6 +26,8 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
+		std::vector<PrimitiveCommand> pending_commands;
+
 
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
@@ -30,7 +41,7 @@ namespace Guarneri {
 			framebuffer->clear(DEFAULT_COLOR);
 		}
 
-		void draw(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
 			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
 			{
@@ -55,6 +66,24 @@ namespace Guarneri {
 			}
 		}
 
+		void fence() {
+			//for (auto& cmd : pending_commands) {
+			//	auto tri = cmd.triangle;
+			//	auto shader = cmd.shader;
+			//	barycentric_rasterize(tri, shader);
+			//	//scanline_rasterize(tri, shader);
+
+			//	// wireframe
+			//	if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+
+			//		draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			//		draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			//		draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			//	}
+			//}
+			pending_commands.clear();
+		}
+
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
 				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
@@ -76,7 +105,7 @@ namespace Guarneri {
 			statistics.earlyz_optimized = 0;
 		}
 
-		void draw_triangle(const std::shared_ptr<Shader>& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
 
 			REF(m);
@@ -138,32 +167,13 @@ namespace Guarneri {
 
 			// rasterization
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-				barycentric_rasterize(*iter, shader);
-				//rasterize(*iter, shader);
-			}
-
-			// wireframe
-			if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-
-				draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-				draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-				draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			}
-
-			// wireframe & scanline
-			if ((misc_param.render_flag & RenderFlag::SCANLINE) != RenderFlag::DISABLE) {
-
-				for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-					auto& t = *iter;
-					draw_screen_segment(t[0].position, t[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(t[0].position, t[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(t[2].position, t[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-				}
+				PrimitiveCommand cmd(*iter, shader);
+				pending_commands.push_back(cmd);
 			}
 		}
 
 		// per vertex processing
-		v2f process_vertex(const std::shared_ptr<Shader>& shader, const Vertex& vert) const {
+		v2f process_vertex(Shader* shader, const Vertex& vert) const {
 			a2v input;
 			input.position = vert.position;
 			input.uv = vert.uv;
@@ -173,7 +183,7 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
-		void barycentric_rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
+		void barycentric_rasterize(const Triangle& tri, Shader* shader) {
 			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
 			int row_start = (int)(bounds.min().y + 0.5f) - 1;
 			int row_end = (int)(bounds.max().y + 0.5f) + 1;
@@ -286,7 +296,7 @@ namespace Guarneri {
 			const Triangle& tri, 
 			const Vector2& v0, const Vector2& v1, const Vector2& v2, const float& area, 
 			const int& ccw_idx0, const int& ccw_idx1, const int& ccw_idx2,
-			const std::shared_ptr<Shader>& shader, 
+			Shader* shader, 
 			const int& row, const int& col,
 			const Vertex& up, const Vertex& left) {
 			Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
@@ -304,7 +314,7 @@ namespace Guarneri {
 			return Vertex();
 		}
 
-		void scanline_rasterize(const Triangle& tri, const std::shared_ptr<Shader>& shader) {
+		void scanline_rasterize(const Triangle& tri, Shader* shader) {
 			bool flip = tri.flip;
 			int top_idx = flip ? 2 : 0;
 			int bottom_idx = flip ? 0 : 2;
@@ -338,7 +348,7 @@ namespace Guarneri {
 		}
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const Vertex& ddx, const Vertex& ddy, const std::shared_ptr<Shader>&  shader) {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const Vertex& ddx, const Vertex& ddy, Shader*  shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -391,7 +401,6 @@ namespace Guarneri {
 				v_out.uv = v.uv * w;
 				v_out.tangent = v.tangent * w;
 				v_out.bitangent = v.bitangent * w;
-				s->discarded = false;
 				fragment_result = s->fragment_shader(v_out, ddx, ddy);
 				pixel_color = Color::encode_bgra(fragment_result);
 			}
