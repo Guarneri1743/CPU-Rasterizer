@@ -4,6 +4,7 @@
 
 namespace Guarneri {
 	struct PrimitiveCommand{
+		PrimitiveCommand() {}
 		PrimitiveCommand(const Triangle& triangle, Shader* shader) {
 			this->triangle = triangle;
 			this->shader = shader;
@@ -11,6 +12,8 @@ namespace Guarneri {
 		Triangle triangle;
 		Shader* shader;
 	};
+
+	RingBuffer<PrimitiveCommand> cmd_buffer(65535);
 
 	class GraphicsDevice {
 	public:
@@ -26,7 +29,6 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
-		std::vector<PrimitiveCommand> pending_commands;
 
 
 	public:
@@ -66,22 +68,49 @@ namespace Guarneri {
 			}
 		}
 
-		void fence() {
-			//for (auto& cmd : pending_commands) {
-			//	auto tri = cmd.triangle;
-			//	auto shader = cmd.shader;
-			//	barycentric_rasterize(tri, shader);
-			//	//scanline_rasterize(tri, shader);
+		void rasterize_commands(size_t start, size_t end) {
+			for (int idx = start; idx < end; idx++) {
+				auto cmd = cmd_buffer.read();
+				auto tri = cmd.triangle;
+				auto shader = cmd.shader;
 
-			//	// wireframe
-			//	if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+				//barycentric_rasterize(tri, shader);
+				scanline_rasterize(tri, shader);
 
-			//		draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			//		draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			//		draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			//	}
-			//}
-			pending_commands.clear();
+				// wireframe
+				if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+
+					draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				}
+			}
+		}
+
+#ifdef MULTI_THREAD
+		static void rasterization_task(size_t start, size_t end) {
+			Graphics().rasterize_commands(start, end);
+		}
+#endif
+
+		void dispatch() {
+#ifdef MULTI_THREAD
+			auto thread_size = std::thread::hardware_concurrency();
+			ThreadPool tp(thread_size);
+			int task_size = 256;
+			int buf_size = cmd_buffer.size();
+			size_t block_size = buf_size / task_size;
+			size_t start = 0;
+			size_t end = block_size;
+			for (size_t tid = 0; tid < task_size; tid++) {
+				start = tid * block_size;
+				end = (tid + 1) * block_size;
+				tp.enqueue(rasterization_task, start, end);
+			}
+			tp.enqueue(rasterization_task, end, buf_size);
+#else
+			rasterize_commands(0, cmd_buffer.size());
+#endif
 		}
 
 		void clear_buffer(const BufferFlag& flag) {
@@ -168,7 +197,7 @@ namespace Guarneri {
 			// rasterization
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				PrimitiveCommand cmd(*iter, shader);
-				pending_commands.push_back(cmd);
+				cmd_buffer.write(cmd);
 			}
 		}
 

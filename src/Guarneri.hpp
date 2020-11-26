@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <filesystem>
 #include <thread>
+#include <mutex>
 
 #define NOMINMAX
 #include <windows.h>
@@ -36,6 +37,7 @@
 // Rasterizer Core
 #include <BitwiseEnum.hpp>
 #include <ThreadPool.hpp>
+#include <RingBuffer.hpp>
 #include <PipelineDefinitions.hpp>
 #include <GDIWindow.hpp>
 #include <Singleton.hpp>
@@ -107,11 +109,11 @@ namespace Guarneri {
 				InputMgr().update();
 				scene.update();
 				scene.render();
-				Graphics().fence();
+				Graphics().dispatch();
 				Window().flush();
 				Time::frame_end();
 				std::stringstream ss;
-				ss << "SoftRasterizer  FPS: " << (int)Time::fps << " Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
+				ss << "SoftRasterizer  FPS: " << (int)Time::fps <<" Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
 				Window().set_title(ss.str().c_str());
 				Sleep(1);
 			}
