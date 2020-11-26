@@ -13,7 +13,8 @@ namespace Guarneri {
 		Shader* shader;
 	};
 
-	RingBuffer<PrimitiveCommand> cmd_buffer(65535);
+	// todo: prevent dead lock
+	RingBuffer<PrimitiveCommand> cmd_buffer(65535 * 2);
 
 	class GraphicsDevice {
 	public:
@@ -68,8 +69,8 @@ namespace Guarneri {
 			}
 		}
 
-		void rasterize_commands(size_t start, size_t end) {
-			for (int idx = start; idx < end; idx++) {
+		void rasterize_commands(const int& count) {
+			for (int i = 0; i < count; i++) {
 				auto cmd = cmd_buffer.read();
 				auto tri = cmd.triangle;
 				auto shader = cmd.shader;
@@ -79,7 +80,6 @@ namespace Guarneri {
 
 				// wireframe
 				if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-
 					draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 					draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 					draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -88,8 +88,8 @@ namespace Guarneri {
 		}
 
 #ifdef MULTI_THREAD
-		static void rasterization_task(size_t start, size_t end) {
-			Graphics().rasterize_commands(start, end);
+		static void rasterization_task(const int& count) {
+			Graphics().rasterize_commands(count);
 		}
 #endif
 
@@ -98,18 +98,14 @@ namespace Guarneri {
 			auto thread_size = std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
 			int task_size = 256;
-			int buf_size = cmd_buffer.size();
-			size_t block_size = buf_size / task_size;
-			size_t start = 0;
-			size_t end = block_size;
-			for (size_t tid = 0; tid < task_size; tid++) {
-				start = tid * block_size;
-				end = (tid + 1) * block_size;
-				tp.enqueue(rasterization_task, start, end);
+			int task_count = cmd_buffer.size() / task_size;
+			int rest = cmd_buffer.size() % task_size;
+			for (int i = 0; i < task_count; i++) {
+				tp.enqueue(rasterization_task, task_size);
 			}
-			tp.enqueue(rasterization_task, end, buf_size);
+			tp.enqueue(rasterization_task, rest);
 #else
-			rasterize_commands(0, cmd_buffer.size());
+			rasterize_commands(cmd_buffer.size());
 #endif
 		}
 
@@ -194,9 +190,11 @@ namespace Guarneri {
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontally_split();
 
-			// rasterization
+			// fill ring buffer
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				PrimitiveCommand cmd(*iter, shader);
+
+				// todo: prevent dead lock
 				cmd_buffer.write(cmd);
 			}
 		}

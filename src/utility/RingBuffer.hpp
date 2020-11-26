@@ -15,14 +15,16 @@ namespace Guarneri {
             tail = 0;
         }
 
+        std::condition_variable consume_condition;
+        std::condition_variable produce_condition;
+
+
     private:
         int head;
         int tail;
         T* buffer;
         int buf_size;
         std::mutex buf_mutex;
-        std::condition_variable consume_condition;
-        std::condition_variable produce_condition;
 
     public:
         int size() {
@@ -38,23 +40,21 @@ namespace Guarneri {
         }
 
         T read() {
-            {
-                std::unique_lock<std::mutex> lock(this->buf_mutex);
-                consume_condition.wait(lock, [=] { return !is_empty(); });
-                T data = buffer[head];
-                head = (head + 1) % buf_size;
-                return data;
-            }
+            std::unique_lock<std::mutex> lock(this->buf_mutex);
+            consume_condition.wait(lock, [=] { return !is_empty(); });
+            T data = buffer[head];
+            head = (head + 1) % buf_size;
+            lock.unlock();
             produce_condition.notify_one();
+            return data;
         }
 
         void write(T data) {
-            {
-                std::unique_lock<std::mutex> lock(this->buf_mutex);
-                produce_condition.wait(lock, [=] { return !is_full(); });
-                buffer[tail] = data;
-                tail = (tail + 1) % buf_size;
-            }
+            std::unique_lock<std::mutex> lock(this->buf_mutex);
+            produce_condition.wait(lock, [=] { return !is_full(); });
+            buffer[tail] = data;
+            tail = (tail + 1) % buf_size;
+            lock.unlock();
             consume_condition.notify_one();
         }
     };
