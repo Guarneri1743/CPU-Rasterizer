@@ -3,6 +3,7 @@
 
 namespace Guarneri {
 	struct TiledTask {
+		TiledTask() { shader = nullptr;  }
 		TiledTask(const Triangle& triangle, Shader* shader) {
 			this->triangle = triangle;
 			this->shader = shader;
@@ -28,8 +29,12 @@ namespace Guarneri {
 			return tasks.try_pop(task);
 		}
 
-		static int coord2index(const int& row, const int& col, const int& tile_count) {
-			return row * tile_count + col;
+		int task_size() {
+			return tasks.size();
+		}
+
+		static int coord2index(const int& row, const int& col, const int& col_tile_count) {
+			return row * col_tile_count + col;
 		}
 
 		static void pixel2tile(const int& prow, const int& pcol, int& trow, int& tcol, const int& tile_size) {
@@ -38,7 +43,7 @@ namespace Guarneri {
 			tcol = pcol / tile_size;
 		}
 
-		static std::vector<int> dispatch_render_task(FrameTile* tiles, const Triangle& tri, Shader* shader, const int& w, const int& h, const int& tile_size, const int& tile_count) {
+		static std::vector<int> dispatch_render_task(FrameTile* tiles, const Triangle& tri, Shader* shader, const int& w, const int& h, const int& tile_size, const int& col_tile_count) {
 			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
 			int row_start = (int)(bounds.min().y + 0.5f) - 1;
 			int row_end = (int)(bounds.max().y + 0.5f) + 1;
@@ -58,7 +63,7 @@ namespace Guarneri {
 
 			for (int row = tile_row_start; row < tile_row_end; row++) {
 				for (int col = tile_col_start; col < tile_col_end; col++) {
-					int tile_idx = coord2index(row, col, tile_count);
+					int tile_idx = coord2index(row, col, col_tile_count);
 					tiles[tile_idx].push_task(tri, shader);
 				}
 			}

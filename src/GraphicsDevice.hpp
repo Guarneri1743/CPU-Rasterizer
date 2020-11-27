@@ -22,23 +22,26 @@ namespace Guarneri {
 		FrameTile* tiles;
 		int row_tile_count;
 		int col_tile_count;
+		int tile_len;
 
 	public:
-		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
-			this->width = width_t;
-			this->height = height_t;
+		void initialize(void* bitmap_handle, uint32_t w, uint32_t h) {
+			this->width = w;
+			this->height = h;
 
 			// prepare tiles
-			int row_rest = height_t % TILE_SIZE;
-			int col_rest = width_t % TILE_SIZE;
-			row_tile_count = height_t / TILE_SIZE + row_rest > 0 ? 1 : 0;
-			col_tile_count = width_t / TILE_SIZE + col_rest > 0 ? 1 : 0;
-			tiles = new FrameTile[row_tile_count * col_tile_count];
+			int row_rest = h % TILE_SIZE;
+			int col_rest = w % TILE_SIZE;
+			row_tile_count = h / TILE_SIZE + row_rest > 0 ? 1 : 0;
+			col_tile_count = w / TILE_SIZE + col_rest > 0 ? 1 : 0;
+			tile_len = static_cast<int>(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
+			tiles = new FrameTile[tile_len];
+			std::cout << "row_tile_count: " << row_tile_count << " col_tile_count: " << col_tile_count << std::endl;
 			
 			// prepare buffers
-			zbuffer = std::make_shared<RawBuffer<float>>(width_t, height_t);
-			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
-			stencilbuffer = std::make_shared<RawBuffer<uint8_t>>(width_t, height_t);
+			zbuffer = std::make_shared<RawBuffer<float>>(w, h);
+			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
+			stencilbuffer = std::make_shared<RawBuffer<uint8_t>>(w, h);
 			zbuffer->clear(FAR_Z);
 			stencilbuffer->clear(DEFAULT_STENCIL);
 			framebuffer->clear(DEFAULT_COLOR);
@@ -88,6 +91,27 @@ namespace Guarneri {
 			statistics.culled_triangle_count = 0;
 			statistics.triangle_count = 0;
 			statistics.earlyz_optimized = 0;
+		}
+
+		void render_tiles() {
+			for (auto tidx = 0; tidx < tile_len; tidx++) {
+				auto& tile = tiles[tidx];
+				for (auto idx = 0; idx < tile.task_size(); idx++) {
+					TiledTask task;
+					if (tile.pop_task(task)) {
+						auto triangle = task.triangle;
+						auto shader = task.shader;
+						rasterize(triangle, shader, RasterizerStrategy::SCANBLOCK);
+
+						// wireframe
+						if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+							draw_screen_segment(triangle[0].position, triangle[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+							draw_screen_segment(triangle[0].position, triangle[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+							draw_screen_segment(triangle[2].position, triangle[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						}
+					}
+				}
+			}
 		}
 
 		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
@@ -150,18 +174,10 @@ namespace Guarneri {
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontally_split();
 
-			// fill ring buffer
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				auto tri = *iter;
 
-				rasterize(tri, shader, RasterizerStrategy::SCANBLOCK);
-
-				// wireframe
-				if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-					draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-				}
+				FrameTile::dispatch_render_task(tiles, tri, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
 			}
 		}
 
