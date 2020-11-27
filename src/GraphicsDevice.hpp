@@ -17,12 +17,14 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
+		std::mutex tile_mutex;
+
 		// framebuffer tiles
-		const int TILE_SIZE = 64;
+		const uint32_t TILE_SIZE = 64;
 		FrameTile* tiles;
-		int row_tile_count;
-		int col_tile_count;
-		int tile_length;
+		uint32_t row_tile_count;
+		uint32_t col_tile_count;
+		uint32_t tile_length;
 
 	public:
 		void initialize(void* bitmap_handle, uint32_t w, uint32_t h) {
@@ -178,15 +180,16 @@ namespace Guarneri {
 #ifdef MULTI_THREAD
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			auto task_rest = tile_length % thread_size;
-			auto task_size = tile_length / thread_size;
-			for (auto tid = 0; tid < thread_size; tid++) {
-				auto start = tid * task_size;
-				auto end = (tid + 1) * task_size;
+			int task_size = 1;
+			int task_rest = tile_length % task_size;
+			int task_count = tile_length / task_size;
+			for (auto tid = 0; tid < task_count; tid++) {
+				int start = tid * task_size;
+				int end = (static_cast<long>(tid) + 1) * task_size;
 				tp.enqueue([=] { rasterize_tiles(start, end); });
 			}
-			auto last_start = thread_size * task_size;
-			auto last_end = last_start + task_rest;
+			int last_start = task_count * task_size;
+			int last_end = last_start + task_rest;
 			tp.enqueue([=] { rasterize_tiles(last_start, last_end); });
 #else
 			for (auto tidx = 0; tidx < tile_length; tidx++) {
@@ -215,8 +218,8 @@ namespace Guarneri {
 				}
 			}
 
-			for (auto idx = 0; idx < tile.task_size(); idx++) {
-				TiledTask task;
+			while(!tile.tasks.empty()){
+				TileTask task;
 				if (tile.pop_task(task)) {
 					auto tri = task.triangle;
 					auto shader = task.shader;

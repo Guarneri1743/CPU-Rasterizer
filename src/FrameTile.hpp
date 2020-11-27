@@ -2,10 +2,10 @@
 #define _FRAME_TILE_HPP_
 
 namespace Guarneri {
-	struct TiledTask {
-		TiledTask() { shader = nullptr;  }
+	struct TileTask {
+		TileTask() { shader = nullptr;  }
 
-		TiledTask(const Triangle& triangle, Shader* shader) 
+		TileTask(const Triangle& triangle, Shader* shader) 
 		{
 			this->triangle = triangle;
 			this->shader = shader;
@@ -31,17 +31,26 @@ namespace Guarneri {
 		uint32_t row_end;
 		uint32_t col_start;
 		uint32_t col_end;
-		SafeQueue<TiledTask> tasks;
+		SafeQueue<TileTask> tasks;
 
 	public:
 		void push_task(const Triangle& tri, Shader* shader) 
 		{
-			tasks.push(TiledTask(tri, shader));
+			tasks.push(TileTask(tri, shader));
 		}
 
-		bool pop_task(TiledTask& task) 
+		bool pop_task(TileTask& task) 
 		{
 			return tasks.try_pop(task);
+		}
+
+		bool is_task_empty() {
+			return tasks.empty();
+		}
+
+		void clear() {
+			SafeQueue<TileTask> empty_queue;
+			tasks.swap(empty_queue);
 		}
 
 		auto task_size()
@@ -80,12 +89,12 @@ namespace Guarneri {
 					int rs = row * tile_size;
 					tiles[tidx].row_start = rs;
 					last = row == row_tile_count - 1 ? true : false;
-					tiles[tidx].row_end = last ? rs + row_rest : (row + 1) * tile_size;
+					tiles[tidx].row_end = last && row_rest > 0? rs + row_rest : (row + 1) * tile_size;
 
 					int cs = col * tile_size;
 					tiles[tidx].col_start = cs;
 					last = col == col_tile_count - 1 ? true : false;
-					tiles[tidx].col_end = last ? cs + col_rest : (col + 1) * tile_size;
+					tiles[tidx].col_end = last && col_rest > 0? cs + col_rest : (col + 1) * tile_size;
 
 					tiles[tidx].tile_idx = tidx;
 				}
