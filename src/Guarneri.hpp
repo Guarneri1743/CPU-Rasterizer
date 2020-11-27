@@ -77,6 +77,7 @@
 #include <SegmentDrawer.hpp>
 #include <Shader.hpp>
 #include <Material.hpp>
+#include <FrameTile.hpp>
 #include <GraphicsCommand.hpp>
 #include <GraphicsDevice.hpp>
 #include <Noise.hpp>

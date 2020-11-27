@@ -3,18 +3,6 @@
 #include <Guarneri.hpp>
 
 namespace Guarneri {
-	struct PrimitiveCommand{
-		PrimitiveCommand() {}
-		PrimitiveCommand(const Triangle& triangle, Shader* shader) {
-			this->triangle = triangle;
-			this->shader = shader;
-		}
-		Triangle triangle;
-		Shader* shader;
-	};
-
-	SafeQueue<PrimitiveCommand> cmd_queue;
-
 	class GraphicsDevice {
 	public:
 		uint32_t width;
@@ -29,11 +17,25 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
+		// framebuffer tiles
+		const int TILE_SIZE = 64;
+		FrameTile* tiles;
+		int row_tile_count;
+		int col_tile_count;
 
 	public:
 		void initialize(void* bitmap_handle_t, uint32_t width_t, uint32_t height_t) {
 			this->width = width_t;
 			this->height = height_t;
+
+			// prepare tiles
+			int row_rest = height_t % TILE_SIZE;
+			int col_rest = width_t % TILE_SIZE;
+			row_tile_count = height_t / TILE_SIZE + row_rest > 0 ? 1 : 0;
+			col_tile_count = width_t / TILE_SIZE + col_rest > 0 ? 1 : 0;
+			tiles = new FrameTile[row_tile_count * col_tile_count];
+			
+			// prepare buffers
 			zbuffer = std::make_shared<RawBuffer<float>>(width_t, height_t);
 			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle_t, width_t, height_t, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			stencilbuffer = std::make_shared<RawBuffer<uint8_t>>(width_t, height_t);
