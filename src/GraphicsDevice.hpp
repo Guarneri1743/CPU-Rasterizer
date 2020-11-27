@@ -13,8 +13,7 @@ namespace Guarneri {
 		Shader* shader;
 	};
 
-	// todo: prevent dead lock
-	RingBuffer<PrimitiveCommand> cmd_buffer(65535 * 2);
+	SafeQueue<PrimitiveCommand> cmd_queue;
 
 	class GraphicsDevice {
 	public:
@@ -29,7 +28,6 @@ namespace Guarneri {
 		std::shared_ptr<RawBuffer<color_bgra>> framebuffer;
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
-
 
 
 	public:
@@ -71,18 +69,23 @@ namespace Guarneri {
 
 		void rasterize_commands(const int& count) {
 			for (int i = 0; i < count; i++) {
-				auto cmd = cmd_buffer.read();
-				auto tri = cmd.triangle;
-				auto shader = cmd.shader;
+				PrimitiveCommand cmd;
+				if (cmd_queue.try_pop(cmd)) {
+					auto tri = cmd.triangle;
+					auto shader = cmd.shader;
 
-				//barycentric_rasterize(tri, shader);
-				scanline_rasterize(tri, shader);
+					//barycentric_rasterize(tri, shader);
+					scanline_rasterize(tri, shader);
 
-				// wireframe
-				if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-					draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					// wireframe
+					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+						draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					}
+				}
+				else {
+					std::cerr << "consume error, cmd queue empty" << std::endl;
 				}
 			}
 		}
@@ -98,8 +101,9 @@ namespace Guarneri {
 			auto thread_size = std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
 			int task_size = 256;
-			int task_count = cmd_buffer.size() / task_size;
-			int rest = cmd_buffer.size() % task_size;
+			int queue_size = cmd_queue.size();
+			int task_count = queue_size / task_size;
+			int rest = queue_size % task_size;
 			for (int i = 0; i < task_count; i++) {
 				tp.enqueue(rasterization_task, task_size);
 			}
@@ -193,9 +197,7 @@ namespace Guarneri {
 			// fill ring buffer
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 				PrimitiveCommand cmd(*iter, shader);
-
-				// todo: prevent dead lock
-				cmd_buffer.write(cmd);
+				cmd_queue.push(cmd);
 			}
 		}
 

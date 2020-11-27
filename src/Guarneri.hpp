@@ -38,6 +38,7 @@
 #include <BitwiseEnum.hpp>
 #include <ThreadPool.hpp>
 #include <RingBuffer.hpp>
+#include <SafeQueue.hpp>
 #include <PipelineDefinitions.hpp>
 #include <GDIWindow.hpp>
 #include <Singleton.hpp>
