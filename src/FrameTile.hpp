@@ -36,12 +36,12 @@ namespace Guarneri {
 	public:
 		void push_task(const Triangle& tri, Shader* shader) 
 		{
-			tasks.push(TileTask(tri, shader));
+			tasks.produce(TileTask(tri, shader));
 		}
 
 		bool pop_task(TileTask& task) 
 		{
-			return tasks.try_pop(task);
+			return tasks.try_consume(task);
 		}
 
 		bool is_task_empty() {
@@ -49,8 +49,7 @@ namespace Guarneri {
 		}
 
 		void clear() {
-			SafeQueue<TileTask> empty_queue;
-			tasks.swap(empty_queue);
+			tasks.clear();
 		}
 
 		auto task_size()

@@ -17,10 +17,9 @@ namespace Guarneri {
 		// 8 bits stencil buffer
 		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
 
-		std::mutex tile_mutex;
-
 		// framebuffer tiles
 		const uint32_t TILE_SIZE = 64;
+		const uint32_t TILE_TASK_SIZE = 4;
 		FrameTile* tiles;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
@@ -180,7 +179,7 @@ namespace Guarneri {
 #ifdef MULTI_THREAD
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			int task_size = 1;
+			int task_size = TILE_TASK_SIZE;
 			int task_rest = tile_length % task_size;
 			int task_count = tile_length / task_size;
 			for (auto tid = 0; tid < task_count; tid++) {
