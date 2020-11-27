@@ -175,8 +175,32 @@ namespace Guarneri {
 
 #ifdef TILE_BASED
 		void render_tiles() {
+#ifdef MULTI_THREAD
+			auto thread_size = std::thread::hardware_concurrency();
+			ThreadPool tp(thread_size);
+			int task_rest = tile_length % thread_size;
+			int task_size = tile_length / thread_size;
+			for (int tid = 0; tid < thread_size; tid++) {
+				int start = tid * task_size;
+				int end = (tid + 1) * task_size;
+				tp.enqueue([=] { rasterize_tiles(start, end); });
+			}
+			int last_start = thread_size * task_size;
+			int last_end = last_start + task_rest;
+			tp.enqueue([=] { rasterize_tiles(last_start, last_end); });
+#else
 			for (auto tidx = 0; tidx < tile_length; tidx++) {
 				rasterize_tile(tiles[tidx]);
+			}
+#endif
+		}
+
+		void rasterize_tiles(const int& start, const int& end)
+		{
+			assert(end >= start);
+			for (auto idx = start; idx < end; idx++)
+			{
+				rasterize_tile(tiles[idx]);
 			}
 		}
 
