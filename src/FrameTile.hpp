@@ -26,11 +26,11 @@ namespace Guarneri {
 		}
 
 	public:
-		int tile_idx;
-		int row_start;
-		int row_end;
-		int col_start;
-		int col_end;
+		uint32_t tile_idx;
+		uint32_t row_start;
+		uint32_t row_end;
+		uint32_t col_start;
+		uint32_t col_end;
 		SafeQueue<TiledTask> tasks;
 
 	public:
@@ -44,7 +44,7 @@ namespace Guarneri {
 			return tasks.try_pop(task);
 		}
 
-		int task_size() 
+		auto task_size()
 		{
 			return tasks.size();
 		}
@@ -69,7 +69,6 @@ namespace Guarneri {
 
 		static void build_tiles(
 			FrameTile* tiles, 
-			const int& w, const int& h, 
 			const int& tile_size, 
 			const int& row_tile_count, const int& col_tile_count, 
 			const int& row_rest, const int& col_rest) 

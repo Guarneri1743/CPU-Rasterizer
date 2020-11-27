@@ -42,6 +42,7 @@ namespace Guarneri {
 		// todo: use blanced binary tree tree to reuse id
 		void free(const uint32_t& id)
 		{
+			REF(id)
 			// do nothing
 		}
 	};

@@ -34,6 +34,10 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+template <class T>
+inline void unused(T const&) {}
+#define REF(obj) unused(obj);
+
 // Rasterizer Core
 #include <BitwiseEnum.hpp>
 #include <ThreadPool.hpp>

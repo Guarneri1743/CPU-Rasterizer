@@ -36,7 +36,7 @@ namespace Guarneri {
 			col_tile_count = w / TILE_SIZE + (col_rest > 0 ? 1 : 0);
 			tile_length = static_cast<int>(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
 			tiles = new FrameTile[tile_length];
-			FrameTile::build_tiles(tiles, w, h, TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
+			FrameTile::build_tiles(tiles, TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
 
 			// prepare buffers
 			zbuffer = std::make_shared<RawBuffer<float>>(w, h);
@@ -153,7 +153,7 @@ namespace Guarneri {
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontally_split();
 
-			for (auto& iter = tris.begin(); iter != tris.end(); iter++) {
+			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
 #ifdef TILE_BASED
 				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
 #else
@@ -176,17 +176,17 @@ namespace Guarneri {
 #ifdef TILE_BASED
 		void render_tiles() {
 #ifdef MULTI_THREAD
-			auto thread_size = std::thread::hardware_concurrency();
+			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			int task_rest = tile_length % thread_size;
-			int task_size = tile_length / thread_size;
-			for (int tid = 0; tid < thread_size; tid++) {
-				int start = tid * task_size;
-				int end = (tid + 1) * task_size;
+			auto task_rest = tile_length % thread_size;
+			auto task_size = tile_length / thread_size;
+			for (auto tid = 0; tid < thread_size; tid++) {
+				auto start = tid * task_size;
+				auto end = (tid + 1) * task_size;
 				tp.enqueue([=] { rasterize_tiles(start, end); });
 			}
-			int last_start = thread_size * task_size;
-			int last_end = last_start + task_rest;
+			auto last_start = thread_size * task_size;
+			auto last_end = last_start + task_rest;
 			tp.enqueue([=] { rasterize_tiles(last_start, last_end); });
 #else
 			for (auto tidx = 0; tidx < tile_length; tidx++) {
@@ -195,7 +195,7 @@ namespace Guarneri {
 #endif
 		}
 
-		void rasterize_tiles(const int& start, const int& end)
+		void rasterize_tiles(const size_t& start, const size_t& end)
 		{
 			assert(end >= start);
 			for (auto idx = start; idx < end; idx++)

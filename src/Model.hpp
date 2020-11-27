@@ -123,10 +123,10 @@ namespace Guarneri {
 
 			aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
 
-			auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE, albedo_prop);
-			auto specular = load_textures(aiMat, aiTextureType_SPECULAR, specular_prop);
-			auto normal = load_textures(aiMat, aiTextureType_HEIGHT, normal_prop);
-			auto ao = load_textures(aiMat, aiTextureType_AMBIENT, ao_prop);
+			auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE);
+			auto specular = load_textures(aiMat, aiTextureType_SPECULAR);
+			auto normal = load_textures(aiMat, aiTextureType_HEIGHT);
+			auto ao = load_textures(aiMat, aiTextureType_AMBIENT);
 
 			if (diffuse != nullptr) {
 				diffuse->filtering = Filtering::POINT;
@@ -149,7 +149,7 @@ namespace Guarneri {
 			return std::make_unique<Mesh>(vertices, indices);
 		}
 
-		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type, property_name property_name) {
+		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type) {
 			std::shared_ptr<Texture> ret;
 			for (unsigned int i = 0; i < ai_material->GetTextureCount(type); i++)
 			{

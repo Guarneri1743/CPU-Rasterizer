@@ -29,11 +29,6 @@ namespace Guarneri {
 		return cur_path() + "/res";
 	}
 
-	template <class T>
-	inline void unused(T const&) {}
-
-	#define REF(obj) unused(obj);
-
 	IdAllocator idalloc(INVALID_ID + 1, MAX_ID);
 	#define ALLOC_ID() idalloc.alloc();
 	#define FREE_ID(id) idalloc.free(id);
