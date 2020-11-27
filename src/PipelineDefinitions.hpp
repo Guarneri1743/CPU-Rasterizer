@@ -5,6 +5,7 @@ namespace Guarneri{
 	#define LEFT_HANDED
 	#define FAR_Z 1.0f
 	#define DEFAULT_STENCIL 0x00
+	#define TILE_BASED
 	
 	enum class RasterizerStrategy {
 		SCANBLOCK,
@@ -119,7 +120,8 @@ namespace Guarneri{
 		NORMAL = 1 << 5,
 		MIPMAP = 1 << 6,
 		STENCIL = 1 << 7,
-		SCANLINE = 1 << 8
+		SCANLINE = 1 << 8,
+		FRAME_TILE = 1 << 9
 	};
 
 	template<>

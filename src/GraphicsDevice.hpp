@@ -22,7 +22,7 @@ namespace Guarneri {
 		FrameTile* tiles;
 		int row_tile_count;
 		int col_tile_count;
-		int tile_len;
+		int tile_length;
 
 	public:
 		void initialize(void* bitmap_handle, uint32_t w, uint32_t h) {
@@ -32,12 +32,12 @@ namespace Guarneri {
 			// prepare tiles
 			int row_rest = h % TILE_SIZE;
 			int col_rest = w % TILE_SIZE;
-			row_tile_count = h / TILE_SIZE + row_rest > 0 ? 1 : 0;
-			col_tile_count = w / TILE_SIZE + col_rest > 0 ? 1 : 0;
-			tile_len = static_cast<int>(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
-			tiles = new FrameTile[tile_len];
-			std::cout << "row_tile_count: " << row_tile_count << " col_tile_count: " << col_tile_count << std::endl;
-			
+			row_tile_count = h / TILE_SIZE + (row_rest > 0 ? 1 : 0);
+			col_tile_count = w / TILE_SIZE + (col_rest > 0 ? 1 : 0);
+			tile_length = static_cast<int>(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
+			tiles = new FrameTile[tile_length];
+			FrameTile::build_tiles(tiles, w, h, TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
+
 			// prepare buffers
 			zbuffer = std::make_shared<RawBuffer<float>>(w, h);
 			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
@@ -93,27 +93,6 @@ namespace Guarneri {
 			statistics.earlyz_optimized = 0;
 		}
 
-		void render_tiles() {
-			for (auto tidx = 0; tidx < tile_len; tidx++) {
-				auto& tile = tiles[tidx];
-				for (auto idx = 0; idx < tile.task_size(); idx++) {
-					TiledTask task;
-					if (tile.pop_task(task)) {
-						auto triangle = task.triangle;
-						auto shader = task.shader;
-						rasterize(triangle, shader, RasterizerStrategy::SCANBLOCK);
-
-						// wireframe
-						if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-							draw_screen_segment(triangle[0].position, triangle[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-							draw_screen_segment(triangle[0].position, triangle[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-							draw_screen_segment(triangle[2].position, triangle[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						}
-					}
-				}
-			}
-		}
-
 		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
 
@@ -127,9 +106,9 @@ namespace Guarneri {
 			v2f o2 = process_vertex(shader, v2);
 			v2f o3 = process_vertex(shader, v3);
 
-			Vertex c1(o1.position,o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
-			Vertex c2(o2.position,o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
-			Vertex c3(o3.position,o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+			Vertex c1(o1.position, o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
+			Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
+			Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			// clip in screen space
 			//if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
@@ -143,7 +122,7 @@ namespace Guarneri {
 
 			bool double_face = shader->double_face;
 			bool enable_backface_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
-	
+
 			if (!double_face && enable_backface_culling && !shader->skybox) {
 				if (Clipper::backface_culling(n1.position, n2.position, n3.position)) {
 					statistics.culled_triangle_count++;
@@ -174,10 +153,12 @@ namespace Guarneri {
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontally_split();
 
-			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-				auto tri = *iter;
-
-				FrameTile::dispatch_render_task(tiles, tri, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
+			for (auto& iter = tris.begin(); iter != tris.end(); iter++) {
+#ifdef TILE_BASED
+				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
+#else
+				rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
+#endif
 			}
 		}
 
@@ -192,12 +173,88 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
+#ifdef TILE_BASED
+		void render_tiles() {
+			for (auto tidx = 0; tidx < tile_length; tidx++) {
+				rasterize_tile(tiles[tidx]);
+			}
+		}
+
+		void rasterize_tile(FrameTile& tile) {
+			if ((misc_param.render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE) {
+				for (uint32_t row = tile.row_start; row < tile.row_end; row++) {
+					for (uint32_t col = tile.col_start; col < tile.col_end; col++) {
+						float r = (float)row / tile.row_end;
+						float g = (float)col / tile.col_end;
+						framebuffer->write(row, col, Color::encode_bgra(r, g, 0.0f, 0.3f));
+					}
+				}
+			}
+
+			for (auto idx = 0; idx < tile.task_size(); idx++) {
+				TiledTask task;
+				if (tile.pop_task(task)) {
+					auto tri = task.triangle;
+					auto shader = task.shader;
+
+					auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
+					int row_start = (int)(bounds.min().y + 0.5f) - 1;
+					int row_end = (int)(bounds.max().y + 0.5f) + 1;
+					int col_start = (int)(bounds.min().x + 0.5f) - 1;
+					int col_end = (int)(bounds.max().x + 0.5f) + 1;
+
+					row_start = CLAMP_INT(row_start, tile.row_start, tile.row_end);
+					row_end = CLAMP_INT(row_end, tile.row_start, tile.row_end);
+					col_start = CLAMP_INT(col_start, tile.col_start, tile.col_end);
+					col_end = CLAMP_INT(col_end, tile.col_start, tile.col_end);
+
+					bool flip = tri.flip;
+					int ccw_idx0 = 0;
+					int ccw_idx1 = flip ? 2 : 1;
+					int ccw_idx2 = flip ? 1 : 2;
+
+					auto v0 = tri[ccw_idx0].position.xy();
+					auto v1 = tri[ccw_idx1].position.xy();
+					auto v2 = tri[ccw_idx2].position.xy();
+
+					float area = Triangle::area_double(v0, v1, v2);
+
+					for (int row = row_start; row < row_end; row++) {
+						for (int col = col_start; col < col_end; col++) {
+							Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+							float w0 = Triangle::area_double(v1, v2, pixel);
+							float w1 = Triangle::area_double(v2, v0, pixel);
+							float w2 = Triangle::area_double(v0, v1, pixel);
+							if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+								w0 /= area; w1 /= area; w2 /= area;
+								Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
+								process_fragment(vert, row, col, shader);
+							}
+						}
+					}
+
+					// wireframe
+					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+						draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					}
+				}
+			}
+		}
+#else
 		void rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy) {
 			if (strategy == RasterizerStrategy::SCANBLOCK) {
 				scanblock(tri, shader);
 			}
 			else {
 				scanline(tri, shader);
+			}
+			// wireframe
+			if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+				draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 		}
 
@@ -217,15 +274,15 @@ namespace Guarneri {
 			int ccw_idx0 = 0;
 			int ccw_idx1 = flip ? 2 : 1;
 			int ccw_idx2 = flip ? 1 : 2;
-				
+
 			auto v0 = tri[ccw_idx0].position.xy();
 			auto v1 = tri[ccw_idx1].position.xy();
 			auto v2 = tri[ccw_idx2].position.xy();
 
 			float area = Triangle::area_double(v0, v1, v2);
 
-			for (int row = row_start; row < row_end; row ++) {
-				for (int col = col_start; col < col_end; col ++) {
+			for (int row = row_start; row < row_end; row++) {
+				for (int col = col_start; col < col_end; col++) {
 					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
 					float w0 = Triangle::area_double(v1, v2, pixel);
 					float w1 = Triangle::area_double(v2, v0, pixel);
@@ -249,7 +306,7 @@ namespace Guarneri {
 			bottom = CLAMP_INT(bottom, 0, this->height);
 			assert(bottom >= top);
 
-			for (int row = top; row < bottom; row ++) {
+			for (int row = top; row < bottom; row++) {
 				Vertex lhs, rhs;
 				tri.interpolate((float)row + 0.5f, lhs, rhs);
 
@@ -271,9 +328,10 @@ namespace Guarneri {
 				}
 			}
 		}
+#endif
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, Shader*  shader) {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
