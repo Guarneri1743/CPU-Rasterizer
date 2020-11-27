@@ -90,24 +90,18 @@ namespace Guarneri {
 			}
 		}
 
-#ifdef MULTI_THREAD
-		static void rasterization_task(const int& count) {
-			Graphics().rasterize_commands(count);
-		}
-#endif
-
 		void dispatch() {
 #ifdef MULTI_THREAD
 			auto thread_size = std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			int task_size = 256;
+			const int task_size = 4096;
 			int queue_size = cmd_queue.size();
 			int task_count = queue_size / task_size;
 			int rest = queue_size % task_size;
 			for (int i = 0; i < task_count; i++) {
-				tp.enqueue(rasterization_task, task_size);
+				tp.enqueue([=](const int& count) { rasterize_commands(count); }, task_size);
 			}
-			tp.enqueue(rasterization_task, rest);
+			tp.enqueue([=](const int& count) { rasterize_commands(count); }, rest);
 #else
 			rasterize_commands(cmd_buffer.size());
 #endif
