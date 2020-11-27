@@ -5,6 +5,11 @@ namespace Guarneri{
 	#define LEFT_HANDED
 	#define FAR_Z 1.0f
 	#define DEFAULT_STENCIL 0x00
+	
+	enum class RasterizerStrategy {
+		SCANBLOCK,
+		SCANLINE
+	};
 
 	enum class Projection {
 		PERSPECTIVE,

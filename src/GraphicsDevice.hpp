@@ -67,46 +67,6 @@ namespace Guarneri {
 			}
 		}
 
-		void rasterize_commands(const int& count) {
-			for (int i = 0; i < count; i++) {
-				PrimitiveCommand cmd;
-				if (cmd_queue.try_pop(cmd)) {
-					auto tri = cmd.triangle;
-					auto shader = cmd.shader;
-
-					//barycentric_rasterize(tri, shader);
-					scanline_rasterize(tri, shader);
-
-					// wireframe
-					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-						draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-					}
-				}
-				else {
-					std::cerr << "consume error, cmd queue empty" << std::endl;
-				}
-			}
-		}
-
-		void dispatch() {
-#ifdef MULTI_THREAD
-			auto thread_size = std::thread::hardware_concurrency();
-			ThreadPool tp(thread_size);
-			const int task_size = 4096;
-			int queue_size = cmd_queue.size();
-			int task_count = queue_size / task_size;
-			int rest = queue_size % task_size;
-			for (int i = 0; i < task_count; i++) {
-				tp.enqueue([=](const int& count) { rasterize_commands(count); }, task_size);
-			}
-			tp.enqueue([=](const int& count) { rasterize_commands(count); }, rest);
-#else
-			rasterize_commands(cmd_buffer.size());
-#endif
-		}
-
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
 				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
@@ -190,8 +150,16 @@ namespace Guarneri {
 
 			// fill ring buffer
 			for (auto iter = tris.begin(); iter != tris.end(); iter++) {
-				PrimitiveCommand cmd(*iter, shader);
-				cmd_queue.push(cmd);
+				auto tri = *iter;
+
+				rasterize(tri, shader, RasterizerStrategy::SCANBLOCK);
+
+				// wireframe
+				if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+					draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+				}
 			}
 		}
 
@@ -206,40 +174,26 @@ namespace Guarneri {
 			return shader->vertex_shader(input);
 		}
 
-		void barycentric_rasterize(const Triangle& tri, Shader* shader) {
+		void rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy) {
+			if (strategy == RasterizerStrategy::SCANBLOCK) {
+				scanblock(tri, shader);
+			}
+			else {
+				scanline(tri, shader);
+			}
+		}
+
+		void scanblock(const Triangle& tri, Shader* shader) {
 			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
 			int row_start = (int)(bounds.min().y + 0.5f) - 1;
 			int row_end = (int)(bounds.max().y + 0.5f) + 1;
 			int col_start = (int)(bounds.min().x + 0.5f) - 1;
 			int col_end = (int)(bounds.max().x + 0.5f) + 1;
 
-			// build pixel block
-			const int block_size = 2;
-			int row_rest = (row_end - row_start) % block_size;
-			if (row_rest != 0) {
-				if (row_end < this->height) {
-					row_end += block_size - row_rest;
-				}
-				else if (row_start > 0) {
-					row_start -= block_size - row_rest;;
-				}
-			}
-			int col_rest = (col_end - col_start) % block_size;
-			if (col_rest != 0) {
-				if (col_end < this->width) {
-					col_end += block_size - col_rest;;
-				}
-				else if (col_start > 0) {
-					col_start -= block_size - col_rest;;
-				}
-			}
 			row_start = CLAMP_INT(row_start, 0, this->height);
 			row_end = CLAMP_INT(row_end, 0, this->height);
 			col_start = CLAMP_INT(col_start, 0, this->width);
 			col_end = CLAMP_INT(col_end, 0, this->width);
-
-			int row_block_count = (row_end - row_start) / block_size;
-			int col_block_count = (col_end - col_start) / block_size;
 
 			bool flip = tri.flip;
 			int ccw_idx0 = 0;
@@ -252,92 +206,22 @@ namespace Guarneri {
 
 			float area = Triangle::area_double(v0, v1, v2);
 
-			std::vector<Vertex> prev_row;
-			std::vector<Vertex> prev_col;
-			for (int block_row_start = row_start; block_row_start < row_end; block_row_start += block_size) {
-				std::vector<Vertex> cur_row;
-				cur_row.reserve(row_end - row_start);
-				for (int block_col_start = col_start; block_col_start < col_end; block_col_start += block_size) {
-					std::vector<Vertex> cur_col;
-					// process pixel block
-					int row0 = block_row_start;
-					int row1 = row0 + 1;
-					int col0 = block_col_start;
-					int col1 = col0 + 1;
-
-					Vertex up00, up01, left00, left10;
-
-					if (prev_row.size() > 0) {
-						up00 = prev_row[col0 - col_start];
-						up01 = prev_row[col1 - col_start];
+			for (int row = row_start; row < row_end; row ++) {
+				for (int col = col_start; col < col_end; col ++) {
+					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+					float w0 = Triangle::area_double(v1, v2, pixel);
+					float w1 = Triangle::area_double(v2, v0, pixel);
+					float w2 = Triangle::area_double(v0, v1, pixel);
+					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+						w0 /= area; w1 /= area; w2 /= area;
+						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
+						process_fragment(vert, row, col, shader);
 					}
-
-					if (prev_col.size() > 0) {
-						left00 = prev_col[0];
-						left10 = prev_col[1];
-					}
-
-					auto v00 = process_pixel_block(
-						tri, v0, v1, v2, area,
-						ccw_idx0, ccw_idx1, ccw_idx2,
-						shader,
-						row0, col0,
-						up00, left00);
-
-					auto v01 = process_pixel_block(
-						tri, v0, v1, v2, area,
-						ccw_idx0, ccw_idx1, ccw_idx2,
-						shader,
-						row0, col1,
-						up01, v00);
-
-					auto v10 = process_pixel_block(
-						tri, v0, v1, v2, area,
-						ccw_idx0, ccw_idx1, ccw_idx2,
-						shader,
-						row1, col0,
-						v00, left10);
-
-					auto v11 = process_pixel_block(
-						tri, v0, v1, v2, area,
-						ccw_idx0, ccw_idx1, ccw_idx2,
-						shader,
-						row1, col1,
-						v01, v10);
-
-					cur_row.emplace_back(v10);
-					cur_row.emplace_back(v11);
-					cur_col.emplace_back(v01);
-					cur_col.emplace_back(v11);
-					prev_col = cur_col;
 				}
-				prev_row = cur_row;
 			}
 		}
 
-		Vertex process_pixel_block(
-			const Triangle& tri, 
-			const Vector2& v0, const Vector2& v1, const Vector2& v2, const float& area, 
-			const int& ccw_idx0, const int& ccw_idx1, const int& ccw_idx2,
-			Shader* shader, 
-			const int& row, const int& col,
-			const Vertex& up, const Vertex& left) {
-			Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
-			float w0 = Triangle::area_double(v1, v2, pixel);
-			float w1 = Triangle::area_double(v2, v0, pixel);
-			float w2 = Triangle::area_double(v0, v1, pixel);
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-				w0 /= area; w1 /= area; w2 /= area;
-				Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-				auto ddx = Vertex::differential(vert, left);
-				auto ddy = Vertex::differential(vert, up);
-				process_fragment(vert, row, col, ddx, ddy, shader);
-				return vert;
-			}
-			return Vertex();
-		}
-
-		void scanline_rasterize(const Triangle& tri, Shader* shader) {
+		void scanline(const Triangle& tri, Shader* shader) {
 			bool flip = tri.flip;
 			int top_idx = flip ? 2 : 0;
 			int bottom_idx = flip ? 0 : 2;
@@ -363,7 +247,7 @@ namespace Guarneri {
 				assert(right >= left);
 
 				for (auto col = left; col < right; col++) {
-					process_fragment(lhs, row, col, Vertex(), Vertex(), shader);
+					process_fragment(lhs, row, col, shader);
 					auto dx = Vertex::differential(lhs, rhs);
 					lhs = Vertex::intagral(lhs, dx);
 				}
@@ -371,7 +255,7 @@ namespace Guarneri {
 		}
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, const Vertex& ddx, const Vertex& ddy, Shader*  shader) {
+		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, Shader*  shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -424,7 +308,9 @@ namespace Guarneri {
 				v_out.uv = v.uv * w;
 				v_out.tangent = v.tangent * w;
 				v_out.bitangent = v.bitangent * w;
-				fragment_result = s->fragment_shader(v_out, ddx, ddy);
+
+				// todo: ddx ddy
+				fragment_result = s->fragment_shader(v_out, Vertex(), Vertex());
 				pixel_color = Color::encode_bgra(fragment_result);
 			}
 
