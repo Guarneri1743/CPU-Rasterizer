@@ -7,6 +7,7 @@ namespace Guarneri {
 	public:
 		Material() {
 			this->target_shader = std::make_unique<Shader>();
+			this->shadow_caster = std::make_unique<ShadowShader>();
 			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
 			this->stencil_pass_op = StencilOp::KEEP;
@@ -22,11 +23,11 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
-			this->skybox = false;
 		}
 
 		Material(std::unique_ptr<Shader>& shader) {
 			this->target_shader = std::move(shader);
+			this->shadow_caster = std::make_unique<ShadowShader>();
 			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
 			this->stencil_pass_op = StencilOp::KEEP;
@@ -42,12 +43,12 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
-			this->skybox = false;
 		}
 
 		Material(std::unique_ptr<SkyboxShader>& shader) {
 			auto shader_ptr = shader.release();
 			this->target_shader = std::unique_ptr <Shader>((Shader*)(shader_ptr));
+			this->shadow_caster = std::make_unique<ShadowShader>();
 			this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 			this->stencil_func = CompareFunc::ALWAYS;
 			this->stencil_pass_op = StencilOp::KEEP;
@@ -63,7 +64,6 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
-			this->skybox = true;
 		}
 
 		Material(const Material& other) {
@@ -87,7 +87,6 @@ namespace Guarneri {
 		BlendFactor dst_factor;
 		BlendOp blend_op;
 		bool double_face;
-		bool skybox;
 		bool transparent;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -96,6 +95,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		LightingData lighting_param;
 		std::unique_ptr<Shader> target_shader;
+		std::unique_ptr<ShadowShader> shadow_caster;
 
 	public:
 		static std::unique_ptr<Material> create() {
@@ -110,7 +110,21 @@ namespace Guarneri {
 			return std::make_unique<Material>(other);
 		}
 
-		void sync(const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+		Shader* get_shader(const RenderPass& pass) const {
+			if (pass == RenderPass::SHADOW) {
+				return shadow_caster.get();
+			}
+			return target_shader.get();
+		}
+
+		void set_light_space_mat(const Matrix4x4& light_space_matrix) {
+			if (shadow_caster == nullptr) {
+				return;
+			}
+			shadow_caster->light_space = light_space_matrix;
+		}
+
+		void sync(Shader* target_shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			target_shader->m = m;
 			target_shader->v = v;
 			target_shader->p = p;
@@ -135,12 +149,18 @@ namespace Guarneri {
 			target_shader->color_mask = color_mask;
 			target_shader->lighting_param = lighting_param;
 			target_shader->double_face = double_face;
-			target_shader->skybox = skybox;
 			if (name2tex.count(normal_prop) > 0) {
 				target_shader->normal_map = true;
 			}
 			else {
 				target_shader->normal_map = false;
+			}
+		}
+
+		void sync(const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			sync(target_shader.get(), m, v, p);
+			if (shadow_caster != nullptr) {
+				sync(shadow_caster.get(), m, v, p);
 			}
 		}
 

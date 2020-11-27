@@ -49,11 +49,11 @@ int main()
 	InputMgr().add_on_update_evt([](void* user_data) {
 		if (InputMgr().is_key_down(KeyCode::R)) {
 			Scene* s = reinterpret_cast<Scene*>(user_data);
-			s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
+			s->main_light.update_direction(s->main_light.direction + Vector3(0.2f, 0.0f, 0.2f));
 		}
 		if (InputMgr().is_key_down(KeyCode::T)) {
 			Scene* s = reinterpret_cast<Scene*>(user_data);
-			s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
+			s->main_light.update_direction(s->main_light.direction - Vector3(0.2f, 0.0f, 0.2f));
 		}
 		}, &demo_scene);
 

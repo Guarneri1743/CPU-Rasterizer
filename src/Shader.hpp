@@ -50,15 +50,13 @@ namespace Guarneri {
 			this->transparent = false;
 			this->double_face = false;
 			this->skybox = false;
-		}
-
-		Shader(const Shader& other) {
-			copy(other);
+			this->shadow = false;
 		}
 
 		virtual ~Shader() { }
 
 	public:		
+		Matrix4x4 light_space;
 		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -82,6 +80,7 @@ namespace Guarneri {
 		bool transparent;
 		bool double_face;
 		bool skybox;
+		bool shadow;
 		LightingData lighting_param;
 		bool discarded = false;
 		bool normal_map = false;
@@ -211,37 +210,6 @@ namespace Guarneri {
 			
 			ret = Color::saturate(ret);
 			return Color(ret.r, ret.g, ret.b, 1.0f);
-		}
-
-		Shader& operator =(const Shader& other) {
-			copy(other);
-			return *this;
-		}
-
-		void copy(const Shader& other) {
-			this->id = other.id;
-			this->ztest_func = other.ztest_func;
-			this->zwrite_mode = other.zwrite_mode;
-			this->src_factor = other.src_factor;
-			this->dst_factor = other.dst_factor;
-			this->blend_op = other.blend_op;
-			this->transparent = other.transparent;
-			this->name2float.insert(other.name2float.begin(), other.name2float.end());
-			this->name2float4.insert(other.name2float4.begin(), other.name2float4.end());
-			this->name2tex.insert(other.name2tex.begin(), other.name2tex.end());
-			this->name2cubemap.insert(other.name2cubemap.begin(), other.name2cubemap.end());
-			this->name2int.insert(other.name2int.begin(), other.name2int.end());
-			this->keywords.insert(other.keywords.begin(), other.keywords.end());
-			this->stencil_func = other.stencil_func;
-			this->stencil_pass_op = other.stencil_pass_op;
-			this->stencil_fail_op = other.stencil_fail_op;
-			this->stencil_zfail_op = other.stencil_zfail_op;
-			this->stencil_read_mask = other.stencil_read_mask;
-			this->stencil_write_mask = other.stencil_write_mask;
-			this->stencil_ref_val = other.stencil_ref_val;
-			this->double_face = other.double_face;
-			this->lighting_param = other.lighting_param;
-			this->skybox = other.skybox;
 		}
 
 		std::string str() const {

@@ -27,11 +27,11 @@ namespace Guarneri{
 		// todo: serialzie & deserialize Scene data
 		void initialize() {
 			enable_skybox = false;
-			main_light.direction = Vector3(1.0f, 1.0f, 1.0f);
 			main_light.intensity = 1.0f;
 			main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
 			main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
 			main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+			main_light.update_direction(Vector3(1.0f, 1.0f, 1.0f));
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
 			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), Window().aspect, 45.0f, 0.5f, 500.0f, Projection::PERSPECTIVE));
@@ -172,6 +172,12 @@ namespace Guarneri{
 			}
 			draw_camera_coords();
 			//draw_world_coords();
+		}
+
+		void render_shadow() {
+			for (auto& obj : objects) {
+				obj->render_shadow();
+			}
 		}
 
 		void render() {

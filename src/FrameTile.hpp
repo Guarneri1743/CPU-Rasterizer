@@ -5,7 +5,7 @@ namespace Guarneri {
 	struct TileTask {
 		TileTask() { shader = nullptr;  }
 
-		TileTask(const Triangle& triangle, Shader* shader) 
+		TileTask(const Triangle& triangle, Shader* shader)
 		{
 			this->triangle = triangle;
 			this->shader = shader;
@@ -34,7 +34,7 @@ namespace Guarneri {
 		SafeQueue<TileTask> tasks;
 
 	public:
-		void push_task(const Triangle& tri, Shader* shader) 
+		void push_task(const Triangle& tri, Shader* shader)
 		{
 			tasks.produce(TileTask(tri, shader));
 		}

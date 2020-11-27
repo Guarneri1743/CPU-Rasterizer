@@ -41,18 +41,31 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
+		virtual Matrix4x4 light_space_matrix() const {
+			return misc_param.main_light.light_space;
+		}
+
 		static void draw_triangle(Shader* shader, const std::vector<Triangle>& triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			for (auto& tri : triangles) {
 				Graphics().draw(shader, tri[0], tri[1], tri[2], m, v, p);
 			}
 		}
 
+		virtual void render_shadow() const {
+			render_internal(RenderPass::SHADOW);
+		}
+
 		virtual void render() const {
+			render_internal(RenderPass::OBJECT);
+		}
+
+		void render_internal(const RenderPass& render_pass) const {
 #ifdef MULTI_THREAD
 			auto thread_size = std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
 #endif
 			Vertex vertices[3];
+			target->material->set_light_space_mat(light_space_matrix());
 			target->material->sync(model_matrix(), view_matrix(), projection_matrix());
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
@@ -69,20 +82,20 @@ namespace Guarneri {
 						if (idx == 3) {
 							tris.emplace_back(Triangle(vertices[0], vertices[1], vertices[2]));
 							if (tris.size() == block_size) {
-								tp.enqueue(draw_triangle, target->material->target_shader.get(), tris, model_matrix(), view_matrix(), projection_matrix());
+								tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(), projection_matrix());
 								tris.clear();
 							}
 							idx = 0;
 						}
 					}
-					tp.enqueue(draw_triangle, target->material->target_shader.get(), tris, model_matrix(), view_matrix(), projection_matrix());
+					tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(), projection_matrix());
 #else
 					for (auto& index : m->indices) {
 						assert(idx < 3 && index < m->vertices.size());
 						vertices[idx] = m->vertices[index];
 						idx++;
 						if (idx == 3) {
-							Graphics().draw(target->material->target_shader.get(), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(), projection_matrix());
+							Graphics().draw(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(), projection_matrix());
 							idx = 0;
 						}
 					}

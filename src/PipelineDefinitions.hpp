@@ -124,6 +124,19 @@ namespace Guarneri{
 		FRAME_TILE = 1 << 9
 	};
 
+#ifdef OPAQUE
+#undef OPAQUE
+#endif
+#ifdef TRANSPARENT
+#undef TRANSPARENT
+#endif
+
+	enum class RenderPass {
+		OBJECT,
+		SHADOW,
+		SKYBOX
+	};
+
 	template<>
 	struct support_bitwise_enum<RenderFlag> : std::true_type {};
 

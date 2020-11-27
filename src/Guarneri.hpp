@@ -56,9 +56,9 @@ inline void unused(T const&) {}
 #include <Vector3.hpp>
 #include <Vector4.hpp>
 #include <Color.hpp>
-#include <Light.hpp>
 #include <Matrix4x4.hpp>
 #include <Matrix3x3.hpp>
+#include <Light.hpp>
 #include <RawBuffer.hpp>
 #include <Texture.hpp>
 #include <Misc.hpp>
@@ -74,12 +74,16 @@ inline void unused(T const&) {}
 #include <BoundingBox2D.hpp>
 #include <Frustum.hpp>
 #include <Vertex.hpp>
+#include <VertexBufferObject.hpp>
+#include <VertexArrayObject.hpp>
+#include <FrameBufferObject.hpp>
 #include <Triangle.hpp>
 #include <Clipper.hpp>
 #include <InputManager.hpp>
 #include <Transform.hpp>
 #include <SegmentDrawer.hpp>
 #include <Shader.hpp>
+#include <ShadowShader.hpp>
 #include <Material.hpp>
 #include <FrameTile.hpp>
 #include <GraphicsCommand.hpp>
@@ -114,8 +118,10 @@ namespace Guarneri {
 				Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
 				InputMgr().update();
 				scene.update();
+				scene.render_shadow();
+				Graphics().render();
 				scene.render();
-				Graphics().render_tiles();
+				Graphics().render();
 				Window().flush();
 				Time::frame_end();
 				std::stringstream ss;

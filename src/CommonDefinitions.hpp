@@ -78,6 +78,7 @@ namespace Guarneri {
 	const property_name normal_prop = 3; // "texture_normal";
 	const property_name ao_prop = 4; // "texture_ao";
 	const property_name skybox_cubemap_prop = 5; // "skybox_cubemap";
+	const property_name shadowmap_prop = 6; // "shadowmap";
 
 	// statistics
 	struct GraphicsStatistic{

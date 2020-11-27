@@ -11,11 +11,13 @@ namespace Guarneri {
 
 	private:
 		// use 32 bits zbuffer here, for convenience 
-		std::shared_ptr<RawBuffer<float>> zbuffer;
+		std::unique_ptr<RawBuffer<float>> zbuffer;
 		// 32 bits bgra framebuffer, 8-bit per channel
-		std::shared_ptr<RawBuffer<color_bgra>> framebuffer;
+		std::unique_ptr<RawBuffer<color_bgra>> framebuffer;
 		// 8 bits stencil buffer
-		std::shared_ptr<RawBuffer<uint8_t>> stencilbuffer;
+		std::unique_ptr<RawBuffer<uint8_t>> stencilbuffer;
+		// shadowmap
+		std::unique_ptr<RawBuffer<float>> shadowmap;
 
 		// framebuffer tiles
 		const uint32_t TILE_SIZE = 64;
@@ -40,9 +42,10 @@ namespace Guarneri {
 			FrameTile::build_tiles(tiles, TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
 
 			// prepare buffers
-			zbuffer = std::make_shared<RawBuffer<float>>(w, h);
-			framebuffer = std::make_shared<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
-			stencilbuffer = std::make_shared<RawBuffer<uint8_t>>(w, h);
+			zbuffer = std::make_unique<RawBuffer<float>>(w, h);
+			shadowmap = std::make_unique<RawBuffer<float>>(w, h);
+			framebuffer = std::make_unique<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
+			stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 			zbuffer->clear(FAR_Z);
 			stencilbuffer->clear(DEFAULT_STENCIL);
 			framebuffer->clear(DEFAULT_COLOR);
@@ -73,6 +76,12 @@ namespace Guarneri {
 			}
 		}
 
+		void render() {
+#ifdef TILE_BASED
+			render_tiles();
+#endif
+		}
+
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
 				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
@@ -94,6 +103,7 @@ namespace Guarneri {
 			statistics.earlyz_optimized = 0;
 		}
 
+	private:
 		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			assert(shader != nullptr);
 
@@ -112,7 +122,7 @@ namespace Guarneri {
 			Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 			// clip in screen space
-			//if (!material->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
+			//if (!shader->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
 			//	return;
 			//}
 
@@ -223,47 +233,52 @@ namespace Guarneri {
 					auto tri = task.triangle;
 					auto shader = task.shader;
 
-					auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
-					int row_start = (int)(bounds.min().y + 0.5f) - 1;
-					int row_end = (int)(bounds.max().y + 0.5f) + 1;
-					int col_start = (int)(bounds.min().x + 0.5f) - 1;
-					int col_end = (int)(bounds.max().x + 0.5f) + 1;
-
-					row_start = CLAMP_INT(row_start, tile.row_start, tile.row_end);
-					row_end = CLAMP_INT(row_end, tile.row_start, tile.row_end);
-					col_start = CLAMP_INT(col_start, tile.col_start, tile.col_end);
-					col_end = CLAMP_INT(col_end, tile.col_start, tile.col_end);
-
-					bool flip = tri.flip;
-					int ccw_idx0 = 0;
-					int ccw_idx1 = flip ? 2 : 1;
-					int ccw_idx2 = flip ? 1 : 2;
-
-					auto v0 = tri[ccw_idx0].position.xy();
-					auto v1 = tri[ccw_idx1].position.xy();
-					auto v2 = tri[ccw_idx2].position.xy();
-
-					float area = Triangle::area_double(v0, v1, v2);
-
-					for (int row = row_start; row < row_end; row++) {
-						for (int col = col_start; col < col_end; col++) {
-							Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
-							float w0 = Triangle::area_double(v1, v2, pixel);
-							float w1 = Triangle::area_double(v2, v0, pixel);
-							float w2 = Triangle::area_double(v0, v1, pixel);
-							if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-								w0 /= area; w1 /= area; w2 /= area;
-								Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-								process_fragment(vert, row, col, shader);
-							}
-						}
-					}
+					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+					execute_task(framebuffer.get(), zbuf, stencilbuffer.get(), tile, tri, shader);
 
 					// wireframe
 					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
 						draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 						draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 						draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					}
+				}
+			}
+		}
+
+		void execute_task(RawBuffer<color_bgra>* framebuffer, RawBuffer<float>* zbuffer, RawBuffer<uint8_t>* stencilbuffer, const FrameTile& tile, const Triangle& tri, Shader* shader) {
+			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
+			int row_start = (int)(bounds.min().y + 0.5f) - 1;
+			int row_end = (int)(bounds.max().y + 0.5f) + 1;
+			int col_start = (int)(bounds.min().x + 0.5f) - 1;
+			int col_end = (int)(bounds.max().x + 0.5f) + 1;
+
+			row_start = CLAMP_INT(row_start, tile.row_start, tile.row_end);
+			row_end = CLAMP_INT(row_end, tile.row_start, tile.row_end);
+			col_start = CLAMP_INT(col_start, tile.col_start, tile.col_end);
+			col_end = CLAMP_INT(col_end, tile.col_start, tile.col_end);
+
+			bool flip = tri.flip;
+			int ccw_idx0 = 0;
+			int ccw_idx1 = flip ? 2 : 1;
+			int ccw_idx2 = flip ? 1 : 2;
+
+			auto v0 = tri[ccw_idx0].position.xy();
+			auto v1 = tri[ccw_idx1].position.xy();
+			auto v2 = tri[ccw_idx2].position.xy();
+
+			float area = Triangle::area_double(v0, v1, v2);
+
+			for (int row = row_start; row < row_end; row++) {
+				for (int col = col_start; col < col_end; col++) {
+					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+					float w0 = Triangle::area_double(v1, v2, pixel);
+					float w1 = Triangle::area_double(v2, v0, pixel);
+					float w2 = Triangle::area_double(v0, v1, pixel);
+					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+						w0 /= area; w1 /= area; w2 /= area;
+						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
+						process_fragment(framebuffer, zbuffer, stencilbuffer, vert, row, col, shader);
 					}
 				}
 			}
@@ -316,7 +331,7 @@ namespace Guarneri {
 					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-						process_fragment(vert, row, col, shader);
+						process_fragment(framebuffer.get(), zbuffer.get(), stencilbuffer.get(), vert, row, col, shader);
 					}
 				}
 			}
@@ -348,7 +363,7 @@ namespace Guarneri {
 				assert(right >= left);
 
 				for (auto col = left; col < right; col++) {
-					process_fragment(lhs, row, col, shader);
+					process_fragment(framebuffer.get(), zbuffer.get(), stencilbuffer.get(), lhs, row, col, shader);
 					auto dx = Vertex::differential(lhs, rhs);
 					lhs = Vertex::intagral(lhs, dx);
 				}
@@ -357,7 +372,7 @@ namespace Guarneri {
 #endif
 
 		// per fragment processing
-		void process_fragment(const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
+		void process_fragment(RawBuffer<color_bgra>* framebuffer, RawBuffer<float>* zbuffer, RawBuffer<uint8_t>* stencilbuffer, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -389,7 +404,7 @@ namespace Guarneri {
 			// early-z
 			// todo: early-z conditions
 			if (enable_depth_test && !(enable_blending && s != nullptr && s->transparent)) {
-				if (!perform_depth_test(ztest_func, row, col, z)) {
+				if (!perform_depth_test(zbuffer, ztest_func, row, col, z)) {
 					statistics.earlyz_optimized++;
 					return;
 				}
@@ -433,14 +448,14 @@ namespace Guarneri {
 			// todo: stencil test
 			if (enable_stencil_test)
 			{
-				if (!perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col)) {
+				if (!perform_stencil_test(stencilbuffer, stencil_ref_val, stencil_read_mask, stencil_func, row, col)) {
 					op_pass &= ~PerSampleOperation::STENCIL_TEST;
 				}
 			}
 
 			// depth test
 			if (enable_depth_test) {
-				if (!perform_depth_test(ztest_func, row, col, z)) {
+				if (!perform_depth_test(zbuffer, ztest_func, row, col, z)) {
 					op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				}
 			}
@@ -483,7 +498,7 @@ namespace Guarneri {
 
 			// update stencilbuffer
 			if (enable_stencil_test) {
-				update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
+				update_stencil_buffer(stencilbuffer, row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 			}
 
 			// write depth
@@ -508,7 +523,7 @@ namespace Guarneri {
 			// depth buffer visualization
 			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
 				float cur_depth;
-				if (zbuffer->read(row, col, cur_depth)) {
+				if (shadowmap->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
 					Color depth_color = Color::WHITE * linear_depth / 30.0f;
 					if (EQUALS(cur_depth, FAR_Z)) {
@@ -528,7 +543,7 @@ namespace Guarneri {
 			return true;
 		}
 
-		bool perform_stencil_test(const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const {
+		bool perform_stencil_test(RawBuffer<uint8_t>* stencilbuffer, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const {
 			bool pass = false;
 			uint8_t stencil;
 			if (stencilbuffer->read(row, col, stencil)) {
@@ -562,7 +577,7 @@ namespace Guarneri {
 			return pass;
 		}
 
-		void update_stencil_buffer(const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const {
+		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuffer, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const {
 			bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
 			bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
 			uint8_t stencil;
@@ -601,7 +616,7 @@ namespace Guarneri {
 			}
 		}
 
-		bool perform_depth_test(const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const {
+		bool perform_depth_test(RawBuffer<float>* zbuffer, const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const {
 			float depth;
 			bool pass = false;
 			if (zbuffer->read(row, col, depth)) {
@@ -769,11 +784,11 @@ namespace Guarneri {
 			s1 = translation * s1;
 			s2 = translation * s2;
 
-			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+			SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
 		}
 
 		void draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col) {
-			SegmentDrawer::bresenham(framebuffer, (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
+			SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
 		}
 
 		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
@@ -795,7 +810,7 @@ namespace Guarneri {
 			Vector4 s1 = ndc2viewport(n1);
 			Vector4 s2 = ndc2viewport(n2);
 
-			SegmentDrawer::bresenham(framebuffer, (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+			SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
 		}
 
 		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset) {
@@ -815,6 +830,39 @@ namespace Guarneri {
 			Graphics().draw_segment(pos, pos + right, Color::RED, m, v, p);
 			Graphics().draw_segment(pos, pos + up, Color::GREEN, m, v, p);
 		}
+
+		// todo: opengl like api
+		/*void gen_vertex_array(uint32_t& id) {
+			id = ALLOC_ID()
+			id2vao[id] = std::make_unique<VertexArrayObject>();
+		}
+
+		void bind_vertex_array(const uint32_t& id) {
+
+		}
+
+		void gen_buffer(uint32_t& id) {
+			id = ALLOC_ID()
+			id2vbo[id] = std::make_unique<VertexBufferObject>();
+		}
+
+		void bind_buffer(const uint32_t& id) {
+
+		}
+
+		void gen_framebuffer(uint32_t& id) {
+			id = ALLOC_ID()
+			id2fbo[id] = std::make_unique<FrameBufferObject>();
+		}
+
+		void bind_framebuffer(const uint32_t& id) {
+
+		}*/
+
+	//private:
+		//std::unordered_map <uint32_t, std::unique_ptr<VertexArrayObject>> id2vao;
+		//std::unordered_map <uint32_t, std::unique_ptr<VertexBufferObject>> id2vbo;
+		//std::unordered_map <uint32_t, std::unique_ptr<FrameBufferObject>> id2fbo;
 	};
 }
 #endif
