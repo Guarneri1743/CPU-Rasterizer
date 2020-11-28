@@ -110,7 +110,7 @@ namespace Guarneri {
 			return o;
 		}
 
-		virtual Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const {
+		virtual Color fragment_shader(const v2f& input) const {
 			Color ambient = misc_param.main_light.ambient;
 			Color specular = misc_param.main_light.specular;
 			Color diffuse = misc_param.main_light.diffuse;
@@ -161,7 +161,8 @@ namespace Guarneri {
 				ret *= ao;
 			}
 
-			if ((misc_param.render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
+			// todo: ddx ddy
+			/*if ((misc_param.render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
 				Vector2 ddx_uv = ddx.uv;
 				Vector2 ddy_uv = ddy.uv;
 				float rho = std::max(std::sqrt(Vector2::dot(ddx_uv, ddx_uv)), std::sqrt(Vector2::dot(ddy_uv, ddy_uv)));
@@ -194,7 +195,7 @@ namespace Guarneri {
 				else {
 					return Color(0.5f, 0.5f, 0.5f, 1.0f);
 				}
- 			}
+ 			}*/
 
 			if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
 				return input.uv;

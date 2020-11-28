@@ -34,7 +34,7 @@ namespace Guarneri{
 			main_light.update_direction(Vector3(1.0f, 1.0f, 1.0f));
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
-			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), Window().aspect, 45.0f, 0.5f, 500.0f, Projection::PERSPECTIVE));
+			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), Window().aspect, 45.0f, 0.5f, 30.0f, Projection::PERSPECTIVE));
 			main_cam->lookat(Vector3::ZERO);
 			debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
 			world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
@@ -68,16 +68,16 @@ namespace Guarneri{
 			InputMgr().add_on_key_down_evt([](KeyCode code, void* data){			
 				REF(data)
 				if (code == KeyCode::F1) {
-					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::SHADED;
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::SHADOWMAP;
 				}
 				else if (code == KeyCode::F2) {
-					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::FRAME_TILE;
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::DEPTH;
 				}
 				else if (code == KeyCode::F3) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::WIREFRAME;
 				}
 				else if (code == KeyCode::F4) {
-					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::DEPTH;
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::FRAME_TILE;
 				}
 				else if (code == KeyCode::F5) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::UV;
@@ -175,12 +175,20 @@ namespace Guarneri{
 		}
 
 		void render_shadow() {
+			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
+				return;
+			}
+
 			for (auto& obj : objects) {
 				obj->render_shadow();
 			}
 		}
 
 		void render() {
+			if ((misc_param.render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE) {
+				return;
+			}
+
 			bool enable_frustum_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE;
 			if (enable_frustum_culling) {
 				// todo: CPU Frustum Culling

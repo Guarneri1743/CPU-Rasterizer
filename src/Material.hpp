@@ -124,36 +124,36 @@ namespace Guarneri {
 			shadow_caster->light_space = light_space_matrix;
 		}
 
-		void sync(Shader* target_shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			target_shader->m = m;
-			target_shader->v = v;
-			target_shader->p = p;
-			target_shader->ztest_func = ztest_func;
-			target_shader->zwrite_mode = zwrite_mode;
-			target_shader->src_factor = src_factor;
-			target_shader->dst_factor = dst_factor;
-			target_shader->blend_op = blend_op;
-			target_shader->transparent = transparent;
-			target_shader->name2float = name2float;
-			target_shader->name2float4 = name2float4;
-			target_shader->name2tex = name2tex;
-			target_shader->name2int = name2int;
-			target_shader->name2cubemap = name2cubemap;
-			target_shader->stencil_func = stencil_func;
-			target_shader->stencil_pass_op = stencil_pass_op;
-			target_shader->stencil_fail_op = stencil_fail_op;
-			target_shader->stencil_zfail_op = stencil_zfail_op;
-			target_shader->stencil_read_mask = stencil_read_mask;
-			target_shader->stencil_write_mask = stencil_write_mask;
-			target_shader->stencil_ref_val = stencil_ref_val;
-			target_shader->color_mask = color_mask;
-			target_shader->lighting_param = lighting_param;
-			target_shader->double_face = double_face;
+		void sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
+			shader->m = m;
+			shader->v = v;
+			shader->p = p;
+			shader->ztest_func = ztest_func;
+			shader->zwrite_mode = zwrite_mode;
+			shader->src_factor = src_factor;
+			shader->dst_factor = dst_factor;
+			shader->blend_op = blend_op;
+			shader->transparent = transparent;
+			shader->name2float = name2float;
+			shader->name2float4 = name2float4;
+			shader->name2tex = name2tex;
+			shader->name2int = name2int;
+			shader->name2cubemap = name2cubemap;
+			shader->stencil_func = stencil_func;
+			shader->stencil_pass_op = stencil_pass_op;
+			shader->stencil_fail_op = stencil_fail_op;
+			shader->stencil_zfail_op = stencil_zfail_op;
+			shader->stencil_read_mask = stencil_read_mask;
+			shader->stencil_write_mask = stencil_write_mask;
+			shader->stencil_ref_val = stencil_ref_val;
+			shader->color_mask = color_mask;
+			shader->lighting_param = lighting_param;
+			shader->double_face = double_face;
 			if (name2tex.count(normal_prop) > 0) {
-				target_shader->normal_map = true;
+				shader->normal_map = true;
 			}
 			else {
-				target_shader->normal_map = false;
+				shader->normal_map = false;
 			}
 		}
 

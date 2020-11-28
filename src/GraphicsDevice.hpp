@@ -47,6 +47,7 @@ namespace Guarneri {
 			framebuffer = std::make_unique<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
 			stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 			zbuffer->clear(FAR_Z);
+			shadowmap->clear(FAR_Z);
 			stencilbuffer->clear(DEFAULT_STENCIL);
 			framebuffer->clear(DEFAULT_COLOR);
 		}
@@ -84,7 +85,7 @@ namespace Guarneri {
 
 		void clear_buffer(const BufferFlag& flag) {
 			if ((flag & BufferFlag::COLOR) != BufferFlag::NONE) {
-				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+				if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (misc_param.render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 				{
 					framebuffer->clear(DEFAULT_DEPTH_COLOR);
 				}
@@ -94,6 +95,7 @@ namespace Guarneri {
 			}
 			if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) {
 				zbuffer->clear(FAR_Z);
+				shadowmap->clear(FAR_Z);
 			}
 			if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) {
 				stencilbuffer->clear(DEFAULT_STENCIL);
@@ -236,17 +238,19 @@ namespace Guarneri {
 					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
 					execute_task(framebuffer.get(), zbuf, stencilbuffer.get(), tile, tri, shader);
 
-					// wireframe
-					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-						draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+					if (!shader->shadow) {
+						// wireframe
+						if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+							draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+							draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+							draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+						}
 					}
 				}
 			}
 		}
 
-		void execute_task(RawBuffer<color_bgra>* framebuffer, RawBuffer<float>* zbuffer, RawBuffer<uint8_t>* stencilbuffer, const FrameTile& tile, const Triangle& tri, Shader* shader) {
+		void execute_task(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const FrameTile& tile, const Triangle& tri, Shader* shader) {
 			auto bounds = BoundingBox2D(tri[0].position, tri[1].position, tri[2].position);
 			int row_start = (int)(bounds.min().y + 0.5f) - 1;
 			int row_end = (int)(bounds.max().y + 0.5f) + 1;
@@ -278,7 +282,7 @@ namespace Guarneri {
 					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-						process_fragment(framebuffer, zbuffer, stencilbuffer, vert, row, col, shader);
+						process_fragment(fbuf, zbuf, stencilbuf, vert, row, col, shader);
 					}
 				}
 			}
@@ -372,7 +376,7 @@ namespace Guarneri {
 #endif
 
 		// per fragment processing
-		void process_fragment(RawBuffer<color_bgra>* framebuffer, RawBuffer<float>* zbuffer, RawBuffer<uint8_t>* stencilbuffer, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
+		void process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 			bool enable_alpha_test = (misc_param.persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 			bool enable_stencil_test = (misc_param.persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -404,7 +408,7 @@ namespace Guarneri {
 			// early-z
 			// todo: early-z conditions
 			if (enable_depth_test && !(enable_blending && s != nullptr && s->transparent)) {
-				if (!perform_depth_test(zbuffer, ztest_func, row, col, z)) {
+				if (!perform_depth_test(zbuf, ztest_func, row, col, z)) {
 					statistics.earlyz_optimized++;
 					return;
 				}
@@ -427,7 +431,7 @@ namespace Guarneri {
 				v_out.bitangent = v.bitangent * w;
 
 				// todo: ddx ddy
-				fragment_result = s->fragment_shader(v_out, Vertex(), Vertex());
+				fragment_result = s->fragment_shader(v_out);
 				pixel_color = Color::encode_bgra(fragment_result);
 			}
 
@@ -448,14 +452,14 @@ namespace Guarneri {
 			// todo: stencil test
 			if (enable_stencil_test)
 			{
-				if (!perform_stencil_test(stencilbuffer, stencil_ref_val, stencil_read_mask, stencil_func, row, col)) {
+				if (!perform_stencil_test(stencilbuf, stencil_ref_val, stencil_read_mask, stencil_func, row, col)) {
 					op_pass &= ~PerSampleOperation::STENCIL_TEST;
 				}
 			}
 
 			// depth test
 			if (enable_depth_test) {
-				if (!perform_depth_test(zbuffer, ztest_func, row, col, z)) {
+				if (!perform_depth_test(zbuf, ztest_func, row, col, z)) {
 					op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				}
 			}
@@ -463,7 +467,7 @@ namespace Guarneri {
 			// blending
 			if (enable_blending && s != nullptr && s->transparent) {
 				color_bgra dst;
-				if (framebuffer->read(row, col, dst)) {
+				if (fbuf->read(row, col, dst)) {
 					Color dst_color = Color::decode(dst);
 					Color src_color = fragment_result;
 					Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
@@ -474,11 +478,11 @@ namespace Guarneri {
 			// write color
 			if (validate_fragment(op_pass)) {
 				if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A)) {
-					framebuffer->write(row, col, pixel_color);
+					fbuf->write(row, col, pixel_color);
 				}
 				else {
 					color_bgra cur;
-					if (framebuffer->read(row, col, cur)) {
+					if (fbuf->read(row, col, cur)) {
 						if ((color_mask & ColorMask::R) == ColorMask::ZERO) {
 							pixel_color.r = cur.r;
 						}
@@ -491,14 +495,14 @@ namespace Guarneri {
 						if ((color_mask & ColorMask::A) == ColorMask::ZERO) {
 							pixel_color.a = cur.a;
 						}
-						framebuffer->write(row, col, pixel_color);
+						fbuf->write(row, col, pixel_color);
 					}
 				}
 			}
 
-			// update stencilbuffer
+			// update stencilbuf
 			if (enable_stencil_test) {
-				update_stencil_buffer(stencilbuffer, row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
+				update_stencil_buffer(stencilbuf, row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 			}
 
 			// write depth
@@ -507,30 +511,36 @@ namespace Guarneri {
 					if (color_mask == ColorMask::ZERO || stencil_pass_op == StencilOp::REPLACE) {
 						std::cerr << "error " << std::endl;
 					}
-					zbuffer->write(row, col, z);
+					zbuf->write(row, col, z);
 				}
 			}
 
 			// stencil visualization
 			if ((misc_param.render_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE) {
 				uint8_t stencil;
-				if (stencilbuffer->read(row, col, stencil)) {
+				if (stencilbuf->read(row, col, stencil)) {
 					color_bgra c = Color::encode_bgra(stencil, stencil, stencil, 255);
-					framebuffer->write(row, col, c);
+					fbuf->write(row, col, c);
 				}
 			}
 
 			// depth buffer visualization
 			if ((misc_param.render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
 				float cur_depth;
-				if (shadowmap->read(row, col, cur_depth)) {
+				if (this->zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					Color depth_color = Color::WHITE * linear_depth / 30.0f;
-					if (EQUALS(cur_depth, FAR_Z)) {
-						depth_color = Color::WHITE;
-					}
+					Color depth_color = Color::WHITE * linear_depth / misc_param.cam_far;
 					color_bgra c = Color::encode_bgra(depth_color);
-					framebuffer->write(row, col, c);
+					fbuf->write(row, col, c);
+				}
+			}
+			
+			if ((misc_param.render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE) {
+				float cur_depth;
+				if (this->shadowmap->read(row, col, cur_depth)) {
+					Color depth_color = Color::WHITE * cur_depth;
+					color_bgra c = Color::encode_bgra(depth_color);
+					fbuf->write(row, col, c);
 				}
 			}
 		}
@@ -543,10 +553,10 @@ namespace Guarneri {
 			return true;
 		}
 
-		bool perform_stencil_test(RawBuffer<uint8_t>* stencilbuffer, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const {
+		bool perform_stencil_test(RawBuffer<uint8_t>* stencilbuf, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const {
 			bool pass = false;
 			uint8_t stencil;
-			if (stencilbuffer->read(row, col, stencil)) {
+			if (stencilbuf->read(row, col, stencil)) {
 				switch (func) {
 				case CompareFunc::NEVER:
 					pass = false;
@@ -577,11 +587,11 @@ namespace Guarneri {
 			return pass;
 		}
 
-		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuffer, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const {
+		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const {
 			bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
 			bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
 			uint8_t stencil;
-			stencilbuffer->read(row, col, stencil);
+			stencilbuf->read(row, col, stencil);
 			StencilOp stencil_op;
 			if (stencil_pass) {
 				stencil_op = z_pass ? stencil_pass_op : stencil_zfail_op;
@@ -593,33 +603,33 @@ namespace Guarneri {
 			case StencilOp::KEEP:
 				break;
 			case StencilOp::ZERO:
-				this->stencilbuffer->write(row, col, 0);
+				stencilbuf->write(row, col, 0);
 				break;
 			case StencilOp::REPLACE:
-				this->stencilbuffer->write(row, col, ref_val);
+				stencilbuf->write(row, col, ref_val);
 				break;
 			case StencilOp::INCR:
-				this->stencilbuffer->write(row, col, CLAMP((int)stencil + 1, 0, 255));
+				stencilbuf->write(row, col, CLAMP((int)stencil + 1, 0, 255));
 				break;
 			case StencilOp::DECR:
-				this->stencilbuffer->write(row, col, CLAMP((int)stencil - 1, 0, 255));
+				stencilbuf->write(row, col, CLAMP((int)stencil - 1, 0, 255));
 				break;
 			case StencilOp::INCR_WRAP:
-				this->stencilbuffer->write(row, col, stencil + 1);
+				stencilbuf->write(row, col, stencil + 1);
 				break;
 			case StencilOp::DECR_WRAP:
-				this->stencilbuffer->write(row, col, stencil - 1);
+				stencilbuf->write(row, col, stencil - 1);
 				break;
 			case StencilOp::INVERT:
-				this->stencilbuffer->write(row, col, ~stencil);
+				stencilbuf->write(row, col, ~stencil);
 				break;
 			}
 		}
 
-		bool perform_depth_test(RawBuffer<float>* zbuffer, const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const {
+		bool perform_depth_test(RawBuffer<float>* zbuf, const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const {
 			float depth;
 			bool pass = false;
-			if (zbuffer->read(row, col, depth)) {
+			if (zbuf->read(row, col, depth)) {
 				pass = z <= depth;
 				switch (func) {
 				case CompareFunc::NEVER:
