@@ -426,7 +426,7 @@ namespace Guarneri {
 
 			// fragment shader
 			Color fragment_result;
-			if ((misc_param.render_flag & RenderFlag::SHADED) != RenderFlag::DISABLE && s != nullptr) {
+			if (s != nullptr) {
 				v2f v_out;
 				float w = 1.0f / v.rhw;
 				v_out.position = v.position;

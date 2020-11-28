@@ -116,7 +116,7 @@ namespace Guarneri{
 	enum class RenderFlag {
 		DISABLE = 0,
 		WIREFRAME = 1 << 0,
-		SHADED = 1 << 1,
+		SHADOWMAP = 1 << 1,
 		DEPTH = 1 << 2,
 		UV = 1 << 3,
 		VERTEX_COLOR = 1 << 4,
@@ -125,8 +125,7 @@ namespace Guarneri{
 		STENCIL = 1 << 7,
 		SCANLINE = 1 << 8,
 		FRAME_TILE = 1 << 9,
-		SHADOWMAP = 1 << 10,
-		SPECULAR = 1 << 11,
+		SPECULAR = 1 << 10,
 	};
 
 #ifdef OPAQUE
@@ -162,10 +161,6 @@ namespace Guarneri{
 		int count = 0;
 		if ((flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
 			stream << "WIREFRAME";
-			count++;
-		}
-		if ((flag & RenderFlag::SHADED) != RenderFlag::DISABLE) {
-			stream << (count > 0 ? " | SHADED" : "SHADED");
 			count++;
 		}
 		if ((flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
@@ -215,10 +210,6 @@ namespace Guarneri{
 		int count = 0;
 		if ((flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
 			stream << "WIREFRAME";
-			count++;
-		}
-		if ((flag & RenderFlag::SHADED) != RenderFlag::DISABLE) {
-			stream << (count > 0 ? " | SHADED" : "SHADED");
 			count++;
 		}
 		if ((flag & RenderFlag::DEPTH) != RenderFlag::DISABLE) {
