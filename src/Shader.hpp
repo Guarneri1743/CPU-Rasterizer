@@ -118,7 +118,7 @@ namespace Guarneri {
 			if (shadowmap == nullptr) {
 				return 0.0f;
 			}
-			Vector3 proj_shadow_coord = light_space_pos.xyz() / light_space_pos.w;
+			Vector3 proj_shadow_coord = light_space_pos.xyz();
 			proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
 			float depth;
 			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth)) {

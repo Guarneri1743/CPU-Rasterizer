@@ -53,14 +53,14 @@ namespace Guarneri {
 		float rhw;
 
 	public:
-		void perspective_division(const float& _rhw) {
-			world_pos *= _rhw;
-			shadow_coord *= _rhw;
-			color *= _rhw;
-			normal *= _rhw;
-			uv *= _rhw;
-			tangent *= _rhw;
-			bitangent *= _rhw;
+		void perspective_division() {
+			world_pos *= rhw;
+			shadow_coord *= rhw;
+			color *= rhw;
+			normal *= rhw;
+			uv *= rhw;
+			tangent *= rhw;
+			bitangent *= rhw;
 		}
 
 		static Vertex barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& w0, const float& w1, const float& w2) {

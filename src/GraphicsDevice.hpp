@@ -149,25 +149,16 @@ namespace Guarneri {
 			}
 
 			// perspective division, uv, color, normal, etc. 
-			n1.perspective_division(c1.rhw);
-			n2.perspective_division(c2.rhw);
-			n3.perspective_division(c3.rhw);
+			n1.perspective_division();
+			n2.perspective_division();
+			n3.perspective_division();
 
 			Vertex s1 = ndc2viewport(n1);
 			Vertex s2 = ndc2viewport(n2);
 			Vertex s3 = ndc2viewport(n3);
 
-			s1.position.w = c1.position.w;
-			s1.rhw = 1.0f / c1.position.w;
-
-			s2.position.w = c2.position.w;
-			s2.rhw = 1.0f / c2.position.w;
-
-			s3.position.w = c3.position.w;
-			s3.rhw = 1.0f / c3.position.w;
-
 			Triangle tri(s1, s2, s3);
-
+		
 			// primitive assembly
 			std::vector<Triangle> tris = tri.horizontally_split();
 
@@ -434,7 +425,7 @@ namespace Guarneri {
 				v_out.uv = v.uv * w;
 				v_out.tangent = v.tangent * w;
 				v_out.bitangent = v.bitangent * w;
-
+				
 				// todo: ddx ddy
 				fragment_result = s->fragment_shader(v_out);
 				pixel_color = Color::encode_bgra(fragment_result);
@@ -742,11 +733,6 @@ namespace Guarneri {
 		Vertex clip2ndc(const Vertex& v) const {
 			Vertex ret = v;
 			ret.position = clip2ndc(v.position);
-			float w = ret.position.w;
-			if (w == 0.0f) {
-				w = EPSILON;
-			}
-			ret.rhw = 1.0f / w;
 			return ret;
 		}
 
@@ -758,14 +744,12 @@ namespace Guarneri {
 			}
 			float rhw = 1.0f / w;
 			ndc_pos *= rhw;
-			ndc_pos.w = 1.0f;
 			return ndc_pos;
 		}
 
 		Vertex ndc2viewport(const Vertex& v) const {
 			Vertex ret = v;
 			ret.position = ndc2viewport(v.position);
-			ret.rhw = 1.0f;
 			return ret;
 		}
 
@@ -774,7 +758,7 @@ namespace Guarneri {
 			viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
 			viewport_pos.y = (v.y + 1.0f) * this->height * 0.5f;
 			viewport_pos.z = v.z * 0.5f + 0.5f;
-			viewport_pos.w = 1.0f;
+			viewport_pos.w = v.w;
 			return viewport_pos;
 		}
 

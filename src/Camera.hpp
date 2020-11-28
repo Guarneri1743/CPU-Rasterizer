@@ -127,7 +127,7 @@ namespace Guarneri {
 				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 				break;
 			case Projection::ORTHO:
-				this->p = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, this->near, this->far);
+				this->p = Matrix4x4::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
 				break;
 			default:
 				this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);

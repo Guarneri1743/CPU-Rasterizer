@@ -10,14 +10,14 @@ int main()
 
 	// setup main Light
 	Scene demo_scene;
-	demo_scene.main_light.position = Vector3(-2.0f, 4.0f, -1.0f);
+	demo_scene.main_light.position = Vector3(4.0f, 4.0f, 4.0f);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.intensity = 3.0f;
 
 	// setup Camera
-	// demo_scene.main_cam->set_projection(Projection::ORTHO);
+	//demo_scene.main_cam->set_projection(Projection::ORTHO);
 	demo_scene.main_cam->position = Vector3(10.5f, 15.0f, 13.0f);
 	demo_scene.main_cam->set_near(0.5f);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 7.0f, 0.0f));

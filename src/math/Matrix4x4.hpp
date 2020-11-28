@@ -256,14 +256,46 @@ namespace Guarneri {
 		}
 
 		static Matrix4x4 perspective(const float& fov, const float& aspect, const float& near, const float& far) {
-#ifdef LEFT_HANDED
-			return perspective_lh(fov, aspect, near, far);
+#ifdef LEFT_HANDED 
+#ifdef GL_LIKE
+			return perspective_lh_gl(fov, aspect, near, far);
+#else 
+			return perspective_lh_dx(fov, aspect, near, far);
+#endif
 #else
-			return perspective_rh(fov, aspect, near, far);
+#ifdef GL_LIKE
+			return perspective_rh_gl(fov, aspect, near, far);
+#else 
+			return perspective_rh_dx(fov, aspect, near, far);
+#endif
 #endif
 		}
 
-		static Matrix4x4 perspective_rh(const float& fov, const float& aspect, const float& near, const float& far) {
+		static Matrix4x4 perspective_rh_dx(const float& fov, const float& aspect, const float& near, const float& far) {
+			float rad = DEGREE2RAD(fov * 0.5f);
+			float cot = std::cos(rad) / std::sin(rad);
+			Matrix4x4 m = ZERO;
+			m.at(0, 0) = cot / aspect;
+			m.at(1, 1) = cot;
+			m.at(2, 2) = - far / (far - near);
+			m.at(3, 2) = -1.0f;
+			m.at(2, 3) = - (far * near) / (far - near);
+			return m;
+		}
+
+		static Matrix4x4 perspective_lh_dx(const float& fov, const float& aspect, const float& near, const float& far) {
+			float rad = DEGREE2RAD(fov * 0.5f);
+			float cot = std::cos(rad) / std::sin(rad);
+			Matrix4x4 m = ZERO;
+			m.at(0, 0) = cot / aspect;
+			m.at(1, 1) = cot;
+			m.at(2, 2) = far / (far - near);
+			m.at(3, 2) = 1.0f;
+			m.at(2, 3) = - (far * near) / (far - near);
+			return m;
+		}
+
+		static Matrix4x4 perspective_rh_gl(const float& fov, const float& aspect, const float& near, const float& far) {
 			float rad = DEGREE2RAD(fov * 0.5f);
 			float cot = std::cos(rad) / std::sin(rad);
 			Matrix4x4 m = ZERO;
@@ -275,7 +307,7 @@ namespace Guarneri {
 			return m;
 		}
 
-		static Matrix4x4 perspective_lh(const float& fov, const float& aspect, const float& near, const float& far) {
+		static Matrix4x4 perspective_lh_gl(const float& fov, const float& aspect, const float& near, const float& far) {
 			float rad = DEGREE2RAD(fov * 0.5f);
 			float cot = std::cos(rad) / std::sin(rad);
 			Matrix4x4 m = ZERO;
@@ -288,32 +320,62 @@ namespace Guarneri {
 		}
 
 		static Matrix4x4 ortho(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
-#ifdef LEFT_HANDED
-			return ortho_lh(left, right, bottom, top, near, far);
+#ifdef LEFT_HANDED 
+#ifdef GL_LIKE
+			return ortho_lh_gl(left, right, bottom, top, near, far);
+#else 
+			return ortho_lh_dx(left, right, bottom, top, near, far);
+#endif
 #else
-			return ortho_rh(left, right, bottom, top, near, far);
+#ifdef GL_LIKE
+			return ortho_rh_gl(left, right, bottom, top, near, far);
+#else 
+			return ortho_rh_dx(left, right, bottom, top, near, far);
+#endif
 #endif
 		}
 
-		static Matrix4x4 ortho_lh(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+		static Matrix4x4 ortho_rh_dx(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
 			Matrix4x4 m = IDENTITY;
 			m.at(0, 0) = 2.0f / (right - left);
 			m.at(1, 1) = 2.0f / (top - bottom);
-			m.at(2, 2) = - 2.0f / (far - near);
-			m.at(0, 3) = -(right + left) / 2.0f;
-			m.at(1, 3) = -(top + bottom) / 2.0f;
-			m.at(2, 3) = - (far + near) / 2.0f;
+			m.at(2, 2) = - 1.0f / (far - near);
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 3) = - near / (far - near);
 			return m;
 		}
 
-		static Matrix4x4 ortho_rh(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+		static Matrix4x4 ortho_lh_dx(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+			Matrix4x4 m = IDENTITY;
+			m.at(0, 0) = 2.0f / (right - left);
+			m.at(1, 1) = 2.0f / (top - bottom);
+			m.at(2, 2) = 1.0f / (far - near);
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 3) = - near / (far - near);
+			return m;
+		}
+
+		static Matrix4x4 ortho_rh_gl(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
 			Matrix4x4 m = IDENTITY;
 			m.at(0, 0) = 2.0f / (right - left);
 			m.at(1, 1) = 2.0f / (top - bottom);
 			m.at(2, 2) = -2.0f / (far - near);
-			m.at(0, 3) = -(right + left) / 2.0f;
-			m.at(1, 3) = -(top + bottom) / 2.0f;
-			m.at(2, 3) = -(far + near) / 2.0f;
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 3) = -(far + near) / (far - near);
+			return m;
+		}
+
+		static Matrix4x4 ortho_lh_gl(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far) {
+			Matrix4x4 m = IDENTITY;
+			m.at(0, 0) = 2.0f / (right - left);
+			m.at(1, 1) = 2.0f / (top - bottom);
+			m.at(2, 2) = 2.0f / (far - near);
+			m.at(0, 3) = -(right + left) / (right - left);
+			m.at(1, 3) = -(top + bottom) / (top - bottom);
+			m.at(2, 3) = -(far + near) / (far - near);
 			return m;
 		}
 
