@@ -16,23 +16,41 @@ namespace Guarneri {
 			diffuse = Color::WHITE;
 			specular = Color::WHITE;
 			intensity = 1.0f;
-			direction = Vector3(1.0f, 1.0f, 1.0f);
-			light_proj = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.05f, 50.0f);
-			light_view = Matrix4x4::lookat(-direction * 10.0f, Vector3(), Vector3::UP);
-			light_space = light_proj * light_view;
+			this->yaw = -210.0f;
+			this->pitch = 70.0f;
+			//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
+			this->p = Matrix4x4::ortho(-20.0f, 20.0f, -15.0f, 15.0f, -7.5f, 7.5f);
+			update_rotation();
 		}
 
-		void update_direction(const Vector3& dir) {
-			direction = dir;
-			light_proj = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.05f, 50.0f);
-			light_view = Matrix4x4::lookat(-direction * 10.0f, Vector3(), Vector3::UP);
-			light_space = light_proj * light_view;
+		float yaw;
+		float pitch;
+		Vector3 forward;
+		Vector3 right;
+		Vector3 up;
+		Vector3 position;
+		Matrix4x4 p;
+
+		Matrix4x4 light_space() const {
+			auto v = Matrix4x4::lookat(position, position + forward, Vector3::UP);
+			auto ret = p * v;
+			return ret;
 		}
 
-		Vector3 direction;
-		Matrix4x4 light_view;
-		Matrix4x4 light_proj;
-		Matrix4x4 light_space;
+		void rotate(const float& yaw_offset, const float& pitch_offset) {
+			this->yaw -= yaw_offset;
+			this->pitch -= pitch_offset;
+			this->pitch = std::clamp(this->pitch, -89.0f, 89.0f);
+			update_rotation();
+		}
+
+		void update_rotation() {
+			forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward.y = sin(DEGREE2RAD(this->pitch));
+			forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
+			forward = Vector3::normalize(forward);
+			Vector3::calculate_right_up(forward, right, up);
+		}
 	};
 
 	struct SpotLight : Light {

@@ -17,9 +17,9 @@ namespace Guarneri{
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::unique_ptr<SkyboxRenderer> skybox;
 		bool enable_skybox;
-		std::shared_ptr<Camera> main_cam;
-		std::shared_ptr<Camera> debug_cam;
-		std::shared_ptr<Camera> world_debug_cam;
+		std::unique_ptr<Camera> main_cam;
+		std::unique_ptr<Camera> debug_cam;
+		std::unique_ptr<Camera> world_debug_cam;
 		float debug_cam_distance;
 		float debug_world_cam_distance;
 
@@ -31,13 +31,14 @@ namespace Guarneri{
 			main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
 			main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
 			main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
-			main_light.update_direction(Vector3(1.0f, 1.0f, 1.0f));
+			main_light.position = Vector3(1.0f, 1.0f, 1.0f);
 			debug_cam_distance = 6.0f;
 			debug_world_cam_distance = 8.0f;
-			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), Window().aspect, 45.0f, 0.5f, 30.0f, Projection::PERSPECTIVE));
+			main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), Window().aspect, 45.0f, 0.5f, 100.0f));
 			main_cam->lookat(Vector3::ZERO);
-			debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
-			world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f, Projection::PERSPECTIVE));
+
+			debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f));
+			world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, Window().aspect, 45.0f, 0.5f, 10.0f));
 
 			skybox = std::make_unique<SkyboxRenderer>();
 

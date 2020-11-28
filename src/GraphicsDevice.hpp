@@ -52,6 +52,11 @@ namespace Guarneri {
 			framebuffer->clear(DEFAULT_COLOR);
 		}
 
+		// todo: ugly impl, fix it
+		RawBuffer<float>* get_shadowmap() {
+			return shadowmap.get();
+		}
+
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			auto object_space_frustum = Frustum::create(p * v * m);
 			if ((misc_param.culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
@@ -386,7 +391,7 @@ namespace Guarneri {
 
 			auto s = shader;
 			float z = v.position.z;
-
+			
 			ColorMask color_mask = s->color_mask;
 			CompareFunc stencil_func = s->stencil_func;
 			StencilOp stencil_pass_op = s->stencil_pass_op;
@@ -511,6 +516,7 @@ namespace Guarneri {
 					if (color_mask == ColorMask::ZERO || stencil_pass_op == StencilOp::REPLACE) {
 						std::cerr << "error " << std::endl;
 					}
+					
 					zbuf->write(row, col, z);
 				}
 			}
@@ -529,7 +535,7 @@ namespace Guarneri {
 				float cur_depth;
 				if (this->zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					Color depth_color = Color::WHITE * linear_depth / misc_param.cam_far;
+					Color depth_color = Color::WHITE *linear_depth / misc_param.cam_far;
 					color_bgra c = Color::encode_bgra(depth_color);
 					fbuf->write(row, col, c);
 				}
@@ -767,7 +773,7 @@ namespace Guarneri {
 			Vector4 viewport_pos;
 			viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
 			viewport_pos.y = (v.y + 1.0f) * this->height * 0.5f;
-			viewport_pos.z = v.z;
+			viewport_pos.z = v.z * 0.5f + 0.5f;
 			viewport_pos.w = 1.0f;
 			return viewport_pos;
 		}

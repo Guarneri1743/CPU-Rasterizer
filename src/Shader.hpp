@@ -51,12 +51,12 @@ namespace Guarneri {
 			this->double_face = false;
 			this->skybox = false;
 			this->shadow = false;
+			this->shadowmap = nullptr;
 		}
 
 		virtual ~Shader() { }
 
 	public:		
-		Matrix4x4 light_space;
 		Matrix4x4 m, v, p;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
@@ -64,6 +64,7 @@ namespace Guarneri {
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		std::unordered_map<property_name, std::string> keywords;
+		RawBuffer<float>* shadowmap;
 		ColorMask color_mask;
 		CompareFunc stencil_func;
 		StencilOp stencil_pass_op;
@@ -88,10 +89,13 @@ namespace Guarneri {
 	public:
 		virtual v2f vertex_shader(const a2v& input) const {
 			v2f o;
-			auto oo = p * v * m * Vector4(input.position.x, input.position.y, input.position.z, 1.0f);
-			o.position = oo;
-			o.world_pos = (m * input.position).xyz();
-			o.shadow_coord = Vector4(input.uv, 0.0f, 1.0f);
+			auto opos = Vector4(input.position.xyz(), 1.0f);
+			auto wpos = m * opos;
+			auto cpos = p * v * wpos;
+			auto light_space_pos = misc_param.main_light.light_space() * wpos;
+			o.position = cpos;
+			o.world_pos = wpos.xyz();
+			o.shadow_coord = light_space_pos;
 			o.color = input.color;
 			Matrix3x3 normal_matrix = Matrix3x3(m).inverse().transpose();
 			if (normal_map) {
@@ -110,6 +114,21 @@ namespace Guarneri {
 			return o;
 		}
 
+		float get_shadow_atten(const Vector4& light_space_pos) const {
+			if (shadowmap == nullptr) {
+				return 0.0f;
+			}
+			Vector3 proj_shadow_coord = light_space_pos.xyz() / light_space_pos.w;
+			proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
+			float depth;
+			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth)) {
+				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
+				float shadow_atten = (proj_shadow_coord.z) > depth ? 1.0f : 0.0f;
+				return shadow_atten * 0.5f;
+			}
+			return 0.0f;
+		}
+
 		virtual Color fragment_shader(const v2f& input) const {
 			Color ambient = misc_param.main_light.ambient;
 			Color specular = misc_param.main_light.specular;
@@ -117,10 +136,12 @@ namespace Guarneri {
 			float intensity = misc_param.main_light.intensity;
 			REF(intensity);
 
-			Vector3 light_dir = misc_param.main_light.direction.normalized();
 			Vector3 cam_pos = misc_param.camera_pos;
 			Vector3 frag_pos = input.world_pos;
 			Vector4 screen_pos = input.position;
+
+			Vector3 light_dir = misc_param.main_light.forward.normalized();
+
 			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
 
 			Vector3 normal = input.normal.normalized();
@@ -142,23 +163,26 @@ namespace Guarneri {
 			Vector3 half_dir = (light_dir + view_dir).normalized();
 			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
 
+			//shadow
+			float shadow_atten = 1.0 - get_shadow_atten(input.shadow_coord);
+
 			Color ret = ambient;
 			Color main_tex;
 			if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex)) {
-				ret += Color::saturate(diffuse * ndl * main_tex);
+				ret += Color::saturate(diffuse * ndl * main_tex) * shadow_atten;
 			}
 
 			Color spec_tex;
 			if (name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(input.uv.x, input.uv.y, spec_tex)) {
-				ret += Color::saturate(specular * spec * spec_tex);
+				ret += Color::saturate(specular * spec * spec_tex) * shadow_atten;
 			}
 			else {
-				ret += Color::saturate(specular * spec);
+				ret += Color::saturate(specular * spec) * shadow_atten;
 			}
 
 			Color ao;
 			if (name2tex.count(ao_prop) >0&&name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao)) {
-				ret *= ao;
+				ret *= ao * shadow_atten;
 			}
 
 			// todo: ddx ddy

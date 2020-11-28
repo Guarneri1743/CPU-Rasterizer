@@ -10,7 +10,7 @@ int main()
 
 	// setup main Light
 	Scene demo_scene;
-	demo_scene.main_light.direction = Vector3(-1.2f, 1.0f, -1.2f);
+	demo_scene.main_light.set_pos(Vector3(-1.2f, 1.0f, -1.2f));
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);

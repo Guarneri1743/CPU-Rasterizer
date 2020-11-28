@@ -117,11 +117,8 @@ namespace Guarneri {
 			return target_shader.get();
 		}
 
-		void set_light_space_mat(const Matrix4x4& light_space_matrix) {
-			if (shadow_caster == nullptr) {
-				return;
-			}
-			shadow_caster->light_space = light_space_matrix;
+		void set_shadowmap(RawBuffer<float>* shadowmap) {
+			this->target_shader->shadowmap = shadowmap;
 		}
 
 		void sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {

@@ -10,7 +10,7 @@ int main()
 
 	// setup main light
 	Scene demo_scene;
-	demo_scene.main_light.direction = Vector3(0, 1.0f, 0);
+	demo_scene.main_light.set_pos(Vector3(0, 1.0f, 0));
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -32,7 +32,7 @@ int main()
 	plane_material->set_texture(albedo_prop, plane_albedo);
 	plane_material->set_texture(normal_prop, plane_normal);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
+	Plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
 	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
 	demo_scene.add(plane_renderer);
 
@@ -51,6 +51,17 @@ int main()
 			bp->target->material->lighting_param.glossiness /= 2.0f;
 		}
 		}, & plane_renderer);
+
+	// cube
+	auto ca = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
+	auto mat = Material::create();
+	mat->set_texture(albedo_prop, ca);
+	mat->double_face = true;
+	auto opaque_cube = PrimitiveFactory::cube(mat);
+	opaque_cube->transform.scale(Vector3(4.0f, 4.0f, 4.0f));
+	opaque_cube->transform.translate(Vector3(6.0f, 4.0f, 4.0f));
+	std::shared_ptr<Renderer> opaque_cube_rdr = Renderer::create(opaque_cube);
+	demo_scene.add(opaque_cube_rdr);
 
 	// transparent cube
 	auto cube_albedo = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");

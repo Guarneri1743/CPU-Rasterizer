@@ -41,10 +41,6 @@ namespace Guarneri {
 			return target->transform.local2world;
 		}
 
-		virtual Matrix4x4 light_space_matrix() const {
-			return misc_param.main_light.light_space;
-		}
-
 		static void draw_triangle(Shader* shader, const std::vector<Triangle>& triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
 			for (auto& tri : triangles) {
 				Graphics().draw(shader, tri[0], tri[1], tri[2], m, v, p);
@@ -65,7 +61,7 @@ namespace Guarneri {
 			ThreadPool tp(thread_size);
 #endif
 			Vertex vertices[3];
-			target->material->set_light_space_mat(light_space_matrix());
+			target->material->set_shadowmap(Graphics().get_shadowmap());
 			target->material->sync(model_matrix(), view_matrix(), projection_matrix());
 			if (target != nullptr) {
 				for(auto& m : target->meshes) {
