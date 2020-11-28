@@ -122,11 +122,28 @@ namespace Guarneri {
 				Graphics().render();
 				scene.render();
 				Graphics().render();
+				{
+					std::stringstream ss;
+					ss << "FPS: " << (int)Time::fps;
+					Window().draw_text(2, 16, 300, 20, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "Triangles: " << Graphics().statistics.triangle_count;
+					Window().draw_text(2, 32, 300, 20, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "Culled: " << Graphics().statistics.culled_triangle_count;
+					Window().draw_text(2, 48, 300, 20, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
+					Window().draw_text(2, 64, 300, 20, ss.str().c_str());
+				}
 				Window().flush();
 				Time::frame_end();
-				std::stringstream ss;
-				ss << "SoftRasterizer  FPS: " << (int)Time::fps <<" Triangles: " << Graphics().statistics.triangle_count << " Culled: " << Graphics().statistics.culled_triangle_count << " EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
-				Window().set_title(ss.str().c_str());
 				Sleep(1);
 			}
 		}
