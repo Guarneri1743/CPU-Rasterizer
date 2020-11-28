@@ -21,6 +21,7 @@ namespace Guarneri {
 		HDC window_device_context;
 		HBITMAP bitmap_handle;
 		HBITMAP original_handle;
+		int text_start = 16;
 
 	public:
 		void initialize(int w, int h, LPCSTR title_str, LRESULT(*event_callback)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)) {
@@ -97,13 +98,14 @@ namespace Guarneri {
 			SetWindowText(window_handle, _title);
 		}
 
-		void draw_text(const int& left, const int& top, const int& width, const int& height, LPCSTR text) {
+		void draw_text(const int& width, const int& height, LPCSTR text) {
 			RECT rect;
-			rect.left = left;
-			rect.right = left + width;
-			rect.bottom = top - height;
-			rect.top = top;
+			rect.left = 1;
+			rect.right = 1 + width;
+			rect.bottom = text_start - height;
+			rect.top = text_start;
 			DrawText(window_device_context, text, -1, &rect, DT_SINGLELINE | DT_LEFT | DT_VCENTER);
+			text_start += height - 4;
 		}
 
 		bool is_valid(){
@@ -111,6 +113,7 @@ namespace Guarneri {
 		}
 
 		void flush() {
+			text_start = 16;
 			HDC hDC = GetDC(window_handle);
 			BitBlt(hDC, 0, 0, width, height, window_device_context, 0, 0, SRCCOPY);
 			ReleaseDC(window_handle, hDC);

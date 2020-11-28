@@ -122,25 +122,74 @@ namespace Guarneri {
 				Graphics().render();
 				scene.render();
 				Graphics().render();
+
+				const int w = 800;
+				const int h = 20;
+				{
+					std::stringstream ss;
+					ss << "CullingClip: " << misc_param.culling_clipping_flag;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "RenderFlag: " << misc_param.render_flag;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
 				{
 					std::stringstream ss;
 					ss << "FPS: " << (int)Time::fps;
-					Window().draw_text(2, 16, 300, 20, ss.str().c_str());
+					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{
 					std::stringstream ss;
 					ss << "Triangles: " << Graphics().statistics.triangle_count;
-					Window().draw_text(2, 32, 300, 20, ss.str().c_str());
+					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{
 					std::stringstream ss;
 					ss << "Culled: " << Graphics().statistics.culled_triangle_count;
-					Window().draw_text(2, 48, 300, 20, ss.str().c_str());
+					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{
 					std::stringstream ss;
 					ss << "EarlyZ_Optimized_Pixels: " << Graphics().statistics.earlyz_optimized;
-					Window().draw_text(2, 64, 300, 20, ss.str().c_str());
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "CameraPos: " << misc_param.camera_pos;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "LightDir: " << misc_param.main_light.forward;
+					Window().draw_text(w, h, ss.str().c_str());
+				} 
+				{
+					std::stringstream ss;
+					ss << "Threads: " << std::thread::hardware_concurrency();
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				auto tinfo = Graphics().get_tile_info();
+				{
+					std::stringstream ss;
+					ss << "TileSize: " << tinfo.tile_size;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "TileRowCount: " << tinfo.row_tile_count;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "TileColCount: " << tinfo.col_tile_count;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "TileTaskSize: " << tinfo.tile_task_size;
+					Window().draw_text(w, h, ss.str().c_str());
 				}
 				Window().flush();
 				Time::frame_end();

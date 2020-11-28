@@ -90,6 +90,9 @@ namespace Guarneri{
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::NORMAL;
 				}
 				else if (code == KeyCode::F8) {
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::SPECULAR;
+				}
+				else if (code == KeyCode::F9) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::STENCIL;
 				}
 				}, nullptr);

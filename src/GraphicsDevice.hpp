@@ -22,11 +22,19 @@ namespace Guarneri {
 		// framebuffer tiles
 		const uint32_t TILE_SIZE = 64;
 		const uint32_t TILE_TASK_SIZE = 4;
-		FrameTile* tiles;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
 		uint32_t tile_length;
+		FrameTile* tiles;
 
+		typedef struct {
+			uint32_t tile_size;
+			uint32_t tile_task_size;
+			uint32_t row_tile_count;
+			uint32_t col_tile_count;
+			uint32_t tile_length;
+		} TileInfo;
+		
 	public:
 		void initialize(void* bitmap_handle, uint32_t w, uint32_t h) {
 			this->width = w;
@@ -55,6 +63,10 @@ namespace Guarneri {
 		// todo: ugly impl, fix it
 		RawBuffer<float>* get_shadowmap() {
 			return shadowmap.get();
+		}
+
+		TileInfo get_tile_info() {
+			return { TILE_SIZE , TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length};
 		}
 
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {

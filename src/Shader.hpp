@@ -229,10 +229,14 @@ namespace Guarneri {
 				return input.color;
 			}
 
-			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
+			if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE) {
 				return spec;
 			}
-			
+
+			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
+				return  input.normal.normalized();
+			}
+
 			ret = Color::saturate(ret);
 			return Color(ret.r, ret.g, ret.b, 1.0f);
 		}
