@@ -105,7 +105,7 @@ namespace Guarneri {
 			rect.bottom = text_start - h;
 			rect.top = text_start;
 			DrawText(window_device_context, text, -1, &rect, DT_SINGLELINE | DT_LEFT | DT_VCENTER);
-			text_start += height - 4;
+			text_start += h - 4;
 		}
 
 		bool is_valid(){
