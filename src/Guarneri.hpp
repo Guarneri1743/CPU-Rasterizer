@@ -115,14 +115,9 @@ namespace Guarneri {
 		static void kick_off(Scene& scene) {
 			while (Window().is_valid()) {
 				Time::frame_start();
-				Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
 				InputMgr().update();
 				scene.update();
-				scene.render_shadow();
-				Graphics().render();
 				scene.render();
-				Graphics().render();
-
 				const int w = 800;
 				const int h = 20;
 				{

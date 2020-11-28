@@ -94,7 +94,7 @@ namespace Guarneri {
 			}
 		}
 
-		void render() {
+		void present() {
 #ifdef TILE_BASED
 			render_tiles();
 #endif

@@ -98,11 +98,11 @@ namespace Guarneri {
 			SetWindowText(window_handle, _title);
 		}
 
-		void draw_text(const int& width, const int& height, LPCSTR text) {
+		void draw_text(const int& w, const int& h, LPCSTR text) {
 			RECT rect;
 			rect.left = 1;
-			rect.right = 1 + width;
-			rect.bottom = text_start - height;
+			rect.right = 1 + w;
+			rect.bottom = text_start - h;
 			rect.top = text_start;
 			DrawText(window_device_context, text, -1, &rect, DT_SINGLELINE | DT_LEFT | DT_VCENTER);
 			text_start += height - 4;

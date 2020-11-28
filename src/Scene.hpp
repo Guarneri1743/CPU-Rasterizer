@@ -166,16 +166,13 @@ namespace Guarneri{
 			world_debug_cam->lookat(Vector3::ZERO);
 		}
 
-		void draw_gizmos() {
-			for (auto& obj : objects) {
-				obj->draw_gizmos();
-			}
-
-			for (auto& obj : transparent_objects) {
-				obj->draw_gizmos();
-			}
-			draw_camera_coords();
-			//draw_world_coords();
+		void render() {
+			Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
+			render_shadow();
+			Graphics().present();
+			render_objects();
+			Graphics().present();
+			draw_gizmos();
 		}
 
 		void render_shadow() {
@@ -188,7 +185,7 @@ namespace Guarneri{
 			}
 		}
 
-		void render() {
+		void render_objects() {
 			if ((misc_param.render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE) {
 				return;
 			}
@@ -210,8 +207,18 @@ namespace Guarneri{
 			for (auto& obj : transparent_objects) {
 				obj->render();
 			}
+		}
 
-			draw_gizmos();
+		void draw_gizmos() {
+			for (auto& obj : objects) {
+				obj->draw_gizmos();
+			}
+
+			for (auto& obj : transparent_objects) {
+				obj->draw_gizmos();
+			}
+			draw_camera_coords();
+			//draw_world_coords();
 		}
 	};
 }

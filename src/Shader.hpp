@@ -164,7 +164,7 @@ namespace Guarneri {
 			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
 
 			//shadow
-			float shadow_atten = 1.0 - get_shadow_atten(input.shadow_coord);
+			float shadow_atten = 1.0f - get_shadow_atten(input.shadow_coord);
 
 			Color ret = ambient;
 			Color main_tex;
