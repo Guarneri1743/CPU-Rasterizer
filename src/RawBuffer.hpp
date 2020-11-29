@@ -10,7 +10,8 @@ namespace Guarneri {
 			this->width = _width;
 			this->height = _height;
 			this->deletor = [](T* ptr) { delete[] ptr; };
-			this->buffer = new T[_width * _height];
+			int buf_size = static_cast<int>(static_cast<long>(width) * static_cast<long>(_height));
+			this->buffer = new T[buf_size];
 		}		
 
 		RawBuffer(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr)) {

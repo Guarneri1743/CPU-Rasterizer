@@ -20,10 +20,10 @@ namespace Guarneri {
 		Color fragment_shader(const v2f& input) const {
 			Color sky_color;
 
-			if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), sky_color)) {
+			if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz()/ input.shadow_coord.w, sky_color)) {
 				if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
 					int index;
-					return name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), index);
+					return name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz() / input.shadow_coord.w, index);
 				}
 				return sky_color;
 			}

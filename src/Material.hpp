@@ -23,6 +23,7 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->cast_shadow = false;
 		}
 
 		Material(std::unique_ptr<Shader>& shader) {
@@ -43,6 +44,7 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->cast_shadow = false;
 		}
 
 		Material(std::unique_ptr<SkyboxShader>& shader) {
@@ -64,6 +66,7 @@ namespace Guarneri {
 			this->blend_op = BlendOp::ADD;
 			this->double_face = false;
 			this->transparent = false;
+			this->cast_shadow = false;
 		}
 
 		Material(const Material& other) {
@@ -88,6 +91,7 @@ namespace Guarneri {
 		BlendOp blend_op;
 		bool double_face;
 		bool transparent;
+		bool cast_shadow;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;

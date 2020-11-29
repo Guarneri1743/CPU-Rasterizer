@@ -10,11 +10,6 @@ int main()
 
 	// setup main light
 	Scene demo_scene;
-	demo_scene.main_light.position = Vector3(0.0f, 8.0f, 0.0f);
-	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
-	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	demo_scene.main_light.intensity = 1.0f;
 
 	// setup camera
 	demo_scene.main_cam->position = Vector3(20.0f, 20.0f, 20.0f);

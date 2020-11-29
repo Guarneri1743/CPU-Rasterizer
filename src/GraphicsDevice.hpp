@@ -750,7 +750,6 @@ namespace Guarneri {
 			if (w == 0.0f) {
 				w += EPSILON;
 			}
-			float rhw = 1.0f / w;
 			ndc_pos /= w;
 			return ndc_pos;
 		}

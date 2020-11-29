@@ -122,12 +122,27 @@ namespace Guarneri {
 				const int h = 20;
 				{
 					std::stringstream ss;
+					ss << "Shortcut: " << "F1:ShadowMap(P: ShadowOn/Off), F2:Depth, F3:WireFrame, B: Bilinear On/Off";
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "Shortcut: " << "F4: FrameTiles, F5:UV, F6:VertexColor, F7:Normal, F8:Specular, F9:Stencil";
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
 					ss << "CullingClip: " << misc_param.culling_clipping_flag;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{
 					std::stringstream ss;
 					ss << "RenderFlag: " << misc_param.render_flag;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "EnableShadow: " << (misc_param.enable_shadow ? "SHADOW_ON" : "SHADOW_OFF");
 					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{

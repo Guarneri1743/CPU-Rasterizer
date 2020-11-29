@@ -57,6 +57,7 @@ int main()
 	auto mat = Material::create();
 	mat->set_texture(albedo_prop, ca);
 	mat->double_face = true;
+	mat->cast_shadow = true;
 	auto opaque_cube = PrimitiveFactory::cube(mat);
 	opaque_cube->transform.scale(Vector3(4.0f, 4.0f, 4.0f));
 	opaque_cube->transform.translate(Vector3(6.0f, 4.0f, 4.0f));
@@ -109,7 +110,6 @@ int main()
 		}, & cube_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {
-		Scene* s = reinterpret_cast<Scene*>(user_data);
 		if (InputMgr().is_key_down(KeyCode::R)) {
 			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(10.0f, 0.0f);

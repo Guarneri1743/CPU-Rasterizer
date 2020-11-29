@@ -17,9 +17,9 @@ namespace Guarneri {
 			specular = Color::WHITE;
 			intensity = 1.0f;
 			this->yaw = -150.0f;
-			this->pitch = -80.0f;
+			this->pitch = -45.0f;
 			//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
-			this->p = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.2f, 10.0f);
+			this->p = Matrix4x4::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.2f, 50.0f);
 			update_rotation();
 		}
 
@@ -35,6 +35,14 @@ namespace Guarneri {
 			auto v = Matrix4x4::lookat(position, position + forward, Vector3::UP);
 			auto ret = p * v;
 			return ret;
+		}
+
+		Matrix4x4 view_matrix() const {
+			return Matrix4x4::lookat(position, position + forward, Vector3::UP);
+		}
+
+		Matrix4x4 projection_matrix() const {
+			return p;
 		}
 
 		void rotate(const float& yaw_offset, const float& pitch_offset) {

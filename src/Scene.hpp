@@ -95,6 +95,9 @@ namespace Guarneri{
 				else if (code == KeyCode::F9) {
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::STENCIL;
 				}
+				else if (code == KeyCode::P) {
+					misc_param.enable_shadow = !misc_param.enable_shadow;
+				}
 				}, nullptr);
 		}
 
@@ -168,8 +171,10 @@ namespace Guarneri{
 
 		void render() {
 			Graphics().clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
-			render_shadow();
-			Graphics().present();
+			if (misc_param.enable_shadow) {
+				render_shadow();
+				Graphics().present();
+			}
 			render_objects();
 			Graphics().present();
 			draw_gizmos();

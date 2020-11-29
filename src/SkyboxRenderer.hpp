@@ -18,7 +18,8 @@ namespace Guarneri {
 			target->material->set_cubemap(skybox_cubemap_prop, std::move(cubemap));
 		}
 
-		Matrix4x4 view_matrix() const {
+		Matrix4x4 view_matrix(const RenderPass& render_pass) const {
+			REF(render_pass)
 			auto view = misc_param.view_matrix;
 			auto view3x3 = Matrix3x3(view);
 			auto view4x4 = Matrix4x4(
@@ -29,7 +30,8 @@ namespace Guarneri {
 			return view4x4;
 		}
 
-		Matrix4x4 projection_matrix() const {
+		Matrix4x4 projection_matrix(const RenderPass& render_pass) const {
+			REF(render_pass)
 			return misc_param.proj_matrix;
 		}
 
