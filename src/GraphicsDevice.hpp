@@ -21,7 +21,7 @@ namespace Guarneri {
 
 		// framebuffer tiles
 		const uint32_t TILE_SIZE = 64;
-		const uint32_t TILE_TASK_SIZE = 4;
+		const uint32_t TILE_TASK_SIZE = 1;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
 		uint32_t tile_length;

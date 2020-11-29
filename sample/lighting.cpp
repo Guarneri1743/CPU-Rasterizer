@@ -46,7 +46,7 @@ int main()
 	plane_material->set_texture(specular_prop, plane_s);
 	plane_material->set_texture(ao_prop, plane_ao);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
+	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
 	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
 	demo_scene.add(plane_renderer);
 
@@ -54,8 +54,8 @@ int main()
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
 	backpack->material->lighting_param.glossiness = 32.0f;
 	backpack->material->cast_shadow = true;
-	backpack->transform.scale(Vector3(1.0f, 1.0f, 1.0f));
-	backpack->transform.translate(Vector3(0.0f, 7.0f, 0.0f));
+	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
+	backpack->transform.translate(Vector3(0.0f, 6.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);
 	demo_scene.add(backpack_renderer);
 
@@ -77,7 +77,8 @@ int main()
 
 
 	InputMgr().add_on_update_evt([](void* user_data) {
-		
+		Scene* s = reinterpret_cast<Scene*>(user_data);
+		s->main_light.rotate(10.0f, 0.0f);
 		if (InputMgr().is_key_down(KeyCode::R)) {
 			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(10.0f, 0.0f);
