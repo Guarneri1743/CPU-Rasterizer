@@ -155,6 +155,12 @@ namespace Guarneri {
 			auto ambient = light_ambient * ao;
 			auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
 			auto specular = Color::saturate(light_spec * spec * spec_tex);
+
+
+			if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE) {
+				return specular;
+			}
+
 			return ambient + diffuse + specular;
 		}
 
@@ -179,6 +185,11 @@ namespace Guarneri {
 			auto ambient = light_ambient * ao;
 			auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
 			auto specular = Color::saturate(light_spec * spec * spec_tex);
+
+			if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE) {
+				return specular * atten;
+			}
+
 			return (ambient + diffuse + specular) * atten;
 		}
 
@@ -266,10 +277,6 @@ namespace Guarneri {
 
 			if ((misc_param.render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE) {
 				return input.color;
-			}
-
-			if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE) {
-				return spec;
 			}
 
 			if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
