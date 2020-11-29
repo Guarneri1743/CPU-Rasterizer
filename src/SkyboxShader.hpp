@@ -11,7 +11,7 @@ namespace Guarneri {
 	public: 
 		v2f vertex_shader(const a2v& input) const {
 			v2f o;
-			auto clip_pos = p * v * Vector4(input.position.xyz(), 1.0f);
+			auto clip_pos = projection * view * Vector4(input.position.xyz(), 1.0f);
 			o.position = Vector4(clip_pos.xy(), clip_pos.ww());
 			o.shadow_coord = input.position;
 			return o;

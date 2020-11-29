@@ -106,8 +106,8 @@ namespace Guarneri {
 			return std::make_unique<Material>();
 		}
 
-		static std::unique_ptr<Material> create(std::unique_ptr<Shader>& Shader) {
-			return std::make_unique<Material>(Shader);
+		static std::unique_ptr<Material> create(std::unique_ptr<Shader> shader) {
+			return std::make_unique<Material>(shader);
 		}
 
 		static std::unique_ptr<Material> create(const Material& other) {
@@ -126,9 +126,9 @@ namespace Guarneri {
 		}
 
 		void sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p) {
-			shader->m = m;
-			shader->v = v;
-			shader->p = p;
+			shader->model = m;
+			shader->view = v;
+			shader->projection = p;
 			shader->ztest_func = ztest_func;
 			shader->zwrite_mode = zwrite_mode;
 			shader->src_factor = src_factor;

@@ -57,7 +57,7 @@ namespace Guarneri {
 		virtual ~Shader() { }
 
 	public:		
-		Matrix4x4 m, v, p;
+		Matrix4x4 model, view, projection;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;
@@ -90,14 +90,14 @@ namespace Guarneri {
 		virtual v2f vertex_shader(const a2v& input) const {
 			v2f o;
 			auto opos = Vector4(input.position.xyz(), 1.0f);
-			auto wpos = m * opos;
-			auto cpos = p * v * wpos;
+			auto wpos = model * opos;
+			auto cpos = projection * view * wpos;
 			auto light_space_pos = misc_param.main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
 			o.position = cpos;
 			o.world_pos = wpos.xyz();
 			o.shadow_coord = light_space_pos;
 			o.color = input.color;
-			Matrix3x3 normal_matrix = Matrix3x3(m).inverse().transpose();
+			Matrix3x3 normal_matrix = Matrix3x3(model).inverse().transpose();
 			if (normal_map) {
 				Vector3 t = (normal_matrix * input.tangent).normalized();
 				Vector3 n = (normal_matrix * input.normal).normalized();
@@ -129,61 +129,100 @@ namespace Guarneri {
 			return 0.0f;
 		}
 
-		virtual Color fragment_shader(const v2f& input) const {
-			Color ambient = misc_param.main_light.ambient;
-			Color specular = misc_param.main_light.specular;
-			Color diffuse = misc_param.main_light.diffuse;
-			float intensity = misc_param.main_light.intensity;
+		Vector3 reflect(const Vector3& n, const Vector3& light_out_dir) const {
+			auto ndl = std::max(Vector3::dot(n, light_out_dir), 0.0f);
+			return 2.0f * n * ndl - light_out_dir;
+		}
+
+		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const {
+			auto light_ambient = light.ambient;
+			auto light_spec = light.specular;
+			auto light_diffuse = light.diffuse;
+			auto intensity = light.intensity;
 			REF(intensity);
+			light_diffuse *= intensity;
+			light_spec *= intensity;
+
+			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+
+			auto light_dir = -light.forward.normalized();
+			light_dir = tbn * light_dir;
+
+			auto ndl = std::max(Vector3::dot(n, light_dir), 0.0f);
+			auto half_dir = (light_dir + v).normalized();
+			auto spec = std::pow(std::max(Vector3::dot(n, half_dir), 0.0f), glossiness);
+
+			auto ambient = light_ambient * ao;
+			auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
+			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			return ambient + diffuse + specular;
+		}
+
+		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const {
+			auto light_ambient = light.ambient;
+			auto light_spec = light.specular;
+			auto light_diffuse = light.diffuse;
+			auto intensity = light.intensity;
+			REF(intensity);
+			light_diffuse *= intensity;
+			light_spec *= intensity;
+			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+			auto light_dir = (light.position - wpos).normalized();
+			light_dir = tbn * light_dir;
+
+			auto ndl = std::max(Vector3::dot(n, light_dir), 0.0f);
+			auto half_dir = (light_dir + v).normalized();
+			auto spec = std::pow(std::max(Vector3::dot(n, half_dir), 0.0f), glossiness);
+			float distance = Vector3::length(light.position, wpos);
+			float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+			auto ambient = light_ambient * ao;
+			auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
+			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			return (ambient + diffuse + specular) * atten;
+		}
+
+		virtual Color fragment_shader(const v2f& input) const {
+			auto main_light = misc_param.main_light;
+			auto point_lights = misc_param.point_lights;
 
 			Vector3 cam_pos = misc_param.camera_pos;
-			Vector3 frag_pos = input.world_pos;
+			Vector3 wpos = input.world_pos;
 			Vector4 screen_pos = input.position;
 
-			Vector3 light_dir = -misc_param.main_light.forward.normalized();
-
-			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
-
 			Vector3 normal = input.normal.normalized();
-			float ndl = 0.0f;
-			Vector3 view_dir = (cam_pos - frag_pos).normalized();
+			Vector3 view_dir = (cam_pos - wpos).normalized();
 		
 			Color normal_tex;
 			float spec;
+			Matrix3x3 tbn;
 			if (name2tex.count(normal_prop) > 0 && name2tex.at(normal_prop)->sample(input.uv.x, input.uv.y, normal_tex)) {
-				Matrix3x3 tbn = Matrix3x3(input.tangent, input.bitangent, input.normal);
-				light_dir = tbn * light_dir;
+				tbn = Matrix3x3(input.tangent, input.bitangent, input.normal);
 				view_dir = tbn * view_dir;
 				auto packed_normal = Vector3(normal_tex.r, normal_tex.g, normal_tex.b);
 				normal = (packed_normal * 2.0f - 1.0f).normalized();
 			}
 
-			ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-			Vector3 reflect_dir = 2.0f * normal * ndl - (-light_dir);
-			Vector3 half_dir = (light_dir + view_dir).normalized();
-			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
-
 			//shadow
 			float shadow_atten = 1.0f - get_shadow_atten(input.shadow_coord);
 
-			Color ret = ambient;
-			Color main_tex;
-			if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex)) {
-				ret += Color::saturate(diffuse * ndl * main_tex) * shadow_atten;
+			Color ret = Color::BLACK;
+			Color main_tex = Color::WHITE;
+			name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex);
+
+			Color spec_tex = Color::WHITE;
+			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(input.uv.x, input.uv.y, spec_tex);
+
+			Color ao = Color::WHITE;
+			name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
+
+			ret += calculate_main_light(main_light, lighting_param, view_dir, normal, main_tex, spec_tex, ao, tbn);
+
+			for (auto& light : point_lights) {
+				ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, main_tex, spec_tex, ao, tbn);
 			}
 
-			Color spec_tex;
-			if (name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(input.uv.x, input.uv.y, spec_tex)) {
-				ret += Color::saturate(specular * spec * spec_tex) * shadow_atten;
-			}
-			else {
-				ret += Color::saturate(specular * spec) * shadow_atten;
-			}
-
-			Color ao;
-			if (name2tex.count(ao_prop) >0&&name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao)) {
-				ret *= ao * shadow_atten;
-			}
+			ret *= shadow_atten;
 
 			// todo: ddx ddy
 			/*if ((misc_param.render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {

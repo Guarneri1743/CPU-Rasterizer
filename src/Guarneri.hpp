@@ -82,6 +82,7 @@ inline void unused(T const&) {}
 #include <SegmentDrawer.hpp>
 #include <Shader.hpp>
 #include <ShadowShader.hpp>
+#include <LightShader.hpp>
 #include <Material.hpp>
 #include <FrameTile.hpp>
 #include <GraphicsCommand.hpp>

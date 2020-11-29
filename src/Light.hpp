@@ -61,6 +61,20 @@ namespace Guarneri {
 		}
 	};
 
+	struct PointLight : Light {
+		PointLight() {
+			constant = 1.0f;
+			linear = 0.1f;
+			quadratic = 0.03f;
+			position = Vector3();
+		}
+
+		float constant;
+		float linear;
+		float quadratic;
+		Vector3 position;
+	};
+
 	struct SpotLight : Light {
 		Vector3 position;
 		Vector3 spot_direction;

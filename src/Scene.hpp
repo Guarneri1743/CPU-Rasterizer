@@ -13,6 +13,7 @@ namespace Guarneri{
 
 	public:
 		DirectionalLight main_light;
+		std::vector<PointLight> point_lights;
 		std::vector<std::shared_ptr<Renderer>> objects;
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::unique_ptr<SkyboxRenderer> skybox;
@@ -116,6 +117,7 @@ namespace Guarneri{
 			misc_param.view_matrix = main_cam->view_matrix();
 			misc_param.proj_matrix = main_cam->projection_matrix();
 			misc_param.main_light = main_light;
+			misc_param.point_lights = point_lights;
 			misc_param.camera_pos = main_cam->position;
 			/*if (input_mgr().is_key_down(KeyCode::W)) {
 				main_cam->move_forward(CAMERA_MOVE_SPEED);
@@ -167,6 +169,14 @@ namespace Guarneri{
 
 			world_debug_cam->position = (Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
 			world_debug_cam->lookat(Vector3::ZERO);
+		}
+
+		void set_main_light(const DirectionalLight& light) {
+			main_light = light;
+		}
+
+		void add_point_light(const PointLight& light) {
+			point_lights.emplace_back(light);
 		}
 
 		void render() {

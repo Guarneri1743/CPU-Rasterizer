@@ -23,6 +23,7 @@ namespace Guarneri {
 		Matrix4x4 view_matrix;
 		Matrix4x4 proj_matrix;
 		DirectionalLight main_light;
+		std::vector<PointLight> point_lights;
 		RenderFlag render_flag;
 		PerSampleOperation persample_op_flag;
 		CullingAndClippingFlag culling_clipping_flag;

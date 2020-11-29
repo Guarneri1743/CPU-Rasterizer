@@ -11,7 +11,7 @@ namespace Guarneri {
 	public: 
 		v2f vertex_shader(const a2v& input) const {
 			v2f o;
-			o.position = misc_param.main_light.light_space() * m * Vector4(input.position.xyz(), 1.0f);
+			o.position = misc_param.main_light.light_space() * model * Vector4(input.position.xyz(), 1.0f);
 			o.shadow_coord = o.position;
 			return o;
 		}

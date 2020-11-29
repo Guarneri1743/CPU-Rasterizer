@@ -13,17 +13,67 @@ int main()
 
 	// setup main Light
 	Scene demo_scene;
-	demo_scene.main_light.position = Vector3(0.0f, 8.0f, 0.0f);
-	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
-	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
-	demo_scene.main_light.intensity = 3.0f;
+	DirectionalLight main_light;
+	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
+	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
+	main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	main_light.intensity = 1.3f;
+	demo_scene.set_main_light(main_light);
+
+	PointLight pl1, pl2, pl3;
+	pl1.position = Vector3(10.0f, 2.0f, 10.0f);
+	pl1.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl1.diffuse = Color(1.0f, 0.0f, 0.0f, 1.0f);
+	pl1.specular = Color(1.0f, 0.0f, 0.0f, 1.0f);
+	pl1.intensity = 30.0f;
+
+	pl2.position = Vector3(-10.0f, 2.0f, -10.0f);
+	pl2.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl2.diffuse = Color(0.0f, 1.0f, 0.0f, 1.0f);
+	pl2.specular = Color(0.0f, 1.0f, 0.0f, 1.0f);
+	pl2.intensity = 30.0f;
+
+	pl3.position = Vector3(-10.0f, 2.0f, 10.0f);
+	pl3.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl3.diffuse = Color(0.0f, 0.0f, 1.0f, 1.0f);
+	pl3.specular = Color(0.0f, 0.0f, 1.0f, 1.0f);
+	pl3.intensity = 30.0f;
+
+	demo_scene.add_point_light(pl1);
+	demo_scene.add_point_light(pl2);
+	demo_scene.add_point_light(pl3);
 
 	// setup Camera
 	//demo_scene.main_cam->set_projection(Projection::ORTHO);
 	demo_scene.main_cam->position = Vector3(10.5f, 15.0f, 13.0f);
 	demo_scene.main_cam->set_near(0.5f);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 7.0f, 0.0f));
+
+	// light cube
+	auto ptlmat = Material::create(std::unique_ptr<Shader>(new LightShader()));
+	ptlmat->double_face = true;
+	auto p1 = PrimitiveFactory::cube(ptlmat);
+	p1->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
+	p1->transform.translate(pl1.position);
+	std::shared_ptr<Renderer> p1r = Renderer::create(p1);
+	demo_scene.add(p1r);
+
+	auto pt2mat = Material::create(std::unique_ptr<Shader>(new LightShader()));
+	pt2mat->double_face = true;
+	auto p2 = PrimitiveFactory::cube(pt2mat);
+	p2->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
+	p2->transform.translate(pl2.position);
+	std::shared_ptr<Renderer> p2r = Renderer::create(p2);
+	demo_scene.add(p2r);
+
+	auto pt3mat = Material::create(std::unique_ptr<Shader>(new LightShader()));
+	pt3mat->double_face = true;
+	auto p3 = PrimitiveFactory::cube(pt3mat);
+	p3->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
+	p3->transform.translate(pl3.position);
+	std::shared_ptr<Renderer> p3r = Renderer::create(p3);
+	demo_scene.add(p3r);
 
 	// Plane
 	auto plane_a_path = res_path() + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
@@ -46,7 +96,7 @@ int main()
 	plane_material->set_texture(specular_prop, plane_s);
 	plane_material->set_texture(ao_prop, plane_ao);
 	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
+	Plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
 	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
 	demo_scene.add(plane_renderer);
 
@@ -55,7 +105,7 @@ int main()
 	backpack->material->lighting_param.glossiness = 32.0f;
 	backpack->material->cast_shadow = true;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
-	backpack->transform.translate(Vector3(0.0f, 6.0f, 0.0f));
+	backpack->transform.translate(Vector3(0.0f, 8.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);
 	demo_scene.add(backpack_renderer);
 
@@ -80,19 +130,15 @@ int main()
 		Scene* s = reinterpret_cast<Scene*>(user_data);
 		s->main_light.rotate(10.0f, 0.0f);
 		if (InputMgr().is_key_down(KeyCode::R)) {
-			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(10.0f, 0.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::T)) {
-			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(0.0f, 10.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::Y)) {
-			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(-10.0f, 0.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::U)) {
-			Scene* s = reinterpret_cast<Scene*>(user_data);
 			s->main_light.rotate(0.0f, -10.0f);
 		}
 		}, &demo_scene);
