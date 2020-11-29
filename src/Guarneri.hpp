@@ -1,8 +1,6 @@
 #ifndef _GUARNERI_
 #define _GUARNERI_
 
-#define MULTI_THREAD
-
 #include <cstdlib>
 #include <cmath>
 #include <limits.h>
@@ -175,11 +173,14 @@ namespace Guarneri {
 					ss << "LightDir: " << misc_param.main_light.forward;
 					Window().draw_text(w, h, ss.str().c_str());
 				} 
+#ifdef MULTI_THREAD
 				{
 					std::stringstream ss;
 					ss << "Threads: " << std::thread::hardware_concurrency();
 					Window().draw_text(w, h, ss.str().c_str());
 				}
+#endif
+#ifdef TILE_BASED
 				auto tinfo = Graphics().get_tile_info();
 				{
 					std::stringstream ss;
@@ -201,6 +202,7 @@ namespace Guarneri {
 					ss << "TileTaskSize: " << tinfo.tile_task_size;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
+#endif
 				Window().flush();
 				Time::frame_end();
 				Sleep(1);

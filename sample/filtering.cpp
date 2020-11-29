@@ -1,7 +1,11 @@
+#define TILE_BASED
+#define MULTI_THREAD
+
 #include <Guarneri.hpp>
 
 using namespace Guarneri;
 using namespace std;
+
 
 int main()
 {

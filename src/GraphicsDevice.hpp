@@ -341,7 +341,8 @@ namespace Guarneri {
 					if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-						process_fragment(framebuffer.get(), zbuffer.get(), stencilbuffer.get(), vert, row, col, shader);
+						RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+						process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
 					}
 				}
 			}
@@ -373,7 +374,8 @@ namespace Guarneri {
 				assert(right >= left);
 
 				for (auto col = left; col < right; col++) {
-					process_fragment(framebuffer.get(), zbuffer.get(), stencilbuffer.get(), lhs, row, col, shader);
+					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+					process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), lhs, row, col, shader);
 					auto dx = Vertex::differential(lhs, rhs);
 					lhs = Vertex::intagral(lhs, dx);
 				}

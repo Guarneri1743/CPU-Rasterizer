@@ -8,7 +8,7 @@ namespace Guarneri {
 		SkyboxShader() { this->skybox = true; }
 		~SkyboxShader(){}
 
-	public:
+	public: 
 		v2f vertex_shader(const a2v& input) const {
 			v2f o;
 			auto clip_pos = p * v * Vector4(input.position.xyz(), 1.0f);
@@ -19,7 +19,6 @@ namespace Guarneri {
 
 		Color fragment_shader(const v2f& input) const {
 			Color sky_color;
-
 			if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz()/ input.shadow_coord.w, sky_color)) {
 				if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE) {
 					int index;
