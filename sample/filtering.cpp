@@ -10,7 +10,7 @@ int main()
 
 	// setup main Light
 	Scene demo_scene;
-	demo_scene.main_light.set_pos(Vector3(-1.2f, 1.0f, -1.2f));
+	demo_scene.main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -86,14 +86,22 @@ int main()
 		}, &plane_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {
-			if (InputMgr().is_key_down(KeyCode::R)) {
-				Scene* s = reinterpret_cast<Scene*>(user_data);
-				s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
-			}
-			if (InputMgr().is_key_down(KeyCode::T)) {
-				Scene* s = reinterpret_cast<Scene*>(user_data);
-				s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
-			}
+		if (InputMgr().is_key_down(KeyCode::R)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::T)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, 10.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::Y)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(-10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::U)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, -10.0f);
+		}
 		}, &demo_scene);
 
 	GuarneriRasterizer::kick_off(demo_scene);

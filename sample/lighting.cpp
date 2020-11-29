@@ -10,7 +10,7 @@ int main()
 
 	// setup main Light
 	Scene demo_scene;
-	demo_scene.main_light.position = Vector3(4.0f, 4.0f, 4.0f);
+	demo_scene.main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -50,8 +50,8 @@ int main()
 	// backpack
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
 	backpack->material->lighting_param.glossiness = 32.0f;
-	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0));
-	backpack->transform.translate(Vector3(0.0f, 5.0f, 0.0f));
+	backpack->transform.scale(Vector3(1.0f, 1.0f, 1.0f));
+	backpack->transform.translate(Vector3(0.0f, 7.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);
 	demo_scene.add(backpack_renderer);
 

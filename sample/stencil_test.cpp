@@ -76,12 +76,21 @@ int main()
 	demo_scene.add(Renderer::create(Plane));
 
 	InputMgr().add_on_update_evt([](void* user_data) {
-		Scene* s = reinterpret_cast<Scene*>(user_data);
 		if (InputMgr().is_key_down(KeyCode::R)) {
-			s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(10.0f, 0.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::T)) {
-			s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, 10.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::Y)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(-10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::U)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, -10.0f);
 		}
 		}, &demo_scene);
 

@@ -66,7 +66,7 @@ namespace Guarneri {
 		bool write(const float& u, const float& v, const T& data) {
 			uint32_t row, col;
 			uv2pixel(u, v, row, col);
-			return this->write(x, y, data);
+			return this->write(row, col, data);
 		}
 
 		bool write(const uint32_t& row, const uint32_t& col, const T& data) {
@@ -80,8 +80,8 @@ namespace Guarneri {
 
 		void uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const {
 			// [0.0, 1.0) -> [0, width-1]
-			row = (uint32_t)(std::floor(v * this->width + 0.5f));
-			col = (uint32_t)(std::floor(u * this->height + 0.5f));
+			row = (uint32_t)(std::floor(v * this->height + 0.5f));
+			col = (uint32_t)(std::floor(u * this->width + 0.5f));
 		}
 
 		void clear(const T& val) {

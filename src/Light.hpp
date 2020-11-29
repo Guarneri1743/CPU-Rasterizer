@@ -16,10 +16,10 @@ namespace Guarneri {
 			diffuse = Color::WHITE;
 			specular = Color::WHITE;
 			intensity = 1.0f;
-			this->yaw = -210.0f;
-			this->pitch = 70.0f;
+			this->yaw = -150.0f;
+			this->pitch = -80.0f;
 			//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
-			this->p = Matrix4x4::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
+			this->p = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.2f, 10.0f);
 			update_rotation();
 		}
 

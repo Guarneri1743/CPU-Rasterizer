@@ -246,13 +246,11 @@ namespace Guarneri {
 					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
 					execute_task(framebuffer.get(), zbuf, stencilbuffer.get(), tile, tri, shader);
 
-					if (!shader->shadow) {
-						// wireframe
-						if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
-							draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-							draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-							draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-						}
+					// wireframe
+					if ((misc_param.render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE) {
+						draw_screen_segment(tri[0].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+						draw_screen_segment(tri[0].position, tri[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+						draw_screen_segment(tri[2].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 					}
 				}
 			}
@@ -382,7 +380,6 @@ namespace Guarneri {
 			}
 		}
 #endif
-
 		// per fragment processing
 		void process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader) {
 			bool enable_scissor_test = (misc_param.persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
@@ -519,7 +516,6 @@ namespace Guarneri {
 					if (color_mask == ColorMask::ZERO || stencil_pass_op == StencilOp::REPLACE) {
 						std::cerr << "error " << std::endl;
 					}
-					
 					zbuf->write(row, col, z);
 				}
 			}
@@ -538,7 +534,7 @@ namespace Guarneri {
 				float cur_depth;
 				if (this->zbuffer->read(row, col, cur_depth)) {
 					float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-					Color depth_color = Color::WHITE *linear_depth / misc_param.cam_far;
+					Color depth_color = Color::WHITE * linear_depth / misc_param.cam_far;
 					color_bgra c = Color::encode_bgra(depth_color);
 					fbuf->write(row, col, c);
 				}
@@ -755,7 +751,7 @@ namespace Guarneri {
 				w += EPSILON;
 			}
 			float rhw = 1.0f / w;
-			ndc_pos *= rhw;
+			ndc_pos /= w;
 			return ndc_pos;
 		}
 

@@ -10,7 +10,7 @@ int main()
 
 	// setup main light
 	Scene demo_scene;
-	demo_scene.main_light.set_pos(Vector3(0, 1.0f, 0));
+	demo_scene.main_light.position = Vector3(0, 1.0f, 0);
 	demo_scene.main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	demo_scene.main_light.diffuse = Color(1.0f, 1.0f, 1.0f, 1.0f);
 	demo_scene.main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -111,10 +111,20 @@ int main()
 	InputMgr().add_on_update_evt([](void* user_data) {
 		Scene* s = reinterpret_cast<Scene*>(user_data);
 		if (InputMgr().is_key_down(KeyCode::R)) {
-			s->main_light.direction += Vector3(0.2f, 0.0f, 0.2f);
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(10.0f, 0.0f);
 		}
 		if (InputMgr().is_key_down(KeyCode::T)) {
-			s->main_light.direction -= Vector3(0.2f, 0.0f, 0.2f);
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, 10.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::Y)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(-10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::U)) {
+			Scene* s = reinterpret_cast<Scene*>(user_data);
+			s->main_light.rotate(0.0f, -10.0f);
 		}
 		}, & demo_scene);
 

@@ -92,7 +92,7 @@ namespace Guarneri {
 			auto opos = Vector4(input.position.xyz(), 1.0f);
 			auto wpos = m * opos;
 			auto cpos = p * v * wpos;
-			auto light_space_pos = misc_param.main_light.light_space() * wpos;
+			auto light_space_pos = misc_param.main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
 			o.position = cpos;
 			o.world_pos = wpos.xyz();
 			o.shadow_coord = light_space_pos;
@@ -123,7 +123,7 @@ namespace Guarneri {
 			float depth;
 			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth)) {
 				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-				float shadow_atten = (proj_shadow_coord.z) > depth ? 1.0f : 0.0f;
+				float shadow_atten = (proj_shadow_coord.z - 0.005f) > depth ? 1.0f : 0.0f;
 				return shadow_atten * 0.5f;
 			}
 			return 0.0f;
@@ -140,7 +140,7 @@ namespace Guarneri {
 			Vector3 frag_pos = input.world_pos;
 			Vector4 screen_pos = input.position;
 
-			Vector3 light_dir = misc_param.main_light.forward.normalized();
+			Vector3 light_dir = -misc_param.main_light.forward.normalized();
 
 			float glossiness = std::clamp(lighting_param.glossiness, 0.0f, 256.0f);
 
@@ -159,7 +159,7 @@ namespace Guarneri {
 			}
 
 			ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-			Vector3 reflect_dir = 2.0f * normal * ndl - light_dir;
+			Vector3 reflect_dir = 2.0f * normal * ndl - (-light_dir);
 			Vector3 half_dir = (light_dir + view_dir).normalized();
 			spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness), 0.0f, 1.0f;
 
