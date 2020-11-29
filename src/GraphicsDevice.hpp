@@ -16,6 +16,7 @@ namespace Guarneri {
 		std::unique_ptr<RawBuffer<color_bgra>> framebuffer;
 		// 8 bits stencil buffer
 		std::unique_ptr<RawBuffer<uint8_t>> stencilbuffer;
+		std::unique_ptr<RawBuffer<Color>> hdr_buffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 
@@ -53,11 +54,13 @@ namespace Guarneri {
 			zbuffer = std::make_unique<RawBuffer<float>>(w, h);
 			shadowmap = std::make_unique<RawBuffer<float>>(w, h);
 			framebuffer = std::make_unique<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr) { unused(ptr); /*delete[] (void*)ptr;*/ });
+			hdr_buffer = std::make_unique<RawBuffer<Color>>(w, h);
 			stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 			zbuffer->clear(FAR_Z);
 			shadowmap->clear(FAR_Z);
 			stencilbuffer->clear(DEFAULT_STENCIL);
 			framebuffer->clear(DEFAULT_COLOR);
+			hdr_buffer->clear(Color::BLACK);
 		}
 
 		// todo: ugly impl, fix it
@@ -108,6 +111,7 @@ namespace Guarneri {
 				}
 				else {
 					framebuffer->clear(DEFAULT_COLOR);
+					hdr_buffer->clear(Color::BLACK);
 				}
 			}
 			if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) {
@@ -227,16 +231,6 @@ namespace Guarneri {
 		}
 
 		void rasterize_tile(FrameTile& tile) {
-			if ((misc_param.render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE) {
-				for (uint32_t row = tile.row_start; row < tile.row_end; row++) {
-					for (uint32_t col = tile.col_start; col < tile.col_end; col++) {
-						float r = (float)row / tile.row_end;
-						float g = (float)col / tile.col_end;
-						framebuffer->write(row, col, Color::encode_bgra(r, g, 0.0f, 0.3f));
-					}
-				}
-			}
-
 			while(!tile.tasks.empty()){
 				TileTask task;
 				if (tile.pop_task(task)) {
@@ -251,6 +245,22 @@ namespace Guarneri {
 						draw_screen_segment(tri[0].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 						draw_screen_segment(tri[0].position, tri[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 						draw_screen_segment(tri[2].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+					}
+				}
+			}
+			if ((misc_param.render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE) {
+				for (uint32_t row = tile.row_start; row < tile.row_end; row++) {
+					for (uint32_t col = tile.col_start; col < tile.col_end; col++) {
+						float r = (float)row / tile.row_end;
+						float g = (float)col / tile.col_end;
+						color_bgra dst;
+						if (framebuffer->read(row, col, dst)) {
+							Color dst_color = Color::decode(dst);
+							Color src_color = Color(r, g, 0.0f, 0.5f);
+							Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
+							auto pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+							framebuffer->write(row, col, pixel_color);
+						}
 					}
 				}
 			}
