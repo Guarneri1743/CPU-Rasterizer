@@ -29,6 +29,7 @@ namespace Guarneri {
 		CullingAndClippingFlag culling_clipping_flag;
 		bool enable_shadow;
 	};
+
 	static MiscParameter misc_param;
 
 	GraphicsDevice& Graphics() {

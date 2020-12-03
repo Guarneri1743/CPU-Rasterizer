@@ -33,7 +33,8 @@
 #endif
 
 template <class T>
-inline void unused(T const&) {}
+inline void unused(T const&)
+{}
 #define REF(obj) unused(obj);
 
 // Rasterizer Core
@@ -98,21 +99,27 @@ inline void unused(T const&) {}
 #include <SkyboxRenderer.hpp>
 #include <Scene.hpp>
 
-namespace Guarneri {
-	class GuarneriRasterizer {
+namespace Guarneri
+{
+	class GuarneriRasterizer
+	{
 	public:
-		static void prepare(const uint32_t w, const uint32_t h, LPCSTR title) {
+		static void prepare(const uint32_t w, const uint32_t h, LPCSTR title)
+		{
 			Window().initialize(w, h, title, InputMgr().event_callback);
-			InputMgr().add_on_key_down_evt([](KeyCode code, void* data) {
-					REF(data)
+			InputMgr().add_on_key_down_evt([](KeyCode code, void* data)
+			{
+				REF(data)
 					if (code == KeyCode::ESC) Window().dispose();
-				}, nullptr);
+			}, nullptr);
 			Graphics().initialize(Window().framebuffer, Window().width, Window().height);
 			Time::start();
 		}
 
-		static void kick_off(Scene& scene) {
-			while (Window().is_valid()) {
+		static void kick_off(Scene& scene)
+		{
+			while (Window().is_valid())
+			{
 				Time::frame_start();
 				InputMgr().update();
 				scene.update();
@@ -173,15 +180,15 @@ namespace Guarneri {
 					std::stringstream ss;
 					ss << "LightDir: " << misc_param.main_light.forward;
 					Window().draw_text(w, h, ss.str().c_str());
-				} 
-#ifdef MULTI_THREAD
+				}
+			#ifdef MULTI_THREAD
 				{
 					std::stringstream ss;
 					ss << "Threads: " << std::thread::hardware_concurrency();
 					Window().draw_text(w, h, ss.str().c_str());
 				}
-#endif
-#ifdef TILE_BASED
+			#endif
+			#ifdef TILE_BASED
 				auto tinfo = Graphics().get_tile_info();
 				{
 					std::stringstream ss;
@@ -203,7 +210,7 @@ namespace Guarneri {
 					ss << "TileTaskSize: " << tinfo.tile_task_size;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
-#endif
+			#endif
 				Window().flush();
 				Time::frame_end();
 				Sleep(1);

@@ -1,28 +1,29 @@
 #ifndef _COMMON_DEF_
 #define _COMMON_DEF_
 
-namespace Guarneri {
-	#define MAX_ID UINT_MAX
-	#define EPSILON 1e-04f
-	#define ONE_MINUS_EPSILON 1 - EPSILON
-	#define EQUALS(a, b) std::abs(a-b) <= EPSILON
-	#define LESS_THAN(a, b) (a - b < -EPSILON)
-	#define GREATER_THAN(a, b) (a - b > EPSILON)
-	#define GREATAER_EQUAL(a, b) (a - b > EPSILON || EQUALS(a, b))
-	#define LESS_EQUAL(a, b) (a - b < -EPSILON || EQUALS(a, b))
-	#define FLOAT_LOG_PRECISION 6
-	#define DEGREE2RAD(degree) degree * 0.0174532925f
-	#define PI 3.1415926
-	#define INVALID_TEXTURE_ID 0
-	#define FRAC(val) val - (long)val
-	#define STEP(y, x) x >= y ? 1 : 0 
-	#define FS std::filesystem
-	#define CAMERA_ROTATE_SPEED 0.25f
-	#define CAMERA_MOVE_SPEED 0.1f
-	#define CAMERA_ZOOM_SPEED 1.0f
-	#define RGB_CHANNEL 3
-	#define RGBA_CHANNEL 4
-	#define TEXTURE_MAX_SIZE 4096
+namespace Guarneri
+{
+#define MAX_ID UINT_MAX
+#define EPSILON 1e-04f
+#define ONE_MINUS_EPSILON 1 - EPSILON
+#define EQUALS(a, b) std::abs(a-b) <= EPSILON
+#define LESS_THAN(a, b) (a - b < -EPSILON)
+#define GREATER_THAN(a, b) (a - b > EPSILON)
+#define GREATAER_EQUAL(a, b) (a - b > EPSILON || EQUALS(a, b))
+#define LESS_EQUAL(a, b) (a - b < -EPSILON || EQUALS(a, b))
+#define FLOAT_LOG_PRECISION 6
+#define DEGREE2RAD(degree) degree * 0.0174532925f
+#define PI 3.1415926
+#define INVALID_TEXTURE_ID 0
+#define FRAC(val) val - (long)val
+#define STEP(y, x) x >= y ? 1 : 0 
+#define FS std::filesystem
+#define CAMERA_ROTATE_SPEED 0.25f
+#define CAMERA_MOVE_SPEED 0.1f
+#define CAMERA_ZOOM_SPEED 1.0f
+#define RGB_CHANNEL 3
+#define RGBA_CHANNEL 4
+#define TEXTURE_MAX_SIZE 4096
 
 	// forward declarations
 	class Object;
@@ -81,19 +82,32 @@ namespace Guarneri {
 	const property_name shadowmap_prop = 6; // "shadowmap";
 
 	// statistics
-	struct GraphicsStatistic{
+	struct GraphicsStatistic
+	{
 		uint32_t triangle_count;
 		uint32_t culled_triangle_count;
 		uint32_t earlyz_optimized;
 	};
 
 	// pixel block
-	typedef struct { uint32_t start_x; uint32_t start_y; uint32_t size; } PixelBlock;
+	typedef struct
+	{
+		uint32_t start_x; uint32_t start_y; uint32_t size;
+	} PixelBlock;
 
 	// framebuffer color 
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; } color_rgb;
-	typedef struct { unsigned char r; unsigned char g; unsigned char b; unsigned char a; } color_rgba;
-	typedef struct { unsigned char b; unsigned char g; unsigned char r; unsigned char a; } color_bgra;
+	typedef struct
+	{
+		unsigned char r; unsigned char g; unsigned char b;
+	} color_rgb;
+	typedef struct
+	{
+		unsigned char r; unsigned char g; unsigned char b; unsigned char a;
+	} color_rgba;
+	typedef struct
+	{
+		unsigned char b; unsigned char g; unsigned char r; unsigned char a;
+	} color_bgra;
 	typedef unsigned char image_ubyte;
 
 	GraphicsDevice& Graphics();
@@ -101,18 +115,21 @@ namespace Guarneri {
 	GDIWindow& Window();
 	ResourceManager<Texture>& TextureMgr();
 
-	enum class MouseButton {
+	enum class MouseButton
+	{
 		LEFT,
 		RIGHT,
 		MIDDLE
 	};
 
-	enum class MouseWheel {
+	enum class MouseWheel
+	{
 		UP,
 		DOWN
 	};
 
-	enum class KeyCode {
+	enum class KeyCode
+	{
 		A,
 		B,
 		C,
