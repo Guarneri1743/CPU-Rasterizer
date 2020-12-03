@@ -26,25 +26,32 @@ namespace Guarneri
 		Matrix3x3(const float& _m00, const float& _m01, const float& _m02,
 				  const float& _m10, const float& _m11, const float& _m12,
 				  const float& _m20, const float& _m21, const float& _m22);
+
 		static Matrix3x3 rotation(const Vector3& axis, const float& theta);
 		static Matrix3x3 scale(const Vector3& scale);
+		
 		Vector3 forward() const;
 		Vector3 up() const;
 		Vector3 right() const;
 		Matrix3x3 operator *(const Matrix3x3& rhs) const;
 		Matrix3x3 transpose() const;
 		Matrix3x3 inverse() const;
+
 		Vector3 operator *(const Vector3& vector) const;
 		bool operator ==(const Matrix3x3& rhs) const;
 		bool operator !=(const Matrix3x3& rhs) const;
+
 		Vector3 row(const int& index) const;
 		Vector3 column(const int& index) const;
+
 		const float& at(const int& row, const int& column) const;
 		float& at(const int& row, const int& column);
+
 		const float& operator[](const int& index) const;
 		float& operator[](const int& index);
-		std::string str() const;
+
 		int rc2index(const int& row, const int& column) const;
+		std::string str() const;
 	};
 
 

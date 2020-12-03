@@ -31,13 +31,10 @@ namespace Guarneri {
 				  const float& _m10, const float& _m11, const float& _m12, const float& _m13,
 				  const float& _m20, const float& _m21, const float& _m22, const float& _m23,
 				  const float& _m30, const float& _m31, const float& _m32, const float& _m33);
+
 		static Matrix4x4 translation(const Vector3& translation);
 		static Matrix4x4 rotation(const Vector3& axis, const float& theta);
 		static Matrix4x4 scale(const Vector3& scale);
-		Vector3 position() const;
-		Vector3 forward() const;
-		Vector3 up() const;
-		Vector3 right() const;
 		static Matrix4x4 viewport(const int& x, const int& y, const int& w, const int& h);
 		static Matrix4x4 yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll);
 		static Matrix4x4 euler_angle_x(const float& angle);
@@ -56,22 +53,31 @@ namespace Guarneri {
 		static Matrix4x4 ortho_lh_dx(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far);
 		static Matrix4x4 ortho_rh_gl(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far);
 		static Matrix4x4 ortho_lh_gl(const float& left, const float& right, const float& bottom, const float& top, const float& near, const float& far);
+
+		Vector3 position() const;
+		Vector3 forward() const;
+		Vector3 up() const;
+		Vector3 right() const;
 		Vector3 transform_point(const Vector3& point) const;
 		Vector3 transform_direction(const Vector3& point) const;
 		Matrix4x4 operator *(const Matrix4x4& rhs) const;
 		Matrix4x4 transpose() const;
 		Matrix4x4 inverse() const;
+
 		Vector4 operator *(const Vector4& vector) const;
 		bool operator ==(const Matrix4x4& rhs) const;
 		bool operator !=(const Matrix4x4& rhs) const;
+
 		Vector4 row(const int& index) const;
 		Vector4 column(const int& index) const;
+
 		const float& at(const int& row, const int& column) const;
 		float& at(const int& row, const int& column);
 		const float& operator[](const int& index) const;
 		float& operator[](const int& index);
-		std::string str() const;
+
 		int rc2index(const int& row, const int& column) const;
+		std::string str() const;
 	};
 
 
