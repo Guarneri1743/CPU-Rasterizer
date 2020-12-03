@@ -2,52 +2,68 @@
 #define _CAPSULE_
 #include <Guarneri.hpp>
 
-namespace Guarneri {
-	struct Capsule {
+namespace Guarneri
+{
+	struct Capsule
+	{
 	public:
-		Capsule() {
-			Segment = Segment::Segment();
-			radius = 0;
-		}
-
-		Capsule(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent, const float& radius_t) {
-			this->Segment = Segment::Segment(center, dir, extent);
-			this->radius = radius_t;
-		}
-
-		Capsule(const Guarneri::Vector3& start, const Guarneri::Vector3& end, const float& radius) {
-			this->Segment = Segment::Segment(start, end);
-			this->radius = radius;
-		}
-
-		Capsule(const Segment& Segment, const float& radius) {
-			this->Segment = Segment;
-			this->radius = radius;
-		}
-
-		Capsule(const Capsule& other) {
-			this->Segment = other.Segment;
-			this->radius = other.radius;
-		}
-
-	public:
-		Segment Segment;
+		Segment segment;
 		float radius;
 
 	public:
-		std::string str() const {
-			std::stringstream ss;
-			ss << "Capsule: [center: " << this->Segment << ", size: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
-			return ss.str();
-		}
+		Capsule();
+		Capsule(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent, const float& radius_t);
+		Capsule(const Guarneri::Vector3& start, const Guarneri::Vector3& end, const float& radius);
+		Capsule(const Segment& Segment, const float& radius);
+		Capsule(const Capsule& other);
+		std::string str() const;
 	};
 
-	static std::ostream& operator << (std::ostream& stream, const Capsule& Capsule) {
+
+	Capsule::Capsule()
+	{
+		segment = Segment::Segment();
+		radius = 0;
+	}
+
+	Capsule::Capsule(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent, const float& radius_t)
+	{
+		this->segment = Segment::Segment(center, dir, extent);
+		this->radius = radius_t;
+	}
+
+	Capsule::Capsule(const Guarneri::Vector3& start, const Guarneri::Vector3& end, const float& radius)
+	{
+		this->segment = Segment::Segment(start, end);
+		this->radius = radius;
+	}
+
+	Capsule::Capsule(const Segment& Segment, const float& radius)
+	{
+		this->segment = Segment;
+		this->radius = radius;
+	}
+
+	Capsule::Capsule(const Capsule& other)
+	{
+		this->segment = other.segment;
+		this->radius = other.radius;
+	}
+
+	std::string Capsule::str() const
+	{
+		std::stringstream ss;
+		ss << "Capsule: [center: " << this->segment << ", size: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
+		return ss.str();
+	}
+	static std::ostream& operator << (std::ostream& stream, const Capsule& Capsule)
+	{
 		stream << Capsule.str();
 		return stream;
 	}
 
-	static std::stringstream& operator << (std::stringstream& stream, const Capsule& Capsule) {
+	static std::stringstream& operator << (std::stringstream& stream, const Capsule& Capsule)
+	{
 		stream << Capsule.str();
 		return stream;
 	}
