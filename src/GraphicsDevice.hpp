@@ -73,6 +73,7 @@ namespace Guarneri
 		Vertex ndc2viewport(const Vertex& v) const;
 		Vector4 ndc2viewport(const Vector4& v) const;
 		float linearize_depth(const float& depth, const float& near, const float& far) const;
+		float linearize_01depth(const float& depth, const float& near, const float& far) const;
 	};
 
 
@@ -665,8 +666,8 @@ namespace Guarneri
 			float cur_depth;
 			if (this->zbuffer->read(row, col, cur_depth))
 			{
-				float linear_depth = linearize_depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
-				Color depth_color = Color::WHITE * linear_depth / misc_param.cam_far;
+				float linear_depth = linearize_01depth(cur_depth, misc_param.cam_near, misc_param.cam_far);
+				Color depth_color = Color::WHITE * linear_depth;
 				color_bgra c = Color::encode_bgra(depth_color);
 				fbuf->write(row, col, c);
 			}
@@ -923,10 +924,27 @@ namespace Guarneri
 		return viewport_pos;
 	}
 
+	float GraphicsDevice::linearize_01depth(const float& depth, const float& near, const float& far) const
+	{
+		return (linearize_depth(depth, near, far) - near) / (far - near);
+	}
+
 	float GraphicsDevice::linearize_depth(const float& depth, const float& near, const float& far) const
 	{
 		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
-		return (2.0f * near * far) / (far + near - ndc_z * (far - near));
+	#ifdef LEFT_HANDED 
+		#ifdef GL_LIKE
+			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
+		#else
+			return (far * near) / (far - (far - near) * ndc_z);
+		#endif
+	#else
+		#ifdef GL_LIKE
+			return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
+		#else
+			return (far * near) / (-far - (far - near) * ndc_z);
+		#endif
+	#endif
 	}
 
 	void GraphicsDevice::draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation)
