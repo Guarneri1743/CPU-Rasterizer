@@ -18,7 +18,6 @@ namespace Guarneri
 		std::unique_ptr<RawBuffer<color_bgra>> framebuffer;
 		// 8 bits stencil buffer
 		std::unique_ptr<RawBuffer<uint8_t>> stencilbuffer;
-		std::unique_ptr<RawBuffer<Color>> hdr_buffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 		// framebuffer tiles
@@ -98,13 +97,11 @@ namespace Guarneri
 		{
 			unused(ptr); /*delete[] (void*)ptr;*/
 		});
-		hdr_buffer = std::make_unique<RawBuffer<Color>>(w, h);
 		stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 		zbuffer->clear(FAR_Z);
 		shadowmap->clear(FAR_Z);
 		stencilbuffer->clear(DEFAULT_STENCIL);
 		framebuffer->clear(DEFAULT_COLOR);
-		hdr_buffer->clear(Color::BLACK);
 	}
 
 	// todo: ugly impl, fix it
@@ -167,7 +164,6 @@ namespace Guarneri
 			else
 			{
 				framebuffer->clear(DEFAULT_COLOR);
-				hdr_buffer->clear(Color::BLACK);
 			}
 		}
 		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE)
@@ -520,10 +516,11 @@ namespace Guarneri
 
 		// early-z
 		// todo: early-z conditions
-		if (enable_depth_test && !(enable_blending && s != nullptr && s->transparent))
+		if (enable_depth_test && !enable_alpha_test)
 		{
 			if (!perform_depth_test(zbuf, ztest_func, row, col, z))
 			{
+				op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				statistics.earlyz_optimized++;
 				return;
 			}
@@ -584,6 +581,15 @@ namespace Guarneri
 			}
 		}
 
+		// write depth
+		if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
+		{
+			if (zwrite_mode == ZWrite::ON)
+			{
+				zbuf->write(row, col, z);
+			}
+		}
+
 		// blending
 		if (enable_blending && s != nullptr && s->transparent)
 		{
@@ -634,19 +640,6 @@ namespace Guarneri
 		if (enable_stencil_test)
 		{
 			update_stencil_buffer(stencilbuf, row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
-		}
-
-		// write depth
-		if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
-		{
-			if (zwrite_mode == ZWrite::ON)
-			{
-				if (color_mask == ColorMask::ZERO || stencil_pass_op == StencilOp::REPLACE)
-				{
-					std::cerr << "error " << std::endl;
-				}
-				zbuf->write(row, col, z);
-			}
 		}
 
 		// stencil visualization

@@ -506,37 +506,37 @@ namespace Guarneri
 		return ss.str();
 	}
 
-	Color operator +(const float& other, const Color& c)
+	static Color operator +(const float& other, const Color& c)
 	{
 		return c + other;
 	}
 
-	Color operator -(const float& other, const Color& c)
+	static Color operator -(const float& other, const Color& c)
 	{
 		return -c + other;
 	}
 
-	Color operator *(const float& other, const Color& c)
+	static Color operator *(const float& other, const Color& c)
 	{
 		return c * other;
 	}
 
-	Color operator *(const Vector4& other, const Color& c)
+	static Color operator *(const Vector4& other, const Color& c)
 	{
 		return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 	}
 
-	Color operator *(const Color& c, const Vector4& other)
+	static Color operator *(const Color& c, const Vector4& other)
 	{
 		return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 	}
 
-	Color operator *(const Vector3& other, const Color& c)
+	static Color operator *(const Vector3& other, const Color& c)
 	{
 		return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 	}
 
-	Color operator *(const Color& c, const Vector3& other)
+	static Color operator *(const Color& c, const Vector3& other)
 	{
 		return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 	}

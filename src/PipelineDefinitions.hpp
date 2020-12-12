@@ -27,13 +27,16 @@ namespace Guarneri{
 
 	enum class Filtering {
 		POINT,
-		BILINEAR
+		BILINEAR,
+		MAX,
+		MIN
 	};
 
 	enum class TextureFormat {
 		INVALID,
 		rgb,
-		rgba
+		rgba,
+		r32
 	};
 
 	enum class CompareFunc {

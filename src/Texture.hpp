@@ -16,11 +16,17 @@ namespace Guarneri
 		std::string path;
 		uint32_t width;
 		uint32_t height;
+		uint32_t mip_count;
+		Filtering mip_filtering;
 
 	private:
 		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
 		std::shared_ptr<RawBuffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<RawBuffer<color_rgba>> rgba_buffer;
+		std::shared_ptr<RawBuffer<float>> float_buffer;
+		std::vector< std::shared_ptr<RawBuffer<float>>> float_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<color_rgb>>> rgb_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<color_rgba>>> rgba_mipmaps;
 
 	public:
 		Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
@@ -35,8 +41,10 @@ namespace Guarneri
 		static std::shared_ptr<Texture> create(const std::string& path);
 		bool bilinear(const float& u, const float& v, Color& ret) const;
 		bool point(const float& u, const float& v, Color& ret) const;
+		void generate_mipmap(const int& mip_count, const Filtering& filtering);
 		bool sample(const float& u, const float& v, Color& ret) const;
-		bool sample(const uint32_t& row, const uint32_t& col, Color& ret) const;
+		bool read(const float& u, const float& v, Color& ret) const;
+		bool read(const uint32_t& row, const uint32_t& col, Color& ret) const;
 		bool write(const uint32_t& x, const uint32_t& y, const Color& data);
 		void save2file();
 		void resize();
@@ -66,6 +74,9 @@ namespace Guarneri
 			break;
 		case TextureFormat::rgba:
 			rgba_buffer = RawBuffer<color_rgba>::create(width, height);
+			break;
+		case TextureFormat::r32:
+			float_buffer = RawBuffer<float>::create(width, height);
 			break;
 		}
 		std::cout << this->str() << " created" << std::endl;
@@ -97,6 +108,13 @@ namespace Guarneri
 			});
 		}
 		break;
+		case TextureFormat::r32:
+		{
+			float_buffer = RawBuffer<float>::create(tex_buffer, width, height, [](float* ptr)
+			{
+				delete[] ptr;
+			});
+		}
 		}
 		std::cout << this->str() << " created" << std::endl;
 	}
@@ -137,6 +155,14 @@ namespace Guarneri
 					stbi_image_free((void*)ptr);
 				});
 				this->fmt = TextureFormat::rgba;
+			}
+			else if (channels == R_CHANNEL)
+			{
+				float_buffer = RawBuffer<float>::create(tex, w, h, [](float* ptr)
+				{
+					stbi_image_free((void*)ptr);
+				});
+				this->fmt = TextureFormat::r32;
 			}
 			else
 			{
@@ -197,10 +223,10 @@ namespace Guarneri
 		float frac_col = cf - (float)col;
 
 		Color c00, c01, c11, c10;
-		sample(row, col, c00);
-		sample(row + 1, col, c01);
-		sample(row + 1, col + 1, c11);
-		sample(row, col + 1, c10);
+		read(row, col, c00);
+		read(row + 1, col, c01);
+		read(row + 1, col + 1, c11);
+		read(row, col + 1, c10);
 
 		Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
 		Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
@@ -209,6 +235,89 @@ namespace Guarneri
 	}
 
 	bool Texture::point(const float& u, const float& v, Color& ret) const
+	{
+		read(u, v, ret);
+		return true;
+	}
+
+
+	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
+	{
+		switch (this->fmt)
+		{
+		case TextureFormat::rgb:
+		{
+			for (int i = 1; i < count; i++)
+			{
+				rgb_mipmaps[i].reset();
+			}
+			rgb_mipmaps.clear();
+
+			rgb_mipmaps.emplace_back(rgb_buffer);
+
+			for (int i = 1; i < count; i++)
+			{
+				long w = this->width >> i;
+				long h = this->height >> i;
+				rgb_mipmaps.emplace_back(std::make_shared<RawBuffer<color_rgb>>(w, h));
+			}
+			break;
+		}
+		case TextureFormat::rgba:
+		{
+			for (int i = 1; i < count; i++)
+			{
+				rgba_mipmaps[i].reset();
+			}
+			rgba_mipmaps.clear();
+
+			rgba_mipmaps.emplace_back(rgba_buffer);
+
+			for (int i = 1; i < count; i++)
+			{
+				long w = this->width >> i;
+				long h = this->height >> i;
+				rgba_mipmaps.emplace_back(std::make_shared<RawBuffer<color_rgba>>(w, h));
+			}
+			break;
+		}
+		case TextureFormat::r32:
+		{
+			for (int i = 1; i < count; i++)
+			{
+				float_mipmaps[i].reset();
+			}
+			float_mipmaps.clear();
+
+			float_mipmaps.emplace_back(float_buffer);
+
+			for (int i = 1; i < count; i++)
+			{
+				long w = this->width >> i;
+				long h = this->height >> i;
+				float_mipmaps.emplace_back(std::make_shared<RawBuffer<float>>(w, h));
+			}
+			break;
+		}
+		}
+
+		this->mip_count = count;
+		this->mip_filtering = mip_filter;
+	}
+
+	bool Texture::sample(const float& u, const float& v, Color& ret) const
+	{
+		switch (this->filtering)
+		{
+		case Filtering::BILINEAR:
+			return bilinear(u, v, ret);
+		case Filtering::POINT:
+			return point(u, v, ret);
+		}
+		return false;
+	}
+
+	bool Texture::read(const float& u, const float& v, Color& ret) const
 	{
 		float wu = u;
 		float wv = v;
@@ -231,23 +340,19 @@ namespace Guarneri
 			ret = Color::decode(pixel);
 			return ok;
 		}
-		}
-		return false;
-	}
-
-	bool Texture::sample(const float& u, const float& v, Color& ret) const
-	{
-		switch (this->filtering)
+		case TextureFormat::r32:
 		{
-		case Filtering::BILINEAR:
-			return bilinear(u, v, ret);
-		case Filtering::POINT:
-			return point(u, v, ret);
+			if (float_buffer == nullptr) return false;
+			float pixel;
+			bool ok = float_buffer->read(wu, wv, pixel);
+			ret = Color(pixel);
+			return ok;
+		}
 		}
 		return false;
 	}
 
-	bool Texture::sample(const uint32_t& row, const uint32_t& col, Color& ret) const
+	bool Texture::read(const uint32_t& row, const uint32_t& col, Color& ret) const
 	{
 		switch (fmt)
 		{
@@ -267,6 +372,14 @@ namespace Guarneri
 			ret = Color::decode(pixel);
 			return ok;
 		}
+		case TextureFormat::r32:
+		{
+			if (float_buffer == nullptr) return false;
+			float pixel;
+			bool ok = float_buffer->read(row, col, pixel);
+			ret = Color(pixel);
+			return ok;
+		}
 		}
 		return false;
 	}
@@ -283,6 +396,11 @@ namespace Guarneri
 			if (rgba_buffer == nullptr) return false;
 			return rgba_buffer->write(x, y, Color::encode_rgba(data));
 		}
+		case TextureFormat::r32:
+		{
+			if (float_buffer == nullptr) return false;
+			return float_buffer->write(x, y, data.r);
+		}
 		}
 		return false;
 	}
@@ -295,6 +413,8 @@ namespace Guarneri
 			break;
 		case TextureFormat::rgba:
 			break;
+		case TextureFormat::r32:
+			break;
 		}
 	}
 
@@ -306,6 +426,7 @@ namespace Guarneri
 
 	void Texture::release()
 	{
+		float_buffer.reset();
 		rgb_buffer.reset();
 		rgba_buffer.reset();
 	}
@@ -382,6 +503,9 @@ namespace Guarneri
 		case TextureFormat::rgba:
 			rgba_buffer->clear(color_rgba());
 			break;
+		case TextureFormat::r32:
+			float_buffer->clear(0.0f);
+			break;
 		}
 	}
 
@@ -399,6 +523,7 @@ namespace Guarneri
 		this->fmt = other.fmt;
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
+		this->float_buffer = other.float_buffer;
 	}
 
 	std::string Texture::str() const

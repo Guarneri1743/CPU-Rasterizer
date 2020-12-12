@@ -21,6 +21,7 @@ namespace Guarneri
 #define CAMERA_ROTATE_SPEED 0.25f
 #define CAMERA_MOVE_SPEED 0.1f
 #define CAMERA_ZOOM_SPEED 1.0f
+#define R_CHANNEL 1
 #define RGB_CHANNEL 3
 #define RGBA_CHANNEL 4
 #define TEXTURE_MAX_SIZE 4096
