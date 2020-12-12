@@ -140,6 +140,14 @@ namespace Guarneri
 				{
 					misc_param.pcf_on = !misc_param.pcf_on;
 				}
+				else if (code == KeyCode::M)
+				{
+					misc_param.shadow_bias *= 2.0f;
+				}
+				else if (code == KeyCode::N)
+				{
+					misc_param.shadow_bias /= 2.0f;
+				}
 		}, nullptr);
 	}
 

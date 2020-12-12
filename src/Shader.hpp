@@ -165,7 +165,7 @@ namespace Guarneri
 					if (shadowmap->read(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 					{
 						//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-						shadow_atten += (proj_shadow_coord.z - 0.005f) > depth ? 1.0f : 0.0f;
+						shadow_atten += (proj_shadow_coord.z - misc_param.shadow_bias) > depth ? 1.0f : 0.0f;
 					}
 				}
 			}
@@ -178,7 +178,7 @@ namespace Guarneri
 			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth))
 			{
 				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-				shadow_atten = (proj_shadow_coord.z - 0.0005f) > depth ? 1.0f : 0.0f;
+				shadow_atten = (proj_shadow_coord.z - misc_param.shadow_bias) > depth ? 1.0f : 0.0f;
 			}
 		}
 

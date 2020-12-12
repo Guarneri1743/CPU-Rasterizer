@@ -158,6 +158,11 @@ namespace Guarneri
 				}
 				{
 					std::stringstream ss;
+					ss << "ShadowBias: " << misc_param.shadow_bias;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
 					ss << "FPS: " << (int)Time::fps;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
