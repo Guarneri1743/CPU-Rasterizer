@@ -30,6 +30,7 @@ namespace Guarneri
 		v2f o;
 		auto clip_pos = projection * view * Vector4(input.position.xyz(), 1.0f);
 		o.position = Vector4(clip_pos.xy(), clip_pos.ww());
+		o.world_pos = (model * Vector4(input.position.xyz(), 1.0f)).xyz();
 		o.shadow_coord = input.position;
 		return o;
 	}
@@ -37,13 +38,15 @@ namespace Guarneri
 	Color SkyboxShader::fragment_shader(const v2f& input) const
 	{
 		Color sky_color;
-		if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz() / input.shadow_coord.w, sky_color))
+
+		if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
-			{
-				int index;
-				return name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz() / input.shadow_coord.w, index);
-			}
+			int index;
+			return name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), index);
+		}
+
+		if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), sky_color))
+		{
 			return sky_color;
 		}
 

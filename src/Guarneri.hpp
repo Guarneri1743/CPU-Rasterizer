@@ -181,36 +181,38 @@ namespace Guarneri
 					ss << "LightDir: " << misc_param.main_light.forward;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
-			#ifdef MULTI_THREAD
+				if (Graphics().multi_thread)
 				{
-					std::stringstream ss;
-					ss << "Threads: " << std::thread::hardware_concurrency();
-					Window().draw_text(w, h, ss.str().c_str());
+					{
+						std::stringstream ss;
+						ss << "Threads: " << std::thread::hardware_concurrency();
+						Window().draw_text(w, h, ss.str().c_str());
+					}
 				}
-			#endif
-			#ifdef TILE_BASED
-				auto tinfo = Graphics().get_tile_info();
+				if (Graphics().tile_based)
 				{
-					std::stringstream ss;
-					ss << "TileSize: " << tinfo.tile_size;
-					Window().draw_text(w, h, ss.str().c_str());
+					auto tinfo = Graphics().get_tile_info();
+					{
+						std::stringstream ss;
+						ss << "TileSize: " << tinfo.tile_size;
+						Window().draw_text(w, h, ss.str().c_str());
+					}
+					{
+						std::stringstream ss;
+						ss << "TileRowCount: " << tinfo.row_tile_count;
+						Window().draw_text(w, h, ss.str().c_str());
+					}
+					{
+						std::stringstream ss;
+						ss << "TileColCount: " << tinfo.col_tile_count;
+						Window().draw_text(w, h, ss.str().c_str());
+					}
+					{
+						std::stringstream ss;
+						ss << "TileTaskSize: " << tinfo.tile_task_size;
+						Window().draw_text(w, h, ss.str().c_str());
+					}
 				}
-				{
-					std::stringstream ss;
-					ss << "TileRowCount: " << tinfo.row_tile_count;
-					Window().draw_text(w, h, ss.str().c_str());
-				}
-				{
-					std::stringstream ss;
-					ss << "TileColCount: " << tinfo.col_tile_count;
-					Window().draw_text(w, h, ss.str().c_str());
-				}
-				{
-					std::stringstream ss;
-					ss << "TileTaskSize: " << tinfo.tile_task_size;
-					Window().draw_text(w, h, ss.str().c_str());
-				}
-			#endif
 				Window().flush();
 				Time::frame_end();
 				Sleep(1);

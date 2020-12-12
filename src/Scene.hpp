@@ -254,6 +254,9 @@ namespace Guarneri
 
 	void Scene::render_objects()
 	{
+		Graphics().multi_thread = true;
+		Graphics().tile_based = true;
+
 		if ((misc_param.render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 		{
 			return;
@@ -272,7 +275,12 @@ namespace Guarneri
 
 		if (enable_skybox)
 		{
+			// todo: fix tile based skybox 
+			Graphics().tile_based = false;
+			Graphics().rasterizer_strategy = RasterizerStrategy::SCANLINE;
 			skybox->render();
+			Graphics().tile_based = true;
+			Graphics().rasterizer_strategy = RasterizerStrategy::SCANBLOCK;
 		}
 
 		// todo: OIT

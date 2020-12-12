@@ -111,8 +111,8 @@ namespace Guarneri
 
 	Vertex Vertex::differential(const Vertex& lhs, const Vertex& rhs)
 	{
-		float w = rhs.position.x - lhs.position.x;
-		float segmentation = 1.0f / w;
+		float width = rhs.position.x - lhs.position.x;
+		float segmentation = 1.0f / width;
 		Vertex ret;
 		ret.position = (rhs.position - lhs.position) * segmentation;
 		ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;

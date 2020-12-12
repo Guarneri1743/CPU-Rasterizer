@@ -6,9 +6,6 @@ namespace Guarneri{
 	#define FAR_Z 1.0f
 	#define DEFAULT_STENCIL 0x00
 
-	//#define TILE_BASED
-	//#define MULTI_THREAD
-
 	enum class RasterizerStrategy {
 		SCANBLOCK,
 		SCANLINE

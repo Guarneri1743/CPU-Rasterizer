@@ -61,6 +61,7 @@ namespace Guarneri
 
 	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
 	{
+		this->mip_count = 0;
 		this->fmt = _fmt;
 		this->width = _width;
 		this->height = _height;
@@ -84,6 +85,7 @@ namespace Guarneri
 
 	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
 	{
+		this->mip_count = 0;
 		this->fmt = _fmt;
 		this->width = _width;
 		this->height = _height;
@@ -121,6 +123,7 @@ namespace Guarneri
 
 	Texture::Texture(const char* path)
 	{
+		this->mip_count = 0;
 		this->path = path;
 		this->fmt = TextureFormat::INVALID;
 		this->filtering = Filtering::BILINEAR;
@@ -428,7 +431,7 @@ namespace Guarneri
 		float_buffer.reset();
 		rgb_buffer.reset();
 		rgba_buffer.reset();
-		for (auto i = 1; i < this->mip_count; i++)
+		for (uint32_t i = 1; i < this->mip_count; i++)
 		{
 			switch (this->fmt)
 			{
@@ -537,6 +540,10 @@ namespace Guarneri
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
 		this->float_buffer = other.float_buffer;
+		this->mip_count = other.mip_count;
+		this->float_mipmaps = other.float_mipmaps;
+		this->rgba_mipmaps = other.rgba_mipmaps;
+		this->rgb_mipmaps = other.rgb_mipmaps;
 	}
 
 	std::string Texture::str() const

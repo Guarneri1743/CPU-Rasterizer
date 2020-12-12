@@ -10,6 +10,9 @@ namespace Guarneri
 		uint32_t width;
 		uint32_t height;
 		GraphicsStatistic statistics;
+		RasterizerStrategy rasterizer_strategy;
+		bool tile_based;
+		bool multi_thread;
 
 	private:
 		// use 32 bits zbuffer here, for convenience 
@@ -50,16 +53,13 @@ namespace Guarneri
 
 	private:
 		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
-	#ifdef TILE_BASED
 		void render_tiles();
 		void rasterize_tiles(const size_t& start, const size_t& end);
 		void rasterize_tile(FrameTile& tile);
 		void execute_task(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const FrameTile& tile, const Triangle& tri, Shader* shader);
-	#else
 		void rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy);
 		void scanblock(const Triangle& tri, Shader* shader);
 		void scanline(const Triangle& tri, Shader* shader);
-	#endif
 		v2f process_vertex(Shader* shader, const Vertex& vert) const;
 		void process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
@@ -148,9 +148,10 @@ namespace Guarneri
 
 	void GraphicsDevice::present()
 	{
-	#ifdef TILE_BASED
-		render_tiles();
-	#endif
+		if (tile_based)
+		{
+			render_tiles();
+		}
 	}
 
 	void GraphicsDevice::clear_buffer(const BufferFlag& flag)
@@ -236,11 +237,14 @@ namespace Guarneri
 
 		for (auto iter = tris.begin(); iter != tris.end(); iter++)
 		{
-		#ifdef TILE_BASED
-			FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
-		#else
-			rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
-		#endif
+			if (tile_based)
+			{
+				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
+			}
+			else
+			{
+				rasterize(*iter, shader, rasterizer_strategy);
+			}
 		}
 	}
 
@@ -256,36 +260,38 @@ namespace Guarneri
 		return shader->vertex_shader(input);
 	}
 
-#ifdef TILE_BASED
 	void GraphicsDevice::render_tiles()
 	{
-	#ifdef MULTI_THREAD
-		auto thread_size = (size_t)std::thread::hardware_concurrency();
-		ThreadPool tp(thread_size);
-		int task_size = TILE_TASK_SIZE;
-		int task_rest = tile_length % task_size;
-		int task_count = tile_length / task_size;
-		for (auto tid = 0; tid < task_count; tid++)
+		if (multi_thread)
 		{
-			int start = tid * task_size;
-			int end = (static_cast<long>(tid) + 1) * task_size;
+			auto thread_size = (size_t)std::thread::hardware_concurrency();
+			ThreadPool tp(thread_size);
+			int task_size = TILE_TASK_SIZE;
+			int task_rest = tile_length % task_size;
+			int task_count = tile_length / task_size;
+			for (auto tid = 0; tid < task_count; tid++)
+			{
+				int start = tid * task_size;
+				int end = (static_cast<long>(tid) + 1) * task_size;
+				tp.enqueue([=]
+				{
+					rasterize_tiles(start, end);
+				});
+			}
+			int last_start = task_count * task_size;
+			int last_end = last_start + task_rest;
 			tp.enqueue([=]
 			{
-				rasterize_tiles(start, end);
+				rasterize_tiles(last_start, last_end);
 			});
 		}
-		int last_start = task_count * task_size;
-		int last_end = last_start + task_rest;
-		tp.enqueue([=]
+		else
 		{
-			rasterize_tiles(last_start, last_end);
-		});
-	#else
-		for (auto tidx = 0; tidx < tile_length; tidx++)
-		{
-			rasterize_tile(tiles[tidx]);
+			for (uint32_t tidx = 0; tidx < tile_length; tidx++)
+			{
+				rasterize_tile(tiles[tidx]);
+			}
 		}
-	#endif
 	}
 
 	void GraphicsDevice::rasterize_tiles(const size_t& start, const size_t& end)
@@ -382,7 +388,7 @@ namespace Guarneri
 			}
 		}
 	}
-#else
+
 	void GraphicsDevice::rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy)
 	{
 		if (strategy == RasterizerStrategy::SCANBLOCK)
@@ -425,10 +431,11 @@ namespace Guarneri
 		auto v2 = tri[ccw_idx2].position.xy();
 
 		float area = Triangle::area_double(v0, v1, v2);
+		float inv_area = 1.0f / area;
 
-		for (int row = row_start; row < row_end; row++)
+		for (uint32_t row = row_start; row < (uint32_t)row_end; row++)
 		{
-			for (int col = col_start; col < col_end; col++)
+			for (uint32_t col = col_start; col < (uint32_t)col_end; col++)
 			{
 				Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
 				float w0 = Triangle::area_double(v1, v2, pixel);
@@ -436,7 +443,7 @@ namespace Guarneri
 				float w2 = Triangle::area_double(v0, v1, pixel);
 				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 				{
-					w0 /= area; w1 /= area; w2 /= area;
+					w0 *= inv_area; w1 *= inv_area; w2 *= inv_area;
 					Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
 					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
 					process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
@@ -456,7 +463,7 @@ namespace Guarneri
 		bottom = CLAMP_INT(bottom, 0, this->height);
 		assert(bottom >= top);
 
-		for (int row = top; row < bottom; row++)
+		for (uint32_t row = top; row < (uint32_t)bottom; row++)
 		{
 			Vertex lhs, rhs;
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
@@ -473,7 +480,7 @@ namespace Guarneri
 			right = CLAMP_INT(right, 0, this->width);
 			assert(right >= left);
 
-			for (auto col = left; col < right; col++)
+			for (uint32_t col = left; col < (uint32_t)right; col++)
 			{
 				RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
 				process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), lhs, row, col, shader);
@@ -482,7 +489,7 @@ namespace Guarneri
 			}
 		}
 	}
-#endif
+
 	// per fragment processing
 	void GraphicsDevice::process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader)
 	{
@@ -926,17 +933,17 @@ namespace Guarneri
 	{
 		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
 	#ifdef LEFT_HANDED 
-		#ifdef GL_LIKE
-			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
-		#else
-			return (far * near) / (far - (far - near) * ndc_z);
-		#endif
+	#ifdef GL_LIKE
+		return (2.0f * near * far) / (far + near - ndc_z * (far - near));
 	#else
-		#ifdef GL_LIKE
-			return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
-		#else
-			return (far * near) / (-far - (far - near) * ndc_z);
-		#endif
+		return (far * near) / (far - (far - near) * ndc_z);
+	#endif
+	#else
+	#ifdef GL_LIKE
+		return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
+	#else
+		return (far * near) / (-far - (far - near) * ndc_z);
+	#endif
 	#endif
 	}
 

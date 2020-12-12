@@ -103,10 +103,10 @@ namespace Guarneri
 		{
 			return;
 		}
-	#ifdef MULTI_THREAD
+
 		auto thread_size = std::thread::hardware_concurrency();
 		ThreadPool tp(thread_size);
-	#endif
+		
 		Vertex vertices[3];
 		target->material->set_shadowmap(Graphics().get_shadowmap());
 		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
@@ -116,40 +116,43 @@ namespace Guarneri
 			{
 				assert(m->indices.size() % 3 == 0);
 				uint32_t idx = 0;
-			#ifdef MULTI_THREAD
-				std::vector<Triangle> tris;
-				auto block_size = m->indices.size() / thread_size;
-				tris.reserve(block_size);
-				for (auto& index : m->indices)
+				if (Graphics().multi_thread)
 				{
-					assert(idx < 3 && index < m->vertices.size());
-					vertices[idx] = m->vertices[index];
-					idx++;
-					if (idx == 3)
+					std::vector<Triangle> tris;
+					auto block_size = m->indices.size() / thread_size;
+					tris.reserve(block_size);
+					for (auto& index : m->indices)
 					{
-						tris.emplace_back(Triangle(vertices[0], vertices[1], vertices[2]));
-						if (tris.size() == block_size)
+						assert(idx < 3 && index < m->vertices.size());
+						vertices[idx] = m->vertices[index];
+						idx++;
+						if (idx == 3)
 						{
-							tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
-							tris.clear();
+							tris.emplace_back(Triangle(vertices[0], vertices[1], vertices[2]));
+							if (tris.size() == block_size)
+							{
+								tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+								tris.clear();
+							}
+							idx = 0;
 						}
-						idx = 0;
 					}
+					tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 				}
-				tp.enqueue(draw_triangle, target->material->get_shader(render_pass), tris, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
-			#else
-				for (auto& index : m->indices)
+				else
 				{
-					assert(idx < 3 && index < m->vertices.size());
-					vertices[idx] = m->vertices[index];
-					idx++;
-					if (idx == 3)
+					for (auto& index : m->indices)
 					{
-						Graphics().draw(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
-						idx = 0;
+						assert(idx < 3 && index < m->vertices.size());
+						vertices[idx] = m->vertices[index];
+						idx++;
+						if (idx == 3)
+						{
+							Graphics().draw(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+							idx = 0;
+						}
 					}
 				}
-			#endif
 			}
 		}
 	}
