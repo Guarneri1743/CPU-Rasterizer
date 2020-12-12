@@ -136,6 +136,10 @@ namespace Guarneri
 				{
 					misc_param.enable_shadow = !misc_param.enable_shadow;
 				}
+				else if (code == KeyCode::O)
+				{
+					misc_param.pcf_on = !misc_param.pcf_on;
+				}
 		}, nullptr);
 	}
 

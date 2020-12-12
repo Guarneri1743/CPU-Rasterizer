@@ -124,7 +124,7 @@ namespace Guarneri{
 		STENCIL = 1 << 7,
 		SCANLINE = 1 << 8,
 		FRAME_TILE = 1 << 9,
-		SPECULAR = 1 << 10,
+		SPECULAR = 1 << 10
 	};
 
 #ifdef OPAQUE

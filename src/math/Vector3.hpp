@@ -564,6 +564,11 @@ namespace Guarneri
 		return vec * val;
 	}
 
+	static Vector3 operator /(const float& val, const Vector3& vec)
+	{
+		return Vector3(val) / vec;
+	}
+
 	static std::ostream& operator << (std::ostream& stream, const Vector3& vec)
 	{
 		stream << vec.str();

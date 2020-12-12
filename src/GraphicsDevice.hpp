@@ -570,7 +570,6 @@ namespace Guarneri
 			}
 		}
 
-		// todo: stencil test
 		if (enable_stencil_test)
 		{
 			if (!perform_stencil_test(stencilbuf, stencil_ref_val, stencil_read_mask, stencil_func, row, col))
@@ -589,12 +588,9 @@ namespace Guarneri
 		}
 
 		// write depth
-		if ((op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
+		if (zwrite_mode == ZWrite::ON)
 		{
-			if (zwrite_mode == ZWrite::ON)
-			{
-				zbuf->write(row, col, z);
-			}
+			zbuf->write(row, col, z);
 		}
 
 		// blending
@@ -931,7 +927,12 @@ namespace Guarneri
 
 	float GraphicsDevice::linearize_depth(const float& depth, const float& near, const float& far) const
 	{
+	#ifdef GL_LIKE
 		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
+	#else
+		float ndc_z = depth; // [0, 1] (DX)
+	#endif
+
 	#ifdef LEFT_HANDED 
 	#ifdef GL_LIKE
 		return (2.0f * near * far) / (far + near - ndc_z * (far - near));

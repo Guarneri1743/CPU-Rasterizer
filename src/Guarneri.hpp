@@ -153,6 +153,11 @@ namespace Guarneri
 				}
 				{
 					std::stringstream ss;
+					ss << "EnablePCF: " << (misc_param.pcf_on ? "PCF_ON" : "PCF_OFF");
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
 					ss << "FPS: " << (int)Time::fps;
 					Window().draw_text(w, h, ss.str().c_str());
 				}

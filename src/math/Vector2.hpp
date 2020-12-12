@@ -259,6 +259,11 @@ namespace Guarneri
 		return Vector2(x, y);
 	}
 
+	static Vector2 operator /(const float& val, const Vector2& vec)
+	{
+		return Vector2(val) / vec;
+	}
+
 	static Vector2 operator *(const float& val, const Vector2& vec)
 	{
 		return vec * val;

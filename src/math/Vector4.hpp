@@ -1888,6 +1888,11 @@ namespace Guarneri
 		return vec * val;
 	}
 
+	static Vector4 operator /(const float& val, const Vector4& vec)
+	{
+		return Vector4(val) / vec;
+	}
+
 	static Vector4 maxf(const Vector4& lhs, const Vector4& rhs)
 	{
 		return Vector4(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z), std::max(lhs.w, rhs.w));

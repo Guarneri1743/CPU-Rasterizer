@@ -10,6 +10,8 @@ namespace Guarneri
 	private:
 		T* buffer;
 		void (*deletor)(T* ptr);
+
+	public:
 		uint32_t width;
 		uint32_t height;
 

@@ -141,16 +141,48 @@ namespace Guarneri
 		{
 			return 0.0f;
 		}
+
 		Vector3 proj_shadow_coord = light_space_pos.xyz();
 		proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
-		float depth;
-		if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth))
+
+		if (proj_shadow_coord.z > 1.0f)
 		{
-			//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-			float shadow_atten = (proj_shadow_coord.z - 0.005f) > depth ? 1.0f : 0.0f;
-			return shadow_atten * 0.5f;
+			return 0.0f;
 		}
-		return 0.0f;
+
+		float shadow_atten = 0.0f;
+
+		Vector2 texel_size = 1.0f / Vector2(shadowmap->height, shadowmap->width);
+
+		if (misc_param.pcf_on)
+		{
+			// PCF
+			for (int x = -1; x <= 1; x++)
+			{
+				for (int y = -1; y <= 1; y++)
+				{
+					float depth;
+					if (shadowmap->read(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
+					{
+						//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
+						shadow_atten += (proj_shadow_coord.z - 0.005f) > depth ? 1.0f : 0.0f;
+					}
+				}
+			}
+
+			shadow_atten /= 9.0f;
+		}
+		else
+		{
+			float depth;
+			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth))
+			{
+				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
+				shadow_atten = (proj_shadow_coord.z - 0.0005f) > depth ? 1.0f : 0.0f;
+			}
+		}
+
+		return shadow_atten * 0.5f;
 	}
 
 	Vector3 Shader::reflect(const Vector3& n, const Vector3& light_out_dir) const

@@ -28,6 +28,7 @@ namespace Guarneri {
 		PerSampleOperation persample_op_flag;
 		CullingAndClippingFlag culling_clipping_flag;
 		bool enable_shadow;
+		bool pcf_on;
 	};
 
 	static MiscParameter misc_param;
