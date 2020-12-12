@@ -11,6 +11,12 @@ namespace Guarneri{
 		SCANLINE
 	};
 
+	enum class PBRWorkFlow
+	{
+		Metallic,
+		Specular
+	};
+
 	enum class Projection {
 		PERSPECTIVE,
 		ORTHO

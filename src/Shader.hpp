@@ -30,7 +30,13 @@ namespace Guarneri
 		LightingData()
 		{
 			glossiness = 32.0f;
+			f0 = Vector3(0.04f);
+			metallic = 0.0f;
+			roughness = 0.5f;
 		}
+		Vector3 f0;
+		float roughness;
+		float metallic;
 		float glossiness;
 	};
 
@@ -72,8 +78,8 @@ namespace Guarneri
 		virtual v2f vertex_shader(const a2v& input) const;
 		float get_shadow_atten(const Vector4& light_space_pos) const;
 		Vector3 reflect(const Vector3& n, const Vector3& light_out_dir) const;
-		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const;
-		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const;
+		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
+		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
 		virtual Color fragment_shader(const v2f& input) const;
 		std::string str() const;
 	};
@@ -191,39 +197,74 @@ namespace Guarneri
 		return 2.0f * n * ndl - light_out_dir;
 	}
 
-	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const
+	float distribution_ggx(const Vector3& n, const Vector3& h, const float& roughness)
 	{
-		auto light_ambient = light.ambient;
-		auto light_spec = light.specular;
-		auto light_diffuse = light.diffuse;
-		auto intensity = light.intensity;
-		REF(intensity);
-		light_diffuse *= intensity;
-		light_spec *= intensity;
+		float a = roughness * roughness;
+		float a2 = a * a;
+		float ndh = std::max(Vector3::dot(n, h), 0.0f);
+		float ndh2 = ndh * ndh;
 
-		float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+		float nom = a2;
+		float denom = (ndh2 * (a2 - 1.0f) + 1.0f);
+		denom = PI * denom * denom;
 
-		auto light_dir = -light.forward.normalized();
-		light_dir = tbn * light_dir;
+		return nom / std::max(denom, 0.001f);
+	}
 
-		auto ndl = std::max(Vector3::dot(n, light_dir), 0.0f);
-		auto half_dir = (light_dir + v).normalized();
-		auto spec = std::pow(std::max(Vector3::dot(n, half_dir), 0.0f), glossiness);
+	float geometry_schlick_ggx(const float& ndv, const float& roughness)
+	{
+		float r = (roughness + 1.0f);
+		float k = (r * r) / 8.0f;
+		float nom = ndv;
+		float denom = ndv * (1.0f - k) + k;
+		return nom / denom;
+	}
 
-		auto ambient = light_ambient * ao;
-		auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
-		auto specular = Color::saturate(light_spec * spec * spec_tex);
+	float geometry_smith(const Vector3& n, const Vector3& v, const Vector3& l, const float& roughness)
+	{
+		float ndv = std::max(Vector3::dot(n, v), 0.0f);
+		float ndl = std::max(Vector3::dot(n, l), 0.0f);
+		float ggx2 = geometry_schlick_ggx(ndv, roughness);
+		float ggx1 = geometry_schlick_ggx(ndl, roughness);
 
+		return ggx1 * ggx2;
+	}
+
+	Vector3 fresnel_schlick(const float& cos_theta, const Vector3& F0)
+	{
+		return F0 + (1.0f - F0) * pow(1.0f - cos_theta, 5.0f);
+	}
+
+	Vector3 metallic_workflow(const Vector3& albedo, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
+	{
+		Vector3 f0 = 0.04f;
+		f0 = Vector3::lerp(f0, albedo, metallic);
+		float attenuation = 1.0f / (light_distance * light_distance);
+		Vector3 radiance = attenuation;
+
+		float ndf = distribution_ggx(normal, halfway, roughness);
+		float geo = geometry_smith(normal, view_dir, light_dir, roughness);
+		Vector3 fresnel = fresnel_schlick(std::max(std::min(Vector3::dot(halfway, view_dir), 1.0f), 0.0f), f0);
+
+		Vector3 nominator = ndf * geo * fresnel;
+		float denominator = 4.0f * std::max(Vector3::dot(normal, view_dir), 0.0f) * std::max(Vector3::dot(normal, light_dir), 0.0f);
+		Vector3 specular = nominator / std::max(denominator, 0.001f);
+
+		Vector3 spec_term = fresnel;
+		Vector3 diffuse_term = Vector3(1.0f) - spec_term;
+		diffuse_term *= 1.0f - metallic;
+
+		float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
 		if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{
 			return specular;
 		}
 
-		return ambient + diffuse + specular;
+		return (diffuse_term * albedo / PI + specular) * radiance * ndl;
 	}
 
-	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color main_tex, Color spec_tex, Color ao, const Matrix3x3& tbn) const
+	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
 	{
 		auto light_ambient = light.ambient;
 		auto light_spec = light.specular;
@@ -232,26 +273,81 @@ namespace Guarneri
 		REF(intensity);
 		light_diffuse *= intensity;
 		light_spec *= intensity;
-		float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+
+		auto light_dir = -light.forward.normalized();
+		light_dir = tbn * light_dir;
+
+		auto half_dir = (light_dir + view_dir).normalized();
+
+		if (misc_param.workflow == PBRWorkFlow::Specular)
+		{
+			//todo
+			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
+			auto ambient = light_ambient * ao;
+			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
+			Color spec_tex = Color::WHITE;
+			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
+			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			auto ret = ambient + diffuse + specular;
+			return ret;
+		}
+		else
+		{
+			auto ambient = light_ambient * ao;
+			Color metallic = Color::BLACK;
+			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
+			Color roughness = 0.04f;
+			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.3f, half_dir, light_dir, view_dir, normal);
+			auto ret = ambient + Color(lo);
+			return ret;
+		}
+	}
+
+	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
+	{
+		auto light_ambient = light.ambient;
+		auto light_spec = light.specular;
+		auto light_diffuse = light.diffuse;
+		auto intensity = light.intensity;
+		REF(intensity);
+		light_diffuse *= intensity;
+		light_spec *= intensity;
 		auto light_dir = (light.position - wpos).normalized();
 		light_dir = tbn * light_dir;
 
-		auto ndl = std::max(Vector3::dot(n, light_dir), 0.0f);
-		auto half_dir = (light_dir + v).normalized();
-		auto spec = std::pow(std::max(Vector3::dot(n, half_dir), 0.0f), glossiness);
-		float distance = Vector3::length(light.position, wpos);
-		float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+		auto half_dir = (light_dir + view_dir).normalized();
 
-		auto ambient = light_ambient * ao;
-		auto diffuse = Color::saturate(light_diffuse * ndl * main_tex);
-		auto specular = Color::saturate(light_spec * spec * spec_tex);
-
-		if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		if (misc_param.workflow == PBRWorkFlow::Specular)
 		{
-			return specular * atten;
+			//todo
+			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
+			float distance = Vector3::length(light.position, wpos);
+			float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+			auto ambient = light_ambient * ao;
+			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
+			Color spec_tex = Color::WHITE;
+			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
+			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			auto ret = (ambient + diffuse + specular) * atten;
+			return ret;
 		}
-
-		return (ambient + diffuse + specular) * atten;
+		else
+		{
+			auto ambient = light_ambient * ao;
+			auto dist = Vector3::length(light.position, wpos);
+			Color metallic = Color::BLACK;
+			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
+			Color roughness = 0.04f;
+			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
+			auto ret = ambient + Color(lo);
+			return ret;
+		}
 	}
 
 	Color Shader::fragment_shader(const v2f& input) const
@@ -283,18 +379,20 @@ namespace Guarneri
 		Color main_tex = Color::WHITE;
 		name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex);
 
-		Color spec_tex = Color::WHITE;
-		name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(input.uv.x, input.uv.y, spec_tex);
-
 		Color ao = Color::WHITE;
 		name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
 
-		ret += calculate_main_light(main_light, lighting_param, view_dir, normal, main_tex, spec_tex, ao, tbn);
+		Color emmision = Color::BLACK;
+		name2tex.count(emission_prop) > 0 && name2tex.at(emission_prop)->sample(input.uv.x, input.uv.y, emmision);
+
+		ret += calculate_main_light(main_light, lighting_param, view_dir, normal, main_tex, ao, input.uv, tbn);
 
 		for (auto& light : point_lights)
 		{
-			ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, main_tex, spec_tex, ao, tbn);
+			ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, main_tex, ao, input.uv, tbn);
 		}
+
+		ret += emmision;
 
 		ret *= shadow_atten;
 
@@ -350,6 +448,11 @@ namespace Guarneri
 		}
 
 		ret = Color::saturate(ret);
+
+		//ret = ret / (ret + Color::WHITE);
+		//
+		//ret = Color::pow(ret, 1.0f / 2.2f);
+
 		return Color(ret.r, ret.g, ret.b, 1.0f);
 	}
 

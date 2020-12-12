@@ -48,6 +48,7 @@ namespace Guarneri
 		static float length(const Vector3& a, const Vector3& b);
 		static Vector3 max(const Vector3& a, const Vector3& b);
 		static Vector3 min(const Vector3& a, const Vector3& b);
+		static Vector3 saturate(const Vector3& vec);
 		static Vector3 abs(const Vector3& v);
 		static Vector3 normalize(const Vector3& value);
 		static Vector3 floor(const Vector3& val);
@@ -299,6 +300,11 @@ namespace Guarneri
 	float Vector3::length(const Vector3& a, const Vector3& b)
 	{
 		return magnitude(a - b);
+	}
+
+	Vector3 Vector3::saturate(const Vector3& vec)
+	{
+		return Vector3(Vector3::max(Vector3::min(Vector3::ONE, vec), Vector3::ZERO));
 	}
 
 	Vector3 Vector3::max(const Vector3& a, const Vector3& b)

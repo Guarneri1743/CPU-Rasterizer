@@ -3,6 +3,8 @@
 using namespace Guarneri;
 using namespace std;
 
+bool auto_rotation = false;
+
 int main()
 {
 	// initialize rasterizer
@@ -36,25 +38,34 @@ int main()
 	demo_scene.enable_skybox = true;
 
 	// helmet
-	auto helmet = Model::create(res_path() + "/helmet/helmet.obj");
+	auto helmet = Model::create(res_path() + "/helmet/helmet.obj", false);
 	helmet->material->lighting_param.glossiness = 32.0f;
 	helmet->material->cast_shadow = true;
 
 	auto tex_a_path = res_path() + "/helmet/TEX/T1_C.jpg";
 	auto tex_n_path = res_path() + "/helmet/TEX/T1_N.jpg";
-	auto tex_s_path = res_path() + "/helmet/TEX/T1_R.jpg";
+	auto tex_r_path = res_path() + "/helmet/TEX/T1_R.jpg";
+	auto tex_e_path = res_path() + "/helmet/TEX/T1_E.png";
 	auto tex_ao_path = res_path() + "/helmet/TEX/T1_AO.jpg";
+	auto tex_m_path = res_path() + "/helmet/TEX/T1_M.png";
 	auto tex_albedo = Texture::create(tex_a_path);
 	auto tex_normal = Texture::create(tex_n_path);
-	auto tex_s = Texture::create(tex_s_path);
+	auto tex_r = Texture::create(tex_r_path);
 	auto tex_ao = Texture::create(tex_ao_path);
+	auto tex_e = Texture::create(tex_e_path);
+	auto tex_m = Texture::create(tex_m_path);
+
 	tex_albedo->filtering = Filtering::POINT;
 	tex_normal->filtering = Filtering::POINT;
-	tex_s->filtering = Filtering::POINT;
+	tex_r->filtering = Filtering::POINT;
 	tex_ao->filtering = Filtering::POINT;
+	tex_e->filtering = Filtering::POINT;
+	tex_m->filtering = Filtering::POINT;
 
 	helmet->material->set_texture(albedo_prop, tex_albedo);
-	helmet->material->set_texture(specular_prop, tex_s);
+	helmet->material->set_texture(roughness_prop, tex_r);
+	helmet->material->set_texture(metallic_prop, tex_m);
+	helmet->material->set_texture(emission_prop, tex_e);
 	helmet->material->set_texture(normal_prop, tex_normal);
 	helmet->material->set_texture(ao_prop, tex_ao);
 
@@ -85,6 +96,37 @@ int main()
 
 	//std::shared_ptr<Renderer> ironman_renderer = Renderer::create(ironman);
 	//demo_scene.add(ironman_renderer);
+
+	InputMgr().add_on_update_evt([](void* user_data)
+	{
+		if (InputMgr().is_key_down(KeyCode::SPACE))
+		{
+			auto_rotation = !auto_rotation;
+		}
+
+		Scene* s = reinterpret_cast<Scene*>(user_data);
+		if (auto_rotation)
+		{
+			s->main_light.rotate(10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::R))
+		{
+			s->main_light.rotate(10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::T))
+		{
+			s->main_light.rotate(0.0f, 10.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::Y))
+		{
+			s->main_light.rotate(-10.0f, 0.0f);
+		}
+		if (InputMgr().is_key_down(KeyCode::U))
+		{
+			s->main_light.rotate(0.0f, -10.0f);
+		}
+	}, &demo_scene);
+
 
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;

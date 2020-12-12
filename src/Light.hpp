@@ -20,6 +20,7 @@ namespace Guarneri {
 			this->pitch = -45.0f;
 			//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
 			this->p = Matrix4x4::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.2f, 50.0f);
+			this->position = Vector3(10.0f, 10.0f, 10.0f);
 			update_rotation();
 		}
 

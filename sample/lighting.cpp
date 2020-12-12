@@ -112,7 +112,7 @@ int main()
 	demo_scene.add(plane_renderer);
 
 	// backpack
-	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
+	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
 	backpack->material->lighting_param.glossiness = 32.0f;
 	backpack->material->cast_shadow = true;
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0f));

@@ -89,6 +89,7 @@ namespace Guarneri
 		static Color maxf(const Color& lhs, const Color& rhs);
 		static Color min(const Color& lhs, const Color& rhs);
 		static Color abs(const Color& v);
+		static Color pow(const Color& c, float power);
 		static Color normalize(const Color& value);
 		std::string str() const;
 	};
@@ -499,6 +500,11 @@ namespace Guarneri
 	Color Color::abs(const Color& v)
 	{
 		return Color(std::abs(v.r), std::abs(v.g), std::abs(v.b), std::abs(v.a));
+	}
+
+	Color Color::pow(const Color& c, float power)
+	{
+		return Color(std::pow(c.r, power), std::pow(c.g, power), std::pow(c.b, power), c.a);
 	}
 
 	Color Color::normalize(const Color& value)

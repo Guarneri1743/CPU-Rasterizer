@@ -17,10 +17,10 @@ namespace Guarneri
 
 	public:
 		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material);
-		Model(std::string path);
+		Model(std::string path, bool flip_uv);
 		~Model();
 		static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material);
-		static std::unique_ptr<Model> create(std::string path);
+		static std::unique_ptr<Model> create(std::string path, bool flip_uv);
 		void traverse_nodes(aiNode* node, const aiScene* Scene);
 		std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene);
 		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type);
@@ -40,11 +40,16 @@ namespace Guarneri
 		this->material = std::move(material);
 	}
 
-	Model::Model(std::string path)
+	Model::Model(std::string path, bool flip_uv)
 	{
 		this->material = std::make_shared<Material>();
 		Assimp::Importer importer;
-		const aiScene* Scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+		auto flag = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
+		if (flip_uv)
+		{
+			flag |= aiProcess_FlipUVs;
+		}
+		const aiScene* Scene = importer.ReadFile(path, flag);
 		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
 		{
 			std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
@@ -66,9 +71,9 @@ namespace Guarneri
 		return std::make_unique<Model>(vertices, indices, std::move(material));
 	}
 
-	std::unique_ptr<Model> Model::create(std::string path)
+	std::unique_ptr<Model> Model::create(std::string path, bool flip_uv)
 	{
-		return std::make_unique<Model>(path);
+		return std::make_unique<Model>(path, flip_uv);
 	}
 
 	void Model::traverse_nodes(aiNode* node, const aiScene* Scene)
