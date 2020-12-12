@@ -16,6 +16,7 @@ function setupIncludeDirs()
       include_dir .. "/assimp",
       include_dir .. "/ply",
       include_dir .. "/stb_image",
+      include_dir .. "/nlohmann"
    }
 end
 
@@ -95,6 +96,7 @@ function setupBlendingDemo()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
+      include_dir .. "/nlohmann/*.*",
       sample_dir .. "/blending.cpp"
    }
 
@@ -119,6 +121,7 @@ function setupStencilDemo()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
+      include_dir .. "/nlohmann/*.*",
       sample_dir .. "/stencil_test.cpp"
    }
 
@@ -143,6 +146,7 @@ function setupLightingDemo()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
+      include_dir .. "/nlohmann/*.*",
       sample_dir .. "/lighting.cpp"
    }
 
@@ -167,6 +171,7 @@ function setupFilteringDemo()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
+      include_dir .. "/nlohmann/*.*",
       sample_dir .. "/filtering.cpp"
    }
 
@@ -178,8 +183,8 @@ function setupFilteringDemo()
 end
 
 
-function setupSkyboxDemo()
-   project "SkyboxDemo"
+function setupCubemapDemo()
+   project "CubemapDemo"
    kind "ConsoleApp"
    language "C++"
 
@@ -192,7 +197,8 @@ function setupSkyboxDemo()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
-      sample_dir .. "/skybox.cpp"
+      include_dir .. "/nlohmann/*.*",
+      sample_dir .. "/cubemap.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -216,6 +222,7 @@ function setupPLYProj()
          include_dir .. "/threading/*.*",
          include_dir .. "/assimp/*.*",
          include_dir .. "/stb_image/*.*",
+         include_dir .. "/nlohmann/*.*",
          include_dir .. "/ply/*.*",
          sample_dir .. "/plytest.c"
       }
@@ -241,6 +248,7 @@ function setupUnitTestProj()
       include_dir .. "/threading/*.*",
       include_dir .. "/assimp/*.*",
       include_dir .. "/stb_image/*.*",
+      include_dir .. "/nlohmann/*.*",
       sample_dir .. "/unit_test.cpp"
    }
 
@@ -257,6 +265,6 @@ setupBlendingDemo()
 setupStencilDemo()
 setupLightingDemo()
 setupFilteringDemo()
-setupSkyboxDemo()
-setupPLYProj()
+setupCubemapDemo()
+--setupPLYProj()
 setupUnitTestProj()

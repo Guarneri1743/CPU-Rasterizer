@@ -54,6 +54,7 @@ namespace Guarneri
 		auto p = parent_path.string();
 		parent_dir = p;
 		traverse_nodes(Scene->mRootNode, Scene);
+		std::cout << "load model: " << path << " mesh: " << this->meshes.size() << std::endl;
 		importer.FreeScene();
 	}
 
@@ -72,6 +73,7 @@ namespace Guarneri
 
 	void Model::traverse_nodes(aiNode* node, const aiScene* Scene)
 	{
+		//std::cout << "traverse_nodes: " << node->mName.C_Str() << ", mesh: " << node->mNumMeshes << std::endl;
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];

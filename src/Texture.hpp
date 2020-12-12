@@ -23,8 +23,8 @@ namespace Guarneri
 		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
 		std::shared_ptr<RawBuffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<RawBuffer<color_rgba>> rgba_buffer;
-		std::shared_ptr<RawBuffer<float>> float_buffer;
-		std::vector< std::shared_ptr<RawBuffer<float>>> float_mipmaps;
+		std::shared_ptr<RawBuffer<color_gray>> gray_buffer;
+		std::vector< std::shared_ptr<RawBuffer<color_gray>>> gray_mipmaps;
 		std::vector< std::shared_ptr<RawBuffer<color_rgb>>> rgb_mipmaps;
 		std::vector< std::shared_ptr<RawBuffer<color_rgba>>> rgba_mipmaps;
 
@@ -77,7 +77,7 @@ namespace Guarneri
 			rgba_buffer = RawBuffer<color_rgba>::create(width, height);
 			break;
 		case TextureFormat::r32:
-			float_buffer = RawBuffer<float>::create(width, height);
+			gray_buffer = RawBuffer<color_gray>::create(width, height);
 			break;
 		}
 		std::cout << this->str() << " created" << std::endl;
@@ -112,7 +112,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::r32:
 		{
-			float_buffer = RawBuffer<float>::create(tex_buffer, width, height, [](float* ptr)
+			gray_buffer = RawBuffer<color_gray>::create(tex_buffer, width, height, [](color_gray* ptr)
 			{
 				delete[] ptr;
 			});
@@ -161,7 +161,7 @@ namespace Guarneri
 			}
 			else if (channels == R_CHANNEL)
 			{
-				float_buffer = RawBuffer<float>::create(tex, w, h, [](float* ptr)
+				gray_buffer = RawBuffer<color_gray>::create(tex, w, h, [](color_gray* ptr)
 				{
 					stbi_image_free((void*)ptr);
 				});
@@ -287,17 +287,17 @@ namespace Guarneri
 		{
 			for (int i = 1; i < count; i++)
 			{
-				float_mipmaps[i].reset();
+				gray_mipmaps[i].reset();
 			}
-			float_mipmaps.clear();
+			gray_mipmaps.clear();
 
-			float_mipmaps.emplace_back(float_buffer);
+			gray_mipmaps.emplace_back(gray_buffer);
 
 			for (int i = 1; i < count; i++)
 			{
 				long w = this->width >> i;
 				long h = this->height >> i;
-				float_mipmaps.emplace_back(std::make_shared<RawBuffer<float>>(w, h));
+				gray_mipmaps.emplace_back(std::make_shared<RawBuffer<color_gray>>(w, h));
 			}
 			break;
 		}
@@ -344,10 +344,10 @@ namespace Guarneri
 		}
 		case TextureFormat::r32:
 		{
-			if (float_buffer == nullptr) return false;
-			float pixel;
-			bool ok = float_buffer->read(wu, wv, pixel);
-			ret = Color(pixel);
+			if (gray_buffer == nullptr) return false;
+			color_gray pixel;
+			bool ok = gray_buffer->read(wu, wv, pixel);
+			ret = Color::decode(pixel);
 			return ok;
 		}
 		}
@@ -376,10 +376,10 @@ namespace Guarneri
 		}
 		case TextureFormat::r32:
 		{
-			if (float_buffer == nullptr) return false;
-			float pixel;
-			bool ok = float_buffer->read(row, col, pixel);
-			ret = Color(pixel);
+			if (gray_buffer == nullptr) return false;
+			color_gray pixel;
+			bool ok = gray_buffer->read(row, col, pixel);
+			ret = Color::decode(pixel);
 			return ok;
 		}
 		}
@@ -400,8 +400,8 @@ namespace Guarneri
 		}
 		case TextureFormat::r32:
 		{
-			if (float_buffer == nullptr) return false;
-			return float_buffer->write(x, y, data.r);
+			if (gray_buffer == nullptr) return false;
+			return gray_buffer->write(x, y, Color::encode_gray(data));
 		}
 		}
 		return false;
@@ -428,7 +428,7 @@ namespace Guarneri
 
 	void Texture::release()
 	{
-		float_buffer.reset();
+		gray_buffer.reset();
 		rgb_buffer.reset();
 		rgba_buffer.reset();
 		for (uint32_t i = 1; i < this->mip_count; i++)
@@ -442,7 +442,7 @@ namespace Guarneri
 				this->rgba_mipmaps[i].reset();
 				break;
 			case TextureFormat::r32:
-				this->float_mipmaps[i].reset();
+				this->gray_mipmaps[i].reset();
 				break;
 			}
 		}
@@ -520,7 +520,7 @@ namespace Guarneri
 			rgba_buffer->clear(color_rgba());
 			break;
 		case TextureFormat::r32:
-			float_buffer->clear(0.0f);
+			gray_buffer->clear(color_gray());
 			break;
 		}
 	}
@@ -539,9 +539,9 @@ namespace Guarneri
 		this->fmt = other.fmt;
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
-		this->float_buffer = other.float_buffer;
+		this->gray_buffer = other.gray_buffer;
 		this->mip_count = other.mip_count;
-		this->float_mipmaps = other.float_mipmaps;
+		this->gray_mipmaps = other.gray_mipmaps;
 		this->rgba_mipmaps = other.rgba_mipmaps;
 		this->rgb_mipmaps = other.rgb_mipmaps;
 	}

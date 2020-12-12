@@ -51,12 +51,12 @@ int main()
 
 	// setup skybox
 	std::vector<std::string> cubemap_path = {
-		res_path() + "/cubemap/lake_right.jpg",
-		res_path() + "/cubemap/lake_left.jpg",
-		res_path() + "/cubemap/lake_top.jpg",
-		res_path() + "/cubemap/lake_bottom.jpg",
-		res_path() + "/cubemap/lake_front.jpg",
-		res_path() + "/cubemap/lake_back.jpg",
+		res_path() + "/cubemap/space_right.png",
+		res_path() + "/cubemap/space_left.png",
+		res_path() + "/cubemap/space_top.png",
+		res_path() + "/cubemap/space_bottom.png",
+		res_path() + "/cubemap/space_front.png",
+		res_path() + "/cubemap/space_back.png",
 	};
 	demo_scene.skybox->load_cubemap(cubemap_path);
 	demo_scene.enable_skybox = true;
