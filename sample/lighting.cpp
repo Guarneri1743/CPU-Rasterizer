@@ -3,6 +3,8 @@
 using namespace Guarneri;
 using namespace std;
 
+bool auto_rotation = false;
+
 int main()
 {
 	// initialize rasterizer
@@ -136,8 +138,16 @@ int main()
 
 
 	InputMgr().add_on_update_evt([](void* user_data) {
+		if (InputMgr().is_key_down(KeyCode::SPACE))
+		{
+			auto_rotation = !auto_rotation;
+		}
+		
 		Scene* s = reinterpret_cast<Scene*>(user_data);
-		s->main_light.rotate(10.0f, 0.0f);
+		if (auto_rotation)
+		{
+			s->main_light.rotate(10.0f, 0.0f);
+		}
 		if (InputMgr().is_key_down(KeyCode::R)) {
 			s->main_light.rotate(10.0f, 0.0f);
 		}
