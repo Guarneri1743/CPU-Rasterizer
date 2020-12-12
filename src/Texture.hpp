@@ -240,7 +240,6 @@ namespace Guarneri
 		return true;
 	}
 
-
 	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
 	{
 		switch (this->fmt)
@@ -429,9 +428,23 @@ namespace Guarneri
 		float_buffer.reset();
 		rgb_buffer.reset();
 		rgba_buffer.reset();
+		for (auto i = 1; i < this->mip_count; i++)
+		{
+			switch (this->fmt)
+			{
+			case TextureFormat::rgb:
+				this->rgb_mipmaps[i].reset();
+				break;
+			case TextureFormat::rgba:
+				this->rgba_mipmaps[i].reset();
+				break;
+			case TextureFormat::r32:
+				this->float_mipmaps[i].reset();
+				break;
+			}
+		}
 	}
 
-	//todo:
 	void Texture::wrap(float& u, float& v) const
 	{
 		switch (wrap_mode)
