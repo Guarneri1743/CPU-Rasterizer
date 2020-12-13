@@ -1,8 +1,8 @@
 local solution_dir = _ACTION
-local lib_dir = "lib"
-local res_dir = "res"
-local src_dir = "src"
-local include_dir = "include"
+local lib_dir = "Guarneri/lib"
+local res_dir = "Guarneri/res"
+local src_dir = "Guarneri/src"
+local third_party_dir = "Guarneri/third_party"
 local sample_dir = "sample"
 
 function setupIncludeDirs()
@@ -11,12 +11,12 @@ function setupIncludeDirs()
       src_dir .. "/utility",
       src_dir .. "/math",
       src_dir .. "/primitives",
-      include_dir,
-      include_dir .. "/threading",
-      include_dir .. "/assimp",
-      include_dir .. "/ply",
-      include_dir .. "/stb_image",
-      include_dir .. "/nlohmann"
+      third_party_dir,
+      third_party_dir .. "/threading",
+      third_party_dir .. "/assimp",
+      third_party_dir .. "/ply",
+      third_party_dir .. "/stb_image",
+      third_party_dir .. "/nlohmann"
    }
 end
 
@@ -92,11 +92,11 @@ function setupBlendingDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/blending.cpp"
    }
 
@@ -117,11 +117,11 @@ function setupStencilDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/stencil_test.cpp"
    }
 
@@ -142,11 +142,11 @@ function setupLightingDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/lighting.cpp"
    }
 
@@ -167,11 +167,11 @@ function setupFilteringDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/filtering.cpp"
    }
 
@@ -193,11 +193,11 @@ function setupCubemapDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/cubemap.cpp"
    }
 
@@ -218,12 +218,12 @@ function setupPLYProj()
          src_dir .. "/utility/*.*",
          src_dir .. "/math/*.*",
          src_dir .. "/primitives/*.*",
-         include_dir .. "/*.*",
-         include_dir .. "/threading/*.*",
-         include_dir .. "/assimp/*.*",
-         include_dir .. "/stb_image/*.*",
-         include_dir .. "/nlohmann/*.*",
-         include_dir .. "/ply/*.*",
+         third_party_dir .. "/*.*",
+         third_party_dir .. "/threading/*.*",
+         third_party_dir .. "/assimp/*.*",
+         third_party_dir .. "/stb_image/*.*",
+         third_party_dir .. "/nlohmann/*.*",
+         third_party_dir .. "/ply/*.*",
          sample_dir .. "/plytest.c"
       }
 
@@ -244,11 +244,11 @@ function setupUnitTestProj()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
-      include_dir .. "/*.*",
-      include_dir .. "/threading/*.*",
-      include_dir .. "/assimp/*.*",
-      include_dir .. "/stb_image/*.*",
-      include_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/threading/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/nlohmann/*.*",
       sample_dir .. "/unit_test.cpp"
    }
 

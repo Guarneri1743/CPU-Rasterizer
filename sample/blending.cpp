@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
+	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
 
 	// setup main light
 	Scene demo_scene;

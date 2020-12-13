@@ -295,7 +295,7 @@ namespace Guarneri
 		if (misc_param.workflow == PBRWorkFlow::Specular)
 		{
 			//todo
-			Color roughness = Color::BLACK;
+			Color roughness = Color::WHITE;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
@@ -371,7 +371,7 @@ namespace Guarneri
 		if (misc_param.workflow == PBRWorkFlow::Specular)
 		{
 			//todo
-			Color roughness = Color::BLACK;
+			Color roughness = Color::WHITE;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
