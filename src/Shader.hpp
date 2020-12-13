@@ -316,9 +316,9 @@ namespace Guarneri
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 
 			/*metallic = 0.0f;
-			roughness = 0.12f;*/
+			roughness = 0.16f;*/
 
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.5f, half_dir, light_dir, view_dir, normal);
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
 
 			//simple IBL
 			//todo: cubemap lod

@@ -123,7 +123,7 @@ int main()
 		}
 	}, &demo_scene);
 
-	misc_param.color_space = ColorSpace::Linear;
+	misc_param.color_space = ColorSpace::Gamma;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }
