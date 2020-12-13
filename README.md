@@ -133,4 +133,4 @@
 
 ### Screenshots
 
-![Overview](https://github.com/Guarneri1743/SoftRasterizer/blob/main/screenshots/overview.jpg)
+![avatar](https://github.com/Guarneri1743/SoftRasterizer/blob/main/screenshots/overview.jpg)
