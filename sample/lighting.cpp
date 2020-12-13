@@ -58,7 +58,9 @@ int main()
 		res_path() + "/cubemap/space_front.png",
 		res_path() + "/cubemap/space_back.png",
 	};
-	demo_scene.skybox->load_cubemap(cubemap_path);
+
+	auto cubemap = CubeMap::create(cubemap_path);
+	demo_scene.skybox->target->material->set_cubemap(cubemap_prop, cubemap);
 	demo_scene.enable_skybox = true;
 
 	// light cube
@@ -106,7 +108,8 @@ int main()
 	plane_material->set_texture(normal_prop, plane_normal);
 	plane_material->set_texture(specular_prop, plane_s);
 	plane_material->set_texture(ao_prop, plane_ao);
-	auto Plane = PrimitiveFactory::Plane(plane_material);
+	plane_material->set_cubemap(cubemap_prop, cubemap);
+	auto Plane = PrimitiveFactory::plane(plane_material);
 	Plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
 	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
 	demo_scene.add(plane_renderer);
@@ -115,6 +118,7 @@ int main()
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
 	backpack->material->lighting_param.glossiness = 32.0f;
 	backpack->material->cast_shadow = true;
+	backpack->material->set_cubemap(cubemap_prop, cubemap);
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
 	backpack->transform.translate(Vector3(0.0f, 8.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);

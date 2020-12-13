@@ -31,9 +31,9 @@ int main()
 	plane_material->lighting_param.glossiness = 32.0f;
 	plane_material->set_texture(albedo_prop, plane_albedo);
 	plane_material->set_texture(normal_prop, plane_normal);
-	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
-	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
+	auto plane = PrimitiveFactory::plane(plane_material);
+	plane->transform.scale(Vector3(30.0f, 1.0f, 30.0f));
+	std::shared_ptr<Renderer> plane_renderer = Renderer::create(plane);
 	demo_scene.add(plane_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {

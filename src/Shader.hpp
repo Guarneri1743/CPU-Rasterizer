@@ -78,7 +78,7 @@ namespace Guarneri
 		virtual v2f vertex_shader(const a2v& input) const;
 		float get_shadow_atten(const Vector4& light_space_pos) const;
 		Vector3 reflect(const Vector3& n, const Vector3& light_out_dir) const;
-		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
+		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
 		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
 		virtual Color fragment_shader(const v2f& input) const;
 		std::string str() const;
@@ -162,10 +162,11 @@ namespace Guarneri
 
 		if (misc_param.pcf_on)
 		{
+			const int kernel_size = 3;
 			// PCF
-			for (int x = -1; x <= 1; x++)
+			for (int x = -kernel_size; x <= kernel_size; x++)
 			{
-				for (int y = -1; y <= 1; y++)
+				for (int y = -kernel_size; y <= kernel_size; y++)
 				{
 					float depth;
 					if (shadowmap->read(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
@@ -176,7 +177,7 @@ namespace Guarneri
 				}
 			}
 
-			shadow_atten /= 9.0f;
+			shadow_atten /= (float)((kernel_size + 1) * (kernel_size + 1) * 4);
 		}
 		else
 		{
@@ -232,7 +233,12 @@ namespace Guarneri
 
 	Vector3 fresnel_schlick(const float& cos_theta, const Vector3& F0)
 	{
-		return F0 + (1.0f - F0) * pow(1.0f - cos_theta, 5.0f);
+		return F0 + (1.0f - F0) * std::pow(1.0f - cos_theta, 5.0f);
+	}
+
+	Vector3 fresnel_schlick_roughness(float cosTheta, Vector3 F0, float roughness)
+	{
+		return F0 + (std::max(Vector3(1.0f - roughness), F0) - F0) * std::pow(1.0f - cosTheta, 5.0f);
 	}
 
 	Vector3 metallic_workflow(const Vector3& albedo, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
@@ -240,7 +246,7 @@ namespace Guarneri
 		Vector3 f0 = 0.04f;
 		f0 = Vector3::lerp(f0, albedo, metallic);
 		float attenuation = 1.0f / (light_distance * light_distance);
-		Vector3 radiance = attenuation;
+		Vector3 radiance = Vector3(attenuation);
 
 		float ndf = distribution_ggx(normal, halfway, roughness);
 		float geo = geometry_smith(normal, view_dir, light_dir, roughness);
@@ -261,11 +267,12 @@ namespace Guarneri
 			return specular;
 		}
 
-		return (diffuse_term * albedo / PI + specular) * radiance * ndl;
+		return ((diffuse_term * albedo) / PI + specular) * radiance * ndl;
 	}
 
-	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
+	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
 	{
+		REF(wpos)
 		auto light_ambient = light.ambient;
 		auto light_spec = light.specular;
 		auto light_diffuse = light.diffuse;
@@ -275,7 +282,10 @@ namespace Guarneri
 		light_spec *= intensity;
 
 		auto light_dir = -light.forward.normalized();
-		light_dir = tbn * light_dir;
+		if (this->normal_map)
+		{
+			light_dir = tbn * light_dir;
+		}
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
@@ -295,13 +305,41 @@ namespace Guarneri
 		}
 		else
 		{
-			auto ambient = light_ambient * ao;
 			Color metallic = Color::BLACK;
 			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-			Color roughness = 0.04f;
+			Color roughness = 0.0f;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.3f, half_dir, light_dir, view_dir, normal);
-			auto ret = ambient + Color(lo);
+
+			metallic = 0.0f;
+			roughness = 0.2f;
+
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.5f, half_dir, light_dir, view_dir, normal);
+
+			//simple IBL
+			//todo: cubemap lod
+			Color irradiance_diffuse;
+			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(normal, irradiance_diffuse);
+
+			Color irradiance_specular;
+			auto reflect_dir = reflect(normal, -light_dir);
+			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_diffuse);
+
+			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), 0.04f, roughness.r);
+
+			Vector3 specular_term = fresnel;
+			Vector3 diffuse_term = 1.0f - specular_term;
+			diffuse_term *= 1.0f - metallic.r;
+
+			Vector3 ibl_diffuse = Vector3(irradiance_diffuse.r, irradiance_diffuse.g, irradiance_diffuse.b) * Vector3(albedo.r, albedo.g, albedo.b);
+			Vector3 ibl_specular = Vector3(irradiance_specular.r, irradiance_specular.g, irradiance_specular.b);
+
+			//todo: irradiance convolution
+			//...
+
+			auto ambient = Vector3::lerp(ibl_diffuse, ibl_specular, metallic.r); //(diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao;
+
+			auto ret = Color(ambient) + Color(lo);
+
 			return ret;
 		}
 	}
@@ -316,7 +354,10 @@ namespace Guarneri
 		light_diffuse *= intensity;
 		light_spec *= intensity;
 		auto light_dir = (light.position - wpos).normalized();
-		light_dir = tbn * light_dir;
+		if (this->normal_map)
+		{
+			light_dir = tbn * light_dir;
+		}
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
@@ -338,11 +379,11 @@ namespace Guarneri
 		}
 		else
 		{
-			auto ambient = light_ambient * ao;
+			auto ambient = light_ambient * ao * albedo;
 			auto dist = Vector3::length(light.position, wpos);
 			Color metallic = Color::BLACK;
 			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-			Color roughness = 0.04f;
+			Color roughness = 0.0f;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
 			auto ret = ambient + Color(lo);
@@ -376,8 +417,9 @@ namespace Guarneri
 		float shadow_atten = 1.0f - get_shadow_atten(input.shadow_coord);
 
 		Color ret = Color::BLACK;
-		Color main_tex = Color::WHITE;
-		name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, main_tex);
+		Color albedo = Color::WHITE;
+		name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo);
+		albedo = Color::pow(albedo, 2.2f);
 
 		Color ao = Color::WHITE;
 		name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
@@ -385,11 +427,11 @@ namespace Guarneri
 		Color emmision = Color::BLACK;
 		name2tex.count(emission_prop) > 0 && name2tex.at(emission_prop)->sample(input.uv.x, input.uv.y, emmision);
 
-		ret += calculate_main_light(main_light, lighting_param, view_dir, normal, main_tex, ao, input.uv, tbn);
+		ret += calculate_main_light(main_light, lighting_param, wpos, view_dir, normal, albedo, ao, input.uv, tbn);
 
 		for (auto& light : point_lights)
 		{
-			ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, main_tex, ao, input.uv, tbn);
+			ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, albedo, ao, input.uv, tbn);
 		}
 
 		ret += emmision;
@@ -447,11 +489,11 @@ namespace Guarneri
 			return  input.normal.normalized();
 		}
 
-		ret = Color::saturate(ret);
-
 		//ret = ret / (ret + Color::WHITE);
-		//
-		//ret = Color::pow(ret, 1.0f / 2.2f);
+
+		ret = Color::pow(ret, 1.0f / 2.2f);
+
+		ret = Color::saturate(ret);
 
 		return Color(ret.r, ret.g, ret.b, 1.0f);
 	}

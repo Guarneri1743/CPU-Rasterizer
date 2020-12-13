@@ -22,6 +22,7 @@ namespace Guarneri
 #define CAMERA_MOVE_SPEED 0.1f
 #define CAMERA_ZOOM_SPEED 1.0f
 #define R_CHANNEL 1
+#define RG_CHANNEL 2
 #define RGB_CHANNEL 3
 #define RGBA_CHANNEL 4
 #define TEXTURE_MAX_SIZE 4096
@@ -74,7 +75,7 @@ namespace Guarneri
 	// optimize unordered_map performance
 	// typedef std::string property_name;
 	typedef uint32_t property_name;
-	const property_name albedo_prop = 0; //"texture_diffuse/albedo/base";
+	const property_name albedo_prop = 0; //"texture_diffuse/albedo";
 	const property_name normal_prop = 1; // "texture_normal";
 	const property_name ao_prop = 2; // "texture_ao";
 	const property_name emission_prop = 3; // "texture_emission"
@@ -88,9 +89,10 @@ namespace Guarneri
 	// metallic/roughness workflow
 	const property_name metallic_prop = 13; // "texture_metallic"
 	const property_name roughness_prop = 14; // "texture_roughness"
+	const property_name base_color_prop = 15; //"texture_base_color";
 
 	// other
-	const property_name skybox_cubemap_prop = 20; // "skybox_cubemap";
+	const property_name cubemap_prop = 20; // "skybox_cubemap";
 	const property_name shadowmap_prop = 21; // "shadowmap";
 
 
@@ -121,6 +123,10 @@ namespace Guarneri
 	{
 		unsigned char b; unsigned char g; unsigned char r; unsigned char a;
 	} color_bgra;
+	typedef struct
+	{
+		unsigned char r; unsigned char g;
+	}color_rg;
 	typedef struct
 	{
 		unsigned char gray;

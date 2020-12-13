@@ -42,9 +42,9 @@ int main()
 	plane_material->set_texture(normal_prop, plane_normal);
 	plane_material->set_texture(specular_prop, plane_s);
 	plane_material->set_texture(ao_prop, plane_ao);
-	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
-	std::shared_ptr<Renderer> plane_renderer = Renderer::create(Plane);
+	auto plane = PrimitiveFactory::plane(plane_material);
+	plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
+	std::shared_ptr<Renderer> plane_renderer = Renderer::create(plane);
 	demo_scene.add(plane_renderer);
 
 	InputMgr().add_on_update_evt([](void* user_data) {

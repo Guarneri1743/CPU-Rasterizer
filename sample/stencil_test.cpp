@@ -71,9 +71,9 @@ int main()
 	auto plane_material = Material::create();
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_tex);
-	auto Plane = PrimitiveFactory::Plane(plane_material);
-	Plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
-	demo_scene.add(Renderer::create(Plane));
+	auto plane = PrimitiveFactory::plane(plane_material);
+	plane->transform.scale(Vector3(10.0f, 1.0f, 10.0f));
+	demo_scene.add(Renderer::create(plane));
 
 	InputMgr().add_on_update_evt([](void* user_data) {
 		if (InputMgr().is_key_down(KeyCode::R)) {

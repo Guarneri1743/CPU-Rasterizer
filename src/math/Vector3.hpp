@@ -54,6 +54,7 @@ namespace Guarneri
 		static Vector3 floor(const Vector3& val);
 		static Vector3 lerp(const Vector3& lhs, const Vector3& rhs, float t);
 		static Vector3 maxf(const Vector3& lhs, const Vector3& rhs);
+		static Vector3 pow(const Vector3& v, float power);
 		static void calculate_right_up(const Vector3& forward, Vector3& right, Vector3& up);
 
 		std::string str() const;
@@ -320,6 +321,11 @@ namespace Guarneri
 	Vector3 Vector3::abs(const Vector3& v)
 	{
 		return Vector3(std::abs(v.x), std::abs(v.y), std::abs(v.z));
+	}
+
+	Vector3 Vector3::pow(const Vector3& v, float power)
+	{
+		return Vector3(std::pow(v.x, power), std::pow(v.y, power), std::pow(v.z, power));
 	}
 
 	Vector3 Vector3::normalize(const Vector3& value)

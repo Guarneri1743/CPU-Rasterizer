@@ -42,10 +42,10 @@ namespace Guarneri
 		if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			int index;
-			return name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), index);
+			return name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), index);
 		}
 
-		if (name2cubemap.count(skybox_cubemap_prop) > 0 && name2cubemap.at(skybox_cubemap_prop)->sample(input.shadow_coord.xyz(), sky_color))
+		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), sky_color))
 		{
 			return sky_color;
 		}

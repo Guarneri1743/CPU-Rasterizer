@@ -6,7 +6,7 @@ namespace Guarneri {
 	class PrimitiveFactory {
 	public:
 		static Vector3 cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3);
-		static std::unique_ptr<Model> Plane(std::unique_ptr<Material>& material);
+		static std::unique_ptr<Model> plane(std::unique_ptr<Material>& material);
 		static std::unique_ptr<Model> cube(std::unique_ptr<Material>& material);
 		static std::unique_ptr<Model> skybox(std::unique_ptr<Material>& material);
 	};
@@ -122,6 +122,15 @@ namespace Guarneri {
 		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f))
 	};
 
+	Vector3 sphere_parametric_equation(const float& radius, const float& alpha, const float& phi)
+	{
+		Vector3 p;
+		p.x = radius * std::sin(alpha * PI / 180.0f) * std::cos(phi * PI / 180.0f);
+		p.y = radius * std::sin(alpha * PI / 180.0f) * std::sin(phi * PI / 180.0f);
+		p.z = radius * std::cos(alpha * PI / 180.0f);
+		return p;
+	}
+
 	Vector3 PrimitiveFactory::cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		auto edge1 = v2.position - v1.position;
@@ -136,7 +145,7 @@ namespace Guarneri {
 		return tangent.normalized();
 	}
 
-	std::unique_ptr<Model> PrimitiveFactory::Plane(std::unique_ptr<Material>& material)
+	std::unique_ptr<Model> PrimitiveFactory::plane(std::unique_ptr<Material>& material)
 	{
 		auto tangent1 = cal_tangent(plane_vertices[0], plane_vertices[1], plane_vertices[2]);
 		auto tangent2 = cal_tangent(plane_vertices[5], plane_vertices[3], plane_vertices[4]);

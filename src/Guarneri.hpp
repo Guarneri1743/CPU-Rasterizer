@@ -60,6 +60,7 @@ inline void unused(T const&)
 #include <Light.hpp>
 #include <RawBuffer.hpp>
 #include <Texture.hpp>
+#include <CubeMap.hpp>
 #include <Misc.hpp>
 #include <Plane.hpp>
 #include <Ray.hpp>
@@ -94,7 +95,6 @@ inline void unused(T const&)
 #include <Camera.hpp>
 #include <Renderer.hpp>
 #include <PrimitiveFactory.hpp>
-#include <CubeMap.hpp>
 #include <SkyboxShader.hpp>
 #include <SkyboxRenderer.hpp>
 #include <Scene.hpp>

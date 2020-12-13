@@ -60,6 +60,8 @@ namespace Guarneri
 		static Color saturate(const Color& c);
 		static color_gray encode_gray(const float& c);
 		static color_gray encode_gray(const Color& c);
+		static color_rg encode_rg(const float& r);
+		static color_rg encode_rg(const float& r, const float& g);
 		static color_rgb encode_rgb(const Color& c);
 		static color_rgb encode_rgb(const Vector4& c);
 		static color_rgb encode_rgb(const Vector3& c);
@@ -80,6 +82,7 @@ namespace Guarneri
 		static Color decode(const int& c);
 		static Color decode(const color_gray& c);
 		static Color decode(const color_rgb& c);
+		static Color decode(const color_rg& c);
 		static Color decode(const color_rgba& c);
 		static Color decode(const color_bgra& c);
 		static float dot(const Color& lhs, const Color& rhs);
@@ -333,6 +336,22 @@ namespace Guarneri
 		return ret;
 	}
 
+	color_rg Color::encode_rg(const float& r)
+	{
+		color_rg ret;
+		ret.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+		ret.g = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+		return ret;
+	}
+
+	color_rg Color::encode_rg(const float& r, const float& g)
+	{
+		color_rg ret;
+		ret.r = CLAMP((unsigned char)(r * 255.0f), 0, 255);
+		ret.g = CLAMP((unsigned char)(g * 255.0f), 0, 255);
+		return ret;
+	}
+
 	color_rgb Color::encode_rgb(const Color& c)
 	{
 		return encode_rgb(c.r, c.g, c.b);
@@ -455,6 +474,11 @@ namespace Guarneri
 	Color Color::decode(const color_gray& c)
 	{
 		return Color((float)c.gray / 255.0f, (float)c.gray / 255.0f, (float)c.gray / 255.0f, 1.0f);
+	}
+
+	Color Color::decode(const color_rg& c)
+	{
+		return Color((float)c.r / 255.0f, (float)c.g / 255.0f, 0.0f, 1.0f);
 	}
 
 	Color Color::decode(const color_rgb& c)

@@ -39,6 +39,7 @@ namespace Guarneri{
 		INVALID,
 		rgb,
 		rgba,
+		rg,
 		r32
 	};
 

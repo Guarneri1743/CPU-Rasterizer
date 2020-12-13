@@ -9,7 +9,7 @@ namespace Guarneri {
 
 	public:
 		CubeMap(const std::vector<std::string>& path);
-		static std::unique_ptr<CubeMap> create(std::vector<std::string> path);
+		static std::shared_ptr<CubeMap> create(std::vector<std::string> path);
 		bool sample(const Vector3& dir, Color& ret);
 		Vector2 sample(const Vector3& dir, int& index);
 	};
@@ -36,9 +36,9 @@ namespace Guarneri {
 		}
 	}
 
-	std::unique_ptr<CubeMap> CubeMap::create(std::vector<std::string> path)
+	std::shared_ptr<CubeMap> CubeMap::create(std::vector<std::string> path)
 	{
-		return std::make_unique<CubeMap>(path);
+		return std::make_shared<CubeMap>(path);
 	}
 
 	bool CubeMap::sample(const Vector3& dir, Color& ret)

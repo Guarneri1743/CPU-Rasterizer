@@ -11,7 +11,6 @@ namespace Guarneri
 		~SkyboxRenderer();
 
 	public:
-		void load_cubemap(std::vector<std::string> path_list) const;
 		Matrix4x4 view_matrix(const RenderPass& render_pass) const;
 		Matrix4x4 projection_matrix(const RenderPass& render_pass) const;
 		Matrix4x4 model_matrix() const;
@@ -29,12 +28,6 @@ namespace Guarneri
 
 	SkyboxRenderer::~SkyboxRenderer()
 	{}
-
-	void SkyboxRenderer::load_cubemap(std::vector<std::string> path_list) const
-	{
-		auto cubemap = CubeMap::create(path_list);
-		target->material->set_cubemap(skybox_cubemap_prop, std::move(cubemap));
-	}
 
 	Matrix4x4 SkyboxRenderer::view_matrix(const RenderPass& render_pass) const
 	{
