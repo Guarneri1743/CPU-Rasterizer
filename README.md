@@ -149,30 +149,34 @@ Overview
 ---
 
 - Near Plane Clipping:
-<img src="/screenshots/near_plane_clipping.jpg" width = "400" height = "300" alt="Near Plane Clipping" align=center />
-<img src="/screenshots/near_plane_clipping2.jpg" width = "400" height = "300" alt="Near Plane Clipping" align=center />
+
+
+<img src="/screenshots/near_plane_clipping.jpg" width = "800" height = "600" alt="Near Plane Clipping" align=center />
+
+<img src="/screenshots/near_plane_clipping2.jpg" width = "800" height = "600" alt="Near Plane Clipping" align=center />
 
 
 ---
 
 
 - Early-Z:
-<img src="/screenshots/early_z.jpg" width = "400" height = "300" alt="Early-Z" align=center />
+<img src="/screenshots/early_z.jpg" width = "800" height = "600" alt="Early-Z" align=center />
 
 
 ---
 
 - Perspective Correct Interpolation(UV):
-<img src="/screenshots/perspective_correct_uv.jpg" width = "400" height = "300" alt="Perspective Correct Interpolation" align=center />
+<img src="/screenshots/perspective_correct_uv.jpg" width = "800" height = "600" alt="Perspective Correct Interpolation" align=center />
 
 ---
 
 - Texture Filtering:
 
 Point
-<img src="/screenshots/point_filtering.jpg" width = "400" height = "300" alt="Texture Filtering" align=center/>
+<img src="/screenshots/point_filtering.jpg" width = "800" height = "600" alt="Texture Filtering" align=center/>
+
 Bilinear
-<img src="/screenshots/bilinear_filtering.jpg" width = "400" height = "300" alt="Texture Filtering" align=center/> 
+<img src="/screenshots/bilinear_filtering.jpg" width = "800" height = "600" alt="Texture Filtering" align=center/> 
 
 ---
 
@@ -181,31 +185,32 @@ Bilinear
 
 Stencil Test
 
-<img src="/screenshots/stencil_test.jpg" width = "400" height = "400" alt="Per Sample Operation" align=center/>
+<img src="/screenshots/stencil_test.jpg" width = "800" height = "800" alt="Per Sample Operation" align=center/>
 
 Z Test
 
-<img src="/screenshots/z_buffer.jpg" width = "400" height = "300" alt="Per Sample Operation" align=center/>
+<img src="/screenshots/z_buffer.jpg" width = "800" height = "600" alt="Per Sample Operation" align=center/>
 
 --- 
 
 
 - Blending:
 
-<img src="/screenshots/opaque_cube.jpg" width = "400" height = "400" alt="Blending" align=center/>
-<img src="/screenshots/transparent_cube.jpg" width = "400" height = "400" alt="Blending" align=center/>
+<img src="/screenshots/opaque_cube.jpg" width = "800" height = "800" alt="Blending" align=center/>
+
+<img src="/screenshots/transparent_cube.jpg" width = "800" height = "800" alt="Blending" align=center/>
 
 --- 
 
 - Wireframe:
 
-<img src="/screenshots/wireframe.jpg" width = "400" height = "300" alt="Wireframe" align=center/>
+<img src="/screenshots/wireframe.jpg" width = "800" height = "600" alt="Wireframe" align=center/>
 
 ---
 
 - Tile based rasterization:
 
-<img src="/screenshots/tile_based_rendering.jpg" width = "400" height = "300" alt="Tile based rasterization" align=center/>
+<img src="/screenshots/tile_based_rendering.jpg" width = "800" height = "600" alt="Tile based rasterization" align=center/>
 
 tile = 64/128
 
@@ -213,32 +218,32 @@ tile = 64/128
 
 - Shadow Mapping:
 
-<img src="/screenshots/shadowmap.jpg" width = "400" height = "300" alt="Shadow Mapping" align=center/>
+<img src="/screenshots/shadowmap.jpg" width = "800" height = "600" alt="Shadow Mapping" align=center/>
 
-<img src="/screenshots/overview.jpg" width = "400" height = "300" alt="Shadow Mapping" align=center/>
+<img src="/screenshots/overview.jpg" width = "800" height = "600" alt="Shadow Mapping" align=center/>
 
-<img src="/screenshots/shadow_off.jpg" width = "512" height = "512" alt="Shadow Mapping" align=center/>
+<img src="/screenshots/shadow_off.jpg" width = "800" height = "800" alt="Shadow Mapping" align=center/>
 
-<img src="/screenshots/shadow_on.jpg" width = "512" height = "512" alt="Shadow Mapping" align=center/>
+<img src="/screenshots/shadow_on.jpg" width = "800" height = "800" alt="Shadow Mapping" align=center/>
 
 ---
 
 - Frustum Culling:
 
-<img src="/screenshots/frustum_culling.jpg" width = "512" height = "512" alt="Frustum Culling" align=center/>
+<img src="/screenshots/frustum_culling.jpg" width = "800" height = "600" alt="Frustum Culling" align=center/>
 
 ---
 
 - Back-Face Culling:
 
-<img src="/screenshots/backface_culling.jpg" width = "512" height = "512" alt="Back-Face Culling" align=center/>
+<img src="/screenshots/backface_culling.jpg" width = "800" height = "600" alt="Back-Face Culling" align=center/>
 
 ---
 
 - AO:
 
-<img src="/screenshots/ao.jpg" width = "400" height = "400" alt="AO" align=center/>
+<img src="/screenshots/ao.jpg" width = "800" height = "600" alt="AO" align=center/>
 
-<img src="/screenshots/ao2.jpg" width = "400" height = "400" alt="AO" align=center/>
+<img src="/screenshots/ao2.jpg" width = "800" height = "800" alt="AO" align=center/>
 
 ---
