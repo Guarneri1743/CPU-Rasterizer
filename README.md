@@ -88,7 +88,7 @@
 
 ---
 
-####TODO(Future): 
+#### TODO(Future): 
 		
 ##### Rasterizer:
 
@@ -133,4 +133,108 @@
 
 ### Screenshots
 
-![avatar](https://github.com/Guarneri1743/SoftRasterizer/blob/main/screenshots/overview.jpg)
+Overview
+
+- Star War
+
+<img src="/screenshots/helmet_ibl.jpg" width = "800" height = "800" alt="Star War" align=center />
+
+---
+
+
+- Backpack
+<img src="/screenshots/overview.jpg" width = "800" height = "600" alt="Backpack" align=center />
+
+
+---
+
+- Near Plane Clipping:
+<img src="/screenshots/near_plane_clipping.jpg" width = "400" height = "300" alt="Backpack" align=center />
+<img src="/screenshots/near_plane_clipping2.jpg" width = "400" height = "300" alt="Backpack" align=center />
+
+
+---
+
+
+- Early-Z:
+<img src="/screenshots/early_z.jpg" width = "400" height = "300" alt="Backpack" align=center />
+
+
+---
+
+- Perspective Correct Interpolation(UV):
+<img src="/screenshots/perspective_correct_uv.jpg" width = "400" height = "300" alt="Backpack" align=center />
+
+---
+
+- Texture Filtering:
+
+Point
+<img src="/screenshots/point_filtering.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+Bilinear
+<img src="/screenshots/bilinear_filtering.jpg" width = "400" height = "300" alt="Backpack" align=center/> 
+
+---
+
+
+- Per Sample Operation:
+
+Stencil Test
+<img src="/screenshots/stencil_test.jpg" width = "400" height = "400" alt="Backpack" align=center/>
+Z Test
+<img src="/screenshots/z_buffer.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+--- 
+
+
+- Blending:
+
+<img src="/screenshots/opaque_cube.jpg" width = "400" height = "400" alt="Backpack" align=center/>
+<img src="/screenshots/transparent_cube.jpg" width = "400" height = "400" alt="Backpack" align=center/>
+
+--- 
+
+- Wireframe:
+
+<img src="/screenshots/wireframe.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+
+---
+
+- Tile based rasterization:
+
+<img src="/screenshots/tile_based_rendering.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+
+tile = 64/128
+
+---
+
+- Shadow Mapping:
+
+<img src="/screenshots/shadowmap.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+
+<img src="/screenshots/overview.jpg" width = "400" height = "300" alt="Backpack" align=center/>
+
+<img src="/screenshots/shadow_off.jpg" width = "512" height = "512" alt="Backpack" align=center/>
+
+<img src="/screenshots/shadow_on.jpg" width = "512" height = "512" alt="Backpack" align=center/>
+
+---
+
+- Frustum Culling:
+
+<img src="/screenshots/frustum_culling.jpg" width = "512" height = "512" alt="Backpack" align=center/>
+
+---
+
+- Back-Face Culling:
+
+<img src="/screenshots/backface_culling.jpg" width = "512" height = "512" alt="Backpack" align=center/>
+
+---
+
+- AO:
+
+<img src="/screenshots/ao.jpg" width = "400" height = "400" alt="Backpack" align=center/>
+
+<img src="/screenshots/ao2.jpg" width = "400" height = "400" alt="Backpack" align=center/>
+
+---
