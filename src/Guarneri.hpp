@@ -173,7 +173,12 @@ namespace Guarneri
 				}
 				{
 					std::stringstream ss;
-					ss << "Culled: " << Graphics().statistics.culled_triangle_count;
+					ss << "FrustumCulled: " << Graphics().statistics.culled_triangle_count;
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "BackFaceCulled: " << Graphics().statistics.culled_backface_triangle_count;
 					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{

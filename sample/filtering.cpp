@@ -7,7 +7,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
+	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
 
 	// setup main Light
 	Scene demo_scene;
@@ -105,6 +105,8 @@ int main()
 		}
 		}, &demo_scene);
 
+	misc_param.workflow = PBRWorkFlow::Specular;
+	misc_param.color_space = ColorSpace::Gamma;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }

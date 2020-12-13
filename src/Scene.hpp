@@ -118,7 +118,7 @@ namespace Guarneri
 				}
 				else if (code == KeyCode::F6)
 				{
-					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::VERTEX_COLOR;
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::CULLED_BACK_FACE;
 				}
 				else if (code == KeyCode::F7)
 				{
@@ -131,6 +131,10 @@ namespace Guarneri
 				else if (code == KeyCode::F9)
 				{
 					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::STENCIL;
+				}
+				else if (code == KeyCode::Z)
+				{
+					misc_param.render_flag = misc_param.render_flag ^ RenderFlag::EARLY_Z_DEBUG;
 				}
 				else if (code == KeyCode::P)
 				{
@@ -289,10 +293,8 @@ namespace Guarneri
 		{
 			// todo: fix tile based skybox 
 			Graphics().tile_based = false;
-			Graphics().rasterizer_strategy = RasterizerStrategy::SCANLINE;
 			skybox->render();
 			Graphics().tile_based = true;
-			Graphics().rasterizer_strategy = RasterizerStrategy::SCANBLOCK;
 		}
 
 		// todo: OIT

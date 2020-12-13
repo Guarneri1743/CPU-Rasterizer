@@ -11,6 +11,12 @@ namespace Guarneri{
 		SCANLINE
 	};
 
+	enum class ColorSpace
+	{
+		Gamma,
+		Linear
+	};
+
 	enum class PBRWorkFlow
 	{
 		Metallic,
@@ -131,7 +137,9 @@ namespace Guarneri{
 		STENCIL = 1 << 7,
 		SCANLINE = 1 << 8,
 		FRAME_TILE = 1 << 9,
-		SPECULAR = 1 << 10
+		CULLED_BACK_FACE = 1 << 10,
+		SPECULAR = 1 << 11,
+		EARLY_Z_DEBUG = 1 << 12
 	};
 
 #ifdef OPAQUE
@@ -185,6 +193,16 @@ namespace Guarneri{
 			stream << (count > 0 ? " | NORMAL" : "NORMAL");
 			count++;
 		}
+		if ((flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | CULLED_BACK_FACE" : "CULLED_BACK_FACE");
+			count++;
+		}
+		if ((flag & RenderFlag::EARLY_Z_DEBUG) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | EARLY_Z_DEBUG" : "EARLY_Z_DEBUG");
+			count++;
+		}
 		if ((flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
 			stream << (count > 0 ? " | MIPMAP" : "MIPMAP");
 			count++;
@@ -232,6 +250,16 @@ namespace Guarneri{
 		}
 		if ((flag & RenderFlag::NORMAL) != RenderFlag::DISABLE) {
 			stream << (count > 0 ? " | NORMAL" : "NORMAL");
+			count++;
+		}
+		if ((flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | CULLED_BACK_FACE" : "CULLED_BACK_FACE");
+			count++;
+		}
+		if ((flag & RenderFlag::EARLY_Z_DEBUG) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | EARLY_Z_DEBUG" : "EARLY_Z_DEBUG");
 			count++;
 		}
 		if ((flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {

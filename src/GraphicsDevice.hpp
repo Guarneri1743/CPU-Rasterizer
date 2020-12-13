@@ -10,7 +10,6 @@ namespace Guarneri
 		uint32_t width;
 		uint32_t height;
 		GraphicsStatistic statistics;
-		RasterizerStrategy rasterizer_strategy;
 		bool tile_based;
 		bool multi_thread;
 
@@ -24,7 +23,7 @@ namespace Guarneri
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 		// framebuffer tiles
-		const uint32_t TILE_SIZE = 64;
+		const uint32_t TILE_SIZE = 256;
 		const uint32_t TILE_TASK_SIZE = 1;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
@@ -177,6 +176,7 @@ namespace Guarneri
 			stencilbuffer->clear(DEFAULT_STENCIL);
 		}
 		statistics.culled_triangle_count = 0;
+		statistics.culled_backface_triangle_count = 0;
 		statistics.triangle_count = 0;
 		statistics.earlyz_optimized = 0;
 	}
@@ -212,12 +212,18 @@ namespace Guarneri
 		bool double_face = shader->double_face;
 		bool enable_backface_culling = (misc_param.culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 
+		bool culled_back_face = false;
+
 		if (!double_face && enable_backface_culling && !shader->skybox)
 		{
 			if (Clipper::backface_culling(n1.position, n2.position, n3.position))
 			{
-				statistics.culled_triangle_count++;
-				return;
+				culled_back_face = true;
+				if ((misc_param.render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
+				{
+					statistics.culled_backface_triangle_count++;
+					return;
+				}
 			}
 		}
 
@@ -237,13 +243,17 @@ namespace Guarneri
 
 		for (auto iter = tris.begin(); iter != tris.end(); iter++)
 		{
+			if (culled_back_face && (misc_param.render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+			{
+				(*iter).culled = true;
+			}
 			if (tile_based)
 			{
 				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
 			}
 			else
 			{
-				rasterize(*iter, shader, rasterizer_strategy);
+				rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
 			}
 		}
 	}
@@ -322,6 +332,14 @@ namespace Guarneri
 					draw_screen_segment(tri[0].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(tri[0].position, tri[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(tri[2].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+				}
+
+				if (tri.culled && ((misc_param.render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE))
+				{
+					statistics.culled_backface_triangle_count++;
+					draw_screen_segment(tri[0].position, tri[1].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
+					draw_screen_segment(tri[0].position, tri[2].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
+					draw_screen_segment(tri[2].position, tri[1].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
 				}
 			}
 		}
@@ -523,13 +541,21 @@ namespace Guarneri
 
 		// early-z
 		// todo: early-z conditions
+		bool valid_early_z = false;
 		if (enable_depth_test && !enable_alpha_test)
 		{
 			if (!perform_depth_test(zbuf, ztest_func, row, col, z))
 			{
 				op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				statistics.earlyz_optimized++;
-				return;
+				if ((misc_param.render_flag & RenderFlag::EARLY_Z_DEBUG) == RenderFlag::DISABLE)
+				{
+					return;
+				}
+				else
+				{
+					valid_early_z = true;
+				}
 			}
 		}
 
@@ -606,35 +632,65 @@ namespace Guarneri
 			}
 		}
 
-		// write color
-		if (validate_fragment(op_pass))
+		if ((misc_param.render_flag & RenderFlag::EARLY_Z_DEBUG) != RenderFlag::DISABLE)
 		{
-			if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
+			if (valid_early_z)
 			{
-				fbuf->write(row, col, pixel_color);
+				color_bgra dst;
+				if (fbuf->read(row, col, dst))
+				{
+					Color dst_color = Color::decode(dst);
+					Color src_color = Color(0.0f, 1.0f, 0.0f, 0.5f);
+					Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+					pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+					fbuf->write(row, col, pixel_color);
+				}
 			}
 			else
 			{
-				color_bgra cur;
-				if (fbuf->read(row, col, cur))
+				color_bgra dst;
+				if (fbuf->read(row, col, dst))
 				{
-					if ((color_mask & ColorMask::R) == ColorMask::ZERO)
-					{
-						pixel_color.r = cur.r;
-					}
-					if ((color_mask & ColorMask::G) == ColorMask::ZERO)
-					{
-						pixel_color.g = cur.g;
-					}
-					if ((color_mask & ColorMask::B) == ColorMask::ZERO)
-					{
-						pixel_color.b = cur.b;
-					}
-					if ((color_mask & ColorMask::A) == ColorMask::ZERO)
-					{
-						pixel_color.a = cur.a;
-					}
+					Color dst_color = Color::decode(dst);
+					Color src_color = Color(1.0f, 0.0f, 0.0f, 0.5f);
+					Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+					pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 					fbuf->write(row, col, pixel_color);
+				}
+			}
+		}
+		else
+		{
+			// write color
+			if (validate_fragment(op_pass))
+			{
+				if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
+				{
+					fbuf->write(row, col, pixel_color);
+				}
+				else
+				{
+					color_bgra cur;
+					if (fbuf->read(row, col, cur))
+					{
+						if ((color_mask & ColorMask::R) == ColorMask::ZERO)
+						{
+							pixel_color.r = cur.r;
+						}
+						if ((color_mask & ColorMask::G) == ColorMask::ZERO)
+						{
+							pixel_color.g = cur.g;
+						}
+						if ((color_mask & ColorMask::B) == ColorMask::ZERO)
+						{
+							pixel_color.b = cur.b;
+						}
+						if ((color_mask & ColorMask::A) == ColorMask::ZERO)
+						{
+							pixel_color.a = cur.a;
+						}
+						fbuf->write(row, col, pixel_color);
+					}
 				}
 			}
 		}

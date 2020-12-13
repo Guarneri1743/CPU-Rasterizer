@@ -15,7 +15,7 @@ namespace Guarneri {
 			persample_op_flag = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST | PerSampleOperation::BLENDING;
 			culling_clipping_flag = CullingAndClippingFlag::APP_FRUSTUM_CULLING | CullingAndClippingFlag::NEAR_PLANE_CLIPPING | CullingAndClippingFlag::SCREEN_CLIPPING | CullingAndClippingFlag::BACK_FACE_CULLING;
 			workflow = PBRWorkFlow::Metallic;
-			shadow_bias = 0.00125f;
+			shadow_bias = 0.02f;
 			enable_shadow = true;
 			pcf_on = true;
 		}
@@ -34,6 +34,7 @@ namespace Guarneri {
 		bool pcf_on;
 		float shadow_bias;
 		PBRWorkFlow workflow;
+		ColorSpace color_space;
 	};
 
 	static MiscParameter misc_param;

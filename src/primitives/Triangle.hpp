@@ -9,6 +9,7 @@ namespace Guarneri
 	public:
 		Vertex vertices[3];
 		bool flip;
+		bool culled;
 
 	public:
 		Triangle();
@@ -30,24 +31,27 @@ namespace Guarneri
 
 	Triangle::Triangle()
 	{
-		this->flip = false;
+		culled = false;
+		flip = false;
 	}
 
 	Triangle::Triangle(const Vertex verts[3])
 	{
+		culled = false;
+		flip = false;
 		for (int i = 0; i < 3; i++)
 		{
 			vertices[i] = verts[i];
 		}
-		flip = false;
 	}
 
 	Triangle::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
+		culled = false;
+		flip = false;
 		vertices[0] = v1;
 		vertices[1] = v2;
 		vertices[2] = v3;
-		flip = false;
 	}
 
 	Triangle::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, const bool& flip)

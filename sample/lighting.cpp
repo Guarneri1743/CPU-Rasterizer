@@ -8,7 +8,7 @@ bool auto_rotation = false;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
+	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
 
 	// setup main Light
 	Scene demo_scene;
@@ -25,19 +25,19 @@ int main()
 	pl1.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	pl1.diffuse = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	pl1.specular = Color(1.0f, 0.0f, 0.0f, 1.0f);
-	pl1.intensity = 30.0f;
+	pl1.intensity = 3.0f;
 
 	pl2.position = Vector3(-10.0f, 2.0f, -10.0f);
 	pl2.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	pl2.diffuse = Color(0.0f, 1.0f, 0.0f, 1.0f);
 	pl2.specular = Color(0.0f, 1.0f, 0.0f, 1.0f);
-	pl2.intensity = 30.0f;
+	pl2.intensity = 3.0f;
 
 	pl3.position = Vector3(-10.0f, 2.0f, 10.0f);
 	pl3.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	pl3.diffuse = Color(0.0f, 0.0f, 1.0f, 1.0f);
 	pl3.specular = Color(0.0f, 0.0f, 1.0f, 1.0f);
-	pl3.intensity = 30.0f;
+	pl3.intensity = 3.0f;
 
 	demo_scene.add_point_light(pl1);
 	demo_scene.add_point_light(pl2);
@@ -45,8 +45,8 @@ int main()
 
 	// setup Camera
 	//demo_scene.main_cam->set_projection(Projection::ORTHO);
-	demo_scene.main_cam->position = Vector3(10.5f, 15.0f, 13.0f);
-	demo_scene.main_cam->set_near(0.5f);
+	demo_scene.main_cam->position = Vector3(10.67f, 20.42f, 9.36f);
+	demo_scene.main_cam->set_near(10.0f);
 	demo_scene.main_cam->lookat(Vector3(0.0f, 7.0f, 0.0f));
 
 	// setup skybox
@@ -103,7 +103,6 @@ int main()
 	plane_ao->filtering = Filtering::POINT;
 	auto plane_material = Material::create();
 	plane_material->transparent = false;
-	plane_material->lighting_param.glossiness = 32.0f;
 	plane_material->set_texture(albedo_prop, plane_albedo);
 	plane_material->set_texture(normal_prop, plane_normal);
 	plane_material->set_texture(specular_prop, plane_s);
@@ -116,9 +115,25 @@ int main()
 
 	// backpack
 	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
-	backpack->material->lighting_param.glossiness = 32.0f;
 	backpack->material->cast_shadow = true;
+
+	auto bp_a = res_path() + "/backpack/diffuse.jpg";
+	auto bp_n = res_path() + "/backpack/normal.png";
+	auto bp_ao = res_path() + "/backpack/ao.jpg";
+	auto bp_s = res_path() + "/backpack/specular.jpg";
+	auto bp_r = res_path() + "/backpack/roughness.jpg";
+	auto tex_bp_a = Texture::create(bp_a);
+	auto tex_bp_n = Texture::create(bp_n);
+	auto tex_bp_ao = Texture::create(bp_ao);
+	auto tex_bp_s = Texture::create(bp_s);
+	auto tex_bp_r = Texture::create(bp_r);
+	backpack->material->set_texture(albedo_prop, tex_bp_a);
+	backpack->material->set_texture(normal_prop, tex_bp_n);
+	backpack->material->set_texture(specular_prop, tex_bp_s);
+	backpack->material->set_texture(ao_prop, tex_bp_ao);
+	backpack->material->set_texture(roughness_prop, tex_bp_r);
 	backpack->material->set_cubemap(cubemap_prop, cubemap);
+
 	backpack->transform.scale(Vector3(3.0f, 3.0f, 3.0f));
 	backpack->transform.translate(Vector3(0.0f, 8.0f, 0.0f));
 	std::shared_ptr<Renderer> backpack_renderer = Renderer::create(backpack);
@@ -166,6 +181,9 @@ int main()
 		}
 		}, &demo_scene);
 
+	misc_param.shadow_bias = 0.00125f;
+	misc_param.color_space = ColorSpace::Gamma;
+	misc_param.workflow = PBRWorkFlow::Specular;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }

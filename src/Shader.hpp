@@ -189,7 +189,7 @@ namespace Guarneri
 			}
 		}
 
-		return shadow_atten * 0.5f;
+		return shadow_atten * 0.8f;
 	}
 
 	Vector3 Shader::reflect(const Vector3& n, const Vector3& light_out_dir) const
@@ -233,7 +233,9 @@ namespace Guarneri
 
 	Vector3 fresnel_schlick(const float& cos_theta, const Vector3& F0)
 	{
-		return F0 + (1.0f - F0) * std::pow(1.0f - cos_theta, 5.0f);
+		float omc = 1.0f - cos_theta;
+
+		return F0 + (1.0f - F0) * omc * omc * omc * omc * omc;
 	}
 
 	Vector3 fresnel_schlick_roughness(float cosTheta, Vector3 F0, float roughness)
@@ -272,7 +274,8 @@ namespace Guarneri
 
 	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
 	{
-		REF(wpos)
+		REF(wpos);
+		REF(lighting_data);
 		auto light_ambient = light.ambient;
 		auto light_spec = light.specular;
 		auto light_diffuse = light.diffuse;
@@ -292,14 +295,16 @@ namespace Guarneri
 		if (misc_param.workflow == PBRWorkFlow::Specular)
 		{
 			//todo
+			Color roughness = Color::BLACK;
+			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
-			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
-			auto ambient = light_ambient * ao;
+
 			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
 			Color spec_tex = Color::WHITE;
 			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
 			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			auto ambient = light_ambient;
 			auto ret = ambient + diffuse + specular;
 			return ret;
 		}
@@ -310,8 +315,8 @@ namespace Guarneri
 			Color roughness = 0.0f;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 
-			metallic = 0.0f;
-			roughness = 0.2f;
+			/*metallic = 0.0f;
+			roughness = 0.12f;*/
 
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.5f, half_dir, light_dir, view_dir, normal);
 
@@ -336,7 +341,7 @@ namespace Guarneri
 			//todo: irradiance convolution
 			//...
 
-			auto ambient = Vector3::lerp(ibl_diffuse, ibl_specular, metallic.r); //(diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao;
+			auto ambient = (diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao.r;
 
 			auto ret = Color(ambient) + Color(lo);
 
@@ -346,6 +351,8 @@ namespace Guarneri
 
 	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
 	{
+		REF(lighting_data);
+
 		auto light_ambient = light.ambient;
 		auto light_spec = light.specular;
 		auto light_diffuse = light.diffuse;
@@ -364,22 +371,23 @@ namespace Guarneri
 		if (misc_param.workflow == PBRWorkFlow::Specular)
 		{
 			//todo
-			float glossiness = std::clamp(lighting_data.glossiness, 0.0f, 256.0f);
+			Color roughness = Color::BLACK;
+			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), glossiness);
 			float distance = Vector3::length(light.position, wpos);
 			float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-			auto ambient = light_ambient * ao;
 			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
 			Color spec_tex = Color::WHITE;
 			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
 			auto specular = Color::saturate(light_spec * spec * spec_tex);
+			auto ambient = light_ambient * ao.r;
 			auto ret = (ambient + diffuse + specular) * atten;
 			return ret;
 		}
 		else
 		{
-			auto ambient = light_ambient * ao * albedo;
+			auto ambient = light_ambient * ao.r;
 			auto dist = Vector3::length(light.position, wpos);
 			Color metallic = Color::BLACK;
 			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
@@ -419,7 +427,11 @@ namespace Guarneri
 		Color ret = Color::BLACK;
 		Color albedo = Color::WHITE;
 		name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo);
-		albedo = Color::pow(albedo, 2.2f);
+
+		if (misc_param.color_space == ColorSpace::Linear)
+		{
+			albedo = Color::pow(albedo, 2.2f);
+		}
 
 		Color ao = Color::WHITE;
 		name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
@@ -474,6 +486,11 @@ namespace Guarneri
 			}
 		}*/
 
+		if ((misc_param.render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		{
+			return Color(ao.r, ao.r, ao.r, 1.0f);
+		}
+
 		if ((misc_param.render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			return input.uv;
@@ -486,12 +503,14 @@ namespace Guarneri
 
 		if ((misc_param.render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
 		{
-			return  input.normal.normalized();
+			return normal;
 		}
 
-		//ret = ret / (ret + Color::WHITE);
-
-		ret = Color::pow(ret, 1.0f / 2.2f);
+		if (misc_param.color_space == ColorSpace::Linear)
+		{
+			ret = ret / (ret + Color::WHITE);
+			ret = Color::pow(ret, 1.0f / 2.2f);
+		}
 
 		ret = Color::saturate(ret);
 

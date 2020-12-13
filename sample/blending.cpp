@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
+	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
 
 	// setup main light
 	Scene demo_scene;
@@ -65,7 +65,7 @@ int main()
 	demo_scene.add(opaque_cube_rdr);
 
 	// transparent cube
-	auto cube_albedo = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
+	auto cube_albedo = Texture::create(res_path() + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg");
 	auto box_material = Material::create();
 	box_material->transparent = true;
 	box_material->blend_op = BlendOp::ADD;
@@ -128,6 +128,8 @@ int main()
 		}
 		}, & demo_scene);
 
+	misc_param.workflow = PBRWorkFlow::Specular;
+	misc_param.color_space = ColorSpace::Gamma;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }

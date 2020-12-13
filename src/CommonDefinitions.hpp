@@ -101,6 +101,7 @@ namespace Guarneri
 	{
 		uint32_t triangle_count;
 		uint32_t culled_triangle_count;
+		uint32_t culled_backface_triangle_count;
 		uint32_t earlyz_optimized;
 	};
 

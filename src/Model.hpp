@@ -148,6 +148,7 @@ namespace Guarneri
 
 		auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE);
 		auto specular = load_textures(aiMat, aiTextureType_SPECULAR);
+		auto roughness = load_textures(aiMat, aiTextureType_SHININESS);
 		auto normal = load_textures(aiMat, aiTextureType_HEIGHT);
 		auto ao = load_textures(aiMat, aiTextureType_AMBIENT);
 

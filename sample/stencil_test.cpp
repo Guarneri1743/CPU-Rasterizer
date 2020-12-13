@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
+	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
 
 	// setup main Light
 	Scene demo_scene;
@@ -57,7 +57,7 @@ int main()
 		}, & stencil_cube_renderer);
 
 	// backpack
-	auto backpack = Model::create(res_path() + "/backpack/backpack.obj");
+	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
 	backpack->material->lighting_param.glossiness = 64.0f;
 	backpack->material->stencil_ref_val = 1;
 	backpack->material->stencil_func = CompareFunc::EQUAL;
@@ -94,6 +94,9 @@ int main()
 		}
 		}, &demo_scene);
 
+	misc_param.shadow_bias = 0.00125f;
+	misc_param.color_space = ColorSpace::Gamma;
+	misc_param.workflow = PBRWorkFlow::Specular;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }

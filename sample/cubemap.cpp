@@ -8,7 +8,7 @@ bool auto_rotation = false;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(1024, 768, "SoftRasterizer");
+	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
 
 	// setup main light
 	Scene demo_scene;
@@ -123,7 +123,7 @@ int main()
 		}
 	}, &demo_scene);
 
-
+	misc_param.color_space = ColorSpace::Linear;
 	GuarneriRasterizer::kick_off(demo_scene);
 	return 0;
 }
