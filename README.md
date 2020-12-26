@@ -77,7 +77,7 @@
 ---
 
 #### Install
-1. Download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [Guarneri](https://github.com/Guarneri1743/SoftRasterizer)
+1. Download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/SoftRasterizer)
 2. cd to the project folder
 3. run 'setup.bat'
 4. you'll see a new folder 'vs2019' contians the solution(modify the 'setup.bat' script if you are using vs2015/2017)
