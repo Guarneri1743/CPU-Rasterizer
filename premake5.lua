@@ -1,8 +1,8 @@
 local solution_dir = _ACTION
-local lib_dir = "Guarneri/lib"
-local res_dir = "Guarneri/res"
-local src_dir = "Guarneri/src"
-local third_party_dir = "Guarneri/third_party"
+local lib_dir = "CPURasterizer/lib"
+local res_dir = "CPURasterizer/res"
+local src_dir = "CPURasterizer/src"
+local third_party_dir = "CPURasterizer/third_party"
 local sample_dir = "sample"
 
 function setupIncludeDirs()
@@ -22,7 +22,7 @@ end
 
 function setupSlotion()
    location(solution_dir)
-   solution "SoftRasterizer"
+   solution "CPURasterizer"
       configurations {
          "Debug", 
          "Release"

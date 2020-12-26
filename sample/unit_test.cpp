@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include <Guarneri.hpp>
+#include <CPURasterizer.hpp>
 
 using namespace Guarneri;
 using namespace std;

@@ -1,4 +1,4 @@
-#include <Guarneri.hpp>
+#include <CPURasterizer.hpp>
 
 using namespace Guarneri;
 using namespace std;
@@ -8,7 +8,7 @@ bool auto_rotation = false;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(1920, 1080, "SoftRasterizer");
+	CPURasterizer::prepare(1920, 1080, "CPU-Rasterizer");
 
 	// setup main light
 	Scene demo_scene;
@@ -124,6 +124,6 @@ int main()
 	}, &demo_scene);
 
 	misc_param.color_space = ColorSpace::Gamma;
-	GuarneriRasterizer::kick_off(demo_scene);
+	CPURasterizer::kick_off(demo_scene);
 	return 0;
 }

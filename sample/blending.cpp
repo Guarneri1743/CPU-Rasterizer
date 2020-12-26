@@ -1,4 +1,4 @@
-#include <Guarneri.hpp>
+#include <CPURasterizer.hpp>
 
 using namespace Guarneri;
 using namespace std;
@@ -6,7 +6,7 @@ using namespace std;
 int main()
 {
 	// initialize rasterizer
-	GuarneriRasterizer::prepare(800, 600, "SoftRasterizer");
+	CPURasterizer::prepare(800, 600, "CPU-Rasterizer");
 
 	// setup main light
 	Scene demo_scene;
@@ -130,6 +130,6 @@ int main()
 
 	misc_param.workflow = PBRWorkFlow::Specular;
 	misc_param.color_space = ColorSpace::Gamma;
-	GuarneriRasterizer::kick_off(demo_scene);
+	CPURasterizer::kick_off(demo_scene);
 	return 0;
 }
