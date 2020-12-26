@@ -1,6 +1,6 @@
-# Guarneri(A tile based soft rasterizer)
+# Tile Based CPU Rasterizer
 
-#### Rasterizer Feature:
+#### Feature:
 
 - 3D-Math
 
@@ -8,19 +8,15 @@
 			
 - Vertex Shader/Fragment Shader
 
-- Near Plane Clipping(Sutherland-Hodgman)
+- CVV Clipping(Sutherland-Hodgman)
 
 - Frustum Culling(Per triangle)
-
-- CVV Clipping
 			
 - Back-Face Culling
 			
 - Rasterization(Tile based & Multi-thread)
 
 - Perspective-Correct Interpolation(Texture mapping)
-			
-- Screen(Viewport) Clipping
 			
 - Early-Z
 			
@@ -46,7 +42,7 @@
 
 ---
 		
-#### Application Feature:
+#### Application:
 
 - Input Manager
 			
@@ -80,19 +76,17 @@
 
 ---
 
-#### Usage
+#### Install
 1. Download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [Guarneri](https://github.com/Guarneri1743/SoftRasterizer)
 2. cd to the project folder
 3. run 'setup.bat'
-4. you'll see a new folder 'vs2019' contians the solution(feel free to modify the 'setup.bat' script if you are using vs2015/2017)
+4. you'll see a new folder 'vs2019' contians the solution(modify the 'setup.bat' script if you are using vs2015/2017)
 
 ---
 
-#### TODO(Future): 
-		
-##### Rasterizer:
+#### TODO: 
 
-- use SIMD math lib
+- SIMD math lib
 			
 - Shader-compiler, ddx, ddy（mipmap, lodSampler）
 			
@@ -104,10 +98,7 @@
 			
 - Hi-Z
 		 
-- MSAA(SSAA)
-
-	 
-##### Application:
+- MSAA
 
 - Specular workflow
 			
@@ -115,9 +106,11 @@
 
 - Skeleton-Animation, Skinning
 
-- Deferred/TBDR/Cluster pipeline
+- TBDR
 
-- IBL: irradiance convloution
+- Cluster
+
+- IBL baker
 			
 - Hi-transform
 			
@@ -125,7 +118,7 @@
 			
 - HDR(ACES?)
 			
-- SSAO/HBAO/TAA/Bloom/ColorGrading (honestly, it's hard to implement post processing in a soft rasterizer, cuz it may eat cpu up)
+- SSAO/HBAO/TAA/Bloom/ColorGrading 
 					
 - Instancing
 
