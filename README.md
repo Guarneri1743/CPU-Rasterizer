@@ -6,65 +6,61 @@
 
 - Multi-thread drawcall submit
 			
-- Vertex Shader/Fragment Shader
+- Vertex shader/fragment shader
 
-- CVV Clipping(Sutherland-Hodgman)
+- CVV clipping
 
-- Frustum Culling(Per triangle)
+- Frustum culling
 			
-- Back-Face Culling
+- Back-face culling
 			
-- Rasterization(Tile based & Multi-thread)
+- Multi-thread and tile based rasterization
 
-- Perspective-Correct Interpolation(Texture mapping)
+- Perspective-correct interpolation
 			
 - Early-Z
 			
-- Alpha-Test (discard)
+- Alpha test (discard)
 			
-- Stencil-Test
+- Stencil test
 			
-- Depth-Test/Depth-Writing
+- Depth test
 			
-- Alpha-Blending
+- Alpha blending
 
-- Line-Drawer(Bresenham、DDA)
+- Segment-drawer
 
 - Texture sampler
 
 - Cubemap sampler
-			
-- Present framebuffer(GDI bitmap)
 
-- Support switching LH/RH and DX/GL.
-
-- Visualization: Early-Z optimized pixels, Back-Face Culled triangles, Z-Buffer, Application(Shadowmap, UV, Normal, AO), etc.
+- Resource visualization
 
 ---
 		
 #### Application:
 
-- Input Manager
+- Input manager
 			
-- Model-Importer
+- Model importer
 
 - Transform
 
-- Roaming Camera
+- Roaming camera
 
 - Material
 
 - Texture
 
-- Various Renderer
+- Various renderer
 
-- Commonly used lighting techs(Directional lighting, point lighting, Normal mapping, Shadow mapping, etc.)
+- Commonly used lighting techs
 			
-- Cook-Torrance BRDF, IBL(naive impl)
+- Cook-Torrance BRDF, IBL
 
 - Metallic workflow
 
-- Gamma/Linear Color-Space workflow
+- Gamma/Linear workflow
 
 ---
 			
@@ -84,17 +80,17 @@
 
 ---
 
-#### TODO: 
+#### Future Work: 
 
-- SIMD math lib
+- SIMD
 			
-- Shader-compiler, ddx, ddy（mipmap, lodSampler）
+- Shader-compiler, ddx, ddy, mipmap and lodSampler
 			
-- OpenGL/DX-like API (State machine)
+- OpenGL/DX-like API
 			
-- Scissor Test
+- Scissor test
 			
-- Early-Z condition optimization(more intelligent?)
+- Early-Z condition optimization
 			
 - Hi-Z
 		 
@@ -102,9 +98,9 @@
 
 - Specular workflow
 			
-- CPU Frustum Culling, Occlusion Culling
+- CPU frustum culling & occlusion culling
 
-- Skeleton-Animation, Skinning
+- Skeleton-animation, skinning
 
 - TBDR
 
