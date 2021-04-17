@@ -116,22 +116,27 @@ namespace Guarneri
 	{
 		unsigned char r; unsigned char g; unsigned char b;
 	} color_rgb;
+
 	typedef struct
 	{
 		unsigned char r; unsigned char g; unsigned char b; unsigned char a;
 	} color_rgba;
+
 	typedef struct
 	{
 		unsigned char b; unsigned char g; unsigned char r; unsigned char a;
 	} color_bgra;
+
 	typedef struct
 	{
 		unsigned char r; unsigned char g;
 	}color_rg;
+
 	typedef struct
 	{
-		unsigned char gray;
+		uint8_t gray;
 	}color_gray;
+
 	typedef unsigned char image_ubyte;
 
 	GraphicsDevice& Graphics();

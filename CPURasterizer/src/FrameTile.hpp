@@ -13,15 +13,15 @@ namespace Guarneri
 	} TileInfo;
 
 
-	struct TileTask
+	struct TiledShadingTask
 	{
 	public:
 		Triangle triangle;
 		Shader* shader;
 
 	public:
-		TileTask();
-		TileTask(const Triangle& triangle, Shader* shader);
+		TiledShadingTask();
+		TiledShadingTask(const Triangle& triangle, Shader* shader);
 	};
 
 
@@ -33,13 +33,13 @@ namespace Guarneri
 		uint32_t row_end;
 		uint32_t col_start;
 		uint32_t col_end;
-		SafeQueue<TileTask> tasks;
+		SafeQueue<TiledShadingTask> tasks;
 
 	public:
 		FrameTile();
 		~FrameTile();
 		void push_task(const Triangle& tri, Shader* shader);
-		bool pop_task(TileTask& task);
+		bool pop_task(TiledShadingTask& task);
 		bool is_task_empty();
 		void clear();
 		size_t task_size();
@@ -60,12 +60,12 @@ namespace Guarneri
 	};
 
 
-	TileTask::TileTask()
+	TiledShadingTask::TiledShadingTask()
 	{
 		shader = nullptr;
 	}
 
-	TileTask::TileTask(const Triangle& triangle, Shader* shader)
+	TiledShadingTask::TiledShadingTask(const Triangle& triangle, Shader* shader)
 	{
 		this->triangle = triangle;
 		this->shader = shader;
@@ -87,10 +87,10 @@ namespace Guarneri
 
 	void FrameTile::push_task(const Triangle& tri, Shader* shader)
 	{
-		tasks.produce(TileTask(tri, shader));
+		tasks.produce(TiledShadingTask(tri, shader));
 	}
 
-	bool FrameTile::pop_task(TileTask& task)
+	bool FrameTile::pop_task(TiledShadingTask& task)
 	{
 		return tasks.try_consume(task);
 	}
