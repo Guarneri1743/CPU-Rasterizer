@@ -18,6 +18,7 @@ namespace Guarneri {
 			shadow_bias = 0.02f;
 			enable_shadow = true;
 			pcf_on = true;
+			enable_msaa = false;
 		}
 
 		float cam_near;
@@ -33,6 +34,7 @@ namespace Guarneri {
 		bool enable_shadow;
 		bool pcf_on;
 		float shadow_bias;
+		bool enable_msaa;
 		PBRWorkFlow workflow;
 		ColorSpace color_space;
 	};

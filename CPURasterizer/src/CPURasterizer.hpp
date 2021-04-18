@@ -153,7 +153,16 @@ namespace Guarneri
 				}
 				{
 					std::stringstream ss;
-					ss << "EnablePCF: " << (misc_param.pcf_on ? "PCF_ON" : "PCF_OFF");
+					ss << "PCF: " << (misc_param.pcf_on ? "PCF_ON" : "PCF_OFF");
+					Window().draw_text(w, h, ss.str().c_str());
+				}
+				{
+					std::stringstream ss;
+					ss << "MSAA: " << (misc_param.enable_msaa ? "MSAA_ON" : "MSAA_OFF");
+					if (misc_param.enable_msaa)
+					{
+						ss << std::to_string(Graphics().msaa_subsample_count) << "X";
+					}
 					Window().draw_text(w, h, ss.str().c_str());
 				}
 				{

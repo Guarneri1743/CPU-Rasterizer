@@ -152,6 +152,17 @@ namespace Guarneri
 				{
 					misc_param.shadow_bias /= 2.0f;
 				}
+				else if (code == KeyCode::A)
+				{
+					if (!misc_param.enable_msaa)
+					{
+						Graphics().set_subsample_count(16);
+					}
+					else
+					{
+						Graphics().set_subsample_count(0);
+					}
+				}
 		}, nullptr);
 	}
 
