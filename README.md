@@ -18,7 +18,7 @@
 
 - perspective correct interpolation
 			
-- early-Z
+- early-z
 			
 - alpha test (discard)
 			
@@ -28,7 +28,7 @@
 			
 - alpha blending
 
-- segment-drawer
+- segment drawer
 
 - texture sampler
 
@@ -65,10 +65,10 @@
 ---
 			
 #### ThirdParty:
-- assimp (Model Importer)
-- stb_image (Image Importer)
-- [nlohmann json](https://github.com/nlohmann/json) (Serialization)
-- [ThreadPool](https://github.com/progschj/ThreadPool) (Drawcall/Rasterization acceleration)
+- assimp 
+- stb_image 
+- [nlohmann json](https://github.com/nlohmann/json) 
+- [ThreadPool](https://github.com/progschj/ThreadPool) 
 
 ---
 
@@ -86,7 +86,7 @@
 			
 - ddx, ddy, mipmap and lodSampler
 			
-- gl/dx like API
+- gl/dx like api
 			
 - scissor test
 			
