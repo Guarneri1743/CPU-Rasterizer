@@ -82,23 +82,29 @@
 
 #### Future Work: 
 
-- simd
-			
-- ddx, ddy, mipmap and lodSampler
-			
-- gl/dx like api
-			
-- scissor test
-			
-- Hiz
-		 
-- specular workflow
-			
-- occlusion culling
-
-- skeleton-animation, skinning
+- low-level:
+	
+	- simd
 				
-- HDR(ACES?)
+	- ddx, ddy, mipmap and lod sampler
+				
+	- gl/dx like api
+				
+	- scissor test
+				
+	- hsr (base on tbdr)
+		 
+- features:
+
+	- specular workflow
+			
+	- occlusion culling
+	
+	- skeleton-animation
+	
+	- skinning
+					
+	- hdr
 
 ---
 
