@@ -2,65 +2,65 @@
 
 #### Feature:
 
-- 3D-Math
-
-- Multi-thread drawcall submit
+- multi-thread drawcall submit
 			
-- Vertex shader/fragment shader
+- vertex/fragment shader
 
-- CVV clipping
+- cvv clipping
 
-- Frustum culling
+- frustum culling
 			
-- Back-face culling
+- back-face culling
 			
-- Multi-thread and tile based rasterization
+- multi-thread and tile based rasterization
 
-- Perspective-correct interpolation
-			
-- Early-Z
-			
-- Alpha test (discard)
-			
-- Stencil test
-			
-- Depth test
-			
-- Alpha blending
+- msaa
 
-- Segment-drawer
+- perspective correct interpolation
+			
+- early-Z
+			
+- alpha test (discard)
+			
+- stencil test
+			
+- depth test
+			
+- alpha blending
 
-- Texture sampler
+- segment-drawer
 
-- Cubemap sampler
+- texture sampler
 
-- Resource visualization
+- cubemap sampler
+
+- resource visualization
 
 ---
 		
 #### Application:
 
-- Input manager
+- input manager
 			
-- Model importer
+- model importer
 
-- Transform
+- transform
 
-- Roaming camera
+- roaming camera
 
-- Material
+- material
 
-- Texture
+- texture
 
-- Various renderer
+- renderer
 
-- Commonly used lighting techs
+- commonly used lighting techs
 			
-- Cook-Torrance BRDF, IBL
+- cook-torrance brdf, simple ibl
 
-- Metallic workflow
+- metallic workflow
 
-- Gamma/Linear workflow
+- gamma/linear workflow
 
 ---
 			
@@ -73,7 +73,7 @@
 ---
 
 #### Install
-1. Download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/SoftRasterizer)
+1. download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/SoftRasterizer)
 2. cd to the project folder
 3. run 'setup.bat'
 4. you'll see a new folder 'vs2019' contians the solution(modify the 'setup.bat' script if you are using vs2015/2017)
@@ -82,41 +82,23 @@
 
 #### Future Work: 
 
-- SIMD
+- simd
 			
-- Shader-compiler, ddx, ddy, mipmap and lodSampler
+- ddx, ddy, mipmap and lodSampler
 			
-- OpenGL/DX-like API
+- gl/dx like API
 			
-- Scissor test
+- scissor test
 			
-- Early-Z condition optimization
-			
-- Hi-Z
+- Hiz
 		 
-- MSAA
-
-- Specular workflow
+- specular workflow
 			
-- CPU frustum culling & occlusion culling
+- occlusion culling
 
-- Skeleton-animation, skinning
-
-- TBDR
-
-- Cluster
-
-- IBL baker
-			
-- Hi-transform
-			
-- Z-Prepass
-			
+- skeleton-animation, skinning
+				
 - HDR(ACES?)
-			
-- SSAO/HBAO/TAA/Bloom/ColorGrading 
-					
-- Instancing
 
 ---
 
@@ -147,6 +129,15 @@ Overview
 
 ---
 
+- MSAA:
+
+No MSAA
+<img src="/screenshots/no_msaa.jpg" width = "800" height = "700" alt="Texture Filtering" align=center/>
+
+16x MSAA
+<img src="/screenshots/16xMSAA.jpg" width = "800" height = "700" alt="Texture Filtering" align=center/> 
+
+---
 
 - Early-Z:
 <img src="/screenshots/early_z.jpg" width = "800" height = "600" alt="Early-Z" align=center />
