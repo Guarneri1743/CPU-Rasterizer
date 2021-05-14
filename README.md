@@ -72,8 +72,6 @@
 
 ### Gallery
 
-overview:
-
 | overview |
 | --- |
 | <img src="/gallery/helmet_ibl.jpg" width = "200" height = "200" alt="Star War" align=bottom /> <img src="/gallery/overview.jpg" width = "220" height = "200" alt="Backpack" align=bottom /> <img src="/gallery/wireframe.jpg" width = "220" height = "200" alt="Wireframe" align=bottom/> |
