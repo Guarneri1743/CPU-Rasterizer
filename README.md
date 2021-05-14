@@ -1,6 +1,6 @@
 # Tile Based CPU Rasterizer
 
-#### Feature:
+#### Features
 
 - multi-thread drawcall submit
 			
@@ -38,7 +38,7 @@
 
 ---
 		
-#### Application:
+#### Application
 
 - input manager
 			
@@ -63,46 +63,10 @@
 - gamma/linear workflow
 
 ---
-			
-#### ThirdParty:
-- assimp 
-- stb_image 
-- [nlohmann json](https://github.com/nlohmann/json) 
-- [ThreadPool](https://github.com/progschj/ThreadPool) 
-
----
 
 #### Install
 1. download [zip](https://github.com/Guarneri1743/CPU-Rasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/CPU-Rasterizer)
 2. run 'setup.bat' or type 'premake vs2017/vs2019' in command-line
-
----
-
-#### Future Work: 
-
-- low-level:
-	
-	- simd
-				
-	- ddx, ddy, mipmap and lod sampler
-				
-	- gl/dx like api
-				
-	- scissor test
-				
-	- hsr (base on tbdr)
-		 
-- features:
-
-	- specular workflow
-			
-	- occlusion culling
-	
-	- skeleton-animation
-	
-	- skinning
-					
-	- hdr
 
 ---
 
@@ -138,3 +102,39 @@ overview:
 | ao |
 | --- | 
 | <img src="/gallery/ao.jpg" width = "200" height = "180" alt="AO" align=bottom/> <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
+
+---
+
+#### Third Parties
+- assimp 
+- stb_image 
+- [nlohmann json](https://github.com/nlohmann/json) 
+- [ThreadPool](https://github.com/progschj/ThreadPool) 
+
+---
+
+#### Future Works
+
+- low-level:
+	
+	- simd
+				
+	- ddx, ddy, mipmap and lod sampler
+				
+	- gl/dx like api
+				
+	- scissor test
+				
+	- hsr (base on tbdr)
+		 
+- features:
+
+	- specular workflow
+			
+	- occlusion culling
+	
+	- skeleton-animation
+	
+	- skinning
+					
+	- hdr
