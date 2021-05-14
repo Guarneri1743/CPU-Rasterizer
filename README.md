@@ -114,7 +114,7 @@ overview:
 | --- |
 | <img src="/gallery/helmet_ibl.jpg" width = "200" height = "200" alt="Star War" align=bottom /> <img src="/gallery/overview.jpg" width = "220" height = "200" alt="Backpack" align=bottom /> <img src="/gallery/wireframe.jpg" width = "220" height = "200" alt="Wireframe" align=bottom/> |
 
-| tile based rasterization | near plane clipping | perspective correct interpolation |
+| tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
 
 | <img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/> | <img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | 
