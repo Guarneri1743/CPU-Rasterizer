@@ -136,5 +136,5 @@ overview:
 | <img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/overview.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> |
 
 | ao |
-| --- |
-| <img src="/gallery/ao.jpg" width = "180" height = "180" alt="AO" align=bottom/> | <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
+| --- | 
+| <img src="/gallery/ao.jpg" width = "180" height = "180" alt="AO" align=bottom/> <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
