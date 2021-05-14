@@ -137,4 +137,4 @@ overview:
 
 | ao |
 | --- | 
-| <img src="/gallery/ao.jpg" width = "180" height = "180" alt="AO" align=bottom/> <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
+| <img src="/gallery/ao.jpg" width = "200" height = "180" alt="AO" align=bottom/> <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
