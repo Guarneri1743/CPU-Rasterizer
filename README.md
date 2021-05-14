@@ -73,10 +73,8 @@
 ---
 
 #### Install
-1. download [zip](https://github.com/Guarneri1743/SoftRasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/SoftRasterizer)
-2. cd to the project folder
-3. run 'setup.bat'
-4. you'll see a new folder 'vs2019' contians the solution(modify the 'setup.bat' script if you are using vs2015/2017)
+1. download [zip](https://github.com/Guarneri1743/CPU-Rasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/CPU-Rasterizer)
+2. run 'setup.bat' or type 'premake vs2017/vs2019' in command-line
 
 ---
 
@@ -108,128 +106,67 @@
 
 ---
 
-### Screenshots
+### Gallery
 
-Overview
+overview
 
-- Star War
+<img src="/gallery/helmet_ibl.jpg" width = "256" height = "256" alt="Star War" align=bottom />
+<img src="/gallery/overview.jpg" width = "300" height = "256" alt="Backpack" align=bottom />
+<img src="/gallery/wireframe.jpg" width = "300" height = "256" alt="Wireframe" align=center/>
 
-<img src="/screenshots/helmet_ibl.jpg" width = "800" height = "800" alt="Star War" align=center />
+- tile based rasterization:
 
----
+<img src="/gallery/tile_based_rendering.jpg" width = "300" height = "256" alt="Tile based rasterization" align=center/>
 
+- near plane clipping:
 
-- Backpack
-<img src="/screenshots/overview.jpg" width = "800" height = "600" alt="Backpack" align=center />
+<img src="/gallery/near_plane_clipping2.jpg" width = "256" height = "256" alt="Near Plane Clipping" align=center />
+<img src="/gallery/near_plane_clipping.jpg" width = "256" height = "256" alt="Near Plane Clipping" align=center />
 
-
----
-
-- Near Plane Clipping:
-
-
-<img src="/screenshots/near_plane_clipping.jpg" width = "800" height = "600" alt="Near Plane Clipping" align=center />
-
-<img src="/screenshots/near_plane_clipping2.jpg" width = "800" height = "600" alt="Near Plane Clipping" align=center />
-
-
----
 
 - MSAA:
 
-No MSAA
-<img src="/screenshots/no_msaa.jpg" width = "800" height = "700" alt="Texture Filtering" align=center/>
-
-16x MSAA
-<img src="/screenshots/16xMSAA.jpg" width = "800" height = "700" alt="Texture Filtering" align=center/> 
-
----
-
-- Early-Z:
-<img src="/screenshots/early_z.jpg" width = "800" height = "600" alt="Early-Z" align=center />
+no MSAA vs 16x MSAA
+<img src="/gallery/no_msaa.jpg" width = "256" height = "256" alt="MSAA" align=center/>
+<img src="/gallery/16xMSAA.jpg" width = "256" height = "256" alt="MSAA" align=center/> 
 
 
----
-
-- Perspective Correct Interpolation(UV):
-<img src="/screenshots/perspective_correct_uv.jpg" width = "800" height = "600" alt="Perspective Correct Interpolation" align=center />
-
----
-
-- Texture Filtering:
-
-Point
-<img src="/screenshots/point_filtering.jpg" width = "800" height = "600" alt="Texture Filtering" align=center/>
-
-Bilinear
-<img src="/screenshots/bilinear_filtering.jpg" width = "800" height = "600" alt="Texture Filtering" align=center/> 
-
----
+- perspective correct interpolation:
+<img src="/gallery/perspective_correct_uv.jpg" width = "256" height = "256" alt="Perspective Correct Interpolation" align=center />
 
 
-- Per Sample Operation:
+- texture filtering:
 
-Stencil Test
-
-<img src="/screenshots/stencil_test.jpg" width = "800" height = "800" alt="Per Sample Operation" align=center/>
-
-Z Test
-
-<img src="/screenshots/z_buffer.jpg" width = "800" height = "600" alt="Per Sample Operation" align=center/>
-
---- 
+point/bilinear
+<img src="/gallery/point_filtering.jpg" width = "280" height = "256" alt="Texture Filtering" align=center/>
+<img src="/gallery/bilinear_filtering.jpg" width = "280" height = "256" alt="Texture Filtering" align=center/> 
 
 
-- Blending:
 
-<img src="/screenshots/opaque_cube.jpg" width = "800" height = "800" alt="Blending" align=center/>
+- per sample operation:
 
-<img src="/screenshots/transparent_cube.jpg" width = "800" height = "800" alt="Blending" align=center/>
+stencil-test, z-test and blending
 
---- 
+<img src="/gallery/stencil_test.jpg" width = "256" height = "256" alt="Per Sample Operation" align=center/>
+<img src="/gallery/z_buffer.jpg" width = "280" height = "256" alt="Per Sample Operation" align=center/>
+<img src="/gallery/transparent_cube.jpg" width = "256" height = "256" alt="Blending" align=center/>
 
-- Wireframe:
 
-<img src="/screenshots/wireframe.jpg" width = "800" height = "600" alt="Wireframe" align=center/>
+- shadow mapping:
 
----
+<img src="/gallery/shadowmap.jpg" width = "256" height = "256" alt="Shadow Mapping" align=top/>
 
-- Tile based rasterization:
+<img src="/gallery/overview.jpg" width = "256" height = "256" alt="Shadow Mapping" align=top/>
 
-<img src="/screenshots/tile_based_rendering.jpg" width = "800" height = "600" alt="Tile based rasterization" align=center/>
+shadow off/on
 
-tile = 64/128
+<img src="/gallery/shadow_off.jpg" width = "256" height = "256" alt="Shadow Mapping" align=bottom/>
 
----
+<img src="/gallery/shadow_on.jpg" width = "256" height = "256" alt="Shadow Mapping" align=bottom/>
 
-- Shadow Mapping:
-
-<img src="/screenshots/shadowmap.jpg" width = "800" height = "600" alt="Shadow Mapping" align=center/>
-
-<img src="/screenshots/overview.jpg" width = "800" height = "600" alt="Shadow Mapping" align=center/>
-
-<img src="/screenshots/shadow_off.jpg" width = "800" height = "800" alt="Shadow Mapping" align=center/>
-
-<img src="/screenshots/shadow_on.jpg" width = "800" height = "800" alt="Shadow Mapping" align=center/>
-
----
-
-- Frustum Culling:
-
-<img src="/screenshots/frustum_culling.jpg" width = "800" height = "600" alt="Frustum Culling" align=center/>
-
----
-
-- Back-Face Culling:
-
-<img src="/screenshots/backface_culling.jpg" width = "800" height = "600" alt="Back-Face Culling" align=center/>
-
----
 
 - AO:
 
-<img src="/screenshots/ao.jpg" width = "800" height = "600" alt="AO" align=center/>
+<img src="/gallery/ao.jpg" width = "256" height = "256" alt="AO" align=center/>
 
-<img src="/screenshots/ao2.jpg" width = "800" height = "800" alt="AO" align=center/>
-
----
+<img src="/gallery/ao2.jpg" width = "256" height = "256" alt="AO" align=center/>

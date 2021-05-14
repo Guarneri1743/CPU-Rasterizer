@@ -1,9 +1,9 @@
 local solution_dir = _ACTION
-local lib_dir = "CPURasterizer/lib"
-local res_dir = "CPURasterizer/res"
-local src_dir = "CPURasterizer/src"
-local third_party_dir = "CPURasterizer/third_party"
-local sample_dir = "sample"
+local lib_dir = "lib"
+local res_dir = "res"
+local src_dir = "src"
+local third_party_dir = "third_party"
+local sample_dir = "samples"
 
 function setupIncludeDirs()
    includedirs {
@@ -266,5 +266,4 @@ setupStencilDemo()
 setupLightingDemo()
 setupFilteringDemo()
 setupCubemapDemo()
---setupPLYProj()
 setupUnitTestProj()
