@@ -1,6 +1,10 @@
 #ifndef _MAT3_
 #define _MAT3_
+#include "Marcos.h"
 #include "Vector3.hpp"
+
+#undef near
+#undef far
 
 namespace Guarneri
 {
@@ -54,8 +58,6 @@ namespace Guarneri
 		int rc2index(const int& row, const int& column) const;
 		std::string str() const;
 	};
-
-
 
 	Matrix3x3::Matrix3x3()
 	{

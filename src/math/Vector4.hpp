@@ -5,9 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
-
-#undef min
-#undef max
+#include "Marcos.h"
 
 namespace Guarneri
 {
@@ -54,8 +52,8 @@ namespace Guarneri
 		static float dot(const Vector4& lhs, const Vector4& rhs);
 		static float magnitude(const Vector4& vector);
 		static float length(const Vector4& a, const Vector4& b);
-		static Vector4 max(const Vector4& a, const Vector4& b);
-		static Vector4 min(const Vector4& a, const Vector4& b);
+		static Vector4 maximum(const Vector4& a, const Vector4& b);
+		static Vector4 minimum(const Vector4& a, const Vector4& b);
 		static Vector4 abs(const Vector4& v);
 		static Vector4 normalize(const Vector4& value);
 
@@ -563,12 +561,12 @@ namespace Guarneri
 		return magnitude(a - b);
 	}
 
-	Vector4 Vector4::max(const Vector4& a, const Vector4& b)
+	Vector4 Vector4::maximum(const Vector4& a, const Vector4& b)
 	{
 		return Vector4(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z), std::max(a.w, b.w));
 	}
 
-	Vector4 Vector4::min(const Vector4& a, const Vector4& b)
+	Vector4 Vector4::minimum(const Vector4& a, const Vector4& b)
 	{
 		return Vector4(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w));
 	}

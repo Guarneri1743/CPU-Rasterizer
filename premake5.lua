@@ -41,12 +41,12 @@ function setupSlotion()
          targetdir ( solution_dir .. "lib/Debug" )
 
       configuration "Release*"
-         defines { "NDEBUG" }
+         defines { "NDEBUG"}
          optimize "On"
          targetdir ( solution_dir .. "lib/Release"  )
 
       filter { "platforms:Win*", "configurations:Debug*" }
-         defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
+         defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
          system "Windows"
          architecture "x86_64"
          staticruntime "Off"
@@ -61,7 +61,7 @@ function setupSlotion()
          }
 
       filter { "platforms:Win*", "configurations:Release*" }
-         defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS" }
+         defines { "WIN32", "_WINDOWS", "_CRT_SECURE_NO_WARNINGS", "NOMINMAX" }
          system "Windows"
          architecture "x86_64"
          staticruntime "Off"

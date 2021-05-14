@@ -7,8 +7,8 @@
 #include "Shader.hpp"
 #include "BoundingBox2D.hpp"
 
-#undef min
-#undef max
+
+
 
 namespace Guarneri
 {

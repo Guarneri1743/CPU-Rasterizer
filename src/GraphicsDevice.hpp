@@ -20,8 +20,8 @@
 #include "FrameTile.hpp"
 #include "SegmentDrawer.hpp"
 
-#undef near
-#undef far
+
+
 
 namespace Guarneri
 {

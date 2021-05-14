@@ -8,8 +8,8 @@
 #include "Marcos.h"
 #include "CommonDefinitions.hpp"
 
-#undef max
-#undef min
+
+
 
 namespace Guarneri
 {
@@ -90,8 +90,8 @@ namespace Guarneri
 		static float dot(const Color& lhs, const Color& rhs);
 		static float magnitude(const Color& vector);
 		static float length(const Color& lhs, const Color& rhs);
-		static Color max(const Color& lhs, const Color& rhs);
-		static Color min(const Color& lhs, const Color& rhs);
+		static Color maximum(const Color& lhs, const Color& rhs);
+		static Color minimum(const Color& lhs, const Color& rhs);
 		static Color abs(const Color& v);
 		static Color pow(const Color& c, float power);
 		static Color normalize(const Color& value);
@@ -537,12 +537,12 @@ namespace Guarneri
 		return retult;
 	}
 
-	Color Color::max(const Color& lhs, const Color& rhs)
+	Color Color::maximum(const Color& lhs, const Color& rhs)
 	{
 		return Color(std::max(lhs.r, rhs.r), std::max(lhs.g, rhs.g), std::max(lhs.b, rhs.b), std::max(lhs.a, rhs.a));
 	}
 
-	Color Color::min(const Color& lhs, const Color& rhs)
+	Color Color::minimum(const Color& lhs, const Color& rhs)
 	{
 		return Color(std::min(lhs.r, rhs.r), std::min(lhs.g, rhs.g), std::min(lhs.b, rhs.b), std::min(lhs.a, rhs.a));
 	}

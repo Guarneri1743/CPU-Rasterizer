@@ -4,8 +4,8 @@
 #include "Math.hpp"
 #include "Plane.hpp"
 
-#undef near
-#undef far
+
+
 
 namespace Guarneri
 {

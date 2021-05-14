@@ -191,8 +191,8 @@ namespace Guarneri
 
 	void Scene::update()
 	{
-		INST(MiscParameter).cam_far = main_cam->far_;
-		INST(MiscParameter).cam_near = main_cam->near_;
+		INST(MiscParameter).cam_far = main_cam->far;
+		INST(MiscParameter).cam_near = main_cam->near;
 		INST(MiscParameter).view_matrix = main_cam->view_matrix();
 		INST(MiscParameter).proj_matrix = main_cam->projection_matrix();
 		INST(MiscParameter).main_light = main_light;

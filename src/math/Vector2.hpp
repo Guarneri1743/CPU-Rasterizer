@@ -1,14 +1,12 @@
 #ifndef _VEC2_
 #define _VEC2_
+#include "Marcos.h"
 #include <cmath>
+#include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <ostream>
 #include <string>
-#include <memory>
-
-#undef min
-#undef max
 
 namespace Guarneri
 {
@@ -45,8 +43,8 @@ namespace Guarneri
 		static float dot(const Vector2& lhs, const Vector2& rhs);
 		static float magnitude(const Vector2& vector);
 		static float length(const Vector2& a, const Vector2& b);
-		static Vector2 max(const Vector2& a, const Vector2& b);
-		static Vector2 min(const Vector2& a, const Vector2& b);
+		static Vector2 maximum(const Vector2& a, const Vector2& b);
+		static Vector2 minimum(const Vector2& a, const Vector2& b);
 		static Vector2 abs(const Vector2& v);
 		static Vector2 normalize(const Vector2& value);
 		static Vector2 lerp(const Vector2& lhs, const Vector2& rhs, float t);
@@ -206,12 +204,12 @@ namespace Guarneri
 		return magnitude(a - b);
 	}
 
-	Vector2 Vector2::max(const Vector2& a, const Vector2& b)
+	Vector2 Vector2::maximum(const Vector2& a, const Vector2& b)
 	{
 		return Vector2(std::max(a.x, b.x), std::max(a.y, b.y));
 	}
 
-	Vector2 Vector2::min(const Vector2& a, const Vector2& b)
+	Vector2 Vector2::minimum(const Vector2& a, const Vector2& b)
 	{
 		return Vector2(std::min(a.x, b.x), std::min(a.y, b.y));
 	}

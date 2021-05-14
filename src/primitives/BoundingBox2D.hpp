@@ -7,8 +7,8 @@
 #include "Vector2.hpp"
 #include "Ray2D.hpp"
 
-#undef min
-#undef max
+
+
 
 namespace Guarneri
 {

@@ -2,6 +2,9 @@
 #define _CAMERA_
 #include "Object.hpp"
 
+#undef near
+#undef far
+
 namespace Guarneri
 {
 	class Camera : public Object
@@ -9,8 +12,8 @@ namespace Guarneri
 	public:
 		float fov;
 		float aspect;
-		float near_;
-		float far_;
+		float near;
+		float far;
 		Vector3 forward;
 		Vector3 right;
 		Vector3 up;
@@ -65,8 +68,8 @@ namespace Guarneri
 		this->position = _position;
 		this->aspect = _aspect;
 		this->fov = _fov;
-		this->near_ = _near;
-		this->far_ = _far;
+		this->near = _near;
+		this->far = _far;
 		this->yaw = -210.0f;
 		this->pitch = -45.0f;
 		this->projection = _proj_type;
@@ -144,13 +147,13 @@ namespace Guarneri
 
 	void Camera::set_near(const float& _near)
 	{
-		near_ = _near;
+		near = _near;
 		update_proj_mode();
 	}
 
 	void Camera::set_far(const float& _far)
 	{
-		far_ = _far;
+		far = _far;
 		update_proj_mode();
 	}
 
@@ -171,13 +174,13 @@ namespace Guarneri
 		switch (this->projection)
 		{
 		case Projection::PERSPECTIVE:
-			this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near_, this->far_);
+			this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 			break;
 		case Projection::ORTHO:
-			this->p = Matrix4x4::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near_, this->far_);
+			this->p = Matrix4x4::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
 			break;
 		default:
-			this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near_, this->far_);
+			this->p = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
 		}
 	}
 

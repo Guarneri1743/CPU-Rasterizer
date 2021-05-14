@@ -3,11 +3,10 @@
 #include <ostream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include <math.h>
+#include "Marcos.h"
 #include "Vector2.hpp"
-
-#undef min
-#undef max
 
 namespace Guarneri
 {
@@ -53,8 +52,8 @@ namespace Guarneri
 		static Vector3 cross(const Vector3& lhs, const Vector3& rhs);
 		static float magnitude(const Vector3& vector);
 		static float length(const Vector3& a, const Vector3& b);
-		static Vector3 max(const Vector3& a, const Vector3& b);
-		static Vector3 min(const Vector3& a, const Vector3& b);
+		static Vector3 maximum(const Vector3& a, const Vector3& b);
+		static Vector3 minimum(const Vector3& a, const Vector3& b);
 		static Vector3 saturate(const Vector3& vec);
 		static Vector3 abs(const Vector3& v);
 		static Vector3 normalize(const Vector3& value);
@@ -311,15 +310,15 @@ namespace Guarneri
 
 	Vector3 Vector3::saturate(const Vector3& vec)
 	{
-		return Vector3(Vector3::max(Vector3::min(Vector3::ONE, vec), Vector3::ZERO));
+		return Vector3(Vector3::maximum(Vector3::minimum(Vector3::ONE, vec), Vector3::ZERO));
 	}
 
-	Vector3 Vector3::max(const Vector3& a, const Vector3& b)
+	Vector3 Vector3::maximum(const Vector3& a, const Vector3& b)
 	{
 		return Vector3(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
 	}
 
-	Vector3 Vector3::min(const Vector3& a, const Vector3& b)
+	Vector3 Vector3::minimum(const Vector3& a, const Vector3& b)
 	{
 		return Vector3(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
 	}

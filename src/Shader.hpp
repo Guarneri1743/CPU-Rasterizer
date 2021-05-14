@@ -13,8 +13,8 @@
 #include "CubeMap.hpp"
 #include "Utility.hpp"
 
-#undef max
-#undef min
+
+
 
 namespace Guarneri
 {
