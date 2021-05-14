@@ -110,13 +110,9 @@
 
 overview:
 
-<table>
-<tr>
-<img src="/gallery/helmet_ibl.jpg" width = "180" height = "180" alt="Star War" align=bottom />
-<img src="/gallery/overview.jpg" width = "220" height = "180" alt="Backpack" align=bottom />
-<img src="/gallery/wireframe.jpg" width = "220" height = "180" alt="Wireframe" align=bottom/>
-</tr>
-</table>
+| star war | backpack | wireframe |
+| -------- | -------- | --------- |
+| <img src="/gallery/helmet_ibl.jpg" width = "256" height = "256" alt="Star War" align=bottom /> | <img src="/gallery/overview.jpg" width = "256" height = "256" alt="Backpack" align=bottom /> | <img src="/gallery/wireframe.jpg" width = "256" height = "256" alt="Wireframe" align=bottom/> |
 
 tile based rasterization:
 
