@@ -110,71 +110,37 @@
 
 overview:
 
-| star war | backpack | wireframe |
-| -------- | -------- | --------- |
-| <img src="/gallery/helmet_ibl.jpg" width = "256" height = "256" alt="Star War" align=bottom /> | <img src="/gallery/overview.jpg" width = "256" height = "256" alt="Backpack" align=bottom /> | <img src="/gallery/wireframe.jpg" width = "256" height = "256" alt="Wireframe" align=bottom/> |
+| overview |
+| --- |
+| <img src="/gallery/helmet_ibl.jpg" width = "256" height = "256" alt="Star War" align=bottom /> <img src="/gallery/overview.jpg" width = "280" height = "256" alt="Backpack" align=bottom /> <img src="/gallery/wireframe.jpg" width = "280" height = "256" alt="Wireframe" align=bottom/> |
 
-tile based rasterization:
+| tile based rasterization | near plane clipping | perspective correct interpolation |
+| --- | --- |
 
-<img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/>
+| <img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/> | <img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> <img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | 
+<img src="/gallery/perspective_correct_uv.jpg" width = "180" height = "180" alt="Perspective Correct Interpolation" align=bottom /> |
 
-near plane clipping:
+| no msaa | 16x msaa |
+| --- | --- |
 
-<table>
-<tr>
-<img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom />
-<img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom />
-</tr>
-</table>
+| <img src="/gallery/no_msaa.jpg" width = "180" height = "180" alt="MSAA" align=bottom/> | <img src="/gallery/16xMSAA.jpg" width = "180" height = "180" alt="MSAA" align=bottom/> |
 
-MSAA:
+| point | bilinear |
+| --- | --- |
 
-<table>
-<tr>
-<img src="/gallery/no_msaa.jpg" width = "180" height = "180" alt="MSAA" align=bottom/>
-<img src="/gallery/16xMSAA.jpg" width = "180" height = "180" alt="MSAA" align=bottom/> 
-</tr>
-</table>
+| <img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> | <img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>  |
 
-perspective correct interpolation:
+| stencil-test | z-test | blending |
+| --- | --- | --- |
 
-<img src="/gallery/perspective_correct_uv.jpg" width = "180" height = "180" alt="Perspective Correct Interpolation" align=bottom />
+| <img src="/gallery/stencil_test.jpg" width = "180" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/z_buffer.jpg" width = "220" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/transparent_cube.jpg" width = "180" height = "180" alt="Blending" align=bottom/> |
 
-point/bilinear texture filtering:
 
-<table>
-<tr>
-<img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>
-<img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> 
-</tr>
-</table>
+| shadow mapping |
+| --- |
+| <img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/overview.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> |
 
-stencil-test, z-test and blending
+| ao |
+| --- |
 
-<table>
-<tr>
-<img src="/gallery/stencil_test.jpg" width = "180" height = "180" alt="Per Sample Operation" align=bottom/>
-<img src="/gallery/z_buffer.jpg" width = "220" height = "180" alt="Per Sample Operation" align=bottom/>
-<img src="/gallery/transparent_cube.jpg" width = "180" height = "180" alt="Blending" align=bottom/>
-</tr>
-</table>
-
-shadow mapping:
-
-<table>
-<tr>
-<img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/>
-<img src="/gallery/overview.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/>
-<img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/>
-<img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/>
-</tr>
-</table>
-
-AO:
-
-<table>
-<tr>
-<img src="/gallery/ao.jpg" width = "180" height = "180" alt="AO" align=bottom/>
-<img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/>
-</tr>
-</table>
+| <img src="/gallery/ao.jpg" width = "180" height = "180" alt="AO" align=bottom/> | <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
