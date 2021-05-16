@@ -1,5 +1,6 @@
 #include <memory>
 #include "CPURasterizer.hpp"
+#include "ShaderLab.hpp"
 
 using namespace Guarneri;
 using namespace std;
@@ -64,8 +65,10 @@ int main()
 	demo_scene.skybox->target->material->set_cubemap(cubemap_prop, cubemap);
 	demo_scene.enable_skybox = true;
 
+	auto light_shader = std::make_shared<LightShader>();
+	auto lshader = std::dynamic_pointer_cast<Shader>(light_shader);
 	// light cube
-	auto ptlmat = Material::create(std::unique_ptr<Shader>(new LightShader()));
+	auto ptlmat = Material::create("light_material", lshader);
 	ptlmat->double_face = true;
 	auto p1 = PrimitiveFactory::cube(ptlmat);
 	p1->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
@@ -73,17 +76,13 @@ int main()
 	std::shared_ptr<Renderer> p1r = Renderer::create(p1);
 	demo_scene.add(p1r);
 
-	auto pt2mat = Material::create(std::unique_ptr<Shader>(new LightShader()));
-	pt2mat->double_face = true;
-	auto p2 = PrimitiveFactory::cube(pt2mat);
+	auto p2 = PrimitiveFactory::cube(ptlmat);
 	p2->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
 	p2->transform.translate(pl2.position);
 	std::shared_ptr<Renderer> p2r = Renderer::create(p2);
 	demo_scene.add(p2r);
 
-	auto pt3mat = Material::create(std::unique_ptr<Shader>(new LightShader()));
-	pt3mat->double_face = true;
-	auto p3 = PrimitiveFactory::cube(pt3mat);
+	auto p3 = PrimitiveFactory::cube(ptlmat);
 	p3->transform.scale(Vector3(0.5f, 0.5f, 0.5f));
 	p3->transform.translate(pl3.position);
 	std::shared_ptr<Renderer> p3r = Renderer::create(p3);
@@ -102,7 +101,7 @@ int main()
 	plane_normal->filtering = Filtering::POINT;
 	plane_s->filtering = Filtering::POINT;
 	plane_ao->filtering = Filtering::POINT;
-	auto plane_material = Material::create();
+	auto plane_material = std::make_shared<Material>("plane_material");
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_albedo);
 	plane_material->set_texture(normal_prop, plane_normal);

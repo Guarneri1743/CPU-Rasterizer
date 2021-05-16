@@ -19,7 +19,7 @@ function setupIncludeDirs()
       third_party_dir .. "/assimp",
       third_party_dir .. "/ply",
       third_party_dir .. "/stb_image",
-      third_party_dir .. "/nlohmann"
+      third_party_dir .. "/rapidjson"
    }
 end
 
@@ -109,7 +109,7 @@ function setupBlendingDemo()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/BlendingSample.cpp"
    }
 
@@ -144,7 +144,7 @@ function setupStencilDemo()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/StencilSample.cpp"
    }
 
@@ -179,7 +179,7 @@ function setupLightingDemo()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/PBRSample.cpp"
    }
 
@@ -214,7 +214,7 @@ function setupFilteringDemo()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/FilteringSample.cpp"
    }
 
@@ -250,7 +250,7 @@ function setupCubemapDemo()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/CubemapSample.cpp"
    }
 
@@ -285,7 +285,7 @@ function setupUnitTestProj()
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/nlohmann/*.*",
+      third_party_dir .. "/rapidjson/*.*",
       sample_dir .. "/UnitTest.cpp"
    }
 

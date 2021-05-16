@@ -1,6 +1,7 @@
 #include "CPURasterizer.hpp"
 #include "GDIWindow.hpp"
 #include "GraphicsDevice.hpp"
+#include "ShaderLab.hpp"
 
 namespace Guarneri
 {
@@ -103,6 +104,7 @@ namespace Guarneri
 
 	void CPURasterizer::prepare(const uint32_t w, const uint32_t h, const char* title)
 	{
+		ShaderLab::initialize();
 		INST(GDIWindow).initialize(w, h, static_cast<LPCSTR>(title), INST(InputManager).event_callback);
 		INST(InputManager).add_on_key_down_evt([](KeyCode code, void* data)
 		{

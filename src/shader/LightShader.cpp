@@ -4,7 +4,7 @@
 
 namespace Guarneri
 {
-	LightShader::LightShader()
+	LightShader::LightShader() : Shader("light_shader")
 	{}
 
 	LightShader::~LightShader()

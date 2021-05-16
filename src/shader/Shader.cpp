@@ -6,7 +6,7 @@
 
 namespace Guarneri
 {
-	Shader::Shader()
+	Shader::Shader(std::string name)
 	{
 		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 		this->stencil_func = CompareFunc::ALWAYS;
@@ -27,6 +27,7 @@ namespace Guarneri
 		this->skybox = false;
 		this->shadow = false;
 		this->shadowmap = nullptr;
+		this->name = name;
 	}
 
 	Shader::~Shader()

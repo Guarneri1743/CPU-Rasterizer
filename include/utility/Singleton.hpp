@@ -16,7 +16,6 @@ namespace Guarneri
 		void operator=(const Singleton&) = delete;
 	};
 
-
 	template<typename T>
 	Singleton<T>::Singleton()
 	{}

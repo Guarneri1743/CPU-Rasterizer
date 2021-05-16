@@ -96,47 +96,47 @@ namespace Guarneri{
 	};
 
 	enum class CompareFunc {
-		NEVER,
-		ALWAYS,
-		LESS,
-		LEQUAL,
-		EQUAL,
-		GEQUAL,
-		GREATER,
-		NOT_EQUAL
+		NEVER = 0,
+		ALWAYS = 1,
+		LESS = 2,
+		LEQUAL = 3,
+		EQUAL = 4,
+		GEQUAL = 5,
+		GREATER = 6,
+		NOT_EQUAL = 7
 	};
 
 	enum class ZWrite {
-		ON,
-		OFF
+		OFF = 0,
+		ON = 1
 	};
 
 	enum class StencilOp {
-		KEEP,
-		ZERO,
-		REPLACE,
-		INCR,
-		INCR_WRAP,
-		DECR,
-		DECR_WRAP,
-		INVERT
+		KEEP = 0,
+		ZERO = 1,
+		REPLACE = 2,
+		INCR = 3,
+		INCR_WRAP = 4,
+		DECR = 5,
+		DECR_WRAP = 6,
+		INVERT = 7
 	};
 
 	enum class BlendFactor {
-		ONE,
-		SRC_COLOR,
-		SRC_ALPHA,
-		ONE_MINUS_SRC_ALPHA,
-		ONE_MINUS_SRC_COLOR,
-		DST_COLOR,
-		DST_ALPHA,
-		ONE_MINUS_DST_ALPHA,
-		ONE_MINUS_DST_COLOR
+		ONE = 0,
+		SRC_COLOR = 1,
+		SRC_ALPHA = 2,
+		ONE_MINUS_SRC_ALPHA = 3,
+		ONE_MINUS_SRC_COLOR = 4,
+		DST_COLOR = 5,
+		DST_ALPHA = 6,
+		ONE_MINUS_DST_ALPHA = 7,
+		ONE_MINUS_DST_COLOR = 8
 	};
 
 	enum class BlendOp {
-		ADD,
-		SUB
+		ADD = 0,
+		SUB = 1
 	};
 
 	enum class ColorMask {

@@ -106,7 +106,7 @@
 #### Third Parties
 - assimp 
 - stb_image 
-- [nlohmann json](https://github.com/nlohmann/json) 
+- [rapidjson](https://github.com/Tencent/rapidjson) 
 - [ThreadPool](https://github.com/progschj/ThreadPool) 
 
 ---

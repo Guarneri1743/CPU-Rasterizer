@@ -1,6 +1,7 @@
 #ifndef _MATERIAL_
 #define _MATERIAL_
 #include <memory>
+#include <string>
 #include "Object.hpp"
 #include "Shader.hpp"
 #include "ShadowShader.hpp"
@@ -11,6 +12,7 @@ namespace Guarneri
 	class Material : public Object
 	{
 	public:
+		std::string material_name;
 		ColorMask color_mask;
 		CompareFunc stencil_func;
 		StencilOp stencil_pass_op;
@@ -33,19 +35,18 @@ namespace Guarneri
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		LightingData lighting_param;
-		std::unique_ptr<Shader> target_shader;
-		std::unique_ptr<ShadowShader> shadow_caster;
+		std::shared_ptr<Shader> target_shader;
+		std::shared_ptr<Shader> shadow_caster;
 
 	public:
 		Material();
-		Material(std::unique_ptr<Shader>& shader);
-		Material(std::unique_ptr<SkyboxShader>& shader);
+		Material(std::string name);
+		Material(std::string name, std::shared_ptr<Shader> shader);
 		Material(const Material& other);
 		~Material();
 
-		static std::unique_ptr<Material> create();
-		static std::unique_ptr<Material> create(std::unique_ptr<Shader> shader);
-		static std::unique_ptr<Material> create(const Material& other);
+		static std::shared_ptr<Material> create(std::string name, std::shared_ptr<Shader> shader);
+		static std::shared_ptr<Material> create(const Material& other);
 		Shader* get_shader(const RenderPass& pass) const;
 		void set_shadowmap(RawBuffer<float>* shadowmap);
 		void sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
@@ -63,6 +64,9 @@ namespace Guarneri
 		Material& operator =(const Material& other);
 		void copy(const Material& other);
 		std::string str() const;
+
+		static void serialize(const Material& material, std::string path);
+		static Material* deserialize(std::string path);
 	};
 }
 #endif

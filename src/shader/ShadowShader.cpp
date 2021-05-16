@@ -5,7 +5,7 @@
 
 namespace Guarneri
 {
-	ShadowShader::ShadowShader()
+	ShadowShader::ShadowShader() : Shader("shadow_shader")
 	{
 		this->shadow = true;
 	}

@@ -6,7 +6,7 @@
 
 namespace Guarneri
 {
-	SkyboxShader::SkyboxShader()
+	SkyboxShader::SkyboxShader() : Shader("skybox_shader")
 	{
 		this->skybox = true;
 	}

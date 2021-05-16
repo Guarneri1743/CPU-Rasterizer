@@ -135,7 +135,7 @@ namespace Guarneri {
 		return tangent.normalized();
 	}
 
-	std::unique_ptr<Model> PrimitiveFactory::plane(std::unique_ptr<Material>& material)
+	std::unique_ptr<Model> PrimitiveFactory::plane(std::shared_ptr<Material> material)
 	{
 		auto tangent1 = cal_tangent(plane_vertices[0], plane_vertices[1], plane_vertices[2]);
 		auto tangent2 = cal_tangent(plane_vertices[5], plane_vertices[3], plane_vertices[4]);
@@ -150,14 +150,14 @@ namespace Guarneri {
 		return Model::create(vert, ind, material);
 	}
 
-	std::unique_ptr<Model> PrimitiveFactory::cube(std::unique_ptr<Material>& material)
+	std::unique_ptr<Model> PrimitiveFactory::cube(std::shared_ptr<Material> material)
 	{
 		const std::vector<Vertex> vert(cube_vertices, cube_vertices + 36);
 		const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
 		return Model::create(vert, ind, material);
 	}
 
-	std::unique_ptr<Model> PrimitiveFactory::skybox(std::unique_ptr<Material>& material)
+	std::unique_ptr<Model> PrimitiveFactory::skybox(std::shared_ptr<Material> material)
 	{
 		const std::vector<Vertex> vert(sky_box_vertices, sky_box_vertices + 36);
 		const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);

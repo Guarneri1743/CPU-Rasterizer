@@ -83,9 +83,10 @@ namespace Guarneri
 		LightingData lighting_param;
 		bool discarded = false;
 		bool normal_map = false;
+		std::string name;
 
 	public:
-		Shader();
+		Shader(std::string name);
 		virtual ~Shader();
 		virtual v2f vertex_shader(const a2v& input) const;
 		float get_shadow_atten(const Vector4& light_space_pos) const;

@@ -1,12 +1,25 @@
 #include "Material.hpp"
 #include <sstream>
+#include <fstream>
+#include <iostream>
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/reader.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include "Marcos.h"
+#include "ShaderLab.hpp"
+#include "Singleton.hpp"
+#include "Utility.hpp"
 
 namespace Guarneri
 {
 	Material::Material()
 	{
-		this->target_shader = std::make_unique<Shader>();
-		this->shadow_caster = std::make_unique<ShadowShader>();
+		this->material_name = "default_material";
+		this->target_shader = std::make_shared<Shader>("pbr_shader");
+		this->shadow_caster = std::dynamic_pointer_cast<Shader>(std::make_shared<ShadowShader>());
 		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 		this->stencil_func = CompareFunc::ALWAYS;
 		this->stencil_pass_op = StencilOp::KEEP;
@@ -25,49 +38,14 @@ namespace Guarneri
 		this->cast_shadow = false;
 	}
 
-	Material::Material(std::unique_ptr<Shader>& shader)
+	Material::Material(std::string name) : Material()
 	{
-		this->target_shader = std::move(shader);
-		this->shadow_caster = std::make_unique<ShadowShader>();
-		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
-		this->stencil_func = CompareFunc::ALWAYS;
-		this->stencil_pass_op = StencilOp::KEEP;
-		this->stencil_fail_op = StencilOp::KEEP;
-		this->stencil_zfail_op = StencilOp::KEEP;
-		this->stencil_read_mask = 0xFF;
-		this->stencil_write_mask = 0xFF;
-		this->stencil_ref_val = 0;
-		this->ztest_func = CompareFunc::LESS;
-		this->zwrite_mode = ZWrite::ON;
-		this->src_factor = BlendFactor::SRC_ALPHA;
-		this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-		this->blend_op = BlendOp::ADD;
-		this->double_face = false;
-		this->transparent = false;
-		this->cast_shadow = false;
+		this->material_name = name;
 	}
 
-	Material::Material(std::unique_ptr<SkyboxShader>& shader)
+	Material::Material(std::string name, std::shared_ptr<Shader> shader) : Material(name)
 	{
-		auto shader_ptr = shader.release();
-		this->target_shader = std::unique_ptr <Shader>((Shader*)(shader_ptr));
-		this->shadow_caster = std::make_unique<ShadowShader>();
-		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
-		this->stencil_func = CompareFunc::ALWAYS;
-		this->stencil_pass_op = StencilOp::KEEP;
-		this->stencil_fail_op = StencilOp::KEEP;
-		this->stencil_zfail_op = StencilOp::KEEP;
-		this->stencil_read_mask = 0xFF;
-		this->stencil_write_mask = 0xFF;
-		this->stencil_ref_val = 0;
-		this->ztest_func = CompareFunc::LESS;
-		this->zwrite_mode = ZWrite::ON;
-		this->src_factor = BlendFactor::SRC_ALPHA;
-		this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-		this->blend_op = BlendOp::ADD;
-		this->double_face = false;
-		this->transparent = false;
-		this->cast_shadow = false;
+		this->target_shader = shader;
 	}
 
 	Material::Material(const Material& other)
@@ -78,19 +56,14 @@ namespace Guarneri
 	Material::~Material()
 	{}
 
-	std::unique_ptr<Material> Material::create()
+	std::shared_ptr<Material> Material::create(std::string name, std::shared_ptr<Shader> shader)
 	{
-		return std::make_unique<Material>();
+		return std::make_shared<Material>(name, shader);
 	}
 
-	std::unique_ptr<Material> Material::create(std::unique_ptr<Shader> shader)
+	std::shared_ptr<Material> Material::create(const Material& other)
 	{
-		return std::make_unique<Material>(shader);
-	}
-
-	std::unique_ptr<Material> Material::create(const Material& other)
-	{
-		return std::make_unique<Material>(other);
+		return std::make_shared<Material>(other);
 	}
 
 	Shader* Material::get_shader(const RenderPass& pass) const
@@ -238,7 +211,8 @@ namespace Guarneri
 
 	void Material::copy(const Material& other)
 	{
-		this->target_shader = std::make_unique<Shader>(Shader(*other.target_shader.get()));
+		this->material_name = other.material_name;
+		this->target_shader = other.target_shader;
 		this->ztest_func = other.ztest_func;
 		this->zwrite_mode = other.zwrite_mode;
 		this->stencil_func = other.stencil_func;
@@ -265,5 +239,79 @@ namespace Guarneri
 		std::stringstream ss;
 		ss << "Material[" << this->id << " Shader: " << this->target_shader << "]";
 		return ss.str();
+	}
+
+	void Material::serialize(const Material& material, std::string path)
+	{
+		rapidjson::Document doc;
+		doc.SetObject();
+		doc.AddMember("color_mask", (int32_t)material.color_mask, doc.GetAllocator());
+		doc.AddMember("blend_op", (int32_t)material.blend_op, doc.GetAllocator());
+		doc.AddMember("src_factor", (int32_t)material.src_factor, doc.GetAllocator());
+		doc.AddMember("dst_factor", (int32_t)material.dst_factor, doc.GetAllocator());
+		doc.AddMember("ztest_func", (int32_t)material.ztest_func, doc.GetAllocator());
+		doc.AddMember("zwrite_mode", (int32_t)material.zwrite_mode, doc.GetAllocator());
+		doc.AddMember("stencil_fail_op", (int32_t)material.stencil_fail_op, doc.GetAllocator());
+		doc.AddMember("stencil_func", (int32_t)material.stencil_func, doc.GetAllocator());
+		doc.AddMember("stencil_pass_op", (int32_t)material.stencil_pass_op, doc.GetAllocator());
+		doc.AddMember("stencil_read_mask", (int32_t)material.stencil_read_mask, doc.GetAllocator());
+		doc.AddMember("stencil_ref_val", (int32_t)material.stencil_ref_val, doc.GetAllocator());
+		doc.AddMember("stencil_write_mask", (int32_t)material.stencil_write_mask, doc.GetAllocator());
+		doc.AddMember("double_face", material.double_face, doc.GetAllocator());
+		doc.AddMember("transparent", material.transparent, doc.GetAllocator());
+		doc.AddMember("cast_shadow", material.cast_shadow, doc.GetAllocator());
+		rapidjson::Value mat_name;
+		mat_name.SetString(material.material_name.c_str(), doc.GetAllocator());
+		doc.AddMember("material_name", mat_name, doc.GetAllocator());
+		rapidjson::Value shader_name;
+		shader_name.SetString(material.target_shader->name.c_str(), doc.GetAllocator());
+		doc.AddMember("target_shader", shader_name, doc.GetAllocator());
+		rapidjson::StringBuffer buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+		doc.Accept(writer);
+		const char* ret = buffer.GetString();
+		std::FILE* fd = fopen(path.c_str(), "w");
+		if (fd != nullptr)
+		{
+			char write_buffer[256];
+			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+			rapidjson::Writer<rapidjson::FileWriteStream> material_writer(fs);
+			doc.Accept(material_writer);
+			fclose(fd);
+		}
+	}
+
+	Material* Material::deserialize(std::string path)
+	{
+		Material* material = new Material();
+		std::FILE* fd = fopen(path.c_str(), "r");
+		if (fd != nullptr)
+		{
+			char read_buffer[256];
+			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+			rapidjson::Document doc;
+			doc.ParseStream(fs);
+			material->color_mask = (ColorMask)doc["color_mask"].GetInt();
+			material->blend_op = (BlendOp)doc["blend_op"].GetInt();
+			material->src_factor = (BlendFactor)doc["src_factor"].GetInt();
+			material->dst_factor = (BlendFactor)doc["dst_factor"].GetInt();
+			material->ztest_func = (CompareFunc)doc["ztest_func"].GetInt();
+			material->zwrite_mode = (ZWrite)doc["zwrite_mode"].GetInt();
+			material->stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
+			material->stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
+			material->stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();
+			material->stencil_read_mask = (uint8_t)doc["stencil_read_mask"].GetInt();
+			material->stencil_ref_val = (uint8_t)doc["stencil_ref_val"].GetInt();
+			material->stencil_write_mask = (uint8_t)doc["stencil_write_mask"].GetInt();
+			material->double_face = doc["double_face"].GetBool();
+			material->transparent = doc["transparent"].GetBool();
+			material->cast_shadow = doc["cast_shadow"].GetBool();
+			material->material_name = doc["material_name"].GetString();
+			material->target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
+			fclose(fd);
+			return material;
+		}
+
+		return nullptr;
 	}
 }

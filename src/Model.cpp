@@ -9,13 +9,13 @@
 
 namespace Guarneri
 {
-	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material)
+	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
 	{
 		assert(vertices.size() != 0 && indices.size() != 0);
 		assert(indices.size() % 3 == 0);
 		auto m = std::make_unique<Mesh>(vertices, indices);
 		meshes.emplace_back(std::move(m));
-		this->material = std::move(material);
+		this->material = material;
 	}
 
 	Model::Model(std::string path, bool flip_uv)
@@ -45,9 +45,9 @@ namespace Guarneri
 	Model::~Model()
 	{}
 
-	std::unique_ptr<Model> Model::create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material)
+	std::unique_ptr<Model> Model::create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
 	{
-		return std::make_unique<Model>(vertices, indices, std::move(material));
+		return std::make_unique<Model>(vertices, indices, material);
 	}
 
 	std::unique_ptr<Model> Model::create(std::string path, bool flip_uv)
