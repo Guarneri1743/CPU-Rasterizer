@@ -1,5 +1,5 @@
-#ifndef SAFEQUEUE_HPP_
-#define SAFEQUEUE_HPP_
+#ifndef _SAFEQUEUE_HPP_
+#define _SAFEQUEUE_HPP_
 #include <mutex>
 #include <queue>
 

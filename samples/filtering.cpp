@@ -23,10 +23,10 @@ int main()
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
 	// Plane
-	auto plane_a_path = res_path() + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
-	auto plane_n_path = res_path() + "/textures/Metal_ScavengerMetal_2k_n_1.jpg";
-	auto plane_s_path = res_path() + "/textures/Metal_ScavengerMetal_2k_g_1.jpg";
-	auto plane_ao_path = res_path() + "/textures/Metal_ScavengerMetal_2k_ao_1.jpg";
+	auto plane_a_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
+	auto plane_n_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_n_1.jpg";
+	auto plane_s_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_g_1.jpg";
+	auto plane_ao_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_ao_1.jpg";
 	auto plane_albedo = Texture::create(plane_a_path);
 	auto plane_normal = Texture::create(plane_n_path);
 	auto plane_s = Texture::create(plane_s_path);

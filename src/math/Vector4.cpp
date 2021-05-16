@@ -1,6 +1,7 @@
 #include "Vector4.hpp"
 #include <cmath>
 #include <iomanip>
+#include <sstream>
 
 namespace Guarneri
 {

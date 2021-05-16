@@ -1,7 +1,5 @@
 #ifndef _MAT4_
 #define _MAT4_
-#include <sstream>
-#include <ostream>
 #include <string>
 #include "Vector3.hpp"
 #include "Vector4.hpp"
@@ -83,15 +81,5 @@ namespace Guarneri {
 		int rc2index(const int& row, const int& column) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Matrix4x4& mat) {
-		stream << mat.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Matrix4x4& mat) {
-		stream << mat.str();
-		return stream;
-	}
 }
 #endif

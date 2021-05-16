@@ -2,12 +2,16 @@
 
 namespace Guarneri
 {
-	DirectionalLight::DirectionalLight()
+	Light::Light()
 	{
 		ambient = Color::BLACK;
 		diffuse = Color::WHITE;
 		specular = Color::WHITE;
 		intensity = 1.0f;
+	}
+
+	DirectionalLight::DirectionalLight() : Light()
+	{
 		this->yaw = -150.0f;
 		this->pitch = -45.0f;
 		//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
@@ -48,5 +52,13 @@ namespace Guarneri
 		forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 		forward = Vector3::normalize(forward);
 		Vector3::calculate_right_up(forward, right, up);
+	}
+
+	PointLight::PointLight() : Light()
+	{
+		constant = 1.0f;
+		linear = 0.1f;
+		quadratic = 0.03f;
+		position = Vector3();
 	}
 }

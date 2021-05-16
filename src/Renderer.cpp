@@ -1,11 +1,10 @@
 #include "Renderer.hpp"
 #include <sstream>
-#include <ostream>
-#include <string>
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "ThreadPool.hpp"
 #include "Misc.hpp"
+#include "Config.h"
 
 namespace Guarneri
 {

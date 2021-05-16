@@ -1,8 +1,6 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
@@ -33,17 +31,5 @@ namespace Guarneri
 		static Vertex intagral(const Vertex& left, const Vertex& differential);
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Vertex& v)
-	{
-		stream << v.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Vertex& v)
-	{
-		stream << v.str();
-		return stream;
-	}
 }
 #endif

@@ -10,6 +10,7 @@ namespace Guarneri {
 		Color diffuse;
 		Color specular;
 		float intensity;
+		Light();
 	};
 
 	struct DirectionalLight : Light {
@@ -34,6 +35,7 @@ namespace Guarneri {
 		float linear;
 		float quadratic;
 		Vector3 position;
+		PointLight();
 	};
 
 	struct SpotLight : Light {

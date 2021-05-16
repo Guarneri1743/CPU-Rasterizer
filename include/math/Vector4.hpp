@@ -2,8 +2,6 @@
 #define _VEC4_
 #include <cmath>
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Marcos.h"
 #include "Vector2.hpp"
 #include "Vector3.hpp"
@@ -12,13 +10,14 @@ namespace Guarneri
 {
 	struct Vector4
 	{
-	public:
+		static const Vector4 ZERO;
+		static const Vector4 ONE;
+
 		float x;
 		float y;
 		float z;
 		float w;
 
-	public:
 		Vector4();
 		Vector4(const float& r);
 		Vector4(const Vector3& v);
@@ -340,55 +339,34 @@ namespace Guarneri
 		Vector2 Vector4::wz() const;
 		Vector2 Vector4::ww() const;
 
-	public:
-		static const Vector4 ZERO;
-		static const Vector4 ONE;
+		friend static Vector4 operator +(const float& other, const Vector4& vec)
+		{
+			return vec + other;
+		}
+
+		friend static Vector4 operator -(const float& other, const Vector4& vec)
+		{
+			return -vec + other;
+		}
+
+		friend static Vector4 operator *(const float& val, const Vector4& vec)
+		{
+			return vec * val;
+		}
+
+		friend static Vector4 operator /(const float& val, const Vector4& vec)
+		{
+			return Vector4(val) / vec;
+		}
+
+		friend static Vector4 lerp(const Vector4& lhs, const Vector4& rhs, float t)
+		{
+			float x = lhs.x + (rhs.x - lhs.x) * t;
+			float y = lhs.y + (rhs.y - lhs.y) * t;
+			float z = lhs.z + (rhs.z - lhs.z) * t;
+			float w = lhs.w + (rhs.w - lhs.w) * t;
+			return Vector4(x, y, z, w);
+		}
 	};
-
-	static Vector4 operator +(const float& other, const Vector4& vec)
-	{
-		return vec + other;
-	}
-
-	static Vector4 operator -(const float& other, const Vector4& vec)
-	{
-		return -vec + other;
-	}
-
-	static Vector4 operator *(const float& val, const Vector4& vec)
-	{
-		return vec * val;
-	}
-
-	static Vector4 operator /(const float& val, const Vector4& vec)
-	{
-		return Vector4(val) / vec;
-	}
-
-	static Vector4 maxf(const Vector4& lhs, const Vector4& rhs)
-	{
-		return Vector4(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z), std::max(lhs.w, rhs.w));
-	}
-
-	static std::ostream& operator << (std::ostream& stream, const Vector4& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Vector4& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
-
-	static Vector4 lerp(const Vector4& lhs, const Vector4& rhs, float t)
-	{
-		float x = lhs.x + (rhs.x - lhs.x) * t;
-		float y = lhs.y + (rhs.y - lhs.y) * t;
-		float z = lhs.z + (rhs.z - lhs.z) * t;
-		float w = lhs.w + (rhs.w - lhs.w) * t;
-		return Vector4(x, y, z, w);
-	}
 }
 #endif

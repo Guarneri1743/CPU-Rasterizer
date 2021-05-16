@@ -1,4 +1,5 @@
 ﻿#include "Line.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -23,7 +24,7 @@ namespace Guarneri
 	std::string Line::str() const
 	{
 		std::stringstream ss;
-		ss << "Line: [origin: " << this->origin << ", direction: " << this->direction << "]";
+		ss << "Line: [origin: " << this->origin.str() << ", direction: " << this->direction.str() << "]";
 		return ss.str();
 	}
 }

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iomanip>
+#include <sstream>
 #include "Marcos.h"
 
 namespace Guarneri

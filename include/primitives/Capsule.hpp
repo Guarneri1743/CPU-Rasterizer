@@ -1,8 +1,6 @@
 ﻿#ifndef _CAPSULE_
 #define _CAPSULE_
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector3.hpp"
 #include "Segment.hpp"
 
@@ -22,17 +20,5 @@ namespace Guarneri
 		Capsule(const Capsule& other);
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Capsule& Capsule)
-	{
-		stream << Capsule.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Capsule& Capsule)
-	{
-		stream << Capsule.str();
-		return stream;
-	}
 }
 #endif

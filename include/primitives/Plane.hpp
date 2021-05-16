@@ -1,8 +1,6 @@
 ﻿#ifndef _PLANE_
 #define _PLANE_
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector3.hpp"
 
 namespace Guarneri
@@ -22,17 +20,5 @@ namespace Guarneri
 		float distance(const Vector3& pt) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Plane& Plane)
-	{
-		stream << Plane.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Plane& Plane)
-	{
-		stream << Plane.str();
-		return stream;
-	}
 }
 #endif

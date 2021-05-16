@@ -1,5 +1,7 @@
 #include "Matrix4x4.hpp"
 #include "Marcos.h"
+#include <assert.h>
+#include <sstream>
 
 #undef near
 #undef far
@@ -659,6 +661,7 @@ namespace Guarneri {
 
 	Vector4 Matrix4x4::row(const int& index) const
 	{
+		assert(index >= 0 && index <= 3);
 		Vector4 ret;
 		switch (index)
 		{
@@ -674,14 +677,13 @@ namespace Guarneri {
 		case 3:
 			ret = Vector4(m30, m31, m32, m33);
 			break;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
 		}
 		return ret;
 	}
 
 	Vector4 Matrix4x4::column(const int& index) const
 	{
+		assert(index >= 0 && index <= 3);
 		Vector4 ret;
 		switch (index)
 		{
@@ -697,8 +699,6 @@ namespace Guarneri {
 		case 3:
 			ret = Vector4(m03, m13, m23, m33);
 			break;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
 		}
 		return ret;
 	}
@@ -715,6 +715,7 @@ namespace Guarneri {
 
 	const float& Matrix4x4::operator[](const int& index) const
 	{
+		assert(index >= 0 && index <= 15);
 		switch (index)
 		{
 		case 0:
@@ -749,14 +750,13 @@ namespace Guarneri {
 			return m32;
 		case 15:
 			return m33;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return m00;
 		}
+		return m00;
 	}
 
 	float& Matrix4x4::operator[](const int& index)
 	{
+		assert(index >= 0 && index <= 15);
 		switch (index)
 		{
 		case 0:
@@ -791,10 +791,8 @@ namespace Guarneri {
 			return m32;
 		case 15:
 			return m33;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return m00;
 		}
+		return m00;
 	}
 
 	int Matrix4x4::rc2index(const int& row, const int& column) const
@@ -805,7 +803,7 @@ namespace Guarneri {
 	std::string Matrix4x4::str() const
 	{
 		std::stringstream ss;
-		ss << row(0) << std::endl << row(1) << std::endl << row(2) << std::endl << row(3) << std::endl;
+		ss << row(0).str() << std::endl << row(1).str() << std::endl << row(2).str() << std::endl << row(3).str() << std::endl;
 		return ss.str();
 	}
 

@@ -2,8 +2,6 @@
 #define _TRIANGLE_
 #include <vector>
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vertex.hpp"
@@ -33,17 +31,5 @@ namespace Guarneri
 		const Vertex& operator[](const uint32_t i) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Triangle& tri)
-	{
-		stream << tri.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Triangle& tri)
-	{
-		stream << tri.str();
-		return stream;
-	}
 }
 #endif

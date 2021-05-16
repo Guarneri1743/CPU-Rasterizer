@@ -22,8 +22,8 @@ int main()
 	demo_scene.main_cam->lookat(Vector3(0.0f, 0.0f, 0.0f));
 
 	// plane
-	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
-	auto plane_normal_path = res_path() + "/textures/pavingstones_decorative2_2k_n_1.jpg";
+	auto tex_path = RES_PATH + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+	auto plane_normal_path = RES_PATH + "/textures/pavingstones_decorative2_2k_n_1.jpg";
 	auto plane_albedo = Texture::create(tex_path);
 	auto plane_normal = Texture::create(plane_normal_path);
 	auto plane_material = Material::create();
@@ -53,7 +53,7 @@ int main()
 		}, & plane_renderer);
 
 	// cube
-	auto ca = Texture::create(res_path() + "/textures/misc_Garbage_2k_alb_1.jpg");
+	auto ca = Texture::create(RES_PATH + "/textures/misc_Garbage_2k_alb_1.jpg");
 	auto mat = Material::create();
 	mat->set_texture(albedo_prop, ca);
 	mat->double_face = true;
@@ -65,7 +65,7 @@ int main()
 	demo_scene.add(opaque_cube_rdr);
 
 	// transparent cube
-	auto cube_albedo = Texture::create(res_path() + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg");
+	auto cube_albedo = Texture::create(RES_PATH + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg");
 	auto box_material = Material::create();
 	box_material->transparent = true;
 	box_material->blend_op = BlendOp::ADD;

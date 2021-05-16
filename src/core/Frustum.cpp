@@ -1,4 +1,5 @@
 #include "Frustum.hpp"
+#include <assert.h>
 
 namespace Guarneri
 {
@@ -90,6 +91,7 @@ namespace Guarneri
 
 	const Plane& Frustum::operator[](const int& index) const
 	{
+		assert(index >= 0 && index <= 5);
 		switch (index)
 		{
 		case 0:
@@ -104,14 +106,13 @@ namespace Guarneri
 			return near;
 		case 5:
 			return far;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return near;
 		}
+		return near;
 	}
 
 	Plane& Frustum::operator[](const int& index)
 	{
+		assert(index >= 0 && index <= 5);
 		switch (index)
 		{
 		case 0:
@@ -126,9 +127,7 @@ namespace Guarneri
 			return near;
 		case 5:
 			return far;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return near;
 		}
+		return near;
 	}
 }

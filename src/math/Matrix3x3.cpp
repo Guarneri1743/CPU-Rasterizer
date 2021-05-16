@@ -1,5 +1,7 @@
 #include "Matrix3x3.hpp"
 #include "Marcos.h"
+#include <assert.h>
+#include <sstream>
 
 #undef near
 #undef far
@@ -12,6 +14,19 @@ namespace Guarneri
 		{
 			this->operator[](i) = 0.0f;
 		}
+	}
+
+	Matrix3x3::Matrix3x3(const Matrix4x4& mat)
+	{
+		m00 = mat.at(0, 0);
+		m01 = mat.at(0, 1);
+		m02 = mat.at(0, 2);
+		m10 = mat.at(1, 0);
+		m11 = mat.at(1, 1);
+		m12 = mat.at(1, 2);
+		m20 = mat.at(2, 0);
+		m21 = mat.at(2, 1);
+		m22 = mat.at(2, 2);
 	}
 
 	Matrix3x3::Matrix3x3(const Vector3& row0, const Vector3& row1, const Vector3& row2)
@@ -171,6 +186,7 @@ namespace Guarneri
 
 	Vector3 Matrix3x3::row(const int& index) const
 	{
+		assert(index >= 0 && index <= 2);
 		Vector3 ret;
 		switch (index)
 		{
@@ -183,14 +199,13 @@ namespace Guarneri
 		case 2:
 			ret = Vector3(m20, m21, m22);
 			break;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
 		}
 		return ret;
 	}
 
 	Vector3 Matrix3x3::column(const int& index) const
 	{
+		assert(index >= 0 && index <= 2);
 		Vector3 ret;
 		switch (index)
 		{
@@ -203,9 +218,6 @@ namespace Guarneri
 		case 2:
 			ret = Vector3(m02, m12, m22);
 			break;
-			break;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
 		}
 		return ret;
 	}
@@ -222,6 +234,7 @@ namespace Guarneri
 
 	const float& Matrix3x3::operator[](const int& index) const
 	{
+		assert(index >= 0 && index <= 8);
 		switch (index)
 		{
 		case 0:
@@ -242,14 +255,13 @@ namespace Guarneri
 			return m21;
 		case 8:
 			return m22;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return m00;
 		}
+		return m00;
 	}
 
 	float& Matrix3x3::operator[](const int& index)
 	{
+		assert(index >= 0 && index <= 8);
 		switch (index)
 		{
 		case 0:
@@ -270,16 +282,14 @@ namespace Guarneri
 			return m21;
 		case 8:
 			return m22;
-		default:
-			std::cerr << "index out of range: " << index << std::endl;
-			return m00;
 		}
+		return m00;
 	}
 
 	std::string Matrix3x3::str() const
 	{
 		std::stringstream ss;
-		ss << row(0) << std::endl << row(1) << std::endl << row(2) << std::endl << std::endl;
+		ss << row(0).str() << std::endl << row(1).str() << std::endl << row(2).str() << std::endl << std::endl;
 		return ss.str();
 	}
 

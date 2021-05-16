@@ -7,11 +7,11 @@ namespace Guarneri
 	class Singleton
 	{
 	public:
-		Singleton();
 		~Singleton();
 		static T& get();
 
 	private:
+		Singleton();
 		Singleton(const Singleton&) = delete;
 		void operator=(const Singleton&) = delete;
 	};

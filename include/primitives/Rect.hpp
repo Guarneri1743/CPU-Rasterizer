@@ -1,7 +1,5 @@
 #ifndef _Rect_
 #define _Rect_
-#include <sstream>
-#include <ostream>
 #include <string>
 #include "Vector2.hpp"
 #include "Vector3.hpp"
@@ -39,17 +37,5 @@ namespace Guarneri
 		Guarneri::Vector2 inv_offset(const Guarneri::Vector2& p) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Rect& Rect)
-	{
-		stream << Rect.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Rect& Rect)
-	{
-		stream << Rect.str();
-		return stream;
-	}
 }
 #endif

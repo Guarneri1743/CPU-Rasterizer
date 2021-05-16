@@ -1,20 +1,17 @@
 #include "Model.hpp"
 #include <sstream>
-#include <ostream>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
 #include <filesystem>
+#include <iostream>
 
 namespace Guarneri
 {
 	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material)
 	{
-		if (vertices.size() == 0 || indices.size() == 0)
-		{
-			std::cerr << "load vertices failed." << std::endl;
-		}
+		assert(vertices.size() != 0 && indices.size() != 0);
 		assert(indices.size() % 3 == 0);
 		auto m = std::make_unique<Mesh>(vertices, indices);
 		meshes.emplace_back(std::move(m));
@@ -31,6 +28,7 @@ namespace Guarneri
 			flag |= aiProcess_FlipUVs;
 		}
 		const aiScene* Scene = importer.ReadFile(path, flag);
+
 		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
 		{
 			std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;

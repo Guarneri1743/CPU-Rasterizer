@@ -1,6 +1,5 @@
 #include "LightShader.hpp"
 #include <iostream>
-#include <ostream>
 #include <sstream>
 
 namespace Guarneri

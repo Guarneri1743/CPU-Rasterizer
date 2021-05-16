@@ -52,12 +52,12 @@ int main()
 
 	// setup skybox
 	std::vector<std::string> cubemap_path = {
-		res_path() + "/cubemap/space_right.png",
-		res_path() + "/cubemap/space_left.png",
-		res_path() + "/cubemap/space_top.png",
-		res_path() + "/cubemap/space_bottom.png",
-		res_path() + "/cubemap/space_front.png",
-		res_path() + "/cubemap/space_back.png",
+		RES_PATH + "/cubemap/space_right.png",
+		RES_PATH + "/cubemap/space_left.png",
+		RES_PATH + "/cubemap/space_top.png",
+		RES_PATH + "/cubemap/space_bottom.png",
+		RES_PATH + "/cubemap/space_front.png",
+		RES_PATH + "/cubemap/space_back.png",
 	};
 
 	auto cubemap = CubeMap::create(cubemap_path);
@@ -90,10 +90,10 @@ int main()
 	demo_scene.add(p3r);
 
 	// Plane
-	auto plane_a_path = res_path() + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
-	auto plane_n_path = res_path() + "/textures/Metal_ScavengerMetal_2k_n_1.jpg";
-	auto plane_s_path = res_path() + "/textures/Metal_ScavengerMetal_2k_g_1.jpg";
-	auto plane_ao_path = res_path() + "/textures/Metal_ScavengerMetal_2k_ao_1.jpg";
+	auto plane_a_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
+	auto plane_n_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_n_1.jpg";
+	auto plane_s_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_g_1.jpg";
+	auto plane_ao_path = RES_PATH + "/textures/Metal_ScavengerMetal_2k_ao_1.jpg";
 	auto plane_albedo = Texture::create(plane_a_path);
 	auto plane_normal = Texture::create(plane_n_path);
 	auto plane_s = Texture::create(plane_s_path);
@@ -115,14 +115,14 @@ int main()
 	demo_scene.add(plane_renderer);
 
 	// backpack
-	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
+	auto backpack = Model::create(RES_PATH + "/backpack/backpack.obj", true);
 	backpack->material->cast_shadow = true;
 
-	auto bp_a = res_path() + "/backpack/diffuse.jpg";
-	auto bp_n = res_path() + "/backpack/normal.png";
-	auto bp_ao = res_path() + "/backpack/ao.jpg";
-	auto bp_s = res_path() + "/backpack/specular.jpg";
-	auto bp_r = res_path() + "/backpack/roughness.jpg";
+	auto bp_a = RES_PATH + "/backpack/diffuse.jpg";
+	auto bp_n = RES_PATH + "/backpack/normal.png";
+	auto bp_ao = RES_PATH + "/backpack/ao.jpg";
+	auto bp_s = RES_PATH + "/backpack/specular.jpg";
+	auto bp_r = RES_PATH + "/backpack/roughness.jpg";
 	auto tex_bp_a = Texture::create(bp_a);
 	auto tex_bp_n = Texture::create(bp_n);
 	auto tex_bp_ao = Texture::create(bp_ao);

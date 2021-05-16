@@ -1,5 +1,6 @@
 ﻿#include "Capsule.hpp"
 #include <iomanip>
+#include <sstream>
 
 namespace Guarneri
 {
@@ -36,7 +37,7 @@ namespace Guarneri
 	std::string Capsule::str() const
 	{
 		std::stringstream ss;
-		ss << "Capsule: [center: " << this->segment << ", size: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
+		ss << "Capsule: [center: " << this->segment.str() << ", size: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
 		return ss.str();
 	}
 }

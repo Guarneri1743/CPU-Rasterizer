@@ -20,13 +20,9 @@ namespace Guarneri
 	class GraphicsDevice
 	{
 	public:
-		int width;
-		int height;
 		GraphicsStatistic statistics;
 		bool tile_based;
 		bool multi_thread;
-		uint8_t msaa_subsample_count;
-		uint8_t subsamples_per_axis;
 
 	private:
 		// use 32 bits zbuffer here, for convenience 
@@ -42,16 +38,21 @@ namespace Guarneri
 		std::unique_ptr<RawBuffer<color_bgra>> msaa_colorbuffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
+		// commands
+		std::queue<GraphicsCommand*> commands;
 		// framebuffer tiles
-		const uint32_t TILE_SIZE = 64;
-		const uint32_t TILE_TASK_SIZE = 1;
+		FrameTile* tiles;
+		int width;
+		int height;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
 		uint32_t tile_length;
-		FrameTile* tiles;
-		std::queue<GraphicsCommand*> commands;
+		uint8_t msaa_subsample_count;
+		uint8_t subsamples_per_axis;
 
 	public:
+		GraphicsDevice();
+		~GraphicsDevice();
 		void initialize(void* bitmap_handle, uint32_t w, uint32_t h);
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void present();
@@ -70,6 +71,7 @@ namespace Guarneri
 
 	public:
 		TileInfo get_tile_info();
+		uint8_t get_subsample_count() { return msaa_subsample_count; }
 		RawBuffer<float>* get_shadowmap();
 
 	private:

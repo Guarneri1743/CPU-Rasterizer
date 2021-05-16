@@ -1,4 +1,6 @@
 ﻿#include "Plane.hpp"
+#include <sstream>
+#include <iomanip>
 
 namespace Guarneri
 {
@@ -40,7 +42,7 @@ namespace Guarneri
 	std::string Plane::str() const
 	{
 		std::stringstream ss;
-		ss << "Plane: [normal: " << this->normal << ", constant: " << this->constant << "]";
+		ss << "Plane: [normal: " << this->normal.str() << std::setprecision(FLOAT_LOG_PRECISION) << ", constant: " << this->constant << "]";
 		return ss.str();
 	}
 }

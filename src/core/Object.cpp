@@ -1,6 +1,4 @@
 #include "Object.hpp"
-#include <sstream>
-#include <ostream>
 #include <string>
 #include <stdint.h>
 #include "Marcos.h"
@@ -24,17 +22,5 @@ namespace Guarneri
 	uint32_t Object::get_id()
 	{
 		return id;
-	}
-
-	static std::ostream& operator << (std::ostream& stream, const Object& obj)
-	{
-		stream << obj.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Object& obj)
-	{
-		stream << obj.str();
-		return stream;
 	}
 }

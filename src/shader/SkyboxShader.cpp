@@ -1,6 +1,5 @@
 #include "SkyboxShader.hpp"
 #include <sstream>
-#include <ostream>
 #include "Vector4.hpp"
 #include "Misc.hpp"
 #include "Singleton.hpp"

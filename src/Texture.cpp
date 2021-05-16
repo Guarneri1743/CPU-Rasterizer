@@ -1,6 +1,6 @@
 #include "Texture.hpp"
 #include <sstream>
-#include <ostream>
+#include <iostream>
 #include <filesystem>
 #include "Singleton.hpp"
 #include "ResourceManager.hpp"

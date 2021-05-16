@@ -57,7 +57,7 @@ int main()
 		}, & stencil_cube_renderer);
 
 	// backpack
-	auto backpack = Model::create(res_path() + "/backpack/backpack.obj", true);
+	auto backpack = Model::create(RES_PATH + "/backpack/backpack.obj", true);
 	backpack->material->lighting_param.glossiness = 64.0f;
 	backpack->material->stencil_ref_val = 1;
 	backpack->material->stencil_func = CompareFunc::EQUAL;
@@ -66,7 +66,7 @@ int main()
 	demo_scene.add(Renderer::create(backpack));
 
 	// Plane
-	auto tex_path = res_path() + "/textures/pavingstones_decorative2_2k_h_1.jpg";
+	auto tex_path = RES_PATH + "/textures/pavingstones_decorative2_2k_h_1.jpg";
 	auto plane_tex = Texture::create(tex_path);
 	auto plane_material = Material::create();
 	plane_material->transparent = false;

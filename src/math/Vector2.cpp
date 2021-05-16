@@ -1,6 +1,7 @@
 #include "Vector2.hpp"
 #include "Marcos.h"
 #include <cmath>
+#include <sstream>
 #include <algorithm>
 #include <iomanip>
 

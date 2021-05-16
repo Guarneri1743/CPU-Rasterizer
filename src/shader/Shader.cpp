@@ -1,8 +1,8 @@
 #include "Shader.hpp"
 #include <algorithm>
+#include <iostream>
 #include "Marcos.h"
 #include "Singleton.hpp"
-#include "Utility.hpp"
 
 namespace Guarneri
 {
@@ -43,7 +43,7 @@ namespace Guarneri
 		o.world_pos = wpos.xyz();
 		o.shadow_coord = light_space_pos;
 		o.color = input.color;
-		Matrix3x3 normal_matrix = mat4tomat3(model).inverse().transpose();
+		Matrix3x3 normal_matrix = Matrix3x3(model).inverse().transpose();
 		if (normal_map)
 		{
 			Vector3 t = (normal_matrix * input.tangent).normalized();
@@ -368,7 +368,6 @@ namespace Guarneri
 		}
 
 		ret += emmision;
-
 		ret *= shadow_atten;
 
 		// todo: ddx ddy

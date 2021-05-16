@@ -2,19 +2,17 @@
 #define _VEC2_
 #include <cmath>
 #include <algorithm>
-#include <sstream>
-#include <ostream>
 #include <string>
 
 namespace Guarneri
 {
 	struct Vector2
 	{
-	public:
+		static const Vector2 ZERO;
+		static const Vector2 ONE;
 		float x;
 		float y;
 
-	public:
 		Vector2();
 		Vector2(const float& r);
 		Vector2(const Vector2& v);
@@ -48,36 +46,21 @@ namespace Guarneri
 		static Vector2 lerp(const Vector2& lhs, const Vector2& rhs, float t);
 
 		std::string str() const;
+
 		Vector2 xx() const;
 		Vector2 yy() const;
 		Vector2 yx() const;
 		Vector2 xy() const;
 
-	public:
-		static const Vector2 ZERO;
-		static const Vector2 ONE;
+		friend static Vector2 operator /(const float& val, const Vector2& vec)
+		{
+			return Vector2(val) / vec;
+		}
+
+		friend static Vector2 operator *(const float& val, const Vector2& vec)
+		{
+			return vec * val;
+		}
 	};
-
-	static Vector2 operator /(const float& val, const Vector2& vec)
-	{
-		return Vector2(val) / vec;
-	}
-
-	static Vector2 operator *(const float& val, const Vector2& vec)
-	{
-		return vec * val;
-	}
-
-	static std::ostream& operator << (std::ostream& stream, const Vector2& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Vector2& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
 }
 #endif

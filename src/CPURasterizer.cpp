@@ -1,11 +1,106 @@
 #include "CPURasterizer.hpp"
 #include "GDIWindow.hpp"
-#include "InputManager.hpp"
-#include "Time.hpp"
 #include "GraphicsDevice.hpp"
 
 namespace Guarneri
 {
+	static std::ostream& operator << (std::ostream& stream, const RenderFlag& flag)
+	{
+		int count = 0;
+		if ((flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+		{
+			stream << "WIREFRAME";
+			count++;
+		}
+		if ((flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | DEPTH" : "DEPTH");
+			count++;
+		}
+		if ((flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | UV" : "UV");
+			count++;
+		}
+		if ((flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | VERTEX_COLOR" : "VERTEX_COLOR");
+			count++;
+		}
+		if ((flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | NORMAL" : "NORMAL");
+			count++;
+		}
+		if ((flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | CULLED_BACK_FACE" : "CULLED_BACK_FACE");
+			count++;
+		}
+		if ((flag & RenderFlag::EARLY_Z_DEBUG) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | EARLY_Z_DEBUG" : "EARLY_Z_DEBUG");
+			count++;
+		}
+		if ((flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | MIPMAP" : "MIPMAP");
+			count++;
+		}
+		if ((flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | STENCIL" : "STENCIL");
+			count++;
+		}
+		if ((flag & RenderFlag::SCANLINE) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | SCANLINE" : "SCANLINE");
+			count++;
+		}
+		if ((flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | FRAME_TILE" : "FRAME_TILE");
+			count++;
+		}
+		if ((flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | SHADOWMAP" : "SHADOWMAP");
+			count++;
+		}
+		if ((flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | SPECULAR" : "SPECULAR");
+			count++;
+		}
+		return stream;
+	}
+
+	static std::ostream& operator << (std::ostream& stream, const CullingAndClippingFlag& flag)
+	{
+		int count = 0;
+		if ((flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
+		{
+			stream << "APP_FRUSTUM_CULLING";
+			count++;
+		}
+		if ((flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | BACK_FACE_CULLING" : "BACK_FACE_CULLING");
+			count++;
+		}
+		if ((flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | NEAR_PLANE_CLIPPING" : "NEAR_PLANE_CLIPPING");
+			count++;
+		}
+		if ((flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE)
+		{
+			stream << (count > 0 ? " | SCREEN_CLIPPING" : "SCREEN_CLIPPING");
+			count++;
+		}
+		return stream;
+	}
+
 	void CPURasterizer::prepare(const uint32_t w, const uint32_t h, const char* title)
 	{
 		INST(GDIWindow).initialize(w, h, static_cast<LPCSTR>(title), INST(InputManager).event_callback);
@@ -63,7 +158,7 @@ namespace Guarneri
 				ss << "MSAA: " << (INST(MiscParameter).enable_msaa ? "MSAA_ON" : "MSAA_OFF");
 				if (INST(MiscParameter).enable_msaa)
 				{
-					ss << std::to_string(INST(GraphicsDevice).msaa_subsample_count) << "X";
+					ss << std::to_string(INST(GraphicsDevice).get_subsample_count()) << "X";
 				}
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
@@ -99,45 +194,39 @@ namespace Guarneri
 			}
 			{
 				std::stringstream ss;
-				ss << "CameraPos: " << INST(MiscParameter).camera_pos;
+				ss << "CameraPos: " << INST(MiscParameter).camera_pos.str();
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "LightDir: " << INST(MiscParameter).main_light.forward;
+				ss << "LightDir: " << INST(MiscParameter).main_light.forward.str();
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
-			if (INST(GraphicsDevice).multi_thread)
 			{
-				{
-					std::stringstream ss;
-					ss << "Threads: " << std::thread::hardware_concurrency();
-					INST(GDIWindow).draw_text(w, h, ss.str().c_str());
-				}
+				std::stringstream ss;
+				ss << "Threads: " << std::thread::hardware_concurrency();
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
-			if (INST(GraphicsDevice).tile_based)
+			auto tinfo = INST(GraphicsDevice).get_tile_info();
 			{
-				auto tinfo = INST(GraphicsDevice).get_tile_info();
-				{
-					std::stringstream ss;
-					ss << "TileSize: " << tinfo.tile_size;
-					INST(GDIWindow).draw_text(w, h, ss.str().c_str());
-				}
-				{
-					std::stringstream ss;
-					ss << "TileRowCount: " << tinfo.row_tile_count;
-					INST(GDIWindow).draw_text(w, h, ss.str().c_str());
-				}
-				{
-					std::stringstream ss;
-					ss << "TileColCount: " << tinfo.col_tile_count;
-					INST(GDIWindow).draw_text(w, h, ss.str().c_str());
-				}
-				{
-					std::stringstream ss;
-					ss << "TileTaskSize: " << tinfo.tile_task_size;
-					INST(GDIWindow).draw_text(w, h, ss.str().c_str());
-				}
+				std::stringstream ss;
+				ss << "TileSize: " << tinfo.tile_size;
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
+			}
+			{
+				std::stringstream ss;
+				ss << "TileRowCount: " << tinfo.row_tile_count;
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
+			}
+			{
+				std::stringstream ss;
+				ss << "TileColCount: " << tinfo.col_tile_count;
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
+			}
+			{
+				std::stringstream ss;
+				ss << "TileTaskSize: " << tinfo.tile_task_size;
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			INST(GDIWindow).flush();
 			Time::frame_end();

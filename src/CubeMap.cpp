@@ -1,6 +1,4 @@
 #include "CubeMap.hpp"
-#include <memory>
-#include <vector>
 #include <assert.h>
 #include "Define.hpp"
 

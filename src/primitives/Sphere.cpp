@@ -1,5 +1,6 @@
 ﻿#include "Sphere.hpp"
 #include <iomanip>
+#include <sstream>
 
 namespace Guarneri
 {
@@ -24,7 +25,7 @@ namespace Guarneri
 	std::string Sphere::str() const
 	{
 		std::stringstream ss;
-		ss << "Sphere: [origin: " << this->center << ", radius: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
+		ss << "Sphere: [origin: " << this->center.str() << ", radius: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
 		return ss.str();
 	}
 }

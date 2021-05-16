@@ -1,4 +1,5 @@
 ﻿#include "Segment.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -44,7 +45,7 @@ namespace Guarneri
 	std::string Segment::str() const
 	{
 		std::stringstream ss;
-		ss << "Segment: [start: " << this->start << ", end: " << this->end << "]";
+		ss << "Segment: [start: " << this->start.str() << ", end: " << this->end.str() << "]";
 		return ss.str();
 	}
 }

@@ -1,4 +1,5 @@
 #include "Rect.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -223,7 +224,7 @@ namespace Guarneri
 	std::string Rect::str() const
 	{
 		std::stringstream ss;
-		ss << "Rect: [center: " << this->center << ", size: " << this->size() << "]";
+		ss << "Rect: [center: " << this->center.str() << ", size: " << this->size().str() << "]";
 		return ss.str();
 	}
 }

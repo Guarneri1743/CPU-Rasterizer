@@ -1,6 +1,5 @@
 #include "Material.hpp"
 #include <sstream>
-#include <ostream>
 
 namespace Guarneri
 {

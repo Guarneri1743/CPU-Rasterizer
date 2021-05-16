@@ -25,7 +25,6 @@ namespace Guarneri
 		Projection projection;
 
 	public:
-		Camera();
 		~Camera();
 		static std::unique_ptr<Camera> create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far);
 		void initialize(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);

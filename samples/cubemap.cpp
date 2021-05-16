@@ -1,4 +1,5 @@
 #include "CPURasterizer.hpp"
+#include <string>
 
 using namespace Guarneri;
 using namespace std;
@@ -28,12 +29,12 @@ int main()
 
 	// setup skybox
 	std::vector<std::string> cubemap_path = {
-		res_path() + "/cubemap/space_right.png",
-		res_path() + "/cubemap/space_left.png",
-		res_path() + "/cubemap/space_top.png",
-		res_path() + "/cubemap/space_bottom.png",
-		res_path() + "/cubemap/space_front.png",
-		res_path() + "/cubemap/space_back.png",
+		RES_PATH + "/cubemap/space_right.png",
+		RES_PATH + "/cubemap/space_left.png",
+		RES_PATH + "/cubemap/space_top.png",
+		RES_PATH + "/cubemap/space_bottom.png",
+		RES_PATH + "/cubemap/space_front.png",
+		RES_PATH + "/cubemap/space_back.png",
 	};
 
 	auto cubemap = CubeMap::create(cubemap_path);
@@ -41,14 +42,14 @@ int main()
 	demo_scene.enable_skybox = true;
 
 	// helmet
-	auto helmet = Model::create(res_path() + "/pbr_helmet/helmet.obj", false);
+	auto helmet = Model::create(RES_PATH + "/pbr_helmet/helmet.obj", false);
 	helmet->material->lighting_param.glossiness = 32.0f;
 	helmet->material->cast_shadow = true;
 	helmet->material->set_cubemap(cubemap_prop, cubemap);
-	auto tex_a_path = res_path() + "/pbr_helmet/textures/albedo.jpg";
-	auto tex_r_path = res_path() + "/pbr_helmet/textures/roughness.png";
-	auto tex_ao_path = res_path() + "/pbr_helmet/textures/ao.jpg";
-	auto tex_m_path = res_path() + "/pbr_helmet/textures/metallic.png";
+	auto tex_a_path = RES_PATH + "/pbr_helmet/textures/albedo.jpg";
+	auto tex_r_path = RES_PATH + "/pbr_helmet/textures/roughness.png";
+	auto tex_ao_path = RES_PATH + "/pbr_helmet/textures/ao.jpg";
+	auto tex_m_path = RES_PATH + "/pbr_helmet/textures/metallic.png";
 	auto tex_albedo = Texture::create(tex_a_path);
 	auto tex_r = Texture::create(tex_r_path);
 	auto tex_ao = Texture::create(tex_ao_path);

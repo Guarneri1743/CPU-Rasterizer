@@ -1,5 +1,6 @@
 #include "Triangle.hpp"
 #include <assert.h>
+#include <sstream>
 
 namespace Guarneri
 {
@@ -30,6 +31,7 @@ namespace Guarneri
 
 	Triangle::Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, const bool& flip)
 	{
+		culled = false;
 		vertices[0] = v1;
 		vertices[1] = v2;
 		vertices[2] = v3;
@@ -218,7 +220,7 @@ namespace Guarneri
 	std::string Triangle::str() const
 	{
 		std::stringstream ss;
-		ss << "Triangle: [v0: " << this->vertices[0] << ", v1: " << this->vertices[1] << ", v2: " << this->vertices[2] << "]";
+		ss << "Triangle: [v0: " << this->vertices[0].str() << ", v1: " << this->vertices[1].str() << ", v2: " << this->vertices[2].str() << "]";
 		return ss.str();
 	}
 }

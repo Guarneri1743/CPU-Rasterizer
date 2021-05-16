@@ -6,22 +6,44 @@
 #include "Frustum.hpp"
 #include "Clipper.hpp"
 #include "SegmentDrawer.hpp"
+#include "Config.h"
 
 namespace Guarneri
 {
+	GraphicsDevice::GraphicsDevice()
+	{
+		width = 0;
+		height = 0;
+		row_tile_count = 0;
+		col_tile_count = 0;
+		tile_length = 0;
+		tiles = 0;
+		msaa_subsample_count = 0;
+		subsamples_per_axis = 0;
+		statistics.culled_backface_triangle_count = 0;
+		statistics.culled_triangle_count = 0;
+		statistics.earlyz_optimized = 0;
+		statistics.triangle_count = 0;
+		multi_thread = true;
+		tile_based = true;
+	}
+
+	GraphicsDevice::~GraphicsDevice()
+	{}
+
 	void GraphicsDevice::initialize(void* bitmap_handle, uint32_t w, uint32_t h)
 	{
 		this->width = w;
 		this->height = h;
 
 		// prepare tiles
-		int row_rest = h % TILE_SIZE;
-		int col_rest = w % TILE_SIZE;
-		row_tile_count = h / TILE_SIZE + (row_rest > 0 ? 1 : 0);
-		col_tile_count = w / TILE_SIZE + (col_rest > 0 ? 1 : 0);
+		int row_rest = h % Config::TILE_SIZE;
+		int col_rest = w % Config::TILE_SIZE;
+		row_tile_count = h / Config::TILE_SIZE + (row_rest > 0 ? 1 : 0);
+		col_tile_count = w / Config::TILE_SIZE + (col_rest > 0 ? 1 : 0);
 		tile_length = (int)(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
 		tiles = new FrameTile[tile_length];
-		FrameTile::build_tiles(tiles, TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
+		FrameTile::build_tiles(tiles, Config::TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
 
 		// prepare buffers
 		zbuffer = std::make_unique<RawBuffer<float>>(w, h);
@@ -53,7 +75,7 @@ namespace Guarneri
 
 	TileInfo GraphicsDevice::get_tile_info()
 	{
-		return { TILE_SIZE , TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length };
+		return { Config::TILE_SIZE , Config::TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length };
 	}
 
 	void GraphicsDevice::draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -116,7 +138,7 @@ namespace Guarneri
 
 	void GraphicsDevice::present()
 	{
-		if (tile_based)
+		if (INST(GraphicsDevice).tile_based)
 		{
 			render_tiles();
 		}
@@ -227,9 +249,9 @@ namespace Guarneri
 			{
 				(*iter).culled = true;
 			}
-			if (tile_based)
+			if (INST(GraphicsDevice).tile_based)
 			{
-				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, TILE_SIZE, this->col_tile_count);
+				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, Config::TILE_SIZE, this->col_tile_count);
 			}
 			else
 			{
@@ -252,11 +274,11 @@ namespace Guarneri
 
 	void GraphicsDevice::msaa_resolve()
 	{
-		if (multi_thread)
+		if (INST(GraphicsDevice).multi_thread)
 		{
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			int task_size = TILE_TASK_SIZE;
+			int task_size = Config::TILE_TASK_SIZE;
 			int task_rest = tile_length % task_size;
 			int task_count = tile_length / task_size;
 			for (auto tid = 0; tid < task_count; tid++)
@@ -286,11 +308,11 @@ namespace Guarneri
 
 	void GraphicsDevice::render_tiles()
 	{
-		if (multi_thread)
+		if (INST(GraphicsDevice).multi_thread)
 		{
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
-			int task_size = TILE_TASK_SIZE;
+			int task_size = Config::TILE_TASK_SIZE;
 			int task_rest = tile_length % task_size;
 			int task_count = tile_length / task_size;
 			for (auto tid = 0; tid < task_count; tid++)

@@ -9,7 +9,6 @@ namespace Guarneri
 {
 	struct Color
 	{
-	public:
 		static const Color WHITE;
 		static const Color BLACK;
 		static const Color RED;
@@ -21,7 +20,6 @@ namespace Guarneri
 		float b;
 		float a;
 
-	public:
 		Color();
 		Color(const float& r);
 		Color(const Vector4& v);
@@ -90,41 +88,41 @@ namespace Guarneri
 		static Color pow(const Color& c, float power);
 		static Color normalize(const Color& value);
 		std::string str() const;
+
+		friend static Color operator +(const float& other, const Color& c)
+		{
+			return c + other;
+		}
+
+		friend static Color operator -(const float& other, const Color& c)
+		{
+			return -c + other;
+		}
+
+		friend static Color operator *(const float& other, const Color& c)
+		{
+			return c * other;
+		}
+
+		friend static Color operator *(const Vector4& other, const Color& c)
+		{
+			return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
+		}
+
+		friend static Color operator *(const Color& c, const Vector4& other)
+		{
+			return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
+		}
+
+		friend static Color operator *(const Vector3& other, const Color& c)
+		{
+			return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
+		}
+
+		friend static Color operator *(const Color& c, const Vector3& other)
+		{
+			return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
+		}
 	};
-
-	static Color operator +(const float& other, const Color& c)
-	{
-		return c + other;
-	}
-
-	static Color operator -(const float& other, const Color& c)
-	{
-		return -c + other;
-	}
-
-	static Color operator *(const float& other, const Color& c)
-	{
-		return c * other;
-	}
-
-	static Color operator *(const Vector4& other, const Color& c)
-	{
-		return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
-	}
-
-	static Color operator *(const Color& c, const Vector4& other)
-	{
-		return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
-	}
-
-	static Color operator *(const Vector3& other, const Color& c)
-	{
-		return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
-	}
-
-	static Color operator *(const Color& c, const Vector3& other)
-	{
-		return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
-	}
 }
 #endif

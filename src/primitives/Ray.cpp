@@ -1,4 +1,5 @@
 ﻿#include "Ray.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -26,7 +27,7 @@ namespace Guarneri
 	std::string Ray::str() const
 	{
 		std::stringstream ss;
-		ss << "Ray: [origin: " << this->origin << ", direction: " << this->direction << ", inversed_direction: " << inversed_direction << "]";
+		ss << "Ray: [origin: " << this->origin.str() << ", direction: " << this->direction.str() << ", inversed_direction: " << inversed_direction.str() << "]";
 		return ss.str();
 	}
 }

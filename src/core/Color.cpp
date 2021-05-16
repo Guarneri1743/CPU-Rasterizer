@@ -1,5 +1,4 @@
 #include "Color.hpp"
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <iomanip>
@@ -7,7 +6,8 @@
 #include "Marcos.h"
 
 namespace Guarneri
-{	Color::Color()
+{	
+	Color::Color()
 	{
 		r = 0.0f; g = 0.0f; b = 0.0f; a = 1.0f;
 	}
@@ -460,18 +460,6 @@ namespace Guarneri
 		std::stringstream ss;
 		ss << "(" << std::setprecision(FLOAT_LOG_PRECISION) << this->r << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->g << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->b << ", " << this->a << ")";
 		return ss.str();
-	}
-
-	std::ostream& operator << (std::ostream& stream, const Color& c)
-	{
-		stream << c.str();
-		return stream;
-	}
-
-	std::stringstream& operator << (std::stringstream& stream, const Color& c)
-	{
-		stream << c.str();
-		return stream;
 	}
 
 	const Color Color::BLACK = Color(0.0f, 0.0f, 0.0f, 1.0f);

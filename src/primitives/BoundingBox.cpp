@@ -1,4 +1,5 @@
 ﻿#include "BoundingBox.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -217,7 +218,7 @@ namespace Guarneri
 	std::string BoundingBox::str() const
 	{
 		std::stringstream ss;
-		ss << "BoundingBox: [center: " << this->center << ", size: " << this->size() << "]";
+		ss << "BoundingBox: [center: " << this->center.str() << ", size: " << this->size().str() << "]";
 		return ss.str();
 	}
 }

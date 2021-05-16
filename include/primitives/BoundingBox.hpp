@@ -1,7 +1,5 @@
 ﻿#ifndef _BOUNDINGBOX_
 #define _BOUNDINGBOX_
-#include <sstream>
-#include <ostream>
 #include <string>
 #include "Vector3.hpp"
 
@@ -36,17 +34,5 @@ namespace Guarneri
 		Guarneri::Vector3 inv_offset(const Guarneri::Vector3& p) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const BoundingBox& BoundingBox)
-	{
-		stream << BoundingBox.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const BoundingBox& BoundingBox)
-	{
-		stream << BoundingBox.str();
-		return stream;
-	}
 }
 #endif

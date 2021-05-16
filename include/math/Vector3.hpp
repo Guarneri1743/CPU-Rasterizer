@@ -1,8 +1,5 @@
 #ifndef _VEC3_
 #define _VEC3_
-#include <ostream>
-#include <sstream>
-#include <iostream>
 #include <string>
 #include <cmath>
 #include "Marcos.h"
@@ -12,12 +9,19 @@ namespace Guarneri
 {
 	struct Vector3
 	{
-	public:
+		static const Vector3 ZERO;
+		static const Vector3 ONE;
+		static const Vector3 UP;
+		static const Vector3 DOWN;
+		static const Vector3 LEFT;
+		static const Vector3 RIGHT;
+		static const Vector3 FORWARD;
+		static const Vector3 BACK;
+
 		float x;
 		float y;
 		float z;
 
-	public:
 		Vector3();
 		Vector3(const Vector2& other);
 		Vector3(const float& r);
@@ -101,47 +105,25 @@ namespace Guarneri
 		Vector2 zx() const;
 		Vector2 zy() const;
 
-	public:
-		static const Vector3 ZERO;
-		static const Vector3 ONE;
-		static const Vector3 UP;
-		static const Vector3 DOWN;
-		static const Vector3 LEFT;
-		static const Vector3 RIGHT;
-		static const Vector3 FORWARD;
-		static const Vector3 BACK;
+		friend static Vector3 operator +(const float& other, const Vector3& vec)
+		{
+			return vec + other;
+		}
+
+		friend static Vector3 operator -(const float& other, const Vector3& vec)
+		{
+			return -vec + other;
+		}
+
+		friend static Vector3 operator *(const float& val, const Vector3& vec)
+		{
+			return vec * val;
+		}
+
+		friend static Vector3 operator /(const float& val, const Vector3& vec)
+		{
+			return Vector3(val) / vec;
+		}
 	};
-
-	static Vector3 operator +(const float& other, const Vector3& vec)
-	{
-		return vec + other;
-	}
-
-	static Vector3 operator -(const float& other, const Vector3& vec)
-	{
-		return -vec + other;
-	}
-
-	static Vector3 operator *(const float& val, const Vector3& vec)
-	{
-		return vec * val;
-	}
-
-	static Vector3 operator /(const float& val, const Vector3& vec)
-	{
-		return Vector3(val) / vec;
-	}
-
-	static std::ostream& operator << (std::ostream& stream, const Vector3& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Vector3& vec)
-	{
-		stream << vec.str();
-		return stream;
-	}
 }
 #endif

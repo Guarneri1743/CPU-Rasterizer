@@ -1,4 +1,5 @@
 #include "Vertex.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
@@ -117,7 +118,7 @@ namespace Guarneri
 	std::string Vertex::str() const
 	{
 		std::stringstream ss;
-		ss << "Vertex: [pos: " << this->position << ", Color: " << this->color << ", uv: " << uv << "]";
+		ss << "Vertex: [pos: " << this->position.str() << ", Color: " << this->color.str() << ", uv: " << uv.str() << "]";
 		return ss.str();
 	}
 }

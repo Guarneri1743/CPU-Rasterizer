@@ -1,8 +1,6 @@
-﻿#ifndef _LINE_
-#define _LINE_
+﻿#ifndef _PRIM_LINE_
+#define _PRIM_LINE_
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector3.hpp"
 
 namespace Guarneri
@@ -19,17 +17,5 @@ namespace Guarneri
 		Line(const Line& other);
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Line& Line)
-	{
-		stream << Line.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Line& Line)
-	{
-		stream << Line.str();
-		return stream;
-	}
 }
 #endif

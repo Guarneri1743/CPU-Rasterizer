@@ -1,5 +1,5 @@
-#ifndef _GUARNERI_
-#define _GUARNERI_
+#ifndef _CPURASTER_
+#define _CPURASTER_
 #include <stdint.h>
 #include "Marcos.h"
 #include "Define.hpp"
@@ -30,13 +30,24 @@
 #include "Sphere.hpp"
 #include "Triangle.hpp"
 
-#include "Camera.hpp"
 #include "Color.hpp"
-#include "Material.hpp"
-#include "Light.hpp"
-#include "LightShader.hpp"
-#include "Scene.hpp"
+#include "Camera.hpp"
+#include "CubeMap.hpp"
 #include "InputManager.hpp"
+#include "Light.hpp"
+#include "Material.hpp"
+#include "Mesh.hpp"
+#include "Model.hpp"
+#include "Renderer.hpp"
+#include "SkyboxRenderer.hpp"
+#include "Texture.hpp"
+#include "Transform.hpp"
+#include "Scene.hpp"
+
+#include "Shader.hpp"
+#include "ShadowShader.hpp"
+#include "SkyboxShader.hpp"
+#include "LightShader.hpp"
 
 namespace Guarneri
 {

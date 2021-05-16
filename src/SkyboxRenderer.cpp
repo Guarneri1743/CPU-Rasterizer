@@ -1,7 +1,6 @@
 #include "SkyboxRenderer.hpp"
 #include "PrimitiveFactory.hpp"
 #include "SkyboxShader.hpp"
-#include "Utility.hpp"
 #include "Material.hpp"
 #include "Singleton.hpp"
 
@@ -22,7 +21,7 @@ namespace Guarneri
 	{
 		UNUSED(render_pass);
 		auto view = INST(MiscParameter).view_matrix;
-		auto view3x3 = mat4tomat3(view);
+		auto view3x3 = Matrix3x3(view);
 		auto view4x4 = Matrix4x4(
 			Vector4(view3x3.row(0), 0),
 			Vector4(view3x3.row(1), 0),

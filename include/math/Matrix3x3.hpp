@@ -1,9 +1,8 @@
 #ifndef _MAT3_
 #define _MAT3_
-#include <sstream>
-#include <ostream>
 #include <string>
 #include "Vector3.hpp"
+#include "Matrix4x4.hpp"
 
 namespace Guarneri
 {
@@ -24,6 +23,7 @@ namespace Guarneri
 
 	public:
 		Matrix3x3();
+		Matrix3x3(const Matrix4x4& mat);
 		Matrix3x3(const Vector3& row0, const Vector3& row1, const Vector3& row2);
 		Matrix3x3(const float& _m00, const float& _m01, const float& _m02,
 				  const float& _m10, const float& _m11, const float& _m12,
@@ -55,17 +55,5 @@ namespace Guarneri
 		int rc2index(const int& row, const int& column) const;
 		std::string str() const;
 	};
-
-	static std::ostream& operator << (std::ostream& stream, const Matrix3x3& mat)
-	{
-		stream << mat.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Matrix3x3& mat)
-	{
-		stream << mat.str();
-		return stream;
-	}
 }
 #endif

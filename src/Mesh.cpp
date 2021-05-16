@@ -1,6 +1,5 @@
 #include "Mesh.hpp"
 #include <sstream>
-#include <ostream>
 
 namespace Guarneri
 {

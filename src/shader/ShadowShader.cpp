@@ -1,6 +1,5 @@
 #include "ShadowShader.hpp"
 #include <sstream>
-#include <ostream>
 #include "Misc.hpp"
 #include "Singleton.hpp"
 

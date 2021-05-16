@@ -1,10 +1,8 @@
 #include "Camera.hpp"
+#include <sstream>
 
 namespace Guarneri
 {
-	Camera::Camera()
-	{}
-
 	Camera::~Camera()
 	{}
 
@@ -139,7 +137,7 @@ namespace Guarneri
 	std::string Camera::str() const
 	{
 		std::stringstream ss;
-		ss << "Camera[" << this->id << "  pos: " << this->position << "]";
+		ss << "Camera[" << this->id << "  pos: " << this->position.str() << "]";
 		return ss.str();
 	}
 }

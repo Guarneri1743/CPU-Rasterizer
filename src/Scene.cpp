@@ -9,6 +9,7 @@
 #include "Vector3.hpp"
 #include "Matrix4x4.hpp"
 #include "Color.hpp"
+#include "Config.h"
 
 #undef near
 #undef far

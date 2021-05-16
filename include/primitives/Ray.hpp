@@ -1,8 +1,6 @@
 ﻿#ifndef _RAY_
 #define _RAY_
 #include <string>
-#include <ostream>
-#include <sstream>
 #include "Vector3.hpp"
 
 namespace Guarneri
@@ -20,17 +18,5 @@ namespace Guarneri
 		Ray(const Ray& other);
 		std::string str() const;
 	};
-	
-	static std::ostream& operator << (std::ostream& stream, const Ray& Ray)
-	{
-		stream << Ray.str();
-		return stream;
-	}
-
-	static std::stringstream& operator << (std::stringstream& stream, const Ray& Ray)
-	{
-		stream << Ray.str();
-		return stream;
-	}
 }
 #endif
