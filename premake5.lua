@@ -103,13 +103,14 @@ function setupBlendingDemo()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/blending.cpp"
+      sample_dir .. "/BlendingSample.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -137,13 +138,14 @@ function setupStencilDemo()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/stencil_test.cpp"
+      sample_dir .. "/StencilSample.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -171,13 +173,14 @@ function setupLightingDemo()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/lighting.cpp"
+      sample_dir .. "/PBRSample.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -205,13 +208,14 @@ function setupFilteringDemo()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/filtering.cpp"
+      sample_dir .. "/FilteringSample.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -240,13 +244,14 @@ function setupCubemapDemo()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/cubemap.cpp"
+      sample_dir .. "/CubemapSample.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -254,41 +259,6 @@ function setupCubemapDemo()
 
    filter { "configurations:Release*" }
       targetdir (solution_dir .. "/bin/release")
-end
-
-function setupPLYProj()
-   project "StanfordPLY"
-      kind "ConsoleApp"
-      language "C++"
-
-      files { 
-         src_dir .. "/*.*", 
-         src_dir .. "/utility/*.*",
-         src_dir .. "/math/*.*",
-         src_dir .. "/primitives/*.*",
-         src_dir .. "/core/*.*",
-         src_dir .. "/shader/*.*",
-         include_dir .. "/*.*", 
-         include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/shader/*.*",
-         third_party_dir .. "/*.*",
-         third_party_dir .. "/threading/*.*",
-         third_party_dir .. "/assimp/*.*",
-         third_party_dir .. "/stb_image/*.*",
-         third_party_dir .. "/nlohmann/*.*",
-         third_party_dir .. "/ply/*.*",
-         sample_dir .. "/plytest.c"
-      }
-
-      filter { "configurations:Debug*" }
-         targetdir (solution_dir .. "/bin/debug")
-
-      filter { "configurations:Release*" }
-         targetdir (solution_dir .. "/bin/release")
 end
 
 function setupUnitTestProj()
@@ -309,13 +279,14 @@ function setupUnitTestProj()
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
+      include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/nlohmann/*.*",
-      sample_dir .. "/unit_test.cpp"
+      sample_dir .. "/UnitTest.cpp"
    }
 
    filter { "configurations:Debug*" }

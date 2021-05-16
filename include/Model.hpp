@@ -25,12 +25,13 @@ namespace Guarneri
 		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material> material);
 		Model(std::string path, bool flip_uv);
 		~Model();
-		static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material);
-		static std::unique_ptr<Model> create(std::string path, bool flip_uv);
 		void traverse_nodes(aiNode* node, const aiScene* Scene);
 		std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene);
 		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type);
 		std::string str() const;
+
+		static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::unique_ptr<Material>& material);
+		static std::unique_ptr<Model> create(std::string path, bool flip_uv);
 	};
 }
 #endif

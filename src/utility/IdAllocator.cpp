@@ -34,10 +34,8 @@ namespace Guarneri
 		return false;
 	}
 
-	// todo: use blanced binary tree tree to reuse id
 	void IdAllocator::free(const uint32_t& id)
 	{
 		UNUSED(id);
-		// do nothing
 	}
 }

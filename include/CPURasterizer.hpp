@@ -23,7 +23,6 @@
 #include "Cylinder.hpp"
 #include "Line.hpp"
 #include "Plane.hpp"
-#include "PrimitiveFactory.hpp"
 #include "Ray.hpp"
 #include "Rect.hpp"
 #include "Segment.hpp"
@@ -48,6 +47,7 @@
 #include "ShadowShader.hpp"
 #include "SkyboxShader.hpp"
 #include "LightShader.hpp"
+#include "PrimitiveFactory.hpp"
 
 namespace Guarneri
 {

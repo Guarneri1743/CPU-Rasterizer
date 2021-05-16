@@ -242,7 +242,6 @@ namespace Guarneri
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
 
 			//simple IBL
-			//todo: cubemap lod
 			Color irradiance_diffuse;
 			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(normal, irradiance_diffuse);
 

@@ -2,7 +2,8 @@
 #include <assert.h>
 #include "Define.hpp"
 
-namespace Guarneri {
+namespace Guarneri
+{
 	CubeMap::CubeMap(const std::vector<std::string>& path)
 	{
 		assert(path.size() == 6);
@@ -28,7 +29,7 @@ namespace Guarneri {
 	{
 		return std::make_shared<CubeMap>(path);
 	}
-
+	 
 	bool CubeMap::sample(const Vector3& dir, Color& ret)
 	{
 		int index = -1;

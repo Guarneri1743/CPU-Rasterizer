@@ -8,16 +8,18 @@
 #include "Color.hpp"
 #include "Texture.hpp"
 
-namespace Guarneri {
+namespace Guarneri
+{
 	class CubeMap {
 	private:
 		std::vector<std::shared_ptr<Texture>> textures;
 
 	public:
-		static std::shared_ptr<CubeMap> create(std::vector<std::string> path);
 		CubeMap(const std::vector<std::string>& path);
 		bool sample(const Vector3& dir, Color& ret);
 		Vector2 sample(const Vector3& dir, int& index);
+
+		static std::shared_ptr<CubeMap> create(std::vector<std::string> path);
 	};
 }
 #endif
