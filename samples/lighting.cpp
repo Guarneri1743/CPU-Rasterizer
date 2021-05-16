@@ -1,5 +1,4 @@
 #include <memory>
-#include "LightShader.hpp"
 #include "CPURasterizer.hpp"
 
 using namespace Guarneri;

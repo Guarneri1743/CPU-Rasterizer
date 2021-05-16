@@ -1,16 +1,19 @@
-local solution_dir = _ACTION
+local solution_dir = "build/" .. _ACTION
 local lib_dir = "lib"
 local res_dir = "res"
 local src_dir = "src"
+local include_dir = "include"
 local third_party_dir = "third_party"
 local sample_dir = "samples"
 
 function setupIncludeDirs()
    includedirs {
-      src_dir,
-      src_dir .. "/utility",
-      src_dir .. "/math",
-      src_dir .. "/primitives",
+      include_dir,
+      include_dir .. "/utility",
+      include_dir .. "/math",
+      include_dir .. "/primitives",
+      include_dir .. "/core",
+      include_dir .. "/shader",
       third_party_dir,
       third_party_dir .. "/threading",
       third_party_dir .. "/assimp",
@@ -52,8 +55,8 @@ function setupSlotion()
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Debug" }
          local createResFolder = "mkdir \"$(OutDir)res\""
-         local copyAssimp = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)\""
-         local copyRes = "xcopy /y /d /s \"../" .. res_dir .. "\" \"$(OutDir)res\""
+         local copyAssimp = "xcopy /y /d \"../../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)\""
+         local copyRes = "xcopy /y /d /s \"../../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
             createResFolder,
             copyAssimp,
@@ -67,8 +70,8 @@ function setupSlotion()
          staticruntime "Off"
          libdirs { lib_dir .. "/assimp/Release" }
          local createResFolder = "mkdir \"$(OutDir)res\""
-         local copyAssimp = "xcopy /y /d \"../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)\""
-         local copyRes = "xcopy /y /d /s \"../" .. res_dir .. "\" \"$(OutDir)res\""
+         local copyAssimp = "xcopy /y /d \"../../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)\""
+         local copyRes = "xcopy /y /d /s \"../../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
             createResFolder,
             copyAssimp,
@@ -92,6 +95,15 @@ function setupBlendingDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
@@ -117,6 +129,15 @@ function setupStencilDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
@@ -142,6 +163,15 @@ function setupLightingDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
@@ -167,6 +197,15 @@ function setupFilteringDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
@@ -193,6 +232,15 @@ function setupCubemapDemo()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
@@ -218,6 +266,15 @@ function setupPLYProj()
          src_dir .. "/utility/*.*",
          src_dir .. "/math/*.*",
          src_dir .. "/primitives/*.*",
+         src_dir .. "/core/*.*",
+         src_dir .. "/shader/*.*",
+         include_dir .. "/*.*", 
+         include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
          third_party_dir .. "/*.*",
          third_party_dir .. "/threading/*.*",
          third_party_dir .. "/assimp/*.*",
@@ -244,6 +301,15 @@ function setupUnitTestProj()
       src_dir .. "/utility/*.*",
       src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/shader/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/math/*.*",
+      include_dir .. "/primitives/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/shader/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",

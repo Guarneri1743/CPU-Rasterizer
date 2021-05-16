@@ -1,0 +1,46 @@
+﻿#include "Plane.hpp"
+
+namespace Guarneri
+{
+	Plane::Plane()
+	{
+		normal = Vector3();
+		constant = 0;
+	}
+
+	Plane::Plane(const Vector3& normal, const float& constant)
+	{
+		this->normal = normal;
+		this->constant = constant;
+	}
+
+	Plane::Plane(const float& a, const float& b, const float& c, const float& d)
+	{
+		this->normal = Vector3(a, b, c);
+		this->constant = d;
+	}
+
+	Plane::Plane(const Vector3& normal, const Vector3& p)
+	{
+		this->normal = normal;
+		this->constant = Vector3::dot(normal, p);
+	}
+
+	Plane::Plane(const Plane& other)
+	{
+		this->normal = other.normal;
+		this->constant = other.constant;
+	}
+
+	float Plane::distance(const Vector3& pt) const
+	{
+		return Vector3::dot(normal, pt) + constant;
+	}
+
+	std::string Plane::str() const
+	{
+		std::stringstream ss;
+		ss << "Plane: [normal: " << this->normal << ", constant: " << this->constant << "]";
+		return ss.str();
+	}
+}
