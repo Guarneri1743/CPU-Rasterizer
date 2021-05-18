@@ -25,7 +25,8 @@ namespace Guarneri {
 	}
 
 #define APP_PATH cur_path()
-#define RES_PATH (APP_PATH + "/res")
+#define RES_PATH (APP_PATH + "/res/raw")
+#define ASSETS_PATH (APP_PATH + "/res/assets")
 }
 
 #endif

@@ -4,20 +4,24 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "rapidjson/document.h"
 
 namespace Guarneri
 {
 	struct Vertex
 	{
 	public:
+		// serializable
 		Vector4 position;
-		Vector3 world_pos;
-		Vector4 shadow_coord;
 		Vector4 color;
 		Vector2 uv;
 		Vector3 tangent;
-		Vector3 bitangent;
 		Vector3 normal;
+
+		// runtime
+		Vector3 world_pos;
+		Vector4 shadow_coord;
+		Vector3 bitangent;
 		float rhw;
 
 	public:
@@ -29,6 +33,8 @@ namespace Guarneri
 		static Vertex interpolate(const Vertex& left, const Vertex& right, const float& t);
 		static Vertex differential(const Vertex& lhs, const Vertex& rhs);
 		static Vertex intagral(const Vertex& left, const Vertex& differential);
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Vertex& v);
+		static Vertex deserialize(const rapidjson::Value& v);
 		std::string str() const;
 	};
 }

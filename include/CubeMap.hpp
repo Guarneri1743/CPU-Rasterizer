@@ -13,13 +13,29 @@ namespace Guarneri
 	class CubeMap {
 	private:
 		std::vector<std::shared_ptr<Texture>> textures;
+		std::vector<std::string> texture_paths;
 
 	public:
-		CubeMap(const std::vector<std::string>& path);
+		void reload(const std::vector<std::string>& paths);
 		bool sample(const Vector3& dir, Color& ret);
 		Vector2 sample(const Vector3& dir, int& index);
+		std::string meta_path;
+		std::string name;
+		WrapMode wrap_mode;
+		Filtering filtering;
 
-		static std::shared_ptr<CubeMap> create(std::vector<std::string> path);
+		static std::shared_ptr<CubeMap> create();
+		static std::shared_ptr<CubeMap> create(const char* path);
+		static std::shared_ptr<CubeMap> create(std::string path);
+		static std::shared_ptr<CubeMap> create(const char* name, std::vector<std::string> path);
+		static std::shared_ptr<CubeMap> create(std::string name, std::vector<std::string> path);
+		static void serialize(const CubeMap& cube_map, std::string path);
+		static 	void CubeMap::deserialize(std::string path, CubeMap& cubemap);
+
+	private:
+		CubeMap();
+		CubeMap(const char* path);
+		CubeMap(const char* name, const std::vector<std::string>& paths);
 	};
 }
 #endif

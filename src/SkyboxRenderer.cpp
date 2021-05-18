@@ -8,9 +8,7 @@ namespace Guarneri
 {
 	SkyboxRenderer::SkyboxRenderer()
 	{
-		auto shader = std::make_shared<SkyboxShader>();
-		auto mat = std::make_shared<Material>("skybox_material", std::move(shader));
-		mat->ztest_func = CompareFunc::LEQUAL;
+		auto mat = Material::create("/materials/space.material");
 		target = PrimitiveFactory::skybox(mat);
 	}
 
@@ -38,7 +36,7 @@ namespace Guarneri
 
 	Matrix4x4 SkyboxRenderer::model_matrix() const
 	{
-		return target->transform.local2world;
+		return target->transform->world_trs;
 	}
 
 	void SkyboxRenderer::draw_gizmos() const

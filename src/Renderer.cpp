@@ -11,9 +11,9 @@ namespace Guarneri
 	Renderer::Renderer()
 	{}
 
-	Renderer::Renderer(std::unique_ptr<Model> model)
+	Renderer::Renderer(std::shared_ptr<Model> model)
 	{
-		this->target = std::move(model);
+		this->target = model;
 	}
 
 	Renderer::Renderer(const Renderer& other)
@@ -24,9 +24,9 @@ namespace Guarneri
 	Renderer::~Renderer()
 	{}
 
-	std::unique_ptr<Renderer> Renderer::create(std::unique_ptr<Model>& model)
+	std::unique_ptr<Renderer> Renderer::create(std::shared_ptr<Model> model)
 	{
-		return std::make_unique<Renderer>(std::move(model));
+		return std::make_unique<Renderer>(model);
 	}
 
 	std::unique_ptr<Renderer> Renderer::create(const Renderer& other)
@@ -54,7 +54,7 @@ namespace Guarneri
 
 	Matrix4x4 Renderer::model_matrix() const
 	{
-		return target->transform.local2world;
+		return target->transform->world_trs;
 	}
 
 	void Renderer::draw_triangle(Shader* shader, const std::vector<Triangle>& triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -84,7 +84,7 @@ namespace Guarneri
 
 		auto thread_size = std::thread::hardware_concurrency();
 		ThreadPool tp(thread_size);
-		
+
 		Vertex vertices[3];
 		target->material->set_shadowmap(INST(GraphicsDevice).get_shadowmap());
 		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
@@ -92,17 +92,17 @@ namespace Guarneri
 		{
 			for (auto& m : target->meshes)
 			{
-				assert(m->indices.size() % 3 == 0);
+				assert(m.indices.size() % 3 == 0);
 				uint32_t idx = 0;
 				if (INST(GraphicsDevice).multi_thread)
 				{
 					std::vector<Triangle> tris;
-					auto block_size = m->indices.size() / thread_size;
+					auto block_size = m.indices.size() / thread_size;
 					tris.reserve(block_size);
-					for (auto& index : m->indices)
+					for (auto& index : m.indices)
 					{
-						assert(idx < 3 && index < m->vertices.size());
-						vertices[idx] = m->vertices[index];
+						assert(idx < 3 && index < m.vertices.size());
+						vertices[idx] = m.vertices[index];
 						idx++;
 						if (idx == 3)
 						{
@@ -119,10 +119,10 @@ namespace Guarneri
 				}
 				else
 				{
-					for (auto& index : m->indices)
+					for (auto& index : m.indices)
 					{
-						assert(idx < 3 && index < m->vertices.size());
-						vertices[idx] = m->vertices[index];
+						assert(idx < 3 && index < m.vertices.size());
+						vertices[idx] = m.vertices[index];
 						idx++;
 						if (idx == 3)
 						{
@@ -143,7 +143,9 @@ namespace Guarneri
 		auto up = Vector3::UP;
 		auto forward = Vector3::FORWARD;
 		auto right = Vector3::RIGHT;
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, model_matrix(), view, proj);
+		auto scale = Matrix4x4::scale(model_matrix().get_scale());
+		Matrix4x4 mat = scale.inverse() * model_matrix();
+		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, mat, view, proj);
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

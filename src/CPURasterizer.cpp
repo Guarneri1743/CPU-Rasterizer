@@ -230,6 +230,15 @@ namespace Guarneri
 				ss << "TileTaskSize: " << tinfo.tile_task_size;
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
+			{
+				std::stringstream ss;
+				Vector3 euler = scene.main_cam->transform->world_euler_angles();
+				euler.x = RAD2DEGREE(euler.x);
+				euler.y = RAD2DEGREE(euler.y);
+				euler.z = RAD2DEGREE(euler.z);
+				ss << "CamYawPitchRoll: " << euler.str();
+				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
+			}
 			INST(GDIWindow).flush();
 			Time::frame_end();
 			Sleep(1);

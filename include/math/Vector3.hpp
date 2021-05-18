@@ -4,6 +4,7 @@
 #include <cmath>
 #include "Marcos.h"
 #include "Vector2.hpp"
+#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -35,6 +36,7 @@ namespace Guarneri
 		Vector3& operator -=(const Vector3& other);
 		Vector3& operator /=(const float& val);
 		Vector3& operator *=(const float& val);
+		Vector3& operator *=(const Vector3& val);
 		Vector3 operator +(const Vector3& other) const;
 		Vector3 operator -(const Vector3& other) const;
 		Vector3 operator +(const float& other) const;
@@ -65,6 +67,9 @@ namespace Guarneri
 		static Vector3 lerp(const Vector3& lhs, const Vector3& rhs, float t);
 		static Vector3 pow(const Vector3& v, float power);
 		static void calculate_right_up(const Vector3& forward, Vector3& right, Vector3& up);
+
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector3& vec);
+		static Vector3 deserialize(const rapidjson::Value& v);
 
 		std::string str() const;
 
@@ -115,7 +120,7 @@ namespace Guarneri
 			return -vec + other;
 		}
 
-		friend static Vector3 operator *(const float& val, const Vector3& vec)
+		friend Vector3 operator *(const float& val, const Vector3& vec)
 		{
 			return vec * val;
 		}

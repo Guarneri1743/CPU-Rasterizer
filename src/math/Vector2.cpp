@@ -187,6 +187,23 @@ namespace Guarneri
 		return Vector2(x, y);
 	}
 
+	rapidjson::Value Vector2::serialize(rapidjson::Document& doc, const Vector2& vec)
+	{
+		rapidjson::Value v;
+		v.SetObject();
+		v.AddMember("x", vec.x, doc.GetAllocator());
+		v.AddMember("y", vec.y, doc.GetAllocator());
+		return v;
+	}
+
+	Vector2 Vector2::deserialize(const rapidjson::Value& v)
+	{
+		Vector2 vec;
+		vec.x = v["x"].GetFloat();
+		vec.y = v["y"].GetFloat();
+		return vec;
+	}
+
 	std::string Vector2::str() const
 	{
 		std::stringstream ss;

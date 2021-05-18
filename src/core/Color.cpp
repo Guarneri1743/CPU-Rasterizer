@@ -445,6 +445,27 @@ namespace Guarneri
 		return retult;
 	}
 
+	rapidjson::Value Color::serialize(rapidjson::Document& doc, const Color& color)
+	{
+		rapidjson::Value v;
+		v.SetObject();
+		v.AddMember("r", color.r, doc.GetAllocator());
+		v.AddMember("g", color.g, doc.GetAllocator());
+		v.AddMember("b", color.b, doc.GetAllocator());
+		v.AddMember("a", color.a, doc.GetAllocator());
+		return v;
+	}
+
+	Color Color::deserialize(const rapidjson::Value& v)
+	{
+		Color color;
+		color.r = v["r"].GetFloat();
+		color.g = v["g"].GetFloat();
+		color.b = v["b"].GetFloat();
+		color.a = v["a"].GetFloat();
+		return color;
+	}
+
 	Color Color::maximum(const Color& lhs, const Color& rhs)
 	{
 		return Color(std::max(lhs.r, rhs.r), std::max(lhs.g, rhs.g), std::max(lhs.b, rhs.b), std::max(lhs.a, rhs.a));

@@ -10,38 +10,45 @@
 #include "Matrix4x4.hpp"
 #include "Color.hpp"
 #include "Config.h"
+#include "rapidjson/document.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/reader.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include <filesystem>
+#include <iostream>
+#include "Utility.hpp"
 
 #undef near
 #undef far
+#undef GetObject
 
 namespace Guarneri
 {
-	Scene::Scene()
+	Scene::Scene(std::string name)
 	{
-		initialize();
-	}
-
-	Scene::~Scene()
-	{}
-
-	// todo: serialzie & deserialize Scene data
-	void Scene::initialize()
-	{
+		this->name = name;
 		enable_skybox = false;
 		main_light.intensity = 1.0f;
 		main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
 		main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
 		main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 		main_light.position = Vector3(1.0f, 1.0f, 1.0f);
+		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), INST(GDIWindow).aspect, 45.0f, 0.5f, 100.0f);
+		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
+		skybox = std::make_unique<SkyboxRenderer>();
+	}
+
+	Scene::~Scene()
+	{}
+
+	void Scene::initialize()
+	{
 		debug_cam_distance = 6.0f;
 		debug_world_cam_distance = 8.0f;
-		main_cam = std::move(Camera::create(Vector3(5.0f, 5.0f, 5.0f), INST(GDIWindow).aspect, 45.0f, 0.5f, 100.0f));
-		main_cam->lookat(Vector3::ZERO);
-
-		debug_cam = std::move(Camera::create(main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, INST(GDIWindow).aspect, 45.0f, 0.5f, 10.0f));
+		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, INST(GDIWindow).aspect, 45.0f, 0.5f, 10.0f));
 		world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, INST(GDIWindow).aspect, 45.0f, 0.5f, 10.0f));
-
-		skybox = std::make_unique<SkyboxRenderer>();
 
 		INST(InputManager).add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data)
 		{
@@ -49,14 +56,14 @@ namespace Guarneri
 			{
 				Vector2 offset = (pos - prev) * Vector2(INST(GDIWindow).width, INST(GDIWindow).height) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
-				s->main_cam->rotate(offset.x, offset.y);
+				s->main_cam->transform->rotate(offset.y, offset.x, 0.0f);
 			}
 			if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 			{
 				Vector2 offset = (pos - prev) * Vector2(INST(GDIWindow).width, INST(GDIWindow).height) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
-				s->main_cam->move_left(offset.x);
-				s->main_cam->move_ascend(offset.y);
+				s->main_cam->transform->move_left(offset.x);
+				s->main_cam->transform->move_ascend(offset.y);
 			}
 		}, this);
 
@@ -65,11 +72,11 @@ namespace Guarneri
 			Scene* s = reinterpret_cast<Scene*>(data);
 			if (rolling == MouseWheel::UP)
 			{
-				s->main_cam->move_forward(CAMERA_ZOOM_SPEED);
+				s->main_cam->transform->move_forward(CAMERA_ZOOM_SPEED);
 			}
 			else
 			{
-				s->main_cam->move_backward(CAMERA_ZOOM_SPEED);
+				s->main_cam->transform->move_backward(CAMERA_ZOOM_SPEED);
 			}
 		}, this);
 
@@ -146,15 +153,16 @@ namespace Guarneri
 		}, nullptr);
 	}
 
-	void Scene::add(std::shared_ptr<Renderer> rdr)
+
+	void Scene::add(std::shared_ptr<Model> model)
 	{
-		if (rdr->target->material->transparent)
+		if (model->material->transparent)
 		{
-			transparent_objects.emplace_back(rdr);
+			transparent_objects.emplace_back(std::make_unique<Renderer>(model));
 		}
 		else
 		{
-			objects.emplace_back(rdr);
+			objects.emplace_back(std::make_unique<Renderer>(model));
 		}
 	}
 
@@ -166,7 +174,7 @@ namespace Guarneri
 		INST(MiscParameter).proj_matrix = main_cam->projection_matrix();
 		INST(MiscParameter).main_light = main_light;
 		INST(MiscParameter).point_lights = point_lights;
-		INST(MiscParameter).camera_pos = main_cam->position;
+		INST(MiscParameter).camera_pos = main_cam->transform->world_position();
 		/*if (input_mgr().is_key_down(KeyCode::W)) {
 			main_cam->move_forward(CAMERA_MOVE_SPEED);
 		}
@@ -187,24 +195,24 @@ namespace Guarneri
 		}*/
 		if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 		{
-			main_cam->move_ascend(CAMERA_MOVE_SPEED);
+			main_cam->transform->move_ascend(CAMERA_MOVE_SPEED);
 		}
 		if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 		{
-			main_cam->move_descend(CAMERA_MOVE_SPEED);
+			main_cam->transform->move_descend(CAMERA_MOVE_SPEED);
 		}
 	}
 
 	void Scene::draw_camera_coords()
 	{
 		Vector2 offset = Vector2(-(INST(GDIWindow).width / 2 - 50.0f), -(INST(GDIWindow).height / 2 - 50.0f));
-		Vector3 pos = main_cam->position;
-		Vector3 forward = main_cam->forward;
-		Vector3 right = main_cam->right;
-		Vector3 up = main_cam->up;
+		Vector3 pos = main_cam->transform->world_position();
+		Vector3 forward = main_cam->transform->forward();
+		Vector3 right = main_cam->transform->right();
+		Vector3 up = main_cam->transform->up();
 		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-		debug_cam->position = (main_cam->position + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance);
-		debug_cam->lookat(main_cam->position);
+		debug_cam->transform->set_world_position((main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance));
+		debug_cam->transform->lookat(main_cam->transform->world_position());
 	}
 
 	void Scene::draw_world_coords()
@@ -213,14 +221,14 @@ namespace Guarneri
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 
-		Vector3 pos = main_cam->position;
-		Vector3 forward = main_cam->forward;
-		Vector3 right = main_cam->right;
-		Vector3 up = main_cam->up;
+		Vector3 pos = main_cam->transform->world_position();
+		Vector3 forward = main_cam->transform->forward();
+		Vector3 right = main_cam->transform->right();
+		Vector3 up = main_cam->transform->up();
 		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
-		world_debug_cam->position = (Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance);
-		world_debug_cam->lookat(Vector3::ZERO);
+		world_debug_cam->transform->set_world_position((Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance));
+		world_debug_cam->transform->lookat(Vector3::ZERO);
 	}
 
 	void Scene::set_main_light(const DirectionalLight& light)
@@ -308,5 +316,117 @@ namespace Guarneri
 		}
 		draw_camera_coords();
 		//draw_world_coords();
+	}
+
+	std::unique_ptr<Scene> Scene::create(const std::string& name)
+	{
+		return std::unique_ptr<Scene>(new Scene(name));
+	}
+
+	void Scene::serialize(const Scene& scene, const std::string& path)
+	{
+		rapidjson::Document doc;
+		doc.SetObject();
+
+		rapidjson::Value name;
+		name.SetString(scene.name.c_str(), doc.GetAllocator());
+		doc.AddMember("name", name, doc.GetAllocator());
+		doc.AddMember("main_light", DirectionalLight::serialize(doc, scene.main_light), doc.GetAllocator());
+
+		rapidjson::Value point_lights;
+		point_lights.SetArray();
+		for (auto& pl : scene.point_lights)
+		{
+			point_lights.PushBack(PointLight::serialize(doc, pl), doc.GetAllocator());
+		}
+		doc.AddMember("point_lights", point_lights, doc.GetAllocator());
+
+		rapidjson::Value models;
+		models.SetArray();
+		for (auto& obj : scene.objects)
+		{
+			rapidjson::Value meta_path;
+			meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
+			models.PushBack(meta_path, doc.GetAllocator());
+		}
+		for (auto& obj : scene.transparent_objects)
+		{
+			rapidjson::Value meta_path;
+			meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
+			models.PushBack(meta_path, doc.GetAllocator());
+		}
+		doc.AddMember("models", models, doc.GetAllocator()); 
+		doc.AddMember("enable_skybox", scene.enable_skybox, doc.GetAllocator());
+
+
+		rapidjson::Value main_cam = Camera::serialize(doc, *scene.main_cam).GetObject();
+		doc.AddMember("main_cam", main_cam, doc.GetAllocator());
+
+		rapidjson::StringBuffer sb;
+		sb.Clear();
+		rapidjson::PrettyWriter<rapidjson::StringBuffer> ww(sb);
+		doc.Accept(ww);
+		std::cout << sb.GetString() << std::endl;
+
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		if (!std::filesystem::exists(abs_path.parent_path()))
+		{
+			std::filesystem::create_directories(abs_path.parent_path());
+		}
+		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
+		if (fd != nullptr)
+		{
+			char write_buffer[256];
+			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
+			doc.Accept(writer);
+			fclose(fd);
+			//std::cout << "save scene: " << path << std::endl;
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
+	}
+
+	std::unique_ptr<Scene> Scene::deserialize(const std::string& path)
+	{
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		std::FILE* fd = fopen(abs_path.string().c_str(), "r");
+		if (fd != nullptr)
+		{
+			char read_buffer[256];
+			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+			rapidjson::Document doc;
+			doc.ParseStream(fs);
+			
+			const char* name = doc["name"].GetString();
+			auto scene = std::unique_ptr<Scene>(new Scene(name));
+
+			scene->main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
+			auto point_lights = doc["point_lights"].GetArray();
+			for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
+			{
+				scene->point_lights.push_back(PointLight::deserialize(point_lights[idx].GetObject()));
+			}
+
+			auto models = doc["models"].GetArray();
+			for (rapidjson::SizeType idx = 0; idx < models.Size(); idx++)
+			{
+				scene->add(Model::create(models[idx].GetString()));
+			}
+
+			scene->enable_skybox = doc["enable_skybox"].GetBool();
+			scene->main_cam = Camera::deserialize(doc["main_cam"].GetObject());
+			scene->initialize();
+
+			fclose(fd);
+			return scene;
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
+		return nullptr;
 	}
 }

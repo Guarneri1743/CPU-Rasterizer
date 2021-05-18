@@ -16,22 +16,35 @@ namespace Guarneri
 	class Model : public Object
 	{
 	public:
-		std::vector<std::unique_ptr<Mesh>> meshes;
-		Transform transform;
+		std::vector<Mesh> meshes;
+		std::unique_ptr<Transform> transform;
 		std::shared_ptr<Material> material;
-		std::string parent_dir;
+		std::string name;
+		std::string raw_path;
+		std::string meta_path;
+		bool flip_uv;
 
 	public:
-		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
-		Model(std::string path, bool flip_uv);
+		Model(const Model& other);
 		~Model();
-		void traverse_nodes(aiNode* node, const aiScene* Scene);
-		std::unique_ptr<Mesh> load_mesh(aiMesh* ai_mesh, const aiScene* scene);
-		std::shared_ptr<Texture> load_textures(aiMaterial* ai_material, aiTextureType type);
+		Model& operator= (const Model& other);
 		std::string str() const;
 
-		static std::unique_ptr<Model> create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
-		static std::unique_ptr<Model> create(std::string path, bool flip_uv);
+		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
+		static std::shared_ptr<Model> load_raw(std::string path, bool flip_uv);
+		static std::shared_ptr<Model> create(const Model& other);
+		static std::shared_ptr<Model> create(std::string path);
+		static void serialize(const Model& model, std::string path);
+		static void deserialize(std::string path, Model& model);
+
+	private:
+		static std::unordered_map<uint32_t, std::shared_ptr<Model>> texture_cache;
+		Model();
+		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
+		Model(std::string path, bool flip_uv);
+		void load_raw_internal(std::string path, bool flip_uv);
+		void load_vertices(aiMesh* ai_mesh);
+		void reload_mesh(aiNode* node, const aiScene* Scene);
 	};
 }
 #endif

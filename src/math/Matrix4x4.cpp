@@ -141,6 +141,15 @@ namespace Guarneri {
 		return r.normalized();
 	}
 
+	Vector3 Matrix4x4::get_scale() const
+	{
+		Vector3 s;
+		s.x = Vector4::magnitude(Vector4(m00, m01, m02, m03));
+		s.y = Vector4::magnitude(Vector4(m10, m11, m12, m13));
+		s.z = Vector4::magnitude(Vector4(m20, m21, m22, m23));
+		return s;
+	}
+
 	Matrix4x4 Matrix4x4::viewport(const int& x, const int& y, const int& w, const int& h)
 	{
 		Matrix4x4 ret = IDENTITY;
@@ -151,15 +160,19 @@ namespace Guarneri {
 		return ret;
 	}
 
-	// yaw-y pitch-x roll-z
-	Matrix4x4 Matrix4x4::yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll)
+	//yaw-y pitch-x roll-z
+	Matrix4x4 Matrix4x4::from_euler(const Vector3& euler)
 	{
-		return euler_angle_z(roll) * euler_angle_x(pitch) * euler_angle_y(yaw);
+		return euler_x(euler.x) * euler_y(euler.y) * euler_z(euler.z);
 	}
 
-	Matrix4x4 Matrix4x4::euler_angle_x(const float& angle)
+	Matrix4x4 Matrix4x4::from_angle(const Vector3& angles)
 	{
-		float rad = DEGREE2RAD(angle);
+		return  euler_x(DEGREE2RAD(angles.x)) * euler_y(DEGREE2RAD(angles.y)) * euler_z(DEGREE2RAD(angles.z));
+	}
+
+	Matrix4x4 Matrix4x4::euler_x(const float& rad)
+	{
 		float c = std::cos(rad);
 		float s = std::sin(rad);
 		return Matrix4x4(
@@ -170,9 +183,8 @@ namespace Guarneri {
 		);
 	}
 
-	Matrix4x4 Matrix4x4::euler_angle_y(const float& angle)
+	Matrix4x4 Matrix4x4::euler_y(const float& rad)
 	{
-		float rad = DEGREE2RAD(angle);
 		float c = std::cos(rad);
 		float s = std::sin(rad);
 		return Matrix4x4(
@@ -183,9 +195,8 @@ namespace Guarneri {
 		);
 	}
 
-	Matrix4x4 Matrix4x4::euler_angle_z(const float& angle)
+	Matrix4x4 Matrix4x4::euler_z(const float& rad)
 	{
-		float rad = DEGREE2RAD(angle);
 		float c = std::cos(rad);
 		float s = std::sin(rad);
 		return Matrix4x4(
@@ -430,6 +441,46 @@ namespace Guarneri {
 		ret.m32 = m30 * rhs.m02 + m31 * rhs.m12 + m32 * rhs.m22 + m33 * rhs.m32;
 		ret.m33 = m30 * rhs.m03 + m31 * rhs.m13 + m32 * rhs.m23 + m33 * rhs.m33;
 		return ret;
+	}
+
+	bool Matrix4x4::is_rotation_matrix() const
+	{
+		Matrix4x4 t = this->transpose();
+		Matrix4x4 multiply = *this * t;
+		return multiply == IDENTITY;
+	}
+
+	// yaw-pitch-roll
+	// https://www.geometrictools.com/Documentation/EulerAngles.pdf
+	Vector3 Matrix4x4::to_euler() const
+	{
+		assert(is_rotation_matrix());
+
+		Vector3 euler;
+
+		if (m20 < 1.0f)
+		{
+			if (m20 > -1.0f)
+			{
+				euler.x = std::asin(-m20);
+				euler.y = std::atan2f(m21, m22);
+				euler.z = std::atan2f(m10, m11);
+			}
+			else
+			{
+				euler.x = PI / 2.0f;
+				euler.y = -std::atan2f(-m10, m11);
+				euler.z = 0.0f;
+			}
+		}
+		else
+		{
+			euler.x = -PI / 2.0f;
+			euler.y = std::atan2(-m01, m00);
+			euler.z = 0.0f;
+		}
+
+		return euler;
 	}
 
 	Matrix4x4 Matrix4x4::transpose() const
@@ -798,6 +849,51 @@ namespace Guarneri {
 	int Matrix4x4::rc2index(const int& row, const int& column) const
 	{
 		return row * 4 + column;
+	}
+
+	rapidjson::Value Matrix4x4::serialize(rapidjson::Document& doc, const Matrix4x4& mat)
+	{
+		rapidjson::Value v;
+		v.SetObject();
+		v.AddMember("m00", mat.m00, doc.GetAllocator());
+		v.AddMember("m01", mat.m01, doc.GetAllocator());
+		v.AddMember("m02", mat.m02, doc.GetAllocator());
+		v.AddMember("m03", mat.m03, doc.GetAllocator());
+		v.AddMember("m10", mat.m10, doc.GetAllocator());
+		v.AddMember("m11", mat.m11, doc.GetAllocator());
+		v.AddMember("m12", mat.m12, doc.GetAllocator());
+		v.AddMember("m13", mat.m13, doc.GetAllocator());
+		v.AddMember("m20", mat.m20, doc.GetAllocator());
+		v.AddMember("m21", mat.m21, doc.GetAllocator());
+		v.AddMember("m22", mat.m22, doc.GetAllocator());
+		v.AddMember("m23", mat.m23, doc.GetAllocator());
+		v.AddMember("m30", mat.m30, doc.GetAllocator());
+		v.AddMember("m31", mat.m31, doc.GetAllocator());
+		v.AddMember("m32", mat.m32, doc.GetAllocator());
+		v.AddMember("m33", mat.m33, doc.GetAllocator());
+		return v;
+	}
+
+	Matrix4x4 Matrix4x4::deserialize(const rapidjson::Value& v)
+	{
+		Matrix4x4 mat;
+		mat.m00 = v["m00"].GetFloat();
+		mat.m01 = v["m01"].GetFloat();
+		mat.m02 = v["m02"].GetFloat();
+		mat.m03 = v["m03"].GetFloat();
+		mat.m10 = v["m10"].GetFloat();
+		mat.m11 = v["m11"].GetFloat();
+		mat.m12 = v["m12"].GetFloat();
+		mat.m13 = v["m13"].GetFloat();
+		mat.m20 = v["m20"].GetFloat();
+		mat.m21 = v["m21"].GetFloat();
+		mat.m22 = v["m22"].GetFloat();
+		mat.m23 = v["m23"].GetFloat();
+		mat.m30 = v["m30"].GetFloat();
+		mat.m31 = v["m31"].GetFloat();
+		mat.m32 = v["m32"].GetFloat();
+		mat.m33 = v["m33"].GetFloat();
+		return mat;
 	}
 
 	std::string Matrix4x4::str() const

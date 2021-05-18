@@ -1,5 +1,7 @@
 #ifndef _SHADER_LAB_
 #define _SHADER_LAB_
+#include <string>
+#include <memory>
 #include <unordered_map>
 #include "Shader.hpp"
 

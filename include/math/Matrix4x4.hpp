@@ -3,6 +3,7 @@
 #include <string>
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "rapidjson/document.h"
 
 namespace Guarneri {
 	struct Matrix4x4 {
@@ -38,10 +39,11 @@ namespace Guarneri {
 		static Matrix4x4 rotation(const Vector3& axis, const float& theta);
 		static Matrix4x4 scale(const Vector3& scale);
 		static Matrix4x4 viewport(const int& x, const int& y, const int& w, const int& h);
-		static Matrix4x4 yaw_pitch_roll(const float& yaw, const float& pitch, const float& roll);
-		static Matrix4x4 euler_angle_x(const float& angle);
-		static Matrix4x4 euler_angle_y(const float& angle);
-		static Matrix4x4 euler_angle_z(const float& angle);
+		static Matrix4x4 from_euler(const Vector3& euler);
+		static Matrix4x4 from_angle(const Vector3& euler);
+		static Matrix4x4 euler_x(const float& rad);
+		static Matrix4x4 euler_y(const float& rad);
+		static Matrix4x4 euler_z(const float& rad);
 		static Matrix4x4 lookat(const Vector3& eye, const Vector3& target, const Vector3& world_up);
 		static Matrix4x4 lookat_lh(const Vector3& eye, const Vector3& target, const Vector3& world_up);
 		static Matrix4x4 lookat_rh(const Vector3& eye, const Vector3& target, const Vector3& world_up);
@@ -60,9 +62,12 @@ namespace Guarneri {
 		Vector3 forward() const;
 		Vector3 up() const;
 		Vector3 right() const;
+		Vector3 get_scale() const;
 		Vector3 transform_point(const Vector3& point) const;
 		Vector3 transform_direction(const Vector3& point) const;
-		Matrix4x4 operator *(const Matrix4x4& rhs) const;
+		Matrix4x4 operator *(const Matrix4x4& rhs) const;		
+		bool is_rotation_matrix() const;
+		Vector3 to_euler() const;
 		Matrix4x4 transpose() const;
 		Matrix4x4 inverse() const;
 
@@ -79,6 +84,10 @@ namespace Guarneri {
 		float& operator[](const int& index);
 
 		int rc2index(const int& row, const int& column) const;
+
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Matrix4x4& mat);
+		static Matrix4x4 deserialize(const rapidjson::Value& v);
+
 		std::string str() const;
 	};
 }

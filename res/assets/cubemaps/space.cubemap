@@ -1,0 +1,12 @@
+{
+    "name": "space",
+    "meta_path": "/cubemaps/space.cubemap",
+    "right": "/cubemaps/space_right.png",
+    "left": "/cubemaps/space_left.png",
+    "top": "/cubemaps/space_top.png",
+    "bottom": "/cubemaps/space_bottom.png",
+    "front": "/cubemaps/space_front.png",
+    "back": "/cubemaps/space_back.png",
+    "wrap_mode": 0,
+    "filtering": 0
+}

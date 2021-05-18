@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include "Marcos.h"
+#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -81,6 +82,14 @@ namespace Guarneri
 		x = x * val;
 		y = y * val;
 		z = z * val;
+		return *this;
+	}
+
+	Vector3& Vector3::operator*=(const Vector3& val)
+	{
+		x = x * val.x;
+		y = y * val.y;
+		z = z * val.z;
 		return *this;
 	}
 
@@ -264,6 +273,25 @@ namespace Guarneri
 		right = Vector3::normalize(Vector3::cross(forward, Vector3::UP));
 		up = Vector3::cross(right, forward);
 	#endif
+	}
+
+	rapidjson::Value Vector3::serialize(rapidjson::Document& doc, const Vector3& vec)
+	{
+		rapidjson::Value v;
+		v.SetObject();
+		v.AddMember("x", vec.x, doc.GetAllocator());
+		v.AddMember("y", vec.y, doc.GetAllocator());
+		v.AddMember("z", vec.z, doc.GetAllocator());
+		return v;
+	}
+
+	Vector3 Vector3::deserialize(const rapidjson::Value& v)
+	{
+		Vector3 vec;
+		vec.x = v["x"].GetFloat();
+		vec.y = v["y"].GetFloat();
+		vec.z = v["z"].GetFloat();
+		return vec;
 	}
 
 	std::string Vector3::str() const

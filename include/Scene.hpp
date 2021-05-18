@@ -12,6 +12,7 @@ namespace Guarneri
 	class Scene
 	{
 	public:
+		std::string name;
 		DirectionalLight main_light;
 		std::vector<PointLight> point_lights;
 		std::vector<std::shared_ptr<Renderer>> objects;
@@ -25,10 +26,9 @@ namespace Guarneri
 		float debug_world_cam_distance;
 
 	public:
-		Scene();
 		~Scene();
 		void initialize();
-		void add(std::shared_ptr<Renderer> rdr);
+		void add(std::shared_ptr<Model> model);
 		void update();
 		void draw_camera_coords();
 		void draw_world_coords();
@@ -38,6 +38,13 @@ namespace Guarneri
 		void render_shadow();
 		void render_objects();
 		void draw_gizmos();
+
+		static std::unique_ptr<Scene> create(const std::string& name);
+		static void serialize(const Scene& scene, const std::string& path);
+		static std::unique_ptr<Scene> deserialize(const std::string& path);
+
+	private:
+		Scene(std::string name);
 	};
 }
 #endif

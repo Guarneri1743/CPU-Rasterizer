@@ -4,53 +4,89 @@
 #include <filesystem>
 #include "Singleton.hpp"
 #include "ResourceManager.hpp"
+#include "rapidjson/document.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/reader.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include "Utility.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>
 
 namespace Guarneri
 {
-	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	Texture::Texture()
 	{
-		this->mip_count = 0;
-		this->fmt = _fmt;
-		this->width = _width;
-		this->height = _height;
-		this->filtering = Filtering::BILINEAR;
-		this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
-		release();
-		switch (fmt)
-		{
-		case TextureFormat::rgb:
-			rgb_buffer = RawBuffer<color_rgb>::create(width, height);
-			break;
-		case TextureFormat::rgba:
-			rgba_buffer = RawBuffer<color_rgba>::create(width, height);
-			break;
-		case TextureFormat::rg:
-			rg_buffer = RawBuffer<color_rg>::create(width, height);
-			break;
-		case TextureFormat::r32:
-			gray_buffer = RawBuffer<color_gray>::create(width, height);
-			break;
-		}
-		std::cout << this->str() << " created" << std::endl;
+		wrap_mode = WrapMode::REPEAT;
+		filtering = Filtering::POINT;
+		format = TextureFormat::INVALID;
+		width = 0;
+		height = 0;
+		mip_count = 0;
+		mip_filtering = Filtering::POINT;
 	}
 
-	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	Texture::Texture(const Texture& other)
 	{
-		this->mip_count = 0;
-		this->fmt = _fmt;
-		this->width = _width;
-		this->height = _height;
-		this->filtering = Filtering::BILINEAR;
-		this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
+		copy(other);
+	}
+
+	Texture::~Texture()
+	{
 		release();
-		switch (fmt)
+		INST(ResourceManager<Texture>).free(this->raw_path);
+	}
+
+	std::shared_ptr<Texture> Texture::create(const Texture& other)
+	{
+		return std::shared_ptr<Texture>(new Texture(other));
+	}
+
+	std::shared_ptr<Texture> Texture::create()
+	{
+		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
+		return ret;
+	}
+
+	std::shared_ptr<Texture> Texture::create(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	{
+		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
+		ret->release();
+		ret->width = _width;
+		ret->height = _height;
+		ret->format = _fmt;
+		switch (ret->format)
+		{
+		case TextureFormat::rgb:
+			ret->rgb_buffer = RawBuffer<color_rgb>::create(ret->width, ret->height);
+			break;
+		case TextureFormat::rgba:
+			ret->rgba_buffer = RawBuffer<color_rgba>::create(ret->width, ret->height);
+			break;
+		case TextureFormat::rg:
+			ret->rg_buffer = RawBuffer<color_rg>::create(ret->width, ret->height);
+			break;
+		case TextureFormat::r32:
+			ret->gray_buffer = RawBuffer<color_gray>::create(ret->width, ret->height);
+			break;
+		}
+		return ret;
+	}
+
+	std::shared_ptr<Texture> Texture::create(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	{
+		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
+		ret->release();
+		ret->width = _width;
+		ret->height = _height;
+		ret->format = _fmt;
+		switch (ret->format)
 		{
 		case TextureFormat::rgb:
 		{
-			rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, width, height, [](color_rgb* ptr)
+			ret->rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, ret->width, ret->height, [](color_rgb* ptr)
 			{
 				delete[] ptr;
 			});
@@ -58,7 +94,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rgba:
 		{
-			rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, width, height, [](color_rgba* ptr)
+			ret->rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, ret->width, ret->height, [](color_rgba* ptr)
 			{
 				delete[] ptr;
 			});
@@ -66,7 +102,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rg:
 		{
-			rg_buffer = RawBuffer<color_rg>::create(tex_buffer, width, height, [](color_rg* ptr)
+			ret->rg_buffer = RawBuffer<color_rg>::create(tex_buffer, ret->width, ret->height, [](color_rg* ptr)
 			{
 				delete[] ptr;
 			});
@@ -74,33 +110,61 @@ namespace Guarneri
 		break;
 		case TextureFormat::r32:
 		{
-			gray_buffer = RawBuffer<color_gray>::create(tex_buffer, width, height, [](color_gray* ptr)
+			ret->gray_buffer = RawBuffer<color_gray>::create(tex_buffer, ret->width, ret->height, [](color_gray* ptr)
 			{
 				delete[] ptr;
 			});
 		}
 		break;
 		}
-		std::cout << this->str() << " created" << std::endl;
+		return ret;
 	}
 
-	Texture::Texture(const char* path)
+	std::shared_ptr<Texture> Texture::create(const char* path)
 	{
-		this->mip_count = 0;
-		this->path = path;
-		this->fmt = TextureFormat::INVALID;
-		this->filtering = Filtering::BILINEAR;
-		this->wrap_mode = WrapMode::CLAMP_TO_EDGE;
+		std::shared_ptr<Texture> ret = nullptr;
+		if (INST(ResourceManager<Texture>).get(path, ret))
+		{
+			return ret;
+		}
+		ret = std::shared_ptr<Texture>(new Texture());
+		Texture::deserialize(path, *ret);
+		INST(ResourceManager<Texture>).cache(path, ret);
+		return ret;
+	}
+
+	std::shared_ptr<Texture> Texture::create(const std::string& path)
+	{
+		return create(path.c_str());
+	}
+
+	std::shared_ptr<Texture> Texture::load_raw(const std::string& path)
+	{
+		return load_raw(path.c_str());
+	}
+
+	std::shared_ptr<Texture> Texture::load_raw(const char* path)
+	{
+		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
+		ret->raw_path = path;
+		ret->reload(path); 
+		return ret;
+	}
+
+	void Texture::reload(const char* texture_path)
+	{
 		release();
+
+		std::string abs_path = RES_PATH + texture_path;
 		int w, h, channels;
-		if (!std::filesystem::exists(path))
+		if (!std::filesystem::exists(abs_path))
 		{
-			std::cerr << "create texture failed, invalid path: " << path << std::endl;
+			std::cerr << "create texture failed, invalid path: " << abs_path << std::endl;
 		}
 		else
 		{
 			stbi_set_flip_vertically_on_load(true);
-			auto tex = stbi_load(path, &w, &h, &channels, 0);
+			auto tex = stbi_load(abs_path.c_str(), &w, &h, &channels, 0);
 			this->width = w;
 			this->height = h;
 			assert(channels > 0);
@@ -112,7 +176,7 @@ namespace Guarneri
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->fmt = TextureFormat::rgb;
+				this->format = TextureFormat::rgb;
 			}
 			else if (channels == RGBA_CHANNEL)
 			{
@@ -120,7 +184,7 @@ namespace Guarneri
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->fmt = TextureFormat::rgba;
+				this->format = TextureFormat::rgba;
 			}
 			else if (channels == RG_CHANNEL)
 			{
@@ -128,7 +192,7 @@ namespace Guarneri
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->fmt = TextureFormat::rg;
+				this->format = TextureFormat::rg;
 			}
 			else if (channels == R_CHANNEL)
 			{
@@ -136,53 +200,14 @@ namespace Guarneri
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->fmt = TextureFormat::r32;
+				this->format = TextureFormat::r32;
 			}
 			else
 			{
 				std::cerr << "invalid channels: " << channels << std::endl;
 			}
 		}
-		std::cout << this->str() << " created" << std::endl;
-	}
-
-	Texture::Texture(const Texture& other)
-	{
-		copy(other);
-	}
-
-	Texture::~Texture()
-	{
-		release();
-		INST(ResourceManager<Texture>).free(this->path);
-		std::cout << this->str() << " freed." << std::endl;
-	}
-
-	std::shared_ptr<Texture> Texture::create(const uint32_t& width, const uint32_t& height, const TextureFormat& fmt)
-	{
-		return std::make_shared<Texture>(width, height, fmt);
-	}
-
-	std::shared_ptr<Texture> Texture::create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& fmt)
-	{
-		return std::make_shared<Texture>(tex_buffer, width, height, fmt);
-	}
-
-	std::shared_ptr<Texture> Texture::create(const Texture& other)
-	{
-		return std::make_shared<Texture>(other);
-	}
-
-	std::shared_ptr<Texture> Texture::create(const std::string& path)
-	{
-		std::shared_ptr<Texture> ret = nullptr;
-		if (INST(ResourceManager<Texture>).get(path, ret))
-		{
-			return ret;
-		}
-		ret = std::make_shared<Texture>(path.c_str());
-		INST(ResourceManager<Texture>).cache(path, ret);
-		return ret;
+		std::cout << this->str() << " raw texture loaded" << std::endl;
 	}
 
 	bool Texture::bilinear(const float& u, const float& v, Color& ret) const
@@ -216,7 +241,7 @@ namespace Guarneri
 
 	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
 	{
-		switch (this->fmt)
+		switch (this->format)
 		{
 		case TextureFormat::rgb:
 		{
@@ -313,7 +338,7 @@ namespace Guarneri
 		float wu = u;
 		float wv = v;
 		this->wrap(wu, wv);
-		switch (fmt)
+		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
@@ -353,7 +378,7 @@ namespace Guarneri
 
 	bool Texture::read(const uint32_t& row, const uint32_t& col, Color& ret) const
 	{
-		switch (fmt)
+		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
@@ -393,7 +418,7 @@ namespace Guarneri
 
 	bool Texture::write(const uint32_t& x, const uint32_t& y, const Color& data)
 	{
-		switch (fmt)
+		switch (format)
 		{
 		case TextureFormat::rgb:
 			if (rgba_buffer == nullptr) return false;
@@ -419,7 +444,7 @@ namespace Guarneri
 
 	void Texture::save2file()
 	{
-		switch (fmt)
+		switch (format)
 		{
 		case TextureFormat::rgb:
 			break;
@@ -444,7 +469,7 @@ namespace Guarneri
 		rgba_buffer.reset();
 		for (uint32_t i = 1; i < this->mip_count; i++)
 		{
-			switch (this->fmt)
+			switch (this->format)
 			{
 			case TextureFormat::rgb:
 				this->rgb_mipmaps[i].reset();
@@ -459,6 +484,75 @@ namespace Guarneri
 				this->gray_mipmaps[i].reset();
 				break;
 			}
+		}
+	}
+
+	void Texture::serialize(const Texture& tex, std::string path)
+	{
+		rapidjson::Document doc;
+		doc.SetObject();
+
+		rapidjson::Value raw_path;
+		raw_path.SetString(tex.raw_path.c_str(), doc.GetAllocator());
+		rapidjson::Value meta_path;
+		meta_path.SetString(path.c_str(), doc.GetAllocator());
+		doc.AddMember("raw_path", raw_path, doc.GetAllocator());
+		doc.AddMember("meta_path", meta_path, doc.GetAllocator());
+		doc.AddMember("filtering", (int32_t)tex.filtering, doc.GetAllocator());
+		doc.AddMember("wrap_mode", (int32_t)tex.wrap_mode, doc.GetAllocator());
+		doc.AddMember("format", (int32_t)tex.format, doc.GetAllocator());
+		doc.AddMember("width", (uint32_t)tex.width, doc.GetAllocator());
+		doc.AddMember("height", (uint32_t)tex.height, doc.GetAllocator());
+		doc.AddMember("mip_count", (uint32_t)tex.mip_count, doc.GetAllocator());
+		doc.AddMember("mip_filtering", (int32_t)tex.mip_filtering, doc.GetAllocator());
+
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		if (!std::filesystem::exists(abs_path.parent_path()))
+		{
+			std::filesystem::create_directories(abs_path.parent_path());
+		}
+		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
+		if (fd != nullptr)
+		{
+			char write_buffer[256];
+			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
+			doc.Accept(material_writer);
+			fclose(fd);
+			std::cout << "save texture: " << path << std::endl;
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
+	}
+
+	void Texture::deserialize(std::string path, Texture & tex)
+	{
+		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
+		if (fd != nullptr)
+		{
+			std::cout << "deserialize: " << ASSETS_PATH + path << std::endl;
+			char read_buffer[256];
+			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+			rapidjson::Document doc;
+			doc.ParseStream(fs);
+			tex.raw_path = doc["raw_path"].GetString();
+			tex.meta_path = doc["meta_path"].GetString();
+			tex.filtering = (Filtering)doc["filtering"].GetInt();
+			tex.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
+			tex.format = (TextureFormat)doc["format"].GetInt();
+			tex.width = doc["width"].GetUint();
+			tex.height = doc["height"].GetUint();
+			tex.mip_count = doc["mip_count"].GetUint();
+			tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
+			tex.reload(tex.raw_path.c_str());
+			fclose(fd);
+			std::cout << "read texture: " << path << std::endl;
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
 		}
 	}
 
@@ -525,7 +619,7 @@ namespace Guarneri
 
 	void Texture::clear()
 	{
-		switch (fmt)
+		switch (format)
 		{
 		case TextureFormat::rgb:
 			rgb_buffer->clear(color_rgb());
@@ -553,7 +647,7 @@ namespace Guarneri
 		this->id = other.id;
 		this->wrap_mode = other.wrap_mode;
 		this->filtering = other.filtering;
-		this->fmt = other.fmt;
+		this->format = other.format;
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
 		this->gray_buffer = other.gray_buffer;
@@ -568,7 +662,7 @@ namespace Guarneri
 	std::string Texture::str() const
 	{
 		std::stringstream ss;
-		ss << "Texture[" << this->id << "], w[" << this->width << "], h[" << this->height << "]" << path << "]";
+		ss << "Texture[" << this->id << "], w[" << this->width << "], h[" << this->height << "]" << raw_path << "]";
 		return ss.str();
 	}
 }

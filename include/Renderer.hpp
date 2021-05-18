@@ -19,10 +19,10 @@ namespace Guarneri
 
 	public:
 		Renderer();
-		Renderer(std::unique_ptr<Model> model);
+		Renderer(std::shared_ptr<Model> model);
 		Renderer(const Renderer& other);
 		~Renderer();
-		static std::unique_ptr<Renderer> create(std::unique_ptr<Model>& model);
+		static std::unique_ptr<Renderer> create(std::shared_ptr<Model> model);
 		static std::unique_ptr<Renderer> create(const Renderer& other);
 		virtual Matrix4x4 view_matrix(const RenderPass& render_pass) const;
 		virtual Matrix4x4 projection_matrix(const RenderPass& render_pass) const;

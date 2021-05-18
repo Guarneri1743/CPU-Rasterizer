@@ -1,75 +1,127 @@
 #include "Model.hpp"
 #include <sstream>
-
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-
 #include <filesystem>
 #include <iostream>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include "rapidjson/document.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/reader.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/filereadstream.h"
+#include "Utility.hpp"
 
 namespace Guarneri
 {
-	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
+	Model::Model()
+	{
+		transform = std::make_unique<Transform>();
+		name = "";
+		raw_path = "";
+		meta_path = "";
+	}
+
+	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material) : Model()
 	{
 		assert(vertices.size() != 0 && indices.size() != 0);
 		assert(indices.size() % 3 == 0);
-		auto m = std::make_unique<Mesh>(vertices, indices);
-		meshes.emplace_back(std::move(m));
+		meshes.emplace_back(Mesh(vertices, indices));
 		this->material = material;
 	}
 
-	Model::Model(std::string path, bool flip_uv)
+	Model::Model(std::string path, bool flip_uv) : Model()
 	{
-		this->material = std::make_shared<Material>();
+		this->raw_path = path;
+		this->material = Material::create();
+		load_raw_internal(path, flip_uv);
+	}
+
+	void Model::load_raw_internal(std::string path, bool flip)
+	{
+		std::string abs_path = RES_PATH + path;
 		Assimp::Importer importer;
 		auto flag = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
-		if (flip_uv)
+		if (flip)
 		{
 			flag |= aiProcess_FlipUVs;
 		}
-		const aiScene* Scene = importer.ReadFile(path, flag);
+		const aiScene* Scene = importer.ReadFile(abs_path, flag);
 
 		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
 		{
-			std::cerr << "load Model failed, path: " << path << " error code: " << importer.GetErrorString() << std::endl;
+			std::cerr << "load Model failed, path: " << abs_path << " error code: " << importer.GetErrorString() << std::endl;
 			return;
 		}
-		auto parent_path = std::filesystem::path(path).parent_path();
-		auto p = parent_path.string();
-		parent_dir = p;
-		traverse_nodes(Scene->mRootNode, Scene);
-		std::cout << "load model: " << path << " mesh: " << this->meshes.size() << std::endl;
+		meshes.clear();
+		reload_mesh(Scene->mRootNode, Scene);
+		std::cout << "load model: " << abs_path << " mesh count: " << this->meshes.size() << std::endl;
 		importer.FreeScene();
+	}
+
+	Model::Model(const Model& other)
+	{
+		this->meshes = other.meshes;
+		this->transform = std::unique_ptr<Transform>(new Transform(*other.transform));
+		this->name = other.name + "(copy)";
+		this->material = other.material;
+		this->raw_path = other.raw_path;
+		this->meta_path = other.meta_path;
+		this->flip_uv = other.flip_uv;
 	}
 
 	Model::~Model()
 	{}
 
-	std::unique_ptr<Model> Model::create(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
+	Model& Model::operator=(const Model & other)
 	{
-		return std::make_unique<Model>(vertices, indices, material);
+		this->meshes = other.meshes;
+		this->transform = std::unique_ptr<Transform>(new Transform(*other.transform));
+		this->name = other.name + "(copy)";
+		this->material = other.material;
+		this->raw_path = other.raw_path;
+		this->meta_path = other.meta_path;
+		this->flip_uv = other.flip_uv;
+		return *this;
 	}
 
-	std::unique_ptr<Model> Model::create(std::string path, bool flip_uv)
+	std::shared_ptr<Model> Model::create(std::string path)
 	{
-		return std::make_unique<Model>(path, flip_uv);
+		std::shared_ptr<Model> ret = std::shared_ptr<Model>(new Model());
+		Model::deserialize(path, *ret);
+		return ret;
 	}
 
-	void Model::traverse_nodes(aiNode* node, const aiScene* Scene)
+	std::shared_ptr<Model> Model::load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
+	{
+		return std::shared_ptr<Model>(new Model(vertices, indices, material));
+	}
+
+	std::shared_ptr<Model> Model::load_raw(std::string path, bool flip_uv)
+	{
+		return std::shared_ptr<Model>(new Model(path, flip_uv));
+	}
+
+	std::shared_ptr<Model> Model::create(const Model& other)
+	{
+		return std::shared_ptr<Model>(new Model(other));
+	}
+
+	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
 	{
 		//std::cout << "traverse_nodes: " << node->mName.C_Str() << ", mesh: " << node->mNumMeshes << std::endl;
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
-			meshes.emplace_back(std::move(load_mesh(Mesh, Scene)));
+			load_vertices(Mesh);
 		}
 		for (uint32_t i = 0; i < node->mNumChildren; i++)
 		{
-			traverse_nodes(node->mChildren[i], Scene);
+			reload_mesh(node->mChildren[i], Scene);
 		}
 	}
 
-	std::unique_ptr<Mesh> Model::load_mesh(aiMesh* ai_mesh, const aiScene* scene)
+	void Model::load_vertices(aiMesh* ai_mesh)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
@@ -116,6 +168,7 @@ namespace Guarneri
 			Vertex.color = Vertex.tangent;
 			vertices.emplace_back(Vertex);
 		}
+
 		for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
 		{
 			aiFace face = ai_mesh->mFaces[i];
@@ -123,58 +176,124 @@ namespace Guarneri
 				indices.emplace_back(face.mIndices[j]);
 		}
 
-		aiMaterial* aiMat = scene->mMaterials[ai_mesh->mMaterialIndex];
-
-		auto diffuse = load_textures(aiMat, aiTextureType_DIFFUSE);
-		auto specular = load_textures(aiMat, aiTextureType_SPECULAR);
-		auto roughness = load_textures(aiMat, aiTextureType_SHININESS);
-		auto normal = load_textures(aiMat, aiTextureType_HEIGHT);
-		auto ao = load_textures(aiMat, aiTextureType_AMBIENT);
-
-		if (diffuse != nullptr)
-		{
-			diffuse->filtering = Filtering::POINT;
-		}
-		if (specular != nullptr)
-		{
-			specular->filtering = Filtering::POINT;
-		}
-		if (normal != nullptr)
-		{
-			normal->filtering = Filtering::POINT;
-		}
-		if (ao != nullptr)
-		{
-			ao->filtering = Filtering::POINT;
-		}
-
-		material->set_texture(albedo_prop, diffuse);
-		material->set_texture(specular_prop, specular);
-		material->set_texture(normal_prop, normal);
-		material->set_texture(ao_prop, ao);
-
-		return std::make_unique<Mesh>(vertices, indices);
+		meshes.emplace_back(Mesh(vertices, indices));
 	}
 
-	std::shared_ptr<Texture> Model::load_textures(aiMaterial* ai_material, aiTextureType type)
+	void Model::serialize(const Model& model, std::string path)
 	{
-		std::shared_ptr<Texture> ret;
-		for (unsigned int i = 0; i < ai_material->GetTextureCount(type); i++)
+		rapidjson::Document doc;
+		doc.SetObject();
+
+		rapidjson::Value name;
+		name.SetString(model.name.c_str(), doc.GetAllocator());
+		doc.AddMember("name", name, doc.GetAllocator());
+
+		rapidjson::Value raw_path;
+		raw_path.SetString(model.raw_path.c_str(), doc.GetAllocator());
+		doc.AddMember("raw_path", raw_path, doc.GetAllocator());
+
+		if (model.raw_path == "" && model.meshes.size() > 0)
 		{
-			aiString str;
-			ai_material->GetTexture(type, i, &str);
-			std::string relative_path = str.C_Str();
-			std::string tex_path = parent_dir + "/" + relative_path;
-			ret = Texture::create(tex_path);
-			break;
+			rapidjson::Value meshes;
+			meshes.SetArray();
+			for (auto& m : model.meshes)
+			{
+				meshes.PushBack(Mesh::serialize(doc, m), doc.GetAllocator());
+			}
+			doc.AddMember("meshes", meshes, doc.GetAllocator());
 		}
-		return ret;
+
+		rapidjson::Value meta_path;
+		meta_path.SetString(path.c_str(), doc.GetAllocator());
+		doc.AddMember("meta_path", meta_path, doc.GetAllocator());
+
+		rapidjson::Value material;
+		if (model.material != nullptr)
+		{
+			material.SetString(model.material->meta_path.c_str(), doc.GetAllocator());
+		}
+		else
+		{
+			material.SetString("", doc.GetAllocator());
+		}
+		doc.AddMember("material", material, doc.GetAllocator());
+
+		doc.AddMember("transform", Transform::serialize(doc, *model.transform), doc.GetAllocator());
+
+		doc.AddMember("flip_uv", model.flip_uv, doc.GetAllocator());
+
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		if (!std::filesystem::exists(abs_path.parent_path()))
+		{
+			std::filesystem::create_directories(abs_path.parent_path());
+		}
+		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
+		if (fd != nullptr)
+		{
+			char write_buffer[256];
+			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
+			doc.Accept(material_writer);
+			fclose(fd);
+			std::cout << "save model: " << path << std::endl;
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
+	}
+
+	void Model::deserialize(std::string path, Model & model)
+	{
+		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
+		if (fd != nullptr)
+		{
+			char read_buffer[256];
+			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+			rapidjson::Document doc;
+			doc.ParseStream(fs);
+			fclose(fd);
+			
+			model.name = doc["name"].GetString();
+			model.raw_path = doc["raw_path"].GetString();
+			model.meta_path = doc["meta_path"].GetString();
+			model.flip_uv = doc["flip_uv"].GetBool();
+			std::string material_path = doc["material"].GetString();
+
+			if (model.raw_path != "")
+			{
+				model.load_raw_internal(model.raw_path, model.flip_uv);
+			}
+			else
+			{
+				rapidjson::Value meshes = doc["meshes"].GetArray();
+				for (rapidjson::SizeType idx = 0; idx < meshes.Size(); idx++)
+				{
+					model.meshes.emplace_back(Mesh::deserialize(meshes[idx].GetObject()));
+				}
+			}
+
+			if (material_path != "")
+			{
+				model.material = Material::create(material_path);
+			}
+			else
+			{
+				model.material = Material::create();
+			}
+
+			model.transform = std::unique_ptr<Transform>(Transform::deserialize(doc["transform"].GetObject()));
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
 	}
 
 	std::string Model::str() const
 	{
 		std::stringstream ss;
-		ss << "Model[" << this->id << " path: " << parent_dir << " Mesh count: " << meshes.size() << "]";
+		ss << "Model[" << this->id << " path: " << raw_path << " mesh count: " << meshes.size() << "]";
 		return ss.str();
 	}
 }

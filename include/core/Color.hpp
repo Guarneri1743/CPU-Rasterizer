@@ -4,6 +4,7 @@
 #include "Vector3.hpp"
 #include "Vector4.hpp"
 #include "Define.hpp"
+#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -87,6 +88,8 @@ namespace Guarneri
 		static Color abs(const Color& v);
 		static Color pow(const Color& c, float power);
 		static Color normalize(const Color& value);
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Color& color);
+		static Color deserialize(const rapidjson::Value& v);
 		std::string str() const;
 
 		friend static Color operator +(const float& other, const Color& c)

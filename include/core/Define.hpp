@@ -80,19 +80,19 @@ namespace Guarneri{
 
 	enum class ColorSpace
 	{
-		Gamma,
-		Linear
+		Gamma = 0, 
+		Linear = 1
 	};
 
 	enum class PBRWorkFlow
 	{
-		Metallic,
-		Specular
+		Metallic = 0,
+		Specular = 1
 	};
 
 	enum class Projection {
-		PERSPECTIVE,
-		ORTHO
+		PERSPECTIVE = 0,
+		ORTHO = 1
 	};
 
 	enum class CompareFunc {

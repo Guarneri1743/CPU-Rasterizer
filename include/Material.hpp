@@ -13,6 +13,7 @@ namespace Guarneri
 	{
 	public:
 		std::string material_name;
+		std::string meta_path;
 		ColorMask color_mask;
 		CompareFunc stencil_func;
 		StencilOp stencil_pass_op;
@@ -39,14 +40,9 @@ namespace Guarneri
 		std::shared_ptr<Shader> shadow_caster;
 
 	public:
-		Material();
-		Material(std::string name);
-		Material(std::string name, std::shared_ptr<Shader> shader);
 		Material(const Material& other);
 		~Material();
 
-		static std::shared_ptr<Material> create(std::string name, std::shared_ptr<Shader> shader);
-		static std::shared_ptr<Material> create(const Material& other);
 		Shader* get_shader(const RenderPass& pass) const;
 		void set_shadowmap(RawBuffer<float>* shadowmap);
 		void sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
@@ -65,8 +61,17 @@ namespace Guarneri
 		void copy(const Material& other);
 		std::string str() const;
 
+		static std::shared_ptr<Material> create();
+		static std::shared_ptr<Material> create(std::string path);
+		static std::shared_ptr<Material> create(std::string name, std::shared_ptr<Shader> shader);
+		static std::shared_ptr<Material> create(const Material& other);
 		static void serialize(const Material& material, std::string path);
-		static Material* deserialize(std::string path);
+		static void deserialize(std::string path, Material& material);
+
+	private:
+		Material();
+		Material(std::string name);
+		Material(std::string name, std::shared_ptr<Shader> shader);
 	};
 }
 #endif

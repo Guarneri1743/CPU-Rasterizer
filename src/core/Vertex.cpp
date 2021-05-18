@@ -115,6 +115,29 @@ namespace Guarneri
 		return ret;
 	}
 
+	rapidjson::Value Vertex::serialize(rapidjson::Document& doc, const Vertex& vertex)
+	{
+		rapidjson::Value v;
+		v.SetObject();
+		v.AddMember("position",Vector4::serialize(doc, vertex.position), doc.GetAllocator());
+		v.AddMember("color", Vector4::serialize(doc, vertex.color), doc.GetAllocator());
+		v.AddMember("uv", Vector2::serialize(doc, vertex.uv), doc.GetAllocator());
+		v.AddMember("tangent", Vector4::serialize(doc, vertex.tangent), doc.GetAllocator());
+		v.AddMember("normal", Vector3::serialize(doc, vertex.normal), doc.GetAllocator());
+		return v;
+	}
+
+	Vertex Vertex::deserialize(const rapidjson::Value& v)
+	{
+		Vertex vertex;
+		vertex.position = Vector4::deserialize(v["position"]);
+		vertex.color = Vector4::deserialize(v["color"]);
+		vertex.uv = Vector2::deserialize(v["uv"]);
+		vertex.tangent = Vector3::deserialize(v["tangent"]);
+		vertex.normal = Vector3::deserialize(v["normal"]);
+		return vertex;
+	}
+
 	std::string Vertex::str() const
 	{
 		std::stringstream ss;

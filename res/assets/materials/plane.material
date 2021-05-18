@@ -1,0 +1,47 @@
+{
+    "material_name": "plane_material",
+    "target_shader": "pbr_shader",
+    "meta_path": "/materials/plane.material",
+    "color_mask": 15,
+    "blend_op": 0,
+    "src_factor": 2,
+    "dst_factor": 3,
+    "ztest_func": 2,
+    "zwrite_mode": 1,
+    "stencil_fail_op": 0,
+    "stencil_func": 1,
+    "stencil_pass_op": 0,
+    "stencil_read_mask": 255,
+    "stencil_ref_val": 0,
+    "stencil_write_mask": 255,
+    "double_face": false,
+    "transparent": false,
+    "cast_shadow": false,
+    "name2float": [],
+    "name2float4": [],
+    "name2int": [],
+    "name2tex": [
+        [
+            0,
+            "/textures/Metal_ScavengerMetal_2k_alb_1.texture"
+        ],
+        [
+            1,
+            "/textures/Metal_ScavengerMetal_2k_n_1.texture"
+        ],
+        [
+            11,
+            "/textures/Metal_ScavengerMetal_2k_g_1.texture"
+        ],
+        [
+            2,
+            "/textures/Metal_ScavengerMetal_2k_ao_1.texture"
+        ]
+    ],
+    "name2cubemap": [
+        [
+            20,
+            "/cubemaps/space.cubemap"
+        ]
+    ]
+}

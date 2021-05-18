@@ -9,31 +9,32 @@
 #include "Object.hpp"
 #include "Color.hpp"
 #include "RawBuffer.hpp"
+#include "rapidjson/document.h"
 
 namespace Guarneri
 {
 	enum class WrapMode
 	{
-		REPEAT,
-		CLAMP_TO_EDGE,
-		CLAMP_TO_BORDER
+		REPEAT = 0,
+		CLAMP_TO_EDGE = 1,
+		CLAMP_TO_BORDER = 2
 	};
 
 	enum class Filtering
 	{
-		POINT,
-		BILINEAR,
-		MAX,
-		MIN
+		POINT = 0,
+		BILINEAR = 1,
+		MAX = 2,
+		MIN = 3
 	};
 
 	enum class TextureFormat
 	{
-		INVALID,
-		rgb,
-		rgba,
-		rg,
-		r32
+		INVALID = 0,
+		rgb = 1,
+		rgba = 2,
+		rg = 3,
+		r32 = 4
 	};
 
 	class Texture : public Object
@@ -41,8 +42,9 @@ namespace Guarneri
 	public:
 		WrapMode wrap_mode;
 		Filtering filtering;
-		TextureFormat fmt;
-		std::string path;
+		TextureFormat format;
+		std::string raw_path;
+		std::string meta_path;
 		uint32_t width;
 		uint32_t height;
 		uint32_t mip_count;
@@ -60,16 +62,19 @@ namespace Guarneri
 		std::vector< std::shared_ptr<RawBuffer<color_rg>>> rg_mipmaps;
 
 	public:
-		Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
-		Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
-		Texture(const char* path);
 		Texture(const Texture& other);
 		~Texture();
 
-		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const TextureFormat& fmt);
-		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& fmt);
+		static std::shared_ptr<Texture> create();
+		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const TextureFormat& format);
+		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& format);
 		static std::shared_ptr<Texture> create(const Texture& other);
 		static std::shared_ptr<Texture> create(const std::string& path);
+		static std::shared_ptr<Texture> create(const char* path);
+		static std::shared_ptr<Texture> load_raw(const std::string& path);
+		static std::shared_ptr<Texture> load_raw(const char* path);
+
+		void reload(const char* texture_path);
 		bool bilinear(const float& u, const float& v, Color& ret) const;
 		bool point(const float& u, const float& v, Color& ret) const;
 		void generate_mipmap(const int& mip_count, const Filtering& filtering);
@@ -80,6 +85,8 @@ namespace Guarneri
 		void save2file();
 		void resize();
 		void release();
+		static void serialize(const Texture& tex, std::string path);
+		static void deserialize(std::string path, Texture& tex);
 		std::string str() const;
 
 	private:
@@ -88,6 +95,7 @@ namespace Guarneri
 		void clear();
 		Texture& operator =(const Texture& other);
 		void copy(const Texture& other);
+		Texture();
 	};
 }
 #endif

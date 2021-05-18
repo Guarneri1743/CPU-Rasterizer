@@ -1,0 +1,51 @@
+{
+    "material_name": "back_pack",
+    "target_shader": "pbr_shader",
+    "meta_path": "/materials/backpack.material",
+    "color_mask": 15,
+    "blend_op": 0,
+    "src_factor": 2,
+    "dst_factor": 3,
+    "ztest_func": 2,
+    "zwrite_mode": 1,
+    "stencil_fail_op": 0,
+    "stencil_func": 1,
+    "stencil_pass_op": 0,
+    "stencil_read_mask": 255,
+    "stencil_ref_val": 0,
+    "stencil_write_mask": 255,
+    "double_face": false,
+    "transparent": false,
+    "cast_shadow": true,
+    "name2float": [],
+    "name2float4": [],
+    "name2int": [],
+    "name2tex": [
+        [
+            0,
+            "/backpack/diffuse.texture"
+        ],
+        [
+            1,
+            "/backpack/normal.texture"
+        ],
+        [
+            11,
+            "/backpack/specular.texture"
+        ],
+        [
+            2,
+            "/backpack/ao.texture"
+        ],
+        [
+            14,
+            "/backpack/roughness.texture"
+        ]
+    ],
+    "name2cubemap": [
+        [
+            20,
+            "/cubemaps/space.cubemap"
+        ]
+    ]
+}

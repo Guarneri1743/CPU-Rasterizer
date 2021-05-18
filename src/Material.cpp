@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include "rapidjson/document.h"
-#include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/reader.h"
 #include "rapidjson/filewritestream.h"
@@ -56,14 +56,27 @@ namespace Guarneri
 	Material::~Material()
 	{}
 
+	std::shared_ptr<Material> Material::create()
+	{
+		std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material());
+		return mat;
+	}
+
+	std::shared_ptr<Material> Material::create(std::string path)
+	{
+		std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material());
+		Material::deserialize(path, *mat);
+		return mat;
+	}
+
 	std::shared_ptr<Material> Material::create(std::string name, std::shared_ptr<Shader> shader)
 	{
-		return std::make_shared<Material>(name, shader);
+		return std::shared_ptr<Material>(new Material(name, shader));
 	}
 
 	std::shared_ptr<Material> Material::create(const Material& other)
 	{
-		return std::make_shared<Material>(other);
+		return std::shared_ptr<Material>(new Material(other));
 	}
 
 	Shader* Material::get_shader(const RenderPass& pass) const
@@ -91,11 +104,6 @@ namespace Guarneri
 		shader->dst_factor = dst_factor;
 		shader->blend_op = blend_op;
 		shader->transparent = transparent;
-		shader->name2float = name2float;
-		shader->name2float4 = name2float4;
-		shader->name2tex = name2tex;
-		shader->name2int = name2int;
-		shader->name2cubemap = name2cubemap;
 		shader->stencil_func = stencil_func;
 		shader->stencil_pass_op = stencil_pass_op;
 		shader->stencil_fail_op = stencil_fail_op;
@@ -106,6 +114,11 @@ namespace Guarneri
 		shader->color_mask = color_mask;
 		shader->lighting_param = lighting_param;
 		shader->double_face = double_face;
+		shader->name2float = name2float;
+		shader->name2float4 = name2float4;
+		shader->name2tex = name2tex;
+		shader->name2int = name2int;
+		shader->name2cubemap = name2cubemap;
 		if (name2tex.count(normal_prop) > 0)
 		{
 			shader->normal_map = true;
@@ -245,6 +258,15 @@ namespace Guarneri
 	{
 		rapidjson::Document doc;
 		doc.SetObject();
+		rapidjson::Value mat_name;
+		mat_name.SetString(material.material_name.c_str(), doc.GetAllocator());
+		rapidjson::Value shader_name;
+		shader_name.SetString(material.target_shader->name.c_str(), doc.GetAllocator());
+		rapidjson::Value meta_path;
+		meta_path.SetString(path.c_str(), doc.GetAllocator());
+		doc.AddMember("material_name", mat_name, doc.GetAllocator());
+		doc.AddMember("target_shader", shader_name, doc.GetAllocator());
+		doc.AddMember("meta_path", meta_path, doc.GetAllocator());
 		doc.AddMember("color_mask", (int32_t)material.color_mask, doc.GetAllocator());
 		doc.AddMember("blend_op", (int32_t)material.blend_op, doc.GetAllocator());
 		doc.AddMember("src_factor", (int32_t)material.src_factor, doc.GetAllocator());
@@ -260,58 +282,166 @@ namespace Guarneri
 		doc.AddMember("double_face", material.double_face, doc.GetAllocator());
 		doc.AddMember("transparent", material.transparent, doc.GetAllocator());
 		doc.AddMember("cast_shadow", material.cast_shadow, doc.GetAllocator());
-		rapidjson::Value mat_name;
-		mat_name.SetString(material.material_name.c_str(), doc.GetAllocator());
-		doc.AddMember("material_name", mat_name, doc.GetAllocator());
-		rapidjson::Value shader_name;
-		shader_name.SetString(material.target_shader->name.c_str(), doc.GetAllocator());
-		doc.AddMember("target_shader", shader_name, doc.GetAllocator());
-		rapidjson::StringBuffer buffer;
-		rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-		doc.Accept(writer);
-		const char* ret = buffer.GetString();
-		std::FILE* fd = fopen(path.c_str(), "w");
+
+		rapidjson::Value name2float;
+		name2float.SetArray();
+		for (auto& kv : material.name2float)
+		{
+			rapidjson::Value pair;
+			pair.SetArray();
+			pair.PushBack(kv.first, doc.GetAllocator());
+			pair.PushBack(kv.second, doc.GetAllocator());
+			name2float.PushBack(pair, doc.GetAllocator());
+		}
+		doc.AddMember("name2float", name2float, doc.GetAllocator());
+
+		rapidjson::Value name2float4;
+		name2float4.SetArray();
+		for (auto& kv : material.name2float4)
+		{
+			rapidjson::Value pair;
+			pair.SetArray();
+			pair.PushBack(kv.first, doc.GetAllocator());
+			pair.PushBack(Vector4::serialize(doc, kv.second), doc.GetAllocator());
+			name2float4.PushBack(pair, doc.GetAllocator());
+		}
+		doc.AddMember("name2float4", name2float4, doc.GetAllocator());
+
+		rapidjson::Value name2int;
+		name2int.SetArray();
+		for (auto& kv : material.name2int)
+		{
+			rapidjson::Value pair;
+			pair.SetArray();
+			pair.PushBack(kv.first, doc.GetAllocator());
+			pair.PushBack(kv.second, doc.GetAllocator());
+			name2int.PushBack(pair, doc.GetAllocator());
+		}
+		doc.AddMember("name2int", name2int, doc.GetAllocator());
+
+		rapidjson::Value name2tex;
+		name2tex.SetArray();
+		for (auto& kv : material.name2tex)
+		{
+			if (kv.second->meta_path == "") continue;
+			rapidjson::Value pair;
+			pair.SetArray();
+			pair.PushBack(kv.first, doc.GetAllocator());
+			rapidjson::Value tex_path;
+			tex_path.SetString(kv.second->meta_path.c_str(), doc.GetAllocator());
+			pair.PushBack(tex_path, doc.GetAllocator());
+			name2tex.PushBack(pair, doc.GetAllocator());
+		}
+		doc.AddMember("name2tex", name2tex, doc.GetAllocator());
+
+		rapidjson::Value name2cubemap;
+		name2cubemap.SetArray();
+		for (auto& kv : material.name2cubemap)
+		{
+			if (kv.second->meta_path == "") continue;
+			rapidjson::Value pair;
+			pair.SetArray();
+			pair.PushBack(kv.first, doc.GetAllocator());
+			rapidjson::Value tex_path;
+			tex_path.SetString(kv.second->meta_path.c_str(), doc.GetAllocator());
+			pair.PushBack(tex_path, doc.GetAllocator());
+			name2cubemap.PushBack(pair, doc.GetAllocator());
+		}
+		doc.AddMember("name2cubemap", name2cubemap, doc.GetAllocator());
+
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		if (!std::filesystem::exists(abs_path.parent_path()))
+		{
+			std::filesystem::create_directories(abs_path.parent_path());
+		}
+		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
 		if (fd != nullptr)
 		{
 			char write_buffer[256];
 			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::Writer<rapidjson::FileWriteStream> material_writer(fs);
+			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
 			doc.Accept(material_writer);
 			fclose(fd);
 		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
 	}
 
-	Material* Material::deserialize(std::string path)
+	void Material::deserialize(std::string path, Material& material)
 	{
-		Material* material = new Material();
-		std::FILE* fd = fopen(path.c_str(), "r");
+		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
 		if (fd != nullptr)
 		{
+			std::cout << "deserialize: " << ASSETS_PATH + path << std::endl;
 			char read_buffer[256];
 			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
 			rapidjson::Document doc;
 			doc.ParseStream(fs);
-			material->color_mask = (ColorMask)doc["color_mask"].GetInt();
-			material->blend_op = (BlendOp)doc["blend_op"].GetInt();
-			material->src_factor = (BlendFactor)doc["src_factor"].GetInt();
-			material->dst_factor = (BlendFactor)doc["dst_factor"].GetInt();
-			material->ztest_func = (CompareFunc)doc["ztest_func"].GetInt();
-			material->zwrite_mode = (ZWrite)doc["zwrite_mode"].GetInt();
-			material->stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
-			material->stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
-			material->stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();
-			material->stencil_read_mask = (uint8_t)doc["stencil_read_mask"].GetInt();
-			material->stencil_ref_val = (uint8_t)doc["stencil_ref_val"].GetInt();
-			material->stencil_write_mask = (uint8_t)doc["stencil_write_mask"].GetInt();
-			material->double_face = doc["double_face"].GetBool();
-			material->transparent = doc["transparent"].GetBool();
-			material->cast_shadow = doc["cast_shadow"].GetBool();
-			material->material_name = doc["material_name"].GetString();
-			material->target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
-			fclose(fd);
-			return material;
-		}
+			material.color_mask = (ColorMask)doc["color_mask"].GetInt();
+			material.blend_op = (BlendOp)doc["blend_op"].GetInt();
+			material.src_factor = (BlendFactor)doc["src_factor"].GetInt();
+			material.dst_factor = (BlendFactor)doc["dst_factor"].GetInt();
+			material.ztest_func = (CompareFunc)doc["ztest_func"].GetInt();
+			material.zwrite_mode = (ZWrite)doc["zwrite_mode"].GetInt();
+			material.stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
+			material.stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
+			material.stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();
+			material.stencil_read_mask = (uint8_t)doc["stencil_read_mask"].GetInt();
+			material.stencil_ref_val = (uint8_t)doc["stencil_ref_val"].GetInt();
+			material.stencil_write_mask = (uint8_t)doc["stencil_write_mask"].GetInt();
+			material.double_face = doc["double_face"].GetBool();
+			material.transparent = doc["transparent"].GetBool();
+			material.cast_shadow = doc["cast_shadow"].GetBool();
+			material.material_name = doc["material_name"].GetString();
+			material.meta_path = doc["meta_path"].GetString();
+			material.target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
 
-		return nullptr;
+			rapidjson::Value name2int, name2float, name2float4, name2tex, name2cubemap;
+			name2int = doc["name2int"].GetArray();
+			name2float = doc["name2float"].GetArray();
+			name2float4 = doc["name2float4"].GetArray();
+			name2tex = doc["name2tex"].GetArray();
+			name2cubemap = doc["name2cubemap"].GetArray();
+
+			for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2int.PopBack();
+				material.name2int[pair[0].GetUint()] = pair[1].GetInt();
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2float.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2float.PopBack();
+				material.name2float[pair[0].GetUint()] = pair[1].GetFloat();
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2float4.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2float4.PopBack();
+				material.name2float4[pair[0].GetUint()] = Vector4::deserialize(pair[1].GetObject());
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2tex.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2tex[idx].GetArray();
+				const char* tex_path = pair[1].GetString();
+				material.name2tex[pair.GetArray()[0].GetUint()] = Texture::create(tex_path);
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2cubemap.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2cubemap[idx].GetArray();
+				const char* tex_path = pair[1].GetString();
+				material.name2cubemap[pair.GetArray()[0].GetUint()] = CubeMap::create(tex_path);
+			}
+
+			fclose(fd);
+		}
+		else
+		{
+			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+		}
 	}
 }
