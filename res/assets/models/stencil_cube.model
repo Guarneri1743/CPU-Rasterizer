@@ -1134,5 +1134,5 @@
         "rotation_angle": 0.0,
         "children": []
     },
-    "flip_uv": false
+    "flip_uv": true
 }

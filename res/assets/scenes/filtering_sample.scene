@@ -1,5 +1,5 @@
 {
-    "name": "stencil_sample",
+    "name": "filtering_sample",
     "main_light": {
         "ambient": {
             "r": 0.05000000074505806,
@@ -30,13 +30,11 @@
     },
     "point_lights": [],
     "models": [
-        "/models/stencil_cube.model",
-        "/models/stencil_backpack.model",
         "/models/plane.model"
     ],
     "enable_skybox": false,
-    "enable_shadow": false,
-    "pcf_on": false,
+    "enable_shadow": null,
+    "pcf_on": 0,
     "shadow_bias": 0.0012499999720603228,
     "color_space": 0,
     "work_flow": 1,

@@ -151,6 +151,30 @@ namespace Guarneri
 				}
 			}
 		}, nullptr);
+
+		INST(InputManager).add_on_update_evt([](void* user_data)
+		{
+			if (INST(InputManager).is_key_down(KeyCode::R))
+			{
+				Scene* s = reinterpret_cast<Scene*>(user_data);
+				s->main_light.rotate(10.0f, 0.0f);
+			}
+			if (INST(InputManager).is_key_down(KeyCode::T))
+			{
+				Scene* s = reinterpret_cast<Scene*>(user_data);
+				s->main_light.rotate(0.0f, 10.0f);
+			}
+			if (INST(InputManager).is_key_down(KeyCode::Y))
+			{
+				Scene* s = reinterpret_cast<Scene*>(user_data);
+				s->main_light.rotate(-10.0f, 0.0f);
+			}
+			if (INST(InputManager).is_key_down(KeyCode::U))
+			{
+				Scene* s = reinterpret_cast<Scene*>(user_data);
+				s->main_light.rotate(0.0f, -10.0f);
+			}
+		}, this);
 	}
 
 

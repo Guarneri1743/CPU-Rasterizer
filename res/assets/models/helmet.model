@@ -1,0 +1,50 @@
+{
+    "name": "",
+    "raw_path": "/pbr_helmet/helmet.obj",
+    "meta_path": "/models/helmet.model",
+    "material": "/materials/helmet.material",
+    "transform": {
+        "name": "",
+        "local_position": {
+            "x": 0.0,
+            "y": 5.0,
+            "z": 0.0
+        },
+        "local_rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "local_scale": {
+            "x": 0.10000000149011612,
+            "y": 0.10000000149011612,
+            "z": 0.10000000149011612
+        },
+        "world_trs": {
+            "m00": 0.10000000149011612,
+            "m01": 0.0,
+            "m02": 0.0,
+            "m03": 0.0,
+            "m10": 0.0,
+            "m11": 0.10000000149011612,
+            "m12": 0.0,
+            "m13": 5.0,
+            "m20": 0.0,
+            "m21": 0.0,
+            "m22": 0.10000000149011612,
+            "m23": 0.0,
+            "m30": 0.0,
+            "m31": 0.0,
+            "m32": 0.0,
+            "m33": 1.0
+        },
+        "rotation_axis": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0
+        },
+        "rotation_angle": 0.0,
+        "children": []
+    },
+    "flip_uv": false
+}

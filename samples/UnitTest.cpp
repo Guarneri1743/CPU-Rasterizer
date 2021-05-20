@@ -222,6 +222,9 @@ void generate_lighting_scene()
 	// setup main Light
 	auto demo_scene = Scene::create("lighting_sample");
 	DirectionalLight main_light;
+	Matrix4x4 rot = Matrix4x4::from_euler({ 0.388f, -0.629f, -0.67f });
+	main_light.yaw = rot.to_euler().y;
+	main_light.pitch = rot.to_euler().x;
 	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
 	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
@@ -254,10 +257,10 @@ void generate_lighting_scene()
 
 	// setup Camera
 	//demo_scene->main_cam->set_projection(Projection::ORTHO);
-	demo_scene->main_cam->transform->set_world_position(Vector3(10.67f, 20.42f, 9.36f));
+	demo_scene->main_cam->transform->set_world_position(Vector3(8.5f, 19.8f, 15.13f));
 	demo_scene->main_cam->set_near(0.5f);
 	//demo_scene->main_cam->transform->lookat(Vector3(0.0f, 7.0f, 0.0f));
-	demo_scene->main_cam->transform->set_world_angle(-313.0f, -113.0f, 0.0f);
+	demo_scene->main_cam->transform->set_world_angle(-328.0f, -151.7f, 0.0f);
 
 	// setup skybox
 	auto space_material = Material::create("/materials/space.material");
@@ -314,9 +317,9 @@ void generate_stencil_scene()
 	demo_scene->set_main_light(main_light);
 
 	// setup Camera
-	demo_scene->main_cam->transform->set_world_position(Vector3(10.67f, 20.42f, 9.36f));
+	demo_scene->main_cam->transform->set_world_position(Vector3(3.4f, 21.8f, -14.0f));
 	demo_scene->main_cam->set_near(0.5f);
-	demo_scene->main_cam->transform->set_world_angle(-313.0f, -113.0f, 0.0f);
+	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
 
 	// stencil demo cube
 	auto stencil_test_material = Material::create();
@@ -358,19 +361,212 @@ void generate_stencil_scene()
 	Scene::serialize(*demo_scene, "/scenes/stencil_sample.scene");
 }
 
-void generate_fltering_scene()
+void generate_filtering_scene()
 {
+	// setup main Light
+	auto demo_scene = Scene::create("filtering_sample");
+	DirectionalLight main_light;
+	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
+	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
+	main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	main_light.intensity = 1.3f;
+	demo_scene->set_main_light(main_light);
 
+	// setup Camera
+	demo_scene->main_cam->transform->set_world_position(Vector3(3.4f, 21.8f, -14.0f));
+	demo_scene->main_cam->set_near(0.5f);
+	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
+
+	// Plane
+	auto plane = Model::create("/models/plane.model");
+	demo_scene->add(plane);
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Gamma;
+	demo_scene->work_flow = PBRWorkFlow::Specular;
+	Scene::serialize(*demo_scene, "/scenes/filtering_sample.scene");
 }
 
 void generate_cubemap_scene()
 {
+	auto helmet = Model::load_raw("/pbr_helmet/helmet.obj", false);
+	helmet->material = Material::create();
+	helmet->material->lighting_param.glossiness = 32.0f;
+	helmet->material->cast_shadow = true;
+	std::string cubemap_path = "/cubemaps/space.cubemap";
+	auto cubemap = CubeMap::create(cubemap_path);
+	helmet->material->set_cubemap(cubemap_prop, cubemap);
+	auto tex_a_path = "/pbr_helmet/textures/albedo.jpg";
+	auto tex_r_path = "/pbr_helmet/textures/roughness.png";
+	auto tex_ao_path = "/pbr_helmet/textures/ao.jpg";
+	auto tex_m_path = "/pbr_helmet/textures/metallic.png";
+	auto tex_albedo = Texture::load_raw(tex_a_path);
+	auto tex_r = Texture::load_raw(tex_r_path);
+	auto tex_ao = Texture::load_raw(tex_ao_path);
+	auto tex_m = Texture::load_raw(tex_m_path);
+	tex_albedo->filtering = Filtering::POINT;
+	tex_r->filtering = Filtering::POINT;
+	tex_ao->filtering = Filtering::POINT;
+	tex_m->filtering = Filtering::POINT;
+	Texture::serialize(*tex_albedo, "/helmet/albedo.texture");
+	Texture::serialize(*tex_r, "/helmet/roughness.texture");
+	Texture::serialize(*tex_ao, "/helmet/ao.texture");
+	Texture::serialize(*tex_m, "/helmet/metallic.texture");
+	tex_albedo = Texture::create("/helmet/albedo.texture");
+	tex_r = Texture::create("/helmet/roughness.texture");
+	tex_ao = Texture::create("/helmet/ao.texture");
+	tex_m = Texture::create("/helmet/metallic.texture");
 
+	helmet->material->set_texture(albedo_prop, tex_albedo);
+	helmet->material->set_texture(roughness_prop, tex_r);
+	helmet->material->set_texture(metallic_prop, tex_m);
+	helmet->material->set_texture(ao_prop, tex_ao);
+	Material::serialize(*helmet->material, "/materials/helmet.material");
+	helmet->material = Material::create("/materials/helmet.material");
+
+	helmet->transform->set_local_scale(Vector3(0.1f, 0.1f, 0.1f));
+	helmet->transform->rotate(Vector3::UP, 300.0f);
+	helmet->transform->set_local_position(Vector3(0.0f, 5.0f, 0.0f));
+	helmet->flip_uv = false;
+	Model::serialize(*helmet, "/models/helmet.model");
+	helmet = Model::create("/models/helmet.model");
+
+	// setup main Light
+	auto demo_scene = Scene::create("cubemap_sample");
+	DirectionalLight main_light;
+	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
+	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
+	main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	main_light.intensity = 1.3f;
+	demo_scene->set_main_light(main_light);
+
+	// setup Camera
+	demo_scene->main_cam->transform->set_world_position(Vector3(3.4f, 21.8f, -14.0f));
+	demo_scene->main_cam->set_near(0.5f);
+	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
+
+	// Plane
+	auto plane = Model::create("/models/plane.model");
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Linear;
+	demo_scene->work_flow = PBRWorkFlow::Metallic;
+
+	demo_scene->add(plane);
+	demo_scene->add(helmet);
+
+	PointLight pl1, pl2, pl3;
+	pl1.position = Vector3(10.0f, 2.0f, 10.0f);
+	pl1.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl1.diffuse = Color(1.0f, 0.0f, 0.0f, 1.0f);
+	pl1.specular = Color(1.0f, 0.0f, 0.0f, 1.0f);
+	pl1.intensity = 3.0f;
+
+	pl2.position = Vector3(-10.0f, 2.0f, -10.0f);
+	pl2.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl2.diffuse = Color(0.0f, 1.0f, 0.0f, 1.0f);
+	pl2.specular = Color(0.0f, 1.0f, 0.0f, 1.0f);
+	pl2.intensity = 3.0f;
+
+	pl3.position = Vector3(-10.0f, 2.0f, 10.0f);
+	pl3.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	pl3.diffuse = Color(0.0f, 0.0f, 1.0f, 1.0f);
+	pl3.specular = Color(0.0f, 0.0f, 1.0f, 1.0f);
+	pl3.intensity = 3.0f;
+
+	// light cube
+	auto p1 = Model::create("/models/light.model");
+	p1->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
+	p1->transform->set_world_position(pl1.position);
+	demo_scene->add(p1);
+
+	auto p2 = Model::create(*p1);
+	p2->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
+	p2->transform->set_world_position(pl2.position);
+	demo_scene->add(p2);
+
+	auto p3 = Model::create(*p1);
+	p3->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
+	p3->transform->set_world_position(pl3.position);
+	demo_scene->add(p3);
+
+	demo_scene->add_point_light(pl1);
+	demo_scene->add_point_light(pl2);
+	demo_scene->add_point_light(pl3);
+
+	demo_scene->enable_shadow = true;
+	demo_scene->enable_skybox = true;
+	demo_scene->pcf_on = true;
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Linear;
+	demo_scene->work_flow = PBRWorkFlow::Metallic;
+
+	Scene::serialize(*demo_scene, "/scenes/cubemap_sample.scene");
 }
 
 void generate_blending_scene()
 {
+	// cube
+	auto ca = Texture::load_raw("/textures/misc_Garbage_2k_alb_1.jpg");
+	auto mat = Material::create();
+	mat->set_texture(albedo_prop, ca);
+	mat->double_face = true;
+	mat->cast_shadow = true;
+	Material::serialize(*mat, "/materials/opaque_cube.material");
+	mat = Material::create("/materials/opaque_cube.material");
+	auto opaque_cube = PrimitiveFactory::cube(mat);
+	opaque_cube->transform->set_local_scale(Vector3(4.0f, 4.0f, 4.0f));
+	opaque_cube->transform->set_local_position(Vector3(6.0f, 4.0f, 4.0f));
+	Model::serialize(*opaque_cube, "/models/opaque_cube.model");
+	opaque_cube = Model::create("/models/opaque_cube.model");
 
+	// transparent cube
+	auto cube_albedo = Texture::create("/common_textures/Metal_ScavengerMetal_2k_alb_1.texture");
+	auto box_material = Material::create();
+	box_material->transparent = true;
+	box_material->blend_op = BlendOp::ADD;
+	box_material->src_factor = BlendFactor::SRC_ALPHA;
+	box_material->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
+	box_material->zwrite_mode = ZWrite::OFF;
+	box_material->double_face = true;
+	box_material->set_texture(albedo_prop, cube_albedo);
+	Material::serialize(*box_material, "/materials/transparent_cube.material");
+	box_material = Material::create("/materials/transparent_cube.material");
+	auto transparent_cube = PrimitiveFactory::cube(box_material);
+	transparent_cube->transform->set_local_scale(Vector3(5.0f, 5.0f, 5.0f));
+	transparent_cube->transform->set_local_position(Vector3(0.0f, 3.0f, 0.0f));
+	Model::serialize(*transparent_cube, "/models/transparent_cube.model");
+	transparent_cube = Model::create("/models/transparent_cube.model");
+
+	// setup main Light
+	auto demo_scene = Scene::create("blending_sample");
+	DirectionalLight main_light;
+	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
+	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
+	main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	main_light.intensity = 1.3f;
+	demo_scene->set_main_light(main_light);
+
+	// setup Camera
+	demo_scene->main_cam->transform->set_world_position(Vector3(3.4f, 21.8f, -14.0f));
+	demo_scene->main_cam->set_near(0.5f);
+	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
+
+	// Plane
+	auto plane = Model::create("/models/plane.model");
+
+	demo_scene->add(plane);
+	demo_scene->add(transparent_cube);
+	demo_scene->add(opaque_cube);
+	demo_scene->enable_shadow = true;
+	demo_scene->enable_skybox = true;
+	demo_scene->pcf_on = true;
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Gamma;
+	demo_scene->work_flow = PBRWorkFlow::Specular;
+
+	Scene::serialize(*demo_scene, "/scenes/blending_sample.scene");
 }
 
 int main()
@@ -381,7 +577,7 @@ int main()
 	texture_material_serialization();
 	generate_lighting_scene();
 	generate_stencil_scene();
-	generate_fltering_scene();
+	generate_filtering_scene();
 	generate_cubemap_scene();
 	generate_blending_scene();
 }

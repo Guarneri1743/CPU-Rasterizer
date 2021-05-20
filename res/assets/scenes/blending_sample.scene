@@ -1,5 +1,5 @@
 {
-    "name": "stencil_sample",
+    "name": "blending_sample",
     "main_light": {
         "ambient": {
             "r": 0.05000000074505806,
@@ -30,13 +30,13 @@
     },
     "point_lights": [],
     "models": [
-        "/models/stencil_cube.model",
-        "/models/stencil_backpack.model",
-        "/models/plane.model"
+        "/models/plane.model",
+        "/models/opaque_cube.model",
+        "/models/transparent_cube.model"
     ],
-    "enable_skybox": false,
-    "enable_shadow": false,
-    "pcf_on": false,
+    "enable_skybox": true,
+    "enable_shadow": true,
+    "pcf_on": true,
     "shadow_bias": 0.0012499999720603228,
     "color_space": 0,
     "work_flow": 1,
@@ -45,7 +45,7 @@
         "aspect": 1.1428571939468384,
         "near": 0.5,
         "far": 100.0,
-        "enable_msaa": false,
+        "enable_msaa": true,
         "transform": {
             "name": "",
             "local_position": {

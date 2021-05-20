@@ -1,0 +1,31 @@
+{
+    "material_name": "default_material",
+    "target_shader": "pbr_shader",
+    "meta_path": "/materials/transparent_cube.material",
+    "color_mask": 15,
+    "blend_op": 0,
+    "src_factor": 2,
+    "dst_factor": 3,
+    "ztest_func": 2,
+    "zwrite_mode": 0,
+    "stencil_fail_op": 0,
+    "stencil_func": 1,
+    "stencil_pass_op": 0,
+    "stencil_read_mask": 255,
+    "stencil_ref_val": 0,
+    "stencil_write_mask": 255,
+    "stencil_zfail_op": 0,
+    "double_face": true,
+    "transparent": true,
+    "cast_shadow": false,
+    "name2float": [],
+    "name2float4": [],
+    "name2int": [],
+    "name2tex": [
+        [
+            0,
+            "/common_textures/Metal_ScavengerMetal_2k_alb_1.texture"
+        ]
+    ],
+    "name2cubemap": []
+}

@@ -289,9 +289,9 @@ namespace Guarneri
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
-		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
+		//todo
+		//if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
-			//todo
 			Color roughness = Color::WHITE;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
@@ -306,7 +306,7 @@ namespace Guarneri
 			auto ret = (ambient + diffuse + specular) * atten;
 			return ret;
 		}
-		else
+		/*else
 		{
 			auto ambient = light_ambient * ao.r;
 			auto dist = Vector3::length(light.position, wpos);
@@ -317,7 +317,7 @@ namespace Guarneri
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
 			auto ret = ambient + Color(lo);
 			return ret;
-		}
+		}*/
 	}
 
 	Color Shader::fragment_shader(const v2f& input) const
