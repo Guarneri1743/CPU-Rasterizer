@@ -261,8 +261,8 @@ function setupCubemapDemo()
       targetdir (solution_dir .. "/bin/release")
 end
 
-function setupUnitTestProj()
-   project "UnitTest"
+function setupGenerateScenesProj()
+   project "GenerateScenes"
    kind "ConsoleApp"
    language "C++"
 
@@ -286,7 +286,7 @@ function setupUnitTestProj()
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
-      sample_dir .. "/UnitTest.cpp"
+      sample_dir .. "/GenerateScenes.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -303,4 +303,4 @@ setupStencilDemo()
 setupLightingDemo()
 setupFilteringDemo()
 setupCubemapDemo()
-setupUnitTestProj()
+setupGenerateScenesProj()
