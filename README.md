@@ -118,6 +118,8 @@
 	- simd
 				
 	- ddx, ddy, mipmap and lod sampler
+	
+	- vector swizzling
 				
 	- gl/dx like api
 				
