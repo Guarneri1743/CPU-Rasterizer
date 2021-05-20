@@ -86,9 +86,6 @@ namespace Guarneri {
 		m.at(2, 0) = (1 - c) * z * x - s * y;
 		m.at(2, 1) = (1 - c) * z * y + s * x;
 		m.at(2, 2) = c + (1 - c) * z * z;
-		/*m.at(0, 3) = m.at(1, 3) = m.at(2, 3) = 0.0f;
-		m.at(3, 0) = m.at(3, 1) = m.at(3, 2) = 0.0f;
-		m.at(3, 3) = 1.0f;*/
 		return m;
 	}
 
@@ -160,7 +157,6 @@ namespace Guarneri {
 		return ret;
 	}
 
-	//yaw-y pitch-x roll-z
 	Matrix4x4 Matrix4x4::from_euler(const Vector3& euler)
 	{
 		return euler_x(euler.x) * euler_y(euler.y) * euler_z(euler.z);
@@ -168,7 +164,7 @@ namespace Guarneri {
 
 	Matrix4x4 Matrix4x4::from_angle(const Vector3& angles)
 	{
-		return  euler_x(DEGREE2RAD(angles.x)) * euler_y(DEGREE2RAD(angles.y)) * euler_z(DEGREE2RAD(angles.z));
+		return euler_x(DEGREE2RAD(angles.x)) * euler_y(DEGREE2RAD(angles.y)) * euler_z(DEGREE2RAD(angles.z));
 	}
 
 	Matrix4x4 Matrix4x4::euler_x(const float& rad)
@@ -462,21 +458,21 @@ namespace Guarneri {
 		{
 			if (m20 > -1.0f)
 			{
-				euler.x = std::asin(-m20);
-				euler.y = std::atan2f(m21, m22);
-				euler.z = std::atan2f(m10, m11);
+				euler.x = std::asin(m20);
+				euler.y = std::atan2f(-m21, m22);
+				euler.z = std::atan2f(-m10, m00);
 			}
 			else
 			{
-				euler.x = PI / 2.0f;
-				euler.y = -std::atan2f(-m10, m11);
+				euler.x = -PI / 2.0f;
+				euler.y = -std::atan2f(m01, m11);
 				euler.z = 0.0f;
 			}
 		}
 		else
 		{
-			euler.x = -PI / 2.0f;
-			euler.y = std::atan2(-m01, m00);
+			euler.x = PI / 2.0f;
+			euler.y = std::atan2(m01, m11);
 			euler.z = 0.0f;
 		}
 

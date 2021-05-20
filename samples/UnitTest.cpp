@@ -36,11 +36,6 @@ void matrix_case()
 	Vector3 local_pt(125, -70, 30);
 	auto world_pt = local2world.transform_point(local_pt);
 	assert(world_pt == Vector3(300, -80, 130));
-
-	Matrix4x4 rot = Matrix4x4::rotation(Vector3::UP, 70.0f);
-	Vector3 euler = rot.to_euler();
-	Matrix4x4 fe = Matrix4x4::from_euler(euler);
-	assert(rot == Matrix4x4::from_euler(euler));
 }
 
 void transform_serialization()
@@ -111,23 +106,23 @@ void texture_material_serialization()
 	Texture::deserialize("/backpack/specular.texture", *tex_bp_s);
 	Texture::deserialize("/backpack/roughness.texture", *tex_bp_r);
 
-	auto plane_a_path = "/textures/Metal_ScavengerMetal_2k_alb_1.jpg";
-	auto plane_n_path = "/textures/Metal_ScavengerMetal_2k_n_1.jpg";
-	auto plane_s_path = "/textures/Metal_ScavengerMetal_2k_g_1.jpg";
-	auto plane_ao_path = "/textures/Metal_ScavengerMetal_2k_ao_1.jpg";
+	auto plane_a_path = "/common_textures/Metal_ScavengerMetal_2k_alb_1.jpg";
+	auto plane_n_path = "/common_textures/Metal_ScavengerMetal_2k_n_1.jpg";
+	auto plane_s_path = "/common_textures/Metal_ScavengerMetal_2k_g_1.jpg";
+	auto plane_ao_path = "/common_textures/Metal_ScavengerMetal_2k_ao_1.jpg";
 	auto plane_albedo = Texture::load_raw(plane_a_path);
 	auto plane_normal = Texture::load_raw(plane_n_path);
 	auto plane_s = Texture::load_raw(plane_s_path);
 	auto plane_ao = Texture::load_raw(plane_ao_path);
 
-	Texture::serialize(*plane_albedo, "/textures/Metal_ScavengerMetal_2k_alb_1.texture");
-	Texture::serialize(*plane_normal, "/textures/Metal_ScavengerMetal_2k_n_1.texture");
-	Texture::serialize(*plane_s, "/textures/Metal_ScavengerMetal_2k_g_1.texture");
-	Texture::serialize(*plane_ao, "/textures/Metal_ScavengerMetal_2k_ao_1.texture");
-	Texture::deserialize("/textures/Metal_ScavengerMetal_2k_alb_1.texture", *plane_albedo);
-	Texture::deserialize("/textures/Metal_ScavengerMetal_2k_n_1.texture", *plane_normal);
-	Texture::deserialize("/textures/Metal_ScavengerMetal_2k_g_1.texture", *plane_s);
-	Texture::deserialize("/textures/Metal_ScavengerMetal_2k_ao_1.texture", *plane_ao);
+	Texture::serialize(*plane_albedo, "/common_textures/Metal_ScavengerMetal_2k_alb_1.texture");
+	Texture::serialize(*plane_normal, "/common_textures/Metal_ScavengerMetal_2k_n_1.texture");
+	Texture::serialize(*plane_s, "/common_textures/Metal_ScavengerMetal_2k_g_1.texture");
+	Texture::serialize(*plane_ao, "/common_textures/Metal_ScavengerMetal_2k_ao_1.texture");
+	Texture::deserialize("/common_textures/Metal_ScavengerMetal_2k_alb_1.texture", *plane_albedo);
+	Texture::deserialize("/common_textures/Metal_ScavengerMetal_2k_n_1.texture", *plane_normal);
+	Texture::deserialize("/common_textures/Metal_ScavengerMetal_2k_g_1.texture", *plane_s);
+	Texture::deserialize("/common_textures/Metal_ScavengerMetal_2k_ao_1.texture", *plane_ao);
 
 
 	auto backpac_mat = Material::create();
@@ -203,7 +198,7 @@ void texture_material_serialization()
 	Material::serialize(*plane_material, "/materials/plane.material");
 }
 
-void model_serialization()
+void generate_lighting_scene()
 {
 	auto plane_material = Material::create("/materials/plane.material");
 	auto plane = PrimitiveFactory::plane(plane_material);
@@ -215,18 +210,15 @@ void model_serialization()
 	backpack->name = "backpack";
 	backpack->material = Material::create("/materials/backpack.material");
 	backpack->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
-	backpack->transform->set_world_position(Vector3(0.0f, 8.0f, 0.0f));
+	backpack->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
 	Model::serialize(*backpack, "/models/backpack.model");
 
 	auto light_material = Material::create("/materials/light.material");
-	auto p1 = PrimitiveFactory::cube(light_material);
-	p1->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
-	p1->transform->set_world_position(Vector3(10.0f, 2.0f, 10.0f));
-	Model::serialize(*p1, "/models/light.model");
-}
+	auto cube = PrimitiveFactory::cube(light_material);
+	cube->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
+	cube->transform->set_world_position(Vector3(10.0f, 2.0f, 10.0f));
+	Model::serialize(*cube, "/models/light.model");
 
-void scene_serialization()
-{
 	// setup main Light
 	auto demo_scene = Scene::create("lighting_sample");
 	DirectionalLight main_light;
@@ -289,18 +281,96 @@ void scene_serialization()
 	demo_scene->add(p3);
 
 	// Plane
-	auto plane = Model::create("/models/plane.model");
-	plane->transform->set_local_scale(Vector3(30.0f, 1.0f, 30.0f));
-	demo_scene->add(plane);
+	auto p = Model::create("/models/plane.model");
+	p->transform->set_local_scale(Vector3(30.0f, 0.0f, 30.0f));
+	demo_scene->add(p);
 
 	// backpack
-	auto backpack = Model::create("/models/backpack.model");
+	auto bp = Model::create("/models/backpack.model");
+	bp->material = Material::create("/materials/backpack.material");
+	bp->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
+	bp->transform->set_world_position(Vector3(0.0f, 8.0f, 0.0f));
+	demo_scene->add(bp);
+
+	demo_scene->pcf_on = true;
+	demo_scene->enable_shadow = true;
+	demo_scene->main_cam->enable_msaa = false;
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Gamma;
+	demo_scene->work_flow = PBRWorkFlow::Specular;
+	Scene::serialize(*demo_scene, "/scenes/lighting_sample.scene");
+}
+
+void generate_stencil_scene()
+{
+	// setup main Light
+	auto demo_scene = Scene::create("stencil_sample");
+	DirectionalLight main_light;
+	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
+	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
+	main_light.diffuse = Color(0.9f, 0.9f, 1.0f, 1.0f);
+	main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+	main_light.intensity = 1.3f;
+	demo_scene->set_main_light(main_light);
+
+	// setup Camera
+	demo_scene->main_cam->transform->set_world_position(Vector3(10.67f, 20.42f, 9.36f));
+	demo_scene->main_cam->set_near(0.5f);
+	demo_scene->main_cam->transform->set_world_angle(-313.0f, -113.0f, 0.0f);
+
+	// stencil demo cube
+	auto stencil_test_material = Material::create();
+	stencil_test_material->stencil_pass_op = StencilOp::REPLACE;
+	stencil_test_material->stencil_ref_val = 1;
+	stencil_test_material->zwrite_mode = ZWrite::OFF;
+	stencil_test_material->stencil_func = CompareFunc::ALWAYS;
+	stencil_test_material->double_face = true;
+	Material::serialize(*stencil_test_material, "/materials/stencil_sample.material");
+
+	auto cube = PrimitiveFactory::cube(Material::create("/materials/stencil_sample.material"));
+	cube->name = "stencil_cube";
+	cube->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
+	cube->transform->set_local_scale(Vector3(5.0f, 5.0f, 5.0f));
+	Model::serialize(*cube, "/models/stencil_cube.model");
+	demo_scene->add(Model::create("/models/stencil_cube.model"));
+
+	// backpack
+	auto backpack = Model::load_raw("/backpack/backpack.obj", true);
+	backpack->name = "backpack";
 	backpack->material = Material::create("/materials/backpack.material");
+	backpack->material->stencil_ref_val = 1;
+	backpack->material->stencil_func = CompareFunc::EQUAL;
+	Material::serialize(*backpack->material, "/materials/stencil_backpack.material");
+	backpack->material = Material::create("/materials/stencil_backpack.material");
 	backpack->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
-	backpack->transform->set_world_position(Vector3(0.0f, 8.0f, 0.0f));
+	backpack->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
+	Model::serialize(*backpack, "/models/stencil_backpack.model");
+
+	backpack = Model::create("/models/stencil_backpack.model");
 	demo_scene->add(backpack);
 
-	Scene::serialize(*demo_scene, "/scenes/lighting_sample.scene");
+	// Plane
+	auto plane = Model::create("/models/plane.model");
+	demo_scene->add(plane);
+	demo_scene->shadow_bias = 0.00125f;
+	demo_scene->color_space = ColorSpace::Gamma;
+	demo_scene->work_flow = PBRWorkFlow::Specular;
+	Scene::serialize(*demo_scene, "/scenes/stencil_sample.scene");
+}
+
+void generate_fltering_scene()
+{
+
+}
+
+void generate_cubemap_scene()
+{
+
+}
+
+void generate_blending_scene()
+{
+
 }
 
 int main()
@@ -309,6 +379,9 @@ int main()
 	matrix_case();
 	transform_serialization();
 	texture_material_serialization();
-	model_serialization();
-	scene_serialization();
+	generate_lighting_scene();
+	generate_stencil_scene();
+	generate_fltering_scene();
+	generate_cubemap_scene();
+	generate_blending_scene();
 }

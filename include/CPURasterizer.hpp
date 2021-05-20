@@ -5,7 +5,7 @@
 #include "Define.hpp"
 #include "Singleton.hpp"
 #include "IdAllocator.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "RingBuffer.hpp"
 #include "SafeQueue.hpp"
 #include "Time.hpp"

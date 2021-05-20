@@ -3,7 +3,7 @@
 #include "GDIWindow.hpp"
 #include "GraphicsDevice.hpp"
 #include "Singleton.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "InputManager.hpp"
 #include "Vector2.hpp"
 #include "Vector3.hpp"
@@ -85,63 +85,63 @@ namespace Guarneri
 			UNUSED(data);
 			if (code == KeyCode::F1)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::SHADOWMAP;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::SHADOWMAP;
 			}
 			else if (code == KeyCode::F2)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::DEPTH;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::DEPTH;
 			}
 			else if (code == KeyCode::F3)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::WIREFRAME;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::WIREFRAME;
 			}
 			else if (code == KeyCode::F4)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::FRAME_TILE;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::FRAME_TILE;
 			}
 			else if (code == KeyCode::F5)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::UV;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::UV;
 			}
 			else if (code == KeyCode::F6)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::CULLED_BACK_FACE;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::CULLED_BACK_FACE;
 			}
 			else if (code == KeyCode::F7)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::NORMAL;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::NORMAL;
 			}
 			else if (code == KeyCode::F8)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::SPECULAR;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::SPECULAR;
 			}
 			else if (code == KeyCode::F9)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::STENCIL;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::STENCIL;
 			}
 			else if (code == KeyCode::Z)
 			{
-				INST(MiscParameter).render_flag = INST(MiscParameter).render_flag ^ RenderFlag::EARLY_Z_DEBUG;
+				INST(GlobalShaderParams).render_flag = INST(GlobalShaderParams).render_flag ^ RenderFlag::EARLY_Z_DEBUG;
 			}
 			else if (code == KeyCode::P)
 			{
-				INST(MiscParameter).enable_shadow = !INST(MiscParameter).enable_shadow;
+				INST(GlobalShaderParams).enable_shadow = !INST(GlobalShaderParams).enable_shadow;
 			}
 			else if (code == KeyCode::O)
 			{
-				INST(MiscParameter).pcf_on = !INST(MiscParameter).pcf_on;
+				INST(GlobalShaderParams).pcf_on = !INST(GlobalShaderParams).pcf_on;
 			}
 			else if (code == KeyCode::M)
 			{
-				INST(MiscParameter).shadow_bias *= 2.0f;
+				INST(GlobalShaderParams).shadow_bias *= 2.0f;
 			}
 			else if (code == KeyCode::N)
 			{
-				INST(MiscParameter).shadow_bias /= 2.0f;
+				INST(GlobalShaderParams).shadow_bias /= 2.0f;
 			}
 			else if (code == KeyCode::A)
 			{
-				if (!INST(MiscParameter).enable_msaa)
+				if (!INST(GlobalShaderParams).enable_msaa)
 				{
 					INST(GraphicsDevice).set_subsample_count(16);
 				}
@@ -168,13 +168,13 @@ namespace Guarneri
 
 	void Scene::update()
 	{
-		INST(MiscParameter).cam_far = main_cam->far;
-		INST(MiscParameter).cam_near = main_cam->near;
-		INST(MiscParameter).view_matrix = main_cam->view_matrix();
-		INST(MiscParameter).proj_matrix = main_cam->projection_matrix();
-		INST(MiscParameter).main_light = main_light;
-		INST(MiscParameter).point_lights = point_lights;
-		INST(MiscParameter).camera_pos = main_cam->transform->world_position();
+		INST(GlobalShaderParams).cam_far = main_cam->far;
+		INST(GlobalShaderParams).cam_near = main_cam->near;
+		INST(GlobalShaderParams).view_matrix = main_cam->view_matrix();
+		INST(GlobalShaderParams).proj_matrix = main_cam->projection_matrix();
+		INST(GlobalShaderParams).main_light = main_light;
+		INST(GlobalShaderParams).point_lights = point_lights;
+		INST(GlobalShaderParams).camera_pos = main_cam->transform->world_position();
 		/*if (input_mgr().is_key_down(KeyCode::W)) {
 			main_cam->move_forward(CAMERA_MOVE_SPEED);
 		}
@@ -244,7 +244,7 @@ namespace Guarneri
 	void Scene::render()
 	{
 		INST(GraphicsDevice).clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
-		if (INST(MiscParameter).enable_shadow)
+		if (INST(GlobalShaderParams).enable_shadow)
 		{
 			render_shadow();
 			INST(GraphicsDevice).present();
@@ -256,7 +256,7 @@ namespace Guarneri
 
 	void Scene::render_shadow()
 	{
-		if ((INST(MiscParameter).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
 		{
 			return;
 		}
@@ -272,12 +272,12 @@ namespace Guarneri
 		INST(GraphicsDevice).multi_thread = true;
 		INST(GraphicsDevice).tile_based = true;
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 		{
 			return;
 		}
 
-		bool enable_frustum_culling = (INST(MiscParameter).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE;
+		bool enable_frustum_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE;
 		if (enable_frustum_culling)
 		{
 			// todo: CPU Frustum Culling
@@ -357,7 +357,11 @@ namespace Guarneri
 		}
 		doc.AddMember("models", models, doc.GetAllocator()); 
 		doc.AddMember("enable_skybox", scene.enable_skybox, doc.GetAllocator());
-
+		doc.AddMember("enable_shadow", scene.enable_shadow, doc.GetAllocator());
+		doc.AddMember("pcf_on", scene.pcf_on, doc.GetAllocator());
+		doc.AddMember("shadow_bias", scene.shadow_bias, doc.GetAllocator());
+		doc.AddMember("color_space", (int32_t)scene.color_space, doc.GetAllocator());
+		doc.AddMember("work_flow", (int32_t)scene.work_flow, doc.GetAllocator());
 
 		rapidjson::Value main_cam = Camera::serialize(doc, *scene.main_cam).GetObject();
 		doc.AddMember("main_cam", main_cam, doc.GetAllocator());
@@ -381,7 +385,7 @@ namespace Guarneri
 			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
 			doc.Accept(writer);
 			fclose(fd);
-			//std::cout << "save scene: " << path << std::endl;
+			std::cout << "save scene: " << path << std::endl;
 		}
 		else
 		{
@@ -417,6 +421,12 @@ namespace Guarneri
 			}
 
 			scene->enable_skybox = doc["enable_skybox"].GetBool();
+			scene->enable_shadow = doc["enable_shadow"].GetBool();
+			scene->pcf_on = doc["pcf_on"].GetBool();
+			scene->shadow_bias = doc["shadow_bias"].GetFloat();
+			scene->color_space = (ColorSpace)doc["color_space"].GetInt();
+			scene->work_flow = (PBRWorkFlow)doc["work_flow"].GetInt();
+
 			scene->main_cam = Camera::deserialize(doc["main_cam"].GetObject());
 			scene->initialize();
 

@@ -18,7 +18,7 @@ namespace Guarneri
 	Matrix4x4 SkyboxRenderer::view_matrix(const RenderPass& render_pass) const
 	{
 		UNUSED(render_pass);
-		auto view = INST(MiscParameter).view_matrix;
+		auto view = INST(GlobalShaderParams).view_matrix;
 		auto view3x3 = Matrix3x3(view);
 		auto view4x4 = Matrix4x4(
 			Vector4(view3x3.row(0), 0),
@@ -31,7 +31,7 @@ namespace Guarneri
 	Matrix4x4 SkyboxRenderer::projection_matrix(const RenderPass& render_pass) const
 	{
 		UNUSED(render_pass);
-		return INST(MiscParameter).proj_matrix;
+		return INST(GlobalShaderParams).proj_matrix;
 	}
 
 	Matrix4x4 SkyboxRenderer::model_matrix() const

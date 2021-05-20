@@ -123,7 +123,7 @@ namespace Guarneri
 	std::shared_ptr<Texture> Texture::create(const char* path)
 	{
 		std::shared_ptr<Texture> ret = nullptr;
-		if (INST(ResourceManager<Texture>).get(path, ret))
+		if (INST(ResourceManager<Texture>).get(path, ret) && ret != nullptr)
 		{
 			return ret;
 		}

@@ -1,7 +1,7 @@
 #include "GraphicsDevice.hpp"
 #include "ThreadPool.hpp"
 #include "Singleton.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "Plane.hpp"
 #include "Frustum.hpp"
 #include "Clipper.hpp"
@@ -81,7 +81,7 @@ namespace Guarneri
 	void GraphicsDevice::draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
 		auto object_space_frustum = Frustum::create(p * v * m);
-		if ((INST(MiscParameter).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
+		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
 		{
 			if (Clipper::conservative_frustum_culling(object_space_frustum, v1, v2, v3))
 			{
@@ -89,7 +89,7 @@ namespace Guarneri
 				return;
 			}
 		}
-		if ((INST(MiscParameter).culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE)
+		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE)
 		{
 			auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
 			if (triangles.size() == 0)
@@ -118,7 +118,7 @@ namespace Guarneri
 			MsaaCommand* msaa = dynamic_cast<MsaaCommand*>(cmd);
 			if (msaa != nullptr)
 			{
-				INST(MiscParameter).enable_msaa = msaa->enable;
+				INST(GlobalShaderParams).enable_msaa = msaa->enable;
 				uint8_t count = msaa->msaa_subsample_count;
 				if (count > 0)
 				{
@@ -150,7 +150,7 @@ namespace Guarneri
 		process_commands();
 		if ((flag & BufferFlag::COLOR) != BufferFlag::NONE)
 		{
-			if ((INST(MiscParameter).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (INST(MiscParameter).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 			{
 				framebuffer->clear(DEFAULT_DEPTH_COLOR);
 			}
@@ -170,7 +170,7 @@ namespace Guarneri
 
 		shadowmap->clear(FAR_Z);
 
-		if (INST(MiscParameter).enable_msaa)
+		if (INST(GlobalShaderParams).enable_msaa)
 		{
 			msaa_colorbuffer->clear(DEFAULT_COLOR);
 			msaa_zbuffer->clear(FAR_Z);
@@ -212,7 +212,7 @@ namespace Guarneri
 		Vertex n3 = clip2ndc(c3);
 
 		bool double_face = shader->double_face;
-		bool enable_backface_culling = (INST(MiscParameter).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
+		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 
 		bool culled_back_face = false;
 
@@ -221,7 +221,7 @@ namespace Guarneri
 			if (Clipper::backface_culling(n1.position, n2.position, n3.position))
 			{
 				culled_back_face = true;
-				if ((INST(MiscParameter).render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
+				if ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
 				{
 					statistics.culled_backface_triangle_count++;
 					return;
@@ -245,7 +245,7 @@ namespace Guarneri
 
 		for (auto iter = tris.begin(); iter != tris.end(); iter++)
 		{
-			if (culled_back_face && (INST(MiscParameter).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+			if (culled_back_face && (INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
 			{
 				(*iter).culled = true;
 			}
@@ -339,7 +339,7 @@ namespace Guarneri
 			}
 		}
 
-		if (INST(MiscParameter).enable_msaa)
+		if (INST(GlobalShaderParams).enable_msaa)
 		{
 			msaa_resolve();
 		}
@@ -367,14 +367,14 @@ namespace Guarneri
 				execute_task(tile, tri, shader);
 
 				// wireframe
-				if ((INST(MiscParameter).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+				if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 				{
 					draw_screen_segment(tri[0].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(tri[0].position, tri[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(tri[2].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 				}
 
-				if (tri.culled && ((INST(MiscParameter).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE))
+				if (tri.culled && ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE))
 				{
 					statistics.culled_backface_triangle_count++;
 					draw_screen_segment(tri[0].position, tri[1].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
@@ -384,7 +384,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
 		{
 			for (uint32_t row = (uint32_t)tile.row_start; row < (uint32_t)tile.row_end; row++)
 			{
@@ -477,7 +477,7 @@ namespace Guarneri
 
 		float area = Triangle::area_double(p0, p1, p2);
 
-		if (INST(MiscParameter).enable_msaa && !shader->shadow)
+		if (INST(GlobalShaderParams).enable_msaa && !shader->shadow)
 		{
 			for (uint32_t row = (uint32_t)row_start; row < (uint32_t)row_end; row++)
 			{
@@ -520,7 +520,7 @@ namespace Guarneri
 			scanline(tri, shader);
 		}
 		// wireframe
-		if ((INST(MiscParameter).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 		{
 			draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
 			draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -593,7 +593,7 @@ namespace Guarneri
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
 
 			// screen space clipping
-			bool enable_screen_clipping = (INST(MiscParameter).culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
+			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
 			if (enable_screen_clipping)
 			{
 				Clipper::screen_clipping(lhs, rhs, this->width);
@@ -644,24 +644,24 @@ namespace Guarneri
 					uint32_t subsample_row = (uint32_t)(row * subsamples_per_axis + x_subsample_idx);
 					uint32_t subsample_col = (uint32_t)(col * subsamples_per_axis + y_subsample_idx);
 
-					//bool enable_scissor_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
-					//bool enable_alpha_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
-					bool enable_stencil_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-					bool enable_depth_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
-					//ColorMask color_mask = shader->color_mask;
+					bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
+					bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
+					bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
+					bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+					ColorMask color_mask = shader->color_mask;
 					CompareFunc stencil_func = shader->stencil_func;
 					StencilOp stencil_pass_op = shader->stencil_pass_op;
 					StencilOp stencil_fail_op = shader->stencil_fail_op;
 					StencilOp stencil_zfail_op = shader->stencil_zfail_op;
 					uint8_t stencil_read_mask = shader->stencil_read_mask;
-					//uint8_t stencil_write_mask = shader->stencil_write_mask;
+					uint8_t stencil_write_mask = shader->stencil_write_mask;
 					uint8_t stencil_ref_val = shader->stencil_ref_val;
 					CompareFunc ztest_func = shader->ztest_func;
 					ZWrite zwrite_mode = shader->zwrite_mode;
 					BlendFactor src_factor = shader->src_factor;
 					BlendFactor dst_factor = shader->dst_factor;
 					BlendOp blend_op = shader->blend_op;
-					bool enable_blending = (INST(MiscParameter).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader->transparent;
+					bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader->transparent;
 
 					PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 					
@@ -744,10 +744,10 @@ namespace Guarneri
 	// per fragment processing
 	void GraphicsDevice::process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader)
 	{
-		bool enable_scissor_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
-		bool enable_alpha_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
-		bool enable_stencil_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-		bool enable_depth_test = (INST(MiscParameter).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
+		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
+		bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
+		bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
 
 		PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
@@ -770,7 +770,7 @@ namespace Guarneri
 
 		UNUSED(stencil_write_mask);
 
-		bool enable_blending = (INST(MiscParameter).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
+		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
 
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
@@ -891,7 +891,7 @@ namespace Guarneri
 		}
 
 		// stencil visualization
-		if ((INST(MiscParameter).render_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
 		{
 			uint8_t stencil;
 			if (stencilbuf->read(row, col, stencil))
@@ -902,12 +902,12 @@ namespace Guarneri
 		}
 
 		// depth buffer visualization
-		if ((INST(MiscParameter).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
 		{
 			float cur_depth;
 			if (this->zbuffer->read(row, col, cur_depth))
 			{
-				float linear_depth = linearize_01depth(cur_depth, INST(MiscParameter).cam_near, INST(MiscParameter).cam_far);
+				float linear_depth = linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
 				Color depth_color = Color::WHITE * linear_depth;
 				color_bgra c = Color::encode_bgra(depth_color);
 				fbuf->write(row, col, c);
@@ -915,7 +915,7 @@ namespace Guarneri
 		}
 
 		// shadowmap visualization
-		if ((INST(MiscParameter).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 		{
 			float cur_depth;
 			if (this->get_shadowmap()->read(row, col, cur_depth))

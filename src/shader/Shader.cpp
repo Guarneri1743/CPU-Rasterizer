@@ -39,7 +39,7 @@ namespace Guarneri
 		auto opos = Vector4(input.position.xyz(), 1.0f);
 		auto wpos = model * opos;
 		auto cpos = projection * view * wpos;
-		auto light_space_pos = INST(MiscParameter).main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
+		auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
 		o.position = cpos;
 		o.world_pos = wpos.xyz();
 		o.shadow_coord = light_space_pos;
@@ -82,7 +82,7 @@ namespace Guarneri
 
 		Vector2 texel_size = 1.0f / Vector2(shadowmap->height, shadowmap->width);
 
-		if (INST(MiscParameter).pcf_on)
+		if (INST(GlobalShaderParams).pcf_on)
 		{
 			const int kernel_size = 3;
 			// PCF
@@ -94,7 +94,7 @@ namespace Guarneri
 					if (shadowmap->read(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 					{
 						//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-						shadow_atten += (proj_shadow_coord.z - INST(MiscParameter).shadow_bias) > depth ? 1.0f : 0.0f;
+						shadow_atten += (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
 					}
 				}
 			}
@@ -107,7 +107,7 @@ namespace Guarneri
 			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth))
 			{
 				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-				shadow_atten = (proj_shadow_coord.z - INST(MiscParameter).shadow_bias) > depth ? 1.0f : 0.0f;
+				shadow_atten = (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
 			}
 		}
 
@@ -186,7 +186,7 @@ namespace Guarneri
 
 		float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{
 			return specular;
 		}
@@ -214,7 +214,7 @@ namespace Guarneri
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
-		if (INST(MiscParameter).workflow == PBRWorkFlow::Specular)
+		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
 			//todo
 			Color roughness = Color::WHITE;
@@ -289,7 +289,7 @@ namespace Guarneri
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
-		if (INST(MiscParameter).workflow == PBRWorkFlow::Specular)
+		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
 			//todo
 			Color roughness = Color::WHITE;
@@ -322,10 +322,10 @@ namespace Guarneri
 
 	Color Shader::fragment_shader(const v2f& input) const
 	{
-		auto main_light = INST(MiscParameter).main_light;
-		auto point_lights = INST(MiscParameter).point_lights;
+		auto main_light = INST(GlobalShaderParams).main_light;
+		auto point_lights = INST(GlobalShaderParams).point_lights;
 
-		Vector3 cam_pos = INST(MiscParameter).camera_pos;
+		Vector3 cam_pos = INST(GlobalShaderParams).camera_pos;
 		Vector3 wpos = input.world_pos;
 		Vector4 screen_pos = input.position;
 
@@ -347,11 +347,12 @@ namespace Guarneri
 
 		Color ret = Color::BLACK;
 		Color albedo = Color::WHITE;
-		name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo);
-
-		if (INST(MiscParameter).color_space == ColorSpace::Linear)
+		if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
 		{
-			albedo = Color::pow(albedo, 2.2f);
+			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
+			{
+				albedo = Color::pow(albedo, 2.2f);
+			}
 		}
 
 		Color ao = Color::WHITE;
@@ -371,7 +372,7 @@ namespace Guarneri
 		ret *= shadow_atten;
 
 		// todo: ddx ddy
-		/*if ((INST(MiscParameter).render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
+		/*if ((INST(GlobalShaderParams).render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
 			Vector2 ddx_uv = ddx.uv;
 			Vector2 ddy_uv = ddy.uv;
 			float rho = std::max(std::sqrt(Vector2::dot(ddx_uv, ddx_uv)), std::sqrt(Vector2::dot(ddy_uv, ddy_uv)));
@@ -406,27 +407,27 @@ namespace Guarneri
 			}
 		}*/
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{
 			return Color(ao.r, ao.r, ao.r, 1.0f);
 		}
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			return input.uv;
 		}
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
 		{
 			return input.color;
 		}
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
 		{
 			return normal;
 		}
 
-		if (INST(MiscParameter).color_space == ColorSpace::Linear)
+		if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 		{
 			ret = ret / (ret + Color::WHITE);
 			ret = Color::pow(ret, 1.0f / 2.2f);

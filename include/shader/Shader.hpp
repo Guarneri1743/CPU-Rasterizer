@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include "Object.hpp"
 #include "Light.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "Color.hpp"
 #include "Vector2.hpp"
 #include "Vector3.hpp"

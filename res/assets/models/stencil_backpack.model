@@ -1,8 +1,8 @@
 {
     "name": "backpack",
     "raw_path": "/backpack/backpack.obj",
-    "meta_path": "/models/backpack.model",
-    "material": "/materials/backpack.material",
+    "meta_path": "/models/stencil_backpack.model",
+    "material": "/materials/stencil_backpack.material",
     "transform": {
         "name": "",
         "local_position": {

@@ -1,7 +1,4 @@
-#include <memory>
 #include "CPURasterizer.hpp"
-#include "ShaderLab.hpp"
-#include <iostream>
 
 using namespace Guarneri;
 using namespace std;
@@ -10,11 +7,10 @@ bool auto_rotation = false;
 
 int main()
 {
-	// initialize rasterizer
 	CPURasterizer::prepare(800, 600, "CPU-Rasterizer");
+	auto scene = Scene::deserialize("/scenes/lighting_sample.scene");
+	CPURasterizer::kick_off(*scene);
 
-	auto demo_scene = Scene::deserialize("/scenes/lighting_sample.scene");
-	
 	/*INST(InputManager).add_on_update_evt([](void* user_data) {
 		auto& bp = *reinterpret_cast<std::shared_ptr<Model>*>(user_data);
 		if (INST(InputManager).is_key_down(KeyCode::LEFT)) {
@@ -57,9 +53,5 @@ int main()
 		}
 		}, &demo_scene);*/
 
-	INST(MiscParameter).shadow_bias = 0.00125f;
-	INST(MiscParameter).color_space = ColorSpace::Gamma;
-	INST(MiscParameter).workflow = PBRWorkFlow::Specular;
-	CPURasterizer::kick_off(*demo_scene);
 	return 0;
 }

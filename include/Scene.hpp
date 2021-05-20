@@ -2,6 +2,7 @@
 #define _SCENE_
 #include <vector>
 #include <memory>
+#include "Define.hpp"
 #include "Light.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
@@ -13,17 +14,32 @@ namespace Guarneri
 	{
 	public:
 		std::string name;
+
+		// lights
 		DirectionalLight main_light;
 		std::vector<PointLight> point_lights;
+
+		// objects
 		std::vector<std::shared_ptr<Renderer>> objects;
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::unique_ptr<SkyboxRenderer> skybox;
-		bool enable_skybox;
+
+		// cam
 		std::unique_ptr<Camera> main_cam;
-		std::unique_ptr<Camera> debug_cam;
-		std::unique_ptr<Camera> world_debug_cam;
+
+		// params
+		bool enable_skybox;
+		bool enable_shadow;
+		bool pcf_on;
+		float shadow_bias;
+		ColorSpace color_space;
+		PBRWorkFlow work_flow;
+
+		// debug cam
 		float debug_cam_distance;
 		float debug_world_cam_distance;
+		std::unique_ptr<Camera> debug_cam;
+		std::unique_ptr<Camera> world_debug_cam;
 
 	public:
 		~Scene();

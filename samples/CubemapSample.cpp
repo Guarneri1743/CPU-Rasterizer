@@ -124,7 +124,7 @@ int main()
 	//	}
 	//}, &demo_scene);
 
-	//INST(MiscParameter).color_space = ColorSpace::Gamma;
+	//INST(GlobalShaderParams).color_space = ColorSpace::Gamma;
 	//CPURasterizer::kick_off(demo_scene);
 	return 0;
 }

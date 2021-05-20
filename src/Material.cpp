@@ -279,6 +279,7 @@ namespace Guarneri
 		doc.AddMember("stencil_read_mask", (int32_t)material.stencil_read_mask, doc.GetAllocator());
 		doc.AddMember("stencil_ref_val", (int32_t)material.stencil_ref_val, doc.GetAllocator());
 		doc.AddMember("stencil_write_mask", (int32_t)material.stencil_write_mask, doc.GetAllocator());
+		doc.AddMember("stencil_zfail_op", (int32_t)material.stencil_zfail_op, doc.GetAllocator());
 		doc.AddMember("double_face", material.double_face, doc.GetAllocator());
 		doc.AddMember("transparent", material.transparent, doc.GetAllocator());
 		doc.AddMember("cast_shadow", material.cast_shadow, doc.GetAllocator());
@@ -323,7 +324,7 @@ namespace Guarneri
 		name2tex.SetArray();
 		for (auto& kv : material.name2tex)
 		{
-			if (kv.second->meta_path == "") continue;
+			if (kv.second == nullptr || kv.second->meta_path == "") continue;
 			rapidjson::Value pair;
 			pair.SetArray();
 			pair.PushBack(kv.first, doc.GetAllocator());
@@ -388,6 +389,7 @@ namespace Guarneri
 			material.stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
 			material.stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
 			material.stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();
+			material.stencil_zfail_op = (StencilOp)doc["stencil_zfail_op"].GetInt();
 			material.stencil_read_mask = (uint8_t)doc["stencil_read_mask"].GetInt();
 			material.stencil_ref_val = (uint8_t)doc["stencil_ref_val"].GetInt();
 			material.stencil_write_mask = (uint8_t)doc["stencil_write_mask"].GetInt();

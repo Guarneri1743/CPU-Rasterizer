@@ -3,7 +3,7 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "ThreadPool.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "Config.h"
 
 namespace Guarneri
@@ -38,18 +38,18 @@ namespace Guarneri
 	{
 		if (render_pass == RenderPass::SHADOW)
 		{
-			return INST(MiscParameter).main_light.view_matrix();
+			return INST(GlobalShaderParams).main_light.view_matrix();
 		}
-		return INST(MiscParameter).view_matrix;
+		return INST(GlobalShaderParams).view_matrix;
 	}
 
 	Matrix4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
 	{
 		if (render_pass == RenderPass::SHADOW)
 		{
-			return INST(MiscParameter).main_light.projection_matrix();
+			return INST(GlobalShaderParams).main_light.projection_matrix();
 		}
-		return INST(MiscParameter).proj_matrix;
+		return INST(GlobalShaderParams).proj_matrix;
 	}
 
 	Matrix4x4 Renderer::model_matrix() const
@@ -137,8 +137,8 @@ namespace Guarneri
 
 	void Renderer::draw_gizmos() const
 	{
-		auto view = INST(MiscParameter).view_matrix;
-		auto proj = INST(MiscParameter).proj_matrix;
+		auto view = INST(GlobalShaderParams).view_matrix;
+		auto proj = INST(GlobalShaderParams).proj_matrix;
 		auto pos = Vector3::ZERO;
 		auto up = Vector3::UP;
 		auto forward = Vector3::FORWARD;

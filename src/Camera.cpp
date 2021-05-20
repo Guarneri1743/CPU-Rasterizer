@@ -89,6 +89,7 @@ namespace Guarneri
 		v.AddMember("aspect", cam.aspect, doc.GetAllocator());
 		v.AddMember("near", cam.near, doc.GetAllocator());
 		v.AddMember("far", cam.far, doc.GetAllocator());
+		v.AddMember("enable_msaa", cam.enable_msaa, doc.GetAllocator());
 		v.AddMember("transform", Transform::serialize(doc, *cam.transform), doc.GetAllocator());
 		v.AddMember("projection", (int32_t)cam.projection, doc.GetAllocator());
 		v.AddMember("proj_matrix", Matrix4x4::serialize(doc, cam.proj_matrix), doc.GetAllocator()); // ??????????
@@ -102,6 +103,7 @@ namespace Guarneri
 		cam->aspect = v["aspect"].GetFloat();
 		cam->near = v["near"].GetFloat();
 		cam->far = v["far"].GetFloat();
+		cam->enable_msaa = v["enable_msaa"].GetBool();
 		cam->proj_matrix = Matrix4x4::deserialize(v["proj_matrix"].GetObject());
 		cam->transform = std::unique_ptr<Transform>(Transform::deserialize(v["transform"].GetObject()));
 		cam->projection = (Projection)v["projection"].GetInt();

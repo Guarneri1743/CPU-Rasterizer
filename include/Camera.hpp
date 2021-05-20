@@ -19,6 +19,7 @@ namespace Guarneri
 		Matrix4x4 proj_matrix;
 		std::unique_ptr<Transform> transform;
 		Projection projection;
+		bool enable_msaa;
 
 	public:
 		~Camera();

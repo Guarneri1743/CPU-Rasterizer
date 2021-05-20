@@ -14,6 +14,7 @@
     "stencil_read_mask": 255,
     "stencil_ref_val": 0,
     "stencil_write_mask": 255,
+    "stencil_zfail_op": 0,
     "double_face": false,
     "transparent": false,
     "cast_shadow": false,
@@ -23,19 +24,19 @@
     "name2tex": [
         [
             0,
-            "/textures/Metal_ScavengerMetal_2k_alb_1.texture"
+            "/common_textures/Metal_ScavengerMetal_2k_alb_1.texture"
         ],
         [
             1,
-            "/textures/Metal_ScavengerMetal_2k_n_1.texture"
+            "/common_textures/Metal_ScavengerMetal_2k_n_1.texture"
         ],
         [
             11,
-            "/textures/Metal_ScavengerMetal_2k_g_1.texture"
+            "/common_textures/Metal_ScavengerMetal_2k_g_1.texture"
         ],
         [
             2,
-            "/textures/Metal_ScavengerMetal_2k_ao_1.texture"
+            "/common_textures/Metal_ScavengerMetal_2k_ao_1.texture"
         ]
     ],
     "name2cubemap": [

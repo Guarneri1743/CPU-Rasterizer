@@ -14,6 +14,7 @@
     "stencil_read_mask": 255,
     "stencil_ref_val": 0,
     "stencil_write_mask": 255,
+    "stencil_zfail_op": 0,
     "double_face": true,
     "transparent": false,
     "cast_shadow": false,

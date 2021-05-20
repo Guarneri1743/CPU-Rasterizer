@@ -117,6 +117,11 @@ namespace Guarneri
 
 	void CPURasterizer::kick_off(Scene& scene)
 	{
+		INST(GlobalShaderParams).enable_shadow = scene.enable_shadow;
+		INST(GlobalShaderParams).pcf_on = scene.pcf_on;
+		INST(GlobalShaderParams).shadow_bias = scene.shadow_bias;
+		INST(GlobalShaderParams).color_space = scene.color_space;
+		INST(GlobalShaderParams).workflow = scene.work_flow;
 		while (INST(GDIWindow).is_valid())
 		{
 			Time::frame_start();
@@ -137,28 +142,28 @@ namespace Guarneri
 			}
 			{
 				std::stringstream ss;
-				ss << "CullingClip: " << INST(MiscParameter).culling_clipping_flag;
+				ss << "CullingClip: " << INST(GlobalShaderParams).culling_clipping_flag;
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "RenderFlag: " << INST(MiscParameter).render_flag;
+				ss << "RenderFlag: " << INST(GlobalShaderParams).render_flag;
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "EnableShadow: " << (INST(MiscParameter).enable_shadow ? "SHADOW_ON" : "SHADOW_OFF");
+				ss << "EnableShadow: " << (INST(GlobalShaderParams).enable_shadow ? "SHADOW_ON" : "SHADOW_OFF");
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "PCF: " << (INST(MiscParameter).pcf_on ? "PCF_ON" : "PCF_OFF");
+				ss << "PCF: " << (INST(GlobalShaderParams).pcf_on ? "PCF_ON" : "PCF_OFF");
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "MSAA: " << (INST(MiscParameter).enable_msaa ? "MSAA_ON" : "MSAA_OFF");
-				if (INST(MiscParameter).enable_msaa)
+				ss << "MSAA: " << (INST(GlobalShaderParams).enable_msaa ? "MSAA_ON" : "MSAA_OFF");
+				if (INST(GlobalShaderParams).enable_msaa)
 				{
 					ss << std::to_string(INST(GraphicsDevice).get_subsample_count()) << "X";
 				}
@@ -166,7 +171,7 @@ namespace Guarneri
 			}
 			{
 				std::stringstream ss;
-				ss << "ShadowBias: " << INST(MiscParameter).shadow_bias;
+				ss << "ShadowBias: " << INST(GlobalShaderParams).shadow_bias;
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
@@ -196,12 +201,12 @@ namespace Guarneri
 			}
 			{
 				std::stringstream ss;
-				ss << "CameraPos: " << INST(MiscParameter).camera_pos.str();
+				ss << "CameraPos: " << INST(GlobalShaderParams).camera_pos.str();
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{
 				std::stringstream ss;
-				ss << "LightDir: " << INST(MiscParameter).main_light.forward.str();
+				ss << "LightDir: " << INST(GlobalShaderParams).main_light.forward.str();
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
 			{

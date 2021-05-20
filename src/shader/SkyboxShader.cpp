@@ -1,7 +1,7 @@
 #include "SkyboxShader.hpp"
 #include <sstream>
 #include "Vector4.hpp"
-#include "Misc.hpp"
+#include "GlobalShaderParams.hpp"
 #include "Singleton.hpp"
 
 namespace Guarneri
@@ -28,7 +28,7 @@ namespace Guarneri
 	{
 		Color sky_color;
 
-		if ((INST(MiscParameter).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			int index;
 			return name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), index);

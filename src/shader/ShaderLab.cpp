@@ -10,20 +10,37 @@ namespace Guarneri
 
 	void ShaderLab::initialize()
 	{
-		name2shaders["pbr_shader"] = std::make_shared<Shader>("pbr_shader");
-		name2shaders["skybox_shader"] = std::make_shared<SkyboxShader>();
-		name2shaders["shadow_shader"] = std::make_shared<ShadowShader>();
-		name2shaders["light_shader"] = std::make_shared<LightShader>(); 
 	}
 
 	std::shared_ptr<Shader> ShaderLab::get_shader(std::string name)
 	{
-		if (name2shaders.count(name) > 0)
+		if (name == "pbr_shader")
+		{
+			return  std::make_shared<Shader>(name);
+		}
+		else if (name == "skybox_shader")
+		{
+			return  std::make_shared<SkyboxShader>();
+		}
+		else if (name == "shadow_shader")
+		{
+			return  std::make_shared<ShadowShader>();
+		}
+		else if (name == "light_shader")
+		{
+			return  std::make_shared<LightShader>();
+		}
+		else
+		{
+			return  std::make_shared<Shader>(name);
+		}
+
+		/*if (name2shaders.count(name) > 0)
 		{
 			return name2shaders[name];
 		}
 
 		name2shaders[name] = std::make_shared<Shader>(name);
-		return name2shaders[name];
+		return name2shaders[name];*/
 	}
 }

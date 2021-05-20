@@ -105,8 +105,8 @@ int main()
 		}
 		}, &demo_scene);
 
-	INST(MiscParameter).workflow = PBRWorkFlow::Specular;
-	INST(MiscParameter).color_space = ColorSpace::Gamma;
+	INST(GlobalShaderParams).workflow = PBRWorkFlow::Specular;
+	INST(GlobalShaderParams).color_space = ColorSpace::Gamma;
 	CPURasterizer::kick_off(demo_scene);
 	return 0;
 }
