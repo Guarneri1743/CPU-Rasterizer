@@ -34,8 +34,6 @@
 
 - cubemap sampler
 
-- resource visualization
-
 ---
 		
 #### Application
@@ -44,7 +42,9 @@
 			
 - model importer
 
-- transform
+- resource serialization & deserialization
+
+- hierarchical transform
 
 - roaming camera
 
