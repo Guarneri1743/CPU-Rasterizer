@@ -1,5 +1,6 @@
 #include "CPURasterizer.hpp"
 #include "GDIWindow.hpp"
+//#include "Editor.h"
 #include "GraphicsDevice.hpp"
 #include "ShaderLab.hpp"
 
@@ -102,10 +103,13 @@ namespace Guarneri
 		return stream;
 	}
 
+	//Editor main_editor;
+
 	void CPURasterizer::prepare(const uint32_t w, const uint32_t h, const char* title)
 	{
 		ShaderLab::initialize();
-		INST(GDIWindow).initialize(w, h, static_cast<LPCSTR>(title), INST(InputManager).event_callback);
+		INST(GDIWindow).initialize(w, h, static_cast<LPCSTR>(title), Editor::WndProc);
+		//main_editor.initialize(INST(GDIWindow).window_handle, INST(GDIWindow).win_class);
 		INST(InputManager).add_on_key_down_evt([](KeyCode code, void* data)
 		{
 			UNUSED(data);
@@ -128,6 +132,8 @@ namespace Guarneri
 			INST(InputManager).update();
 			scene.update();
 			scene.render();
+			INST(GDIWindow).flush();
+			//main_editor.render();
 			const int w = 800;
 			const int h = 20;
 			{
@@ -244,9 +250,9 @@ namespace Guarneri
 				ss << "CamYawPitchRoll: " << euler.str();
 				INST(GDIWindow).draw_text(w, h, ss.str().c_str());
 			}
-			INST(GDIWindow).flush();
 			Time::frame_end();
 			Sleep(1);
 		}
+		//main_editor.dispose();
 	}
 }

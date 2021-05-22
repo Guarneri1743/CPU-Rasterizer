@@ -5,46 +5,6 @@
 
 namespace Guarneri
 {
-	LRESULT InputManager::event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-	{
-		switch (msg)
-		{
-		case WM_CLOSE:
-			closed = true;
-			break;
-		case WM_MOUSEMOVE:
-			break;
-		case WM_LBUTTONDOWN:
-			INST(InputManager).on_vk_down(VK_LBUTTON);
-			break;
-		case WM_LBUTTONUP:
-			INST(InputManager).on_vk_up(VK_LBUTTON);
-			break;
-		case WM_RBUTTONDOWN:
-			INST(InputManager).on_vk_down(VK_RBUTTON);
-			break;
-		case WM_RBUTTONUP:
-			INST(InputManager).on_vk_up(VK_RBUTTON);
-			break;
-		case WM_MBUTTONDOWN:
-			INST(InputManager).on_vk_down(VK_MBUTTON);
-			break;
-		case WM_MBUTTONUP:
-			INST(InputManager).on_vk_up(VK_MBUTTON);
-			break;
-		case WM_MOUSEWHEEL:
-			INST(InputManager).on_wheel_rolling(GET_WHEEL_DELTA_WPARAM(wParam));
-			break;
-		case WM_KEYDOWN:
-			INST(InputManager).on_vk_down(wParam);
-			break;
-		case WM_KEYUP:
-			INST(InputManager).on_vk_up(wParam);
-			break;
-		}
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-	}
-
 	void InputManager::update()
 	{
 		auto prev = mouse_position;

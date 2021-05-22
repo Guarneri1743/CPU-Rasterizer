@@ -20,7 +20,6 @@ namespace Guarneri
 		bitmap_handle = nullptr;
 		closed = false;
 
-		WNDCLASS win_class;
 		win_class.style = CS_BYTEALIGNCLIENT;
 		win_class.lpfnWndProc = (WNDPROC)event_callback;
 		win_class.cbClsExtra = 0;

@@ -14,12 +14,14 @@ function setupIncludeDirs()
       include_dir .. "/primitives",
       include_dir .. "/core",
       include_dir .. "/shader",
+      include_dir .. "/editor",
       third_party_dir,
       third_party_dir .. "/threading",
       third_party_dir .. "/assimp",
       third_party_dir .. "/ply",
       third_party_dir .. "/stb_image",
-      third_party_dir .. "/rapidjson"
+      third_party_dir .. "/rapidjson",
+      third_party_dir .. "/imgui"
    }
 end
 
@@ -53,13 +55,19 @@ function setupSlotion()
          system "Windows"
          architecture "x86_64"
          staticruntime "Off"
-         libdirs { lib_dir .. "/assimp/Debug" }
+         libdirs 
+         { 
+            lib_dir .. "/assimp/Debug",
+            lib_dir .. "/glfw/Debug"
+         }
          local createResFolder = "mkdir \"$(OutDir)res\""
          local copyAssimp = "xcopy /y /d \"../../" .. lib_dir .. "/assimp/Debug\" \"$(OutDir)\""
+         local copyGlfw = "xcopy /y /d \"../../" .. lib_dir .. "/glfw/Debug\" \"$(OutDir)\""
          local copyRes = "xcopy /y /d /s \"../../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
             createResFolder,
             copyAssimp,
+            copyGlfw,
             copyRes
          }
 
@@ -68,21 +76,27 @@ function setupSlotion()
          system "Windows"
          architecture "x86_64"
          staticruntime "Off"
-         libdirs { lib_dir .. "/assimp/Release" }
+         libdirs 
+         { 
+            lib_dir .. "/assimp/Release",
+            lib_dir .. "/glfw/Release"
+         }
          local createResFolder = "mkdir \"$(OutDir)res\""
          local copyAssimp = "xcopy /y /d \"../../" .. lib_dir .. "/assimp/Release\" \"$(OutDir)\""
+         local copyGlfw = "xcopy /y /d \"../../" .. lib_dir .. "/glfw/Release\" \"$(OutDir)\""
          local copyRes = "xcopy /y /d /s \"../../" .. res_dir .. "\" \"$(OutDir)res\""
          postbuildcommands {
             createResFolder,
             copyAssimp,
+            copyGlfw,
             copyRes
          }
 
       filter { "platforms:Win*", "configurations:Debug*" }
-         links { "assimpd" }
+         links { "assimpd", "opengl32", "glfw3" }
 
       filter { "platforms:Win*", "configurations:Release*" }
-         links { "assimp" }
+         links { "assimp", "opengl32", "glfw3"  }
 end
 
 function setupBlendingDemo()
@@ -97,6 +111,7 @@ function setupBlendingDemo()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -105,11 +120,15 @@ function setupBlendingDemo()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
       sample_dir .. "/BlendingSample.cpp"
    }
 
@@ -132,6 +151,7 @@ function setupStencilDemo()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -140,11 +160,16 @@ function setupStencilDemo()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/glfw/*.*",
       sample_dir .. "/StencilSample.cpp"
    }
 
@@ -167,6 +192,7 @@ function setupLightingDemo()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -175,11 +201,16 @@ function setupLightingDemo()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/glfw/*.*",
       sample_dir .. "/PBRSample.cpp"
    }
 
@@ -202,6 +233,7 @@ function setupFilteringDemo()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -210,11 +242,16 @@ function setupFilteringDemo()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/glfw/*.*",
       sample_dir .. "/FilteringSample.cpp"
    }
 
@@ -238,6 +275,7 @@ function setupCubemapDemo()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -246,11 +284,16 @@ function setupCubemapDemo()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/glfw/*.*",
       sample_dir .. "/CubemapSample.cpp"
    }
 
@@ -273,6 +316,7 @@ function setupGenerateScenesProj()
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/shader/*.*",
+      src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
@@ -281,11 +325,16 @@ function setupGenerateScenesProj()
       include_dir .. "/core/*.*",
       include_dir .. "/core/detail/*.*",
       include_dir .. "/shader/*.*",
+      include_dir .. "/editor/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/threading/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
       third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/glfw/*.*",
       sample_dir .. "/GenerateScenes.cpp"
    }
 

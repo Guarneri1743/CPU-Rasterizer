@@ -20,6 +20,7 @@ namespace Guarneri
 		bool initialized;
 		int buffer_size;
 		HWND window_handle;
+		WNDCLASS win_class;
 		HDC window_device_context;
 		HBITMAP bitmap_handle;
 		HBITMAP original_handle;

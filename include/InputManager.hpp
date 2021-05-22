@@ -156,7 +156,6 @@ namespace Guarneri
 		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
 
 	public:
-		static LRESULT event_callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		void update();
 		void on_wheel_rolling(short delta);
 		void on_vk_down(WPARAM code);

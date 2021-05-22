@@ -58,6 +58,7 @@ namespace Guarneri
 		void present();
 		void clear_buffer(const BufferFlag& flag);
 		void set_subsample_count(const uint8_t& multiplier);
+		uint8_t* get_framebuffer() { int size;  return reinterpret_cast<uint8_t*>(framebuffer->get_ptr(size)); };
 
 	public:
 		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation);
