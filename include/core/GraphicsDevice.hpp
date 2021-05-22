@@ -27,15 +27,15 @@ namespace Guarneri
 	private:
 		// use 32 bits zbuffer here, for convenience 
 		std::unique_ptr<RawBuffer<float>> zbuffer;
-		// 32 bits bgra framebuffer, 8-bit per channel
-		std::unique_ptr<RawBuffer<color_bgra>> framebuffer;
+		// 32 bits rgba framebuffer, 8-bit per channel
+		std::unique_ptr<RawBuffer<color_rgba>> framebuffer;
 		// 8 bits stencil buffer
 		std::unique_ptr<RawBuffer<uint8_t>> stencilbuffer;
 		// msaa buffer
 		std::unique_ptr<RawBuffer<uint8_t>> msaa_stencilbuffer;
 		std::unique_ptr<RawBuffer<uint8_t>> msaa_coveragebuffer;
 		std::unique_ptr<RawBuffer<float>> msaa_zbuffer;
-		std::unique_ptr<RawBuffer<color_bgra>> msaa_colorbuffer;
+		std::unique_ptr<RawBuffer<color_rgba>> msaa_colorbuffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 		// commands
@@ -53,12 +53,14 @@ namespace Guarneri
 	public:
 		GraphicsDevice();
 		~GraphicsDevice();
-		void initialize(void* bitmap_handle, uint32_t w, uint32_t h);
+		void initialize(uint32_t w, uint32_t h);
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void present();
 		void clear_buffer(const BufferFlag& flag);
 		void set_subsample_count(const uint8_t& multiplier);
-		uint8_t* get_framebuffer() { int size;  return reinterpret_cast<uint8_t*>(framebuffer->get_ptr(size)); };
+		color_rgba* get_framebuffer() { int size;  return framebuffer->get_ptr(size); };
+		int get_width() { return width; }
+		int get_height() { return height; }
 
 	public:
 		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation);
@@ -89,8 +91,8 @@ namespace Guarneri
 		void scanblock(const Triangle& tri, Shader* shader);
 		void scanline(const Triangle& tri, Shader* shader);
 		v2f process_vertex(Shader* shader, const Vertex& vert) const;
-		void process_subsamples(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area);
-		void process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader);
+		void process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area);
+		void process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
 		bool perform_stencil_test(RawBuffer<uint8_t>* stencilbuf, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const;
 		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const;

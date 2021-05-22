@@ -21,7 +21,9 @@ function setupIncludeDirs()
       third_party_dir .. "/ply",
       third_party_dir .. "/stb_image",
       third_party_dir .. "/rapidjson",
-      third_party_dir .. "/imgui"
+      third_party_dir .. "/imgui",
+      third_party_dir .. "/glfw",
+      third_party_dir .. "/gl3w"
    }
 end
 
@@ -128,7 +130,8 @@ function setupBlendingDemo()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/BlendingSample.cpp"
    }
 
@@ -168,8 +171,8 @@ function setupStencilDemo()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
-      third_party_dir .. "/glfw/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/StencilSample.cpp"
    }
 
@@ -209,8 +212,8 @@ function setupLightingDemo()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
-      third_party_dir .. "/glfw/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/PBRSample.cpp"
    }
 
@@ -250,8 +253,8 @@ function setupFilteringDemo()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
-      third_party_dir .. "/glfw/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/FilteringSample.cpp"
    }
 
@@ -292,8 +295,8 @@ function setupCubemapDemo()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
-      third_party_dir .. "/glfw/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/CubemapSample.cpp"
    }
 
@@ -333,8 +336,8 @@ function setupGenerateScenesProj()
       third_party_dir .. "/rapidjson/*.*",
       third_party_dir .. "/imgui/*.*",
       third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/imgui/backends/GL/*.*",
-      third_party_dir .. "/glfw/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
       sample_dir .. "/GenerateScenes.cpp"
    }
 

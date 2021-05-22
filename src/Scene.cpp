@@ -1,6 +1,5 @@
 #include "Scene.hpp"
 #include "Marcos.h"
-#include "GDIWindow.hpp"
 #include "GraphicsDevice.hpp"
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
@@ -35,8 +34,6 @@ namespace Guarneri
 		main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
 		main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 		main_light.position = Vector3(1.0f, 1.0f, 1.0f);
-		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), INST(GDIWindow).aspect, 45.0f, 0.5f, 100.0f);
-		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
 	}
 
@@ -45,22 +42,25 @@ namespace Guarneri
 
 	void Scene::initialize()
 	{
+		float aspect = (float)INST(GlobalShaderParams).width / INST(GlobalShaderParams).height;
+		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
+		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
 		debug_cam_distance = 6.0f;
 		debug_world_cam_distance = 8.0f;
-		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, INST(GDIWindow).aspect, 45.0f, 0.5f, 10.0f));
-		world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, INST(GDIWindow).aspect, 45.0f, 0.5f, 10.0f));
+		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
+		world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
 
 		INST(InputManager).add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data)
 		{
 			if (INST(InputManager).is_mouse_down(MouseButton::RIGHT))
 			{
-				Vector2 offset = (pos - prev) * Vector2(INST(GDIWindow).width, INST(GDIWindow).height) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
+				Vector2 offset = (pos - prev) * Vector2(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height) * CAMERA_ROTATE_SPEED;
 				s->main_cam->transform->rotate(offset.y, offset.x, 0.0f);
 			}
 			if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 			{
-				Vector2 offset = (pos - prev) * Vector2(INST(GDIWindow).width, INST(GDIWindow).height) * CAMERA_ROTATE_SPEED;
+				Vector2 offset = (pos - prev) * Vector2(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
 				s->main_cam->transform->move_left(offset.x);
 				s->main_cam->transform->move_ascend(offset.y);
@@ -229,7 +229,7 @@ namespace Guarneri
 
 	void Scene::draw_camera_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GDIWindow).width / 2 - 50.0f), -(INST(GDIWindow).height / 2 - 50.0f));
+		Vector2 offset = Vector2(-(INST(GlobalShaderParams).width / 2.0f - 50.0f), -(INST(GlobalShaderParams).height / 2.0f - 50.0f));
 		Vector3 pos = main_cam->transform->world_position();
 		Vector3 forward = main_cam->transform->forward();
 		Vector3 right = main_cam->transform->right();
@@ -241,7 +241,7 @@ namespace Guarneri
 
 	void Scene::draw_world_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GDIWindow).width / 2 - 150.0f), -(INST(GDIWindow).height / 2 - 150.0f));
+		Vector2 offset = Vector2(-(INST(GlobalShaderParams).width / 2.0f - 150.0f), -(INST(GlobalShaderParams).height / 2.0f - 150.0f));
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 

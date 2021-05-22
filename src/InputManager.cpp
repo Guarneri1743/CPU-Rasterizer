@@ -1,16 +1,75 @@
 #include "InputManager.hpp"
 #include "Marcos.h"
 #include "Singleton.hpp"
-#include "GDIWindow.hpp"
+#include "Window.hpp"
+#include "GLFW/glfw3.h"
 
 namespace Guarneri
 {
-	void InputManager::update()
+	std::unordered_map<int, KeyCode> key_mapping =
+	{
+		{ GLFW_KEY_A, KeyCode::A},
+		{ GLFW_KEY_B, KeyCode::B},
+		{ GLFW_KEY_C, KeyCode::C},
+		{ GLFW_KEY_D, KeyCode::D},
+		{ GLFW_KEY_E, KeyCode::E},
+		{ GLFW_KEY_F, KeyCode::F},
+		{ GLFW_KEY_G, KeyCode::G},
+		{ GLFW_KEY_H, KeyCode::H},
+		{ GLFW_KEY_I, KeyCode::I},
+		{ GLFW_KEY_J, KeyCode::J},
+		{ GLFW_KEY_K, KeyCode::K},
+		{ GLFW_KEY_L, KeyCode::L},
+		{ GLFW_KEY_M, KeyCode::M},
+		{ GLFW_KEY_N, KeyCode::N},
+		{ GLFW_KEY_O, KeyCode::O},
+		{ GLFW_KEY_P, KeyCode::P},
+		{ GLFW_KEY_Q, KeyCode::Q},
+		{ GLFW_KEY_R, KeyCode::R},
+		{ GLFW_KEY_S, KeyCode::S},
+		{ GLFW_KEY_T, KeyCode::T},
+		{ GLFW_KEY_U, KeyCode::U},
+		{ GLFW_KEY_V, KeyCode::V},
+		{ GLFW_KEY_W, KeyCode::W},
+		{ GLFW_KEY_X, KeyCode::X},
+		{ GLFW_KEY_Y, KeyCode::Y},
+		{ GLFW_KEY_Z, KeyCode::Z},
+		{ GLFW_KEY_F1, KeyCode::F1},
+		{ GLFW_KEY_F2, KeyCode::F2},
+		{ GLFW_KEY_F3, KeyCode::F3},
+		{ GLFW_KEY_F4, KeyCode::F4},
+		{ GLFW_KEY_F5, KeyCode::F5},
+		{ GLFW_KEY_F6, KeyCode::F6},
+		{ GLFW_KEY_F7, KeyCode::F7},
+		{ GLFW_KEY_F8, KeyCode::F8},
+		{ GLFW_KEY_F9, KeyCode::F9},
+		{ GLFW_KEY_F10, KeyCode::F10},
+		{ GLFW_KEY_F11, KeyCode::F11},
+		{ GLFW_KEY_F12, KeyCode::F12},
+		{ GLFW_KEY_ESCAPE, KeyCode::ESC},
+		{ GLFW_KEY_UP, KeyCode::UP},
+		{ GLFW_KEY_DOWN, KeyCode::DOWN},
+		{ GLFW_KEY_LEFT, KeyCode::LEFT},
+		{ GLFW_KEY_RIGHT, KeyCode::RIGHT},
+		{ GLFW_KEY_SPACE, KeyCode::SPACE},
+		{ GLFW_KEY_LEFT_CONTROL, KeyCode::CTRL_L},
+		{ GLFW_KEY_RIGHT_CONTROL, KeyCode::CTRL_R},
+		{ GLFW_KEY_LEFT_SHIFT, KeyCode::SHIFT_L},
+		{ GLFW_KEY_RIGHT_SHIFT, KeyCode::SHIFT_R},
+		{ GLFW_KEY_ENTER, KeyCode::ENTER}
+	};
+
+	std::unordered_map<WPARAM, MouseButton> mouse_mapping =
+	{
+		{ GLFW_MOUSE_BUTTON_LEFT, MouseButton::LEFT},
+		{ GLFW_MOUSE_BUTTON_RIGHT, MouseButton::RIGHT},
+		{ GLFW_MOUSE_BUTTON_MIDDLE, MouseButton::MIDDLE}
+	};
+
+	void InputManager::update(double x, double y)
 	{
 		auto prev = mouse_position;
-		float x, y;
-		INST(GDIWindow).get_mouse_position(x, y, mouse_x, mouse_y);
-		mouse_position = Vector2(x, y);
+		mouse_position = Vector2((float)x, (float)y);
 		if (Vector2::magnitude(prev - mouse_position) > EPSILON)
 		{
 			for (auto& kv : on_mouse_move_events)
@@ -38,11 +97,11 @@ namespace Guarneri
 		}
 	}
 
-	void InputManager::on_vk_down(WPARAM code)
+	void InputManager::on_key_down(int code)
 	{
-		if (vk2key.count(code) > 0)
+		if (key_mapping.count(code) > 0)
 		{
-			auto key = vk2key.find(code)->second;
+			auto key = key_mapping.find(code)->second;
 			active_keys.insert(key);
 			for (auto& kv : on_key_down_events)
 			{
@@ -51,9 +110,9 @@ namespace Guarneri
 				evt(key, user_data);
 			}
 		}
-		if (vk2mouse.count(code) > 0)
+		if (mouse_mapping.count(code) > 0)
 		{
-			auto key = vk2mouse.find(code)->second;
+			auto key = mouse_mapping.find(code)->second;
 			active_mouse_btns.insert(key);
 			for (auto& kv : on_mouse_down_events)
 			{
@@ -64,11 +123,11 @@ namespace Guarneri
 		}
 	}
 
-	void InputManager::on_vk_up(WPARAM code)
+	void InputManager::on_key_up(int code)
 	{
-		if (vk2key.count(code) > 0)
+		if (key_mapping.count(code) > 0)
 		{
-			auto key = vk2key.find(code)->second;
+			auto key = key_mapping.find(code)->second;
 			active_keys.erase(key);
 			for (auto& kv : on_key_up_events)
 			{
@@ -77,9 +136,9 @@ namespace Guarneri
 				evt(key, user_data);
 			}
 		}
-		if (vk2mouse.count(code) > 0)
+		if (mouse_mapping.count(code) > 0)
 		{
-			auto key = vk2mouse.find(code)->second;
+			auto key = mouse_mapping.find(code)->second;
 			active_mouse_btns.erase(key);
 			for (auto& kv : on_mouse_up_events)
 			{

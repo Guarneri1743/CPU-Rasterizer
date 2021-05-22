@@ -1,20 +1,20 @@
 #ifndef _EDITOR_
 #define _EDITOR_
+
 #include "imgui/imgui.h"
-#include <Windows.h>
+#include <GL/gl3w.h>
+#include <GLFW/glfw3.h>
 
 namespace Guarneri
 {
 	class Editor
 	{
 	public:
-		static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-		Editor();
+		Editor(GLFWwindow* window, char* glsl_version);
 		~Editor();
-		void initialize(HWND window, WNDCLASS window_class);
 		void dispose();
-		void draw_editor_gui();
 		void render();
+		void present();
 
 	private:
 		bool disposed = false;

@@ -15,8 +15,8 @@
 #define STEP(y, x) x >= y ? 1 : 0 
 #define UNUSED(...) ((void)##__VA_ARGS__)
 #define INST(type) Singleton<type>::get()
-#define DEFAULT_COLOR Color::encode_bgra(Color::BLACK)
-#define DEFAULT_DEPTH_COLOR Color::encode_bgra(Color::WHITE)
+#define DEFAULT_COLOR Color::encode_rgba(Color::BLACK)
+#define DEFAULT_DEPTH_COLOR Color::encode_rgba(Color::WHITE)
 #define TEXTURE_MAX_SIZE 4096
 #define FLOAT_LOG_PRECISION 6
 #define INVALID_ID 0

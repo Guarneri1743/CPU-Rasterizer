@@ -33,6 +33,8 @@ namespace Guarneri {
 				CullingAndClippingFlag::BACK_FACE_CULLING;
 		}
 
+		int width;
+		int height;
 		float cam_near;
 		float cam_far;
 		Vector3 camera_pos;

@@ -1,9 +1,9 @@
-#include "CPURasterizer.hpp"
+#include "Application.hpp"
 
 int main()
 {
-	Guarneri::CPURasterizer::prepare(800, 600, "CPU-Rasterizer");
+	Guarneri::Application app("CPU-Rasterizer", 800, 600);
 	auto scene = Guarneri::Scene::deserialize("/scenes/lighting_sample.scene");
-	Guarneri::CPURasterizer::kick_off(*scene);
+	app.kickoff(*scene);
 	return 0;
 }

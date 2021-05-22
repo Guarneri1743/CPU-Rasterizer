@@ -7,6 +7,7 @@
 #include "Clipper.hpp"
 #include "SegmentDrawer.hpp"
 #include "Config.h"
+#include <iostream>
 
 namespace Guarneri
 {
@@ -31,7 +32,7 @@ namespace Guarneri
 	GraphicsDevice::~GraphicsDevice()
 	{}
 
-	void GraphicsDevice::initialize(void* bitmap_handle, uint32_t w, uint32_t h)
+	void GraphicsDevice::initialize(uint32_t w, uint32_t h)
 	{
 		this->width = w;
 		this->height = h;
@@ -48,10 +49,8 @@ namespace Guarneri
 		// prepare buffers
 		zbuffer = std::make_unique<RawBuffer<float>>(w, h);
 		shadowmap = std::make_unique<RawBuffer<float>>(w, h);
-		framebuffer = std::make_unique<RawBuffer<color_bgra>>(bitmap_handle, w, h, [](color_bgra* ptr)
-		{
-			UNUSED(ptr); /*delete[] (void*)ptr;*/
-		});
+		framebuffer = std::make_unique<RawBuffer<color_rgba>>(w, h);
+
 		stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 		zbuffer->clear(FAR_Z);
 		shadowmap->clear(FAR_Z);
@@ -126,7 +125,7 @@ namespace Guarneri
 					const int h = this->height;
 					msaa_subsample_count = count;
 					subsamples_per_axis = (uint8_t)(std::sqrt((double)count));
-					msaa_colorbuffer = std::make_unique<RawBuffer<color_bgra>>(w * subsamples_per_axis, h * subsamples_per_axis);
+					msaa_colorbuffer = std::make_unique<RawBuffer<color_rgba>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_zbuffer = std::make_unique<RawBuffer<float>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_coveragebuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
@@ -138,7 +137,7 @@ namespace Guarneri
 
 	void GraphicsDevice::present()
 	{
-		if (INST(GraphicsDevice).tile_based)
+		if (this->tile_based)
 		{
 			render_tiles();
 		}
@@ -148,6 +147,7 @@ namespace Guarneri
 	{
 		//todo
 		process_commands();
+
 		if ((flag & BufferFlag::COLOR) != BufferFlag::NONE)
 		{
 			if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
@@ -159,6 +159,7 @@ namespace Guarneri
 				framebuffer->clear(DEFAULT_COLOR);
 			}
 		}
+
 		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE)
 		{
 			zbuffer->clear(FAR_Z);
@@ -249,7 +250,7 @@ namespace Guarneri
 			{
 				(*iter).culled = true;
 			}
-			if (INST(GraphicsDevice).tile_based)
+			if (this->tile_based)
 			{
 				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, Config::TILE_SIZE, this->col_tile_count);
 			}
@@ -274,7 +275,7 @@ namespace Guarneri
 
 	void GraphicsDevice::msaa_resolve()
 	{
-		if (INST(GraphicsDevice).multi_thread)
+		if (this->multi_thread)
 		{
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
@@ -308,7 +309,7 @@ namespace Guarneri
 
 	void GraphicsDevice::render_tiles()
 	{
-		if (INST(GraphicsDevice).multi_thread)
+		if (this->multi_thread)
 		{
 			auto thread_size = (size_t)std::thread::hardware_concurrency();
 			ThreadPool tp(thread_size);
@@ -392,13 +393,13 @@ namespace Guarneri
 				{
 					float r = (float)row / tile.row_end;
 					float g = (float)col / tile.col_end;
-					color_bgra dst;
+					color_rgba dst;
 					if (framebuffer->read(row, col, dst))
 					{
 						Color dst_color = Color::decode(dst);
 						Color src_color = Color(r, g, 0.0f, 0.5f);
 						Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
-						auto pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+						auto pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 						framebuffer->write(row, col, pixel_color);
 					}
 				}
@@ -433,7 +434,7 @@ namespace Guarneri
 						if (msaa_coveragebuffer->read(sub_row, sub_col, coverage) && coverage)
 						{
 							coverage_count++;
-							color_bgra msaa_color;
+							color_rgba msaa_color;
 							msaa_colorbuffer->read(sub_row, sub_col, msaa_color);
 							pixel_color += Color::decode(msaa_color);
 						}
@@ -443,7 +444,7 @@ namespace Guarneri
 				if (coverage_count > 0)
 				{
 					pixel_color *=  1.0f / msaa_subsample_count;
-					framebuffer->write(row, col, Color::encode_bgra(pixel_color));
+					framebuffer->write(row, col, Color::encode_rgba(pixel_color));
 				}
 			}
 		}
@@ -614,7 +615,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::process_subsamples(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
+	void GraphicsDevice::process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
 	{
 		auto p0 = v0.position.xy();
 		auto p1 = v1.position.xy();
@@ -627,7 +628,7 @@ namespace Guarneri
 		bool color_calculated = false;
 
 		Color fragment_result;
-		color_bgra pixel_color;
+		color_rgba pixel_color;
 		for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
 		{
 			for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
@@ -688,7 +689,7 @@ namespace Guarneri
 							v_out.tangent = v.tangent * w;
 							v_out.bitangent = v.bitangent * w;
 							fragment_result = shader->fragment_shader(v_out);
-							pixel_color = Color::encode_bgra(fragment_result);
+							pixel_color = Color::encode_rgba(fragment_result);
 						}
 						color_calculated = true;
 					}
@@ -721,13 +722,13 @@ namespace Guarneri
 					// blending
 					if (enable_blending && shader != nullptr && shader->transparent)
 					{
-						color_bgra dst;
+						color_rgba dst;
 						if (fbuf->read(subsample_row, subsample_col, dst))
 						{
 							Color dst_color = Color::decode(dst);
 							Color src_color = fragment_result;
 							Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-							pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+							pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 						}
 					}
 
@@ -742,7 +743,7 @@ namespace Guarneri
 	}
 
 	// per fragment processing
-	void GraphicsDevice::process_fragment(RawBuffer<color_bgra>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader)
+	void GraphicsDevice::process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader)
 	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
@@ -782,7 +783,7 @@ namespace Guarneri
 			}
 		}
 
-		color_bgra pixel_color;
+		color_rgba pixel_color;
 
 		// fragment shader
 		Color fragment_result;
@@ -801,7 +802,7 @@ namespace Guarneri
 
 			// todo: ddx ddy
 			fragment_result = s->fragment_shader(v_out);
-			pixel_color = Color::encode_bgra(fragment_result);
+			pixel_color = Color::encode_rgba(fragment_result);
 		}
 
 		// todo: scissor test
@@ -847,13 +848,13 @@ namespace Guarneri
 		// blending
 		if (enable_blending && s != nullptr && s->transparent)
 		{
-			color_bgra dst;
+			color_rgba dst;
 			if (fbuf->read(row, col, dst))
 			{
 				Color dst_color = Color::decode(dst);
 				Color src_color = fragment_result;
 				Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-				pixel_color = Color::encode_bgra(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+				pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 			}
 		}
 
@@ -866,7 +867,7 @@ namespace Guarneri
 			}
 			else
 			{
-				color_bgra cur;
+				color_rgba cur;
 				if (fbuf->read(row, col, cur))
 				{
 					if ((color_mask & ColorMask::R) == ColorMask::ZERO)
@@ -896,7 +897,7 @@ namespace Guarneri
 			uint8_t stencil;
 			if (stencilbuf->read(row, col, stencil))
 			{
-				color_bgra c = Color::encode_bgra(stencil, stencil, stencil, 255);
+				color_rgba c = Color::encode_rgba(stencil, stencil, stencil, 255);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -909,7 +910,7 @@ namespace Guarneri
 			{
 				float linear_depth = linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
 				Color depth_color = Color::WHITE * linear_depth;
-				color_bgra c = Color::encode_bgra(depth_color);
+				color_rgba c = Color::encode_rgba(depth_color);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -921,7 +922,7 @@ namespace Guarneri
 			if (this->get_shadowmap()->read(row, col, cur_depth))
 			{
 				Color depth_color = Color::WHITE * cur_depth;
-				color_bgra c = Color::encode_bgra(depth_color);
+				color_rgba c = Color::encode_rgba(depth_color);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -1210,12 +1211,12 @@ namespace Guarneri
 		s1 = translation * s1;
 		s2 = translation * s2;
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col)
 	{
-		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_bgra(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -1240,27 +1241,27 @@ namespace Guarneri
 		Vector4 s1 = ndc2viewport(n1);
 		Vector4 s2 = ndc2viewport(n2);
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_bgra(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset)
 	{
-		INST(GraphicsDevice).draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
-		INST(GraphicsDevice).draw_segment(pos, pos + right, Color::RED, v, p, offset);
-		INST(GraphicsDevice).draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
+		this->draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
+		this->draw_segment(pos, pos + right, Color::RED, v, p, offset);
+		this->draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
 	}
 
 	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		INST(GraphicsDevice).draw_segment(pos, pos + forward, Color::BLUE, v, p);
-		INST(GraphicsDevice).draw_segment(pos, pos + right, Color::RED, v, p);
-		INST(GraphicsDevice).draw_segment(pos, pos + up, Color::GREEN, v, p);
+		this->draw_segment(pos, pos + forward, Color::BLUE, v, p);
+		this->draw_segment(pos, pos + right, Color::RED, v, p);
+		this->draw_segment(pos, pos + up, Color::GREEN, v, p);
 	}
 
 	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		INST(GraphicsDevice).draw_segment(pos, pos + forward, Color::BLUE, m, v, p);
-		INST(GraphicsDevice).draw_segment(pos, pos + right, Color::RED, m, v, p);
-		INST(GraphicsDevice).draw_segment(pos, pos + up, Color::GREEN, m, v, p);
+		this->draw_segment(pos, pos + forward, Color::BLUE, m, v, p);
+		this->draw_segment(pos, pos + right, Color::RED, m, v, p);
+		this->draw_segment(pos, pos + up, Color::GREEN, m, v, p);
 	}
 }
