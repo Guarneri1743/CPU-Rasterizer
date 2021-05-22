@@ -39,11 +39,6 @@ namespace Guarneri
 
 		uint32_t compile_blit_shader(std::string vert_path, std::string frag_path);
 
-		std::vector<std::function<void(int key, int scancode, int action, int mods)>> on_key_change_evts;
-		std::vector<std::function<void(double xpos, double ypos)>> on_cursor_pos_change_evts;
-		std::vector<std::function<void(int button, int action, int mods)>> on_mouse_btn_change_evts;
-		std::vector<std::function<void(double xoffset, double yoffset)>> on_scroll_change_evts;
-
 		GLFWwindow* window{ nullptr };
 		double cursor_x;
 		double cursor_y;

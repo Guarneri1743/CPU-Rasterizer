@@ -14,7 +14,6 @@ namespace Guarneri
 		~Editor();
 		void dispose();
 		void render();
-		void present();
 
 	private:
 		bool disposed = false;

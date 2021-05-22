@@ -34,18 +34,20 @@ namespace Guarneri
 		while (window->is_open())
 		{
 			Time::frame_start();
-			double x, y;
-			window->get_cursor_pos(x, y);
-			INST(InputManager).update(x, y);
-
-			window->clear();
-			scene.update();
-			scene.render();
-			window->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()));
-			editor->render();
-			editor->present();
-			window->flush();
-
+			// main loop
+			{
+				// clear color buffer
+				window->clear();
+				// render scene
+				scene.update();
+				scene.render();
+				// blit framebuffer to screen
+				window->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()));
+				// render editor gui
+				editor->render();
+				// flush
+				window->flush();
+			}
 			Time::frame_end();
 			Sleep(1);
 		}

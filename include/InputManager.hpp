@@ -95,8 +95,8 @@ namespace Guarneri
 		std::unordered_map<void (*)(void* user_data), void*> on_update_evts;
 
 	public:
-		void update(double x, double y);
-		void on_wheel_rolling(short delta);
+		void on_mouse_move(double x, double y);
+		void on_wheel_rolling(double delta);
 		void on_key_down(int code);
 		void on_key_up(int code);
 		void add_on_update_evt(void (*on_update)(void* ud), void* user_data);

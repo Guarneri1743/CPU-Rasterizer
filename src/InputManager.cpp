@@ -66,7 +66,7 @@ namespace Guarneri
 		{ GLFW_MOUSE_BUTTON_MIDDLE, MouseButton::MIDDLE}
 	};
 
-	void InputManager::update(double x, double y)
+	void InputManager::on_mouse_move(double x, double y)
 	{
 		auto prev = mouse_position;
 		mouse_position = Vector2((float)x, (float)y);
@@ -87,7 +87,7 @@ namespace Guarneri
 		}
 	}
 
-	void InputManager::on_wheel_rolling(short delta)
+	void InputManager::on_wheel_rolling(double delta)
 	{
 		for (auto& kv : on_wheel_rolling_events)
 		{

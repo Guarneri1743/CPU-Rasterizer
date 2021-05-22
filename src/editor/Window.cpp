@@ -7,48 +7,56 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 #include "Utility.hpp"
+#include "InputManager.hpp"
+#include "Singleton.hpp"
 
 namespace Guarneri
 {
 	void Window::glfw_error_callback(const int error, const char* const description)
 	{
-		std::cerr << "[ERROR] GLFW: " << description << " (code: " << error << ")" << std::endl;
+		std::cout << "glfw error: " << description << std::endl;
 	}
 
-	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action,
-								 const int mods)
+	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 	{
-		auto* const this_ = static_cast<Window*>(glfwGetWindowUserPointer(window));
-		for (auto& callback : this_->on_key_change_evts)
-			callback(key, scancode, action, mods);
+		if (action == GLFW_PRESS)
+		{
+			INST(InputManager).on_key_down(key);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			INST(InputManager).on_key_up(key);
+		}
+		else if (action == GLFW_REPEAT)
+		{
+			//todo
+		}
 	}
 
-	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double xpos, const double ypos)
+	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
 	{
-		auto* const this_ = static_cast<Window*>(glfwGetWindowUserPointer(window));
-		this_->cursor_x = xpos;
-		this_->cursor_y = ypos;
-		for (auto& callback : this_->on_cursor_pos_change_evts)
-			callback(xpos, ypos);
+		INST(InputManager).on_mouse_move(x, y);
 	}
 
 	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
 	{
-		auto* const this_ = static_cast<Window*>(glfwGetWindowUserPointer(window));
-		for (auto& callback : this_->on_mouse_btn_change_evts)
-			callback(button, action, mods);
+		if (action == GLFW_PRESS)
+		{
+			INST(InputManager).on_key_down(button);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			INST(InputManager).on_key_up(button);
+		}
+		else if (action == GLFW_REPEAT)
+		{
+			//todo
+		}
 	}
 
-	void Window::glfw_scroll_callback(GLFWwindow* window, const double xoffset, const double yoffset)
+	void Window::glfw_scroll_callback(GLFWwindow* window, const double delta_x, const double delta_y)
 	{
-		auto* const this_ = static_cast<Window*>(glfwGetWindowUserPointer(window));
-		for (auto& callback : this_->on_scroll_change_evts)
-			callback(xoffset, yoffset);
-	}
-
-	static void glfw_error_callback(int error, const char* description)
-	{
-		fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+		INST(InputManager).on_wheel_rolling(delta_y);
 	}
 
 	Window::Window(const char* title, int width, int height) : 
@@ -152,8 +160,6 @@ namespace Guarneri
 
 		valid = true;
 		std::cout << "window initialized." << std::endl;
-		std::cout << "framebuffer id: " << texture << std::endl;
-		std::cout << "framebuffer shader id: " << shader_id << std::endl;
 	}
 
 	Window::~Window()
@@ -163,7 +169,7 @@ namespace Guarneri
 		valid = false;
 	}
 
-	static void check_error(GLuint shader, std::string type)
+	static void check_shader_error(GLuint shader, std::string type)
 	{
 		GLint success;
 		GLchar infoLog[1024];
@@ -228,45 +234,24 @@ namespace Guarneri
 		vertex = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertex, 1, &vShaderCode, nullptr);
 		glCompileShader(vertex);
-		check_error(vertex, "VERTEX");
+		check_shader_error(vertex, "VERTEX");
 
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragment, 1, &fShaderCode, nullptr);
 		glCompileShader(fragment);
-		check_error(fragment, "FRAGMENT");
+		check_shader_error(fragment, "FRAGMENT");
 
 		uint32_t ID = glCreateProgram();
 		glAttachShader(ID, vertex);
 		glAttachShader(ID, fragment);
 
 		glLinkProgram(ID);
-		check_error(ID, "PROGRAM");
+		check_shader_error(ID, "PROGRAM");
 
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 
 		return ID;
-	}
-
-
-	void Window::add_key_evt(std::function<void(int key, int scancode, int action, int mods)> callback)
-	{
-		on_key_change_evts.emplace_back(callback);
-	}
-
-	void Window::add_cursor_pos_evt(std::function<void(double xpos, double ypos)> callback)
-	{
-		on_cursor_pos_change_evts.emplace_back(callback);
-	}
-
-	void Window::add_mouse_evt(std::function<void(int button, int action, int mods)> callback)
-	{
-		on_mouse_btn_change_evts.emplace_back(callback);
-	}
-
-	void Window::add_on_scroll_change_evt(std::function<void(double xoffset, double yoffset)> callback)
-	{
-		on_scroll_change_evts.emplace_back(callback);
 	}
 
 	void Window::clear()
