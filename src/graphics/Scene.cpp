@@ -25,6 +25,8 @@
 
 namespace Guarneri
 {
+	Scene* Scene::current_scene;
+
 	Scene::Scene(std::string name)
 	{
 		this->name = name;
@@ -55,12 +57,12 @@ namespace Guarneri
 			if (INST(InputManager).is_mouse_down(MouseButton::RIGHT))
 			{
 				Scene* s = reinterpret_cast<Scene*>(data);
-				Vector2 offset = (pos - prev) * Vector2(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height) * CAMERA_ROTATE_SPEED;
+				Vector2 offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				s->main_cam->transform->rotate(offset.y, offset.x, 0.0f);
 			}
 			if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 			{
-				Vector2 offset = (pos - prev) * Vector2(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height) * CAMERA_ROTATE_SPEED;
+				Vector2 offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
 				s->main_cam->transform->move_left(offset.x);
 				s->main_cam->transform->move_ascend(offset.y);

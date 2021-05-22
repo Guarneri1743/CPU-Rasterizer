@@ -3,13 +3,13 @@
 
 namespace Guarneri
 {
-	Application::Application(const char* title, int width, int height)
+	Application::Application(const char* title)
 	{
-		window = std::make_unique<Window>(title, width, height);
-		editor = std::make_unique<Editor>(window->get(), kGlslVersion);
-		INST(GlobalShaderParams).width = width;
-		INST(GlobalShaderParams).height = height;
-		INST(GraphicsDevice).initialize(width, height);
+		Window::initialize_main_window(title);
+		setting_editor = std::make_unique<SettingEditor>();
+		INST(GlobalShaderParams).width = 400;
+		INST(GlobalShaderParams).height = 300;
+		INST(GraphicsDevice).initialize(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height);
 	}
 
 	Application::~Application() {}
@@ -27,31 +27,31 @@ namespace Guarneri
 		{
 			auto win = reinterpret_cast<Window*>(data);
 			if (code == KeyCode::ESC) win->close();
-		}, window.get());
+		}, Window::main()->get());
 
 		std::cout << "kickoff scene: " << scene.name << std::endl;
 
-		while (window->is_open())
+		while (Window::main()->is_open())
 		{
 			Time::frame_start();
 			// main loop
 			{
 				// clear color buffer
-				window->clear();
+				Window::main()->clear();
 				// render scene
 				scene.update();
 				scene.render();
 				// blit framebuffer to screen
-				window->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()));
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()), INST(GlobalShaderParams).width, INST(GlobalShaderParams).height);
 				// render editor gui
-				editor->render();
+				setting_editor->render();
 				// flush
-				window->flush();
+				Window::main()->flush();
 			}
 			Time::frame_end();
 			Sleep(1);
 		}
 
-		window->close();
+		Window::main()->close();
 	}
 }

@@ -32,6 +32,12 @@ namespace Guarneri
 	GraphicsDevice::~GraphicsDevice()
 	{}
 
+	void GraphicsDevice::resize(uint32_t w, uint32_t h)
+	{
+		delete[] tiles;
+		initialize(w, h);
+	}
+
 	void GraphicsDevice::initialize(uint32_t w, uint32_t h)
 	{
 		this->width = w;

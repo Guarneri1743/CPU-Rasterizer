@@ -51,7 +51,8 @@
 #include "PrimitiveFactory.hpp"
 
 #include "Window.hpp"
-#include "Editor.hpp"
+#include "SettingEditor.hpp"
+#include "HierarchyEditor.hpp"
 #include "GraphicsDevice.hpp"
 
 namespace Guarneri
@@ -59,14 +60,13 @@ namespace Guarneri
 	class Application
 	{
 	public:
-		Application(const char* title, int width, int height);
+		Application(const char* title);
 		~Application();
 
 		void kickoff(Scene& scene);
 
 	private:
-		std::unique_ptr<Window> window;
-		std::unique_ptr<Editor> editor;
+		std::unique_ptr<SettingEditor> setting_editor;
 	};
 }
 

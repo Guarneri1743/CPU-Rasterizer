@@ -15,6 +15,9 @@ namespace Guarneri
 	public:
 		std::string name;
 
+		// editor
+		std::shared_ptr<Model> selection;
+
 		// lights
 		DirectionalLight main_light;
 		std::vector<PointLight> point_lights;
@@ -55,11 +58,14 @@ namespace Guarneri
 		void render_objects();
 		void draw_gizmos();
 
+		static Scene* current() { return current_scene; }
+		static void set_current(Scene* scene) { current_scene = scene; }
 		static std::unique_ptr<Scene> create(const std::string& name);
 		static void serialize(const Scene& scene, const std::string& path);
 		static std::unique_ptr<Scene> deserialize(const std::string& path);
 
 	private:
+		static Scene* current_scene;
 		Scene(std::string name);
 	};
 }

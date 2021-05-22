@@ -5,7 +5,10 @@
 #include "Vector3.hpp"
 #include "Matrix4x4.hpp"
 #include "Transform.hpp"
-#include "rapidjson//document.h"
+#include "rapidjson/document.h"
+
+#undef near
+#undef far
 
 namespace Guarneri
 {

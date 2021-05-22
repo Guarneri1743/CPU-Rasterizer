@@ -8,6 +8,10 @@
 namespace Guarneri {
 	struct GlobalShaderParams {
 		GlobalShaderParams() {
+			width = 0;
+			height = 0;
+			window_width = 0;
+			window_height = 0;
 			cam_near = 0.1f;
 			cam_far = 500.0f;
 			camera_pos = Vector3::ZERO;
@@ -33,6 +37,8 @@ namespace Guarneri {
 				CullingAndClippingFlag::BACK_FACE_CULLING;
 		}
 
+		int window_width;
+		int window_height;
 		int width;
 		int height;
 		float cam_near;

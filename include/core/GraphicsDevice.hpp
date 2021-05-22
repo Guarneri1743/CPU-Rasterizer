@@ -53,6 +53,7 @@ namespace Guarneri
 	public:
 		GraphicsDevice();
 		~GraphicsDevice();
+		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void present();

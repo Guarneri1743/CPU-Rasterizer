@@ -12,56 +12,15 @@
 
 namespace Guarneri
 {
-	void Window::glfw_error_callback(const int error, const char* const description)
-	{
-		std::cout << "glfw error: " << description << std::endl;
-	}
+	constexpr int kDefaultWindowWidth = 1920;
+	constexpr int kDefaultWindowHeight = 1280;
 
-	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
-	{
-		if (action == GLFW_PRESS)
-		{
-			INST(InputManager).on_key_down(key);
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			INST(InputManager).on_key_up(key);
-		}
-		else if (action == GLFW_REPEAT)
-		{
-			//todo
-		}
-	}
+	Window* Window::main_window;
 
-	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
-	{
-		INST(InputManager).on_mouse_move(x, y);
-	}
-
-	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
-	{
-		if (action == GLFW_PRESS)
-		{
-			INST(InputManager).on_key_down(button);
-		}
-		else if (action == GLFW_RELEASE)
-		{
-			INST(InputManager).on_key_up(button);
-		}
-		else if (action == GLFW_REPEAT)
-		{
-			//todo
-		}
-	}
-
-	void Window::glfw_scroll_callback(GLFWwindow* window, const double delta_x, const double delta_y)
-	{
-		INST(InputManager).on_wheel_rolling(delta_y);
-	}
-
-	Window::Window(const char* title, int width, int height) : 
-		width(width), 
-		height(height), 
+	Window::Window(const char* title, int w, int h)
+		:
+		width(w),
+		height(h),
 		valid(false),
 		closed(false),
 		EBO(0),
@@ -70,7 +29,8 @@ namespace Guarneri
 		shader_id(0),
 		texture(0),
 		cursor_x(0.0f),
-		cursor_y(0.0f)
+		cursor_y(0.0f),
+		window(nullptr)
 	{
 		glfwSetErrorCallback(glfw_error_callback);
 		if (!glfwInit())
@@ -92,7 +52,7 @@ namespace Guarneri
 		}
 
 		glfwMakeContextCurrent(window);
-		glfwSwapInterval(1); 
+		glfwSwapInterval(1);
 
 		if (gl3wInit() != 0)
 		{
@@ -105,6 +65,7 @@ namespace Guarneri
 		glfwSetCursorPosCallback(window, glfw_cursor_pos_callback);
 		glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
 		glfwSetScrollCallback(window, glfw_scroll_callback);
+		glfwSetFramebufferSizeCallback(window, glfw_resize_callback);
 
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
@@ -167,6 +128,14 @@ namespace Guarneri
 		glfwDestroyWindow(window);
 		glfwTerminate();
 		valid = false;
+	}
+
+	void Window::initialize_main_window(const char* title)
+	{
+		if (main_window == nullptr)
+		{
+			main_window = new Window(title, kDefaultWindowWidth, kDefaultWindowHeight);
+		}
 	}
 
 	static void check_shader_error(GLuint shader, std::string type)
@@ -260,9 +229,9 @@ namespace Guarneri
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	void Window::blit2screen(uint8_t* framebuffer)
+	void Window::blit2screen(uint8_t* framebuffer, uint32_t w, uint32_t h)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUseProgram(shader_id);
 		glBindVertexArray(VAO);
@@ -278,5 +247,75 @@ namespace Guarneri
 	bool Window::is_open()
 	{
 		return !closed && valid && !glfwWindowShouldClose(get());
+	}
+
+	void Window::add_on_resize_evt(void(*on_resize)(int w, int h, void* ud), void* user_data)
+	{
+		if (on_resize_evts.count(on_resize) > 0)
+		{
+			return;
+		}
+
+		on_resize_evts.insert(std::pair(on_resize, user_data));
+	}
+
+	void Window::glfw_error_callback(const int error, const char* const description)
+	{
+		std::cout << "glfw error: " << description << std::endl;
+	}
+
+	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
+	{
+		if (action == GLFW_PRESS)
+		{
+			INST(InputManager).on_key_down(key);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			INST(InputManager).on_key_up(key);
+		}
+		else if (action == GLFW_REPEAT)
+		{
+			//todo
+		}
+	}
+
+	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
+	{
+		INST(InputManager).on_mouse_move(x, y);
+	}
+
+	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
+	{
+		if (action == GLFW_PRESS)
+		{
+			INST(InputManager).on_key_down(button);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			INST(InputManager).on_key_up(button);
+		}
+		else if (action == GLFW_REPEAT)
+		{
+			//todo
+		}
+	}
+
+	void Window::glfw_scroll_callback(GLFWwindow* window, const double delta_x, const double delta_y)
+	{
+		INST(InputManager).on_wheel_rolling(delta_y);
+	}
+
+	void Window::glfw_resize_callback(GLFWwindow* window, int w, int h)
+	{
+		auto win = static_cast<Window*>(glfwGetWindowUserPointer(window));
+		win->width = w;
+		win->height = h;
+		for (auto& kv : win->on_resize_evts)
+		{
+			auto evt = kv.first;
+			auto user_data = kv.second;
+			evt(w, h, user_data);
+		}
 	}
 }
