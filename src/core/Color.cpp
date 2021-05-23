@@ -7,31 +7,6 @@
 
 namespace Guarneri
 {	
-	Color::Color()
-	{
-		r = 0.0f; g = 0.0f; b = 0.0f; a = 1.0f;
-	}
-
-	Color::Color(const float& r)
-	{
-		this->r = r; this->g = r; this->b = r; this->a = r;
-	}
-
-	Color::Color(const Vector4& v)
-	{
-		this->r = v.x; this->g = v.y; this->b = v.z; this->a = v.w;
-	}
-
-	Color::Color(const Vector3& v)
-	{
-		this->r = v.x; this->g = v.y; this->b = v.z; this->a = 1.0f;
-	}
-
-	Color::Color(const float& r, const Vector3& yzw)
-	{
-		this->r = r; this->g = yzw.x; this->b = yzw.y; this->a = yzw.z;
-	}
-
 	Color::Color(const float& r, const float& g, const Vector2& zw)
 	{
 		this->r = r; this->g = g; this->b = zw.x; this->a = zw.y;
@@ -50,16 +25,6 @@ namespace Guarneri
 	Color::Color(const Vector3& v, const float& w)
 	{
 		this->r = v.x; this->g = v.y; this->b = v.z; this->a = w;
-	}
-
-	Color::Color(const float& r, const float& g, const float& b)
-	{
-		this->r = r; this->g = g; this->b = b; this->a = 1.0f;
-	}
-
-	Color::Color(const float& r, const float& g, const float& b, const float& a)
-	{
-		this->r = r; this->g = g; this->b = b; this->a = a;
 	}
 
 	Color Color::normalized()

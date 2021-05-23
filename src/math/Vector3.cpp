@@ -8,26 +8,6 @@
 
 namespace Guarneri
 {
-	Vector3::Vector3()
-	{
-		x = 0; y = 0; z = 0;
-	}
-
-	Vector3::Vector3(const Vector2& other)
-	{
-		this->x = other.x; this->y = other.y; this->z = 0.0f;
-	}
-
-	Vector3::Vector3(const float& r)
-	{
-		this->x = r; this->y = r; this->z = r;
-	}
-
-	Vector3::Vector3(const float& x, const float& y, const float& z)
-	{
-		this->x = x; this->y = y; this->z = z;
-	}
-
 	Vector3 Vector3::normalized() const
 	{
 		return Vector3::normalize(*this);

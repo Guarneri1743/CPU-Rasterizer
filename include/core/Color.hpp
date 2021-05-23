@@ -21,17 +21,17 @@ namespace Guarneri
 		float b;
 		float a;
 
-		Color();
-		Color(const float& r);
-		Color(const Vector4& v);
-		Color(const Vector3& v);
-		Color(const float& r, const Vector3& yzw);
+		constexpr Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {}
+		constexpr Color(const float& v) : r(v), g(v), b(v), a(v) {}
+		constexpr Color(const float& x, const float& y, const float& z) : r(x), g(y), b(z), a(1.0f) {}
+		constexpr Color(const float& x, const float& y, const float& z, const float& w) : r(x), g(y), b(z), a(w) {}
+		constexpr Color(const Vector4& v) : r(v.x), g(v.y), b(v.z), a(v.w) {}
+		constexpr Color(const Vector3& v) : r(v.x), g(v.y), b(v.z), a(1.0f) {}
+		constexpr Color(const float& x, const Vector3& yzw) : r(x), g(yzw.x), b(yzw.y), a(yzw.z) {}
 		Color(const float& r, const float& g, const Vector2& zw);
 		Color(const Vector2& v, const float& b, const float& w);
 		Color(const Vector2& v, const Vector2& zw);
 		Color(const Vector3& v, const float& w);
-		Color(const float& r, const float& g, const float& b);
-		Color(const float& r, const float& g, const float& b, const float& a);
 		Color normalized();
 		float& operator[](const uint32_t& i);
 		const float& operator[](const uint32_t& i) const;

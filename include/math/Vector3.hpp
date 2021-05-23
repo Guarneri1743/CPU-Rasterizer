@@ -23,10 +23,10 @@ namespace Guarneri
 		float y;
 		float z;
 
-		Vector3();
-		Vector3(const Vector2& other);
-		Vector3(const float& r);
-		Vector3(const float& x, const float& y, const float& z);
+		constexpr Vector3() : x(0.0f), y(0.0f), z(0.0f) {}
+		constexpr Vector3(const Vector2& other) : x(other.x), y(other.y), z(0.0f) {}
+		constexpr Vector3(const float& v) : x(v), y(v), z(v) {}
+		constexpr Vector3(const float& x, const float& y, const float& z) : x(x), y(y), z(z) {}
 
 		float& operator[](const unsigned int i);
 		const float& operator[](const unsigned int i) const;

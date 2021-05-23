@@ -95,6 +95,13 @@ namespace Guarneri
 		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& v, const Vector3& n, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const;
 		virtual Color fragment_shader(const v2f& input) const;
 		std::string str() const;
+
+		static Shader*  get_error_shader() { return error_shader; }
+
+	private:
+		Shader(std::string name, bool is_error);
+		bool is_error_shader;
+		static Shader* error_shader;
 	};
 }
 #endif

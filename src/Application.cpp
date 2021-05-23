@@ -6,7 +6,7 @@ namespace Guarneri
 	Application::Application(const char* title)
 	{
 		Window::initialize_main_window(title);
-		setting_editor = std::make_unique<SettingEditor>();
+		editors.emplace_back(std::move(std::make_unique<SettingEditor>()));
 		INST(GlobalShaderParams).width = 400;
 		INST(GlobalShaderParams).height = 300;
 		INST(GraphicsDevice).initialize(INST(GlobalShaderParams).width, INST(GlobalShaderParams).height);
@@ -43,8 +43,11 @@ namespace Guarneri
 				scene.render();
 				// blit framebuffer to screen
 				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()), INST(GlobalShaderParams).width, INST(GlobalShaderParams).height);
-				// render editor gui
-				setting_editor->render();
+				// render editors
+				for (auto& editor : editors)
+				{
+					editor->render();
+				}
 				// flush
 				Window::main()->flush();
 			}

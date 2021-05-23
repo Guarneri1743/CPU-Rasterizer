@@ -5,57 +5,6 @@
 
 namespace Guarneri
 {
-	Vector4::Vector4()
-	{
-		x = 0.0f; y = 0.0f; z = 0.0f; w = 1.0f;
-	}
-
-	Vector4::Vector4(const float& r)
-	{
-		this->x = r; this->y = r; this->z = r; this->w = r;
-	}
-
-	Vector4::Vector4(const Vector3& v)
-	{
-		this->x = v.x; this->y = v.y; this->z = v.z; this->w = 1.0f;
-	}
-
-	Vector4::Vector4(const float& x, const Vector3& yzw)
-	{
-		this->x = x; this->y = yzw.x; this->z = yzw.y; this->w = yzw.z;
-	}
-
-	Vector4::Vector4(const float& x, const float& y, const Vector2& zw)
-	{
-		this->x = x; this->y = y; this->z = zw.x; this->w = zw.y;
-	}
-
-	Vector4::Vector4(const Vector2& v, const float& z, const float& w)
-	{
-		this->x = v.x; this->y = v.y; this->z = z; this->w = w;
-	}
-
-	Vector4::Vector4(const Vector2& v, const Vector2& zw)
-	{
-		this->x = v.x; this->y = v.y; this->z = zw.x; this->w = zw.y;
-	}
-
-	Vector4::Vector4(const Vector3& v, const float& w)
-	{
-		this->x = v.x; this->y = v.y; this->z = v.z; this->w = w;
-	}
-
-	Vector4::Vector4(const float& x, const float& y, const float& z)
-	{
-		this->x = x; this->y = y; this->z = z; this->w = 1.0f;
-	}
-
-	Vector4::Vector4(const float& x, const float& y, const float& z, const float& w)
-	{
-		this->x = x; this->y = y; this->z = z; this->w = w;
-	}
-
-
 	Vector4 Vector4::normalized()
 	{
 		return Vector4::normalize(*this);

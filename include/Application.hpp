@@ -1,6 +1,7 @@
 #ifndef _APPLICATION_
 #define _APPLICATION_
 
+#include <vector>
 #include <stdint.h>
 #include "Marcos.h"
 #include "Define.hpp"
@@ -66,7 +67,7 @@ namespace Guarneri
 		void kickoff(Scene& scene);
 
 	private:
-		std::unique_ptr<SettingEditor> setting_editor;
+		std::vector<std::unique_ptr<BaseEditor>> editors;
 	};
 }
 

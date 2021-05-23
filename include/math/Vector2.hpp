@@ -14,12 +14,12 @@ namespace Guarneri
 		float x;
 		float y;
 
-		Vector2();
-		Vector2(const float& r);
-		Vector2(const Vector2& v);
-		Vector2(const float& x, const float& y);
-		Vector2(const int& x, const int& y);
-		Vector2(const uint32_t& x, const uint32_t& y);
+		constexpr Vector2() : x(0.0f), y(0.0f) {}
+		constexpr Vector2(const float& v) : x(v), y(v) {}
+		constexpr Vector2(const Vector2& v) : x(v.x), y(v.y) {}
+		constexpr Vector2(const float& x, const float& y) : x(x), y(y) {}
+		constexpr Vector2(const int& x, const int& y) : x((float)x), y((float)y) {}
+		constexpr Vector2(const uint32_t& x, const uint32_t& y) : x((float)x), y((float)y) {}
 
 		float& operator[](const uint32_t i);
 		const float& operator[](const uint32_t i) const;

@@ -6,7 +6,13 @@
 
 namespace Guarneri
 {
-	Shader::Shader(std::string name)
+	constexpr Color kErrorColor = Color(199.0f, 0.0f, 106.0f, 1.0f);
+
+	Shader* Shader::error_shader = new Shader("error_shader", true);
+
+	Shader::Shader(std::string name) : Shader(name, false) {}
+
+	Shader::Shader(std::string name, bool is_error_shader)
 	{
 		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
 		this->stencil_func = CompareFunc::ALWAYS;
@@ -28,6 +34,7 @@ namespace Guarneri
 		this->shadow = false;
 		this->shadowmap = nullptr;
 		this->name = name;
+		this->is_error_shader = is_error_shader;
 	}
 
 	Shader::~Shader()
@@ -39,13 +46,16 @@ namespace Guarneri
 		auto opos = Vector4(input.position.xyz(), 1.0f);
 		auto wpos = model * opos;
 		auto cpos = projection * view * wpos;
-		auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
 		o.position = cpos;
 		o.world_pos = wpos.xyz();
-		o.shadow_coord = light_space_pos;
+		if (!is_error_shader)
+		{
+			auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
+			o.shadow_coord = light_space_pos;
+		}
 		o.color = input.color;
 		Matrix3x3 normal_matrix = Matrix3x3(model).inverse().transpose();
-		if (normal_map)
+		if (normal_map && !is_error_shader)
 		{
 			Vector3 t = (normal_matrix * input.tangent).normalized();
 			Vector3 n = (normal_matrix * input.normal).normalized();
@@ -322,6 +332,8 @@ namespace Guarneri
 
 	Color Shader::fragment_shader(const v2f& input) const
 	{
+		if (is_error_shader) { return kErrorColor; }
+
 		auto main_light = INST(GlobalShaderParams).main_light;
 		auto point_lights = INST(GlobalShaderParams).point_lights;
 

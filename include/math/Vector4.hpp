@@ -18,16 +18,16 @@ namespace Guarneri
 		float z;
 		float w;
 
-		Vector4();
-		Vector4(const float& r);
-		Vector4(const Vector3& v);
-		Vector4(const float& x, const Vector3& yzw);
-		Vector4(const float& x, const float& y, const Vector2& zw);
-		Vector4(const Vector2& v, const float& z, const float& w);
-		Vector4(const Vector2& v, const Vector2& zw);
-		Vector4(const Vector3& v, const float& w);
-		Vector4(const float& x, const float& y, const float& z);
-		Vector4(const float& x, const float& y, const float& z, const float& w);
+		constexpr Vector4() : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+		constexpr Vector4(const float& v) : x(v), y(v), z(v), w(v) {}
+		constexpr Vector4(const Vector3& v) : x(v.x), y(v.y), z(v.z), w(0.0f) {}
+		constexpr Vector4(const float& x, const Vector3& yzw) : x(x), y(yzw.x), z(yzw.y), w(yzw.z) {}
+		constexpr Vector4(const float& x, const float& y, const Vector2& zw) : x(x), y(y), z(zw.x), w(zw.y) {}
+		constexpr Vector4(const Vector2& xy, const float& z, const float& w) : x(xy.x), y(xy.y), z(z), w(w) {}
+		constexpr Vector4(const Vector2& xy, const Vector2& zw) : x(xy.x), y(xy.y), z(zw.x), w(zw.y) {}
+		constexpr Vector4(const Vector3& xyz, const float& w) : x(xyz.x), y(xyz.y), z(xyz.z), w(w) {}
+		constexpr Vector4(const float& x, const float& y, const float& z) : x(x), y(y), z(z), w(0.0f) {}
+		constexpr Vector4(const float& x, const float& y, const float& z, const float& w) : x(x), y(y), z(z), w(w) {}
 
 		float& operator[](const unsigned int& i);
 		const float& operator[](const unsigned int& i) const;

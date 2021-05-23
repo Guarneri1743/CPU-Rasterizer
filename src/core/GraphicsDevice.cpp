@@ -85,6 +85,9 @@ namespace Guarneri
 
 	void GraphicsDevice::draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
+		if (shader == nullptr) { 
+			shader = Shader::get_error_shader(); 
+		}
 		auto object_space_frustum = Frustum::create(p * v * m);
 		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
 		{
@@ -113,7 +116,7 @@ namespace Guarneri
 			draw_triangle(shader, v1, v2, v3, m, v, p);
 		}
 	}
-	
+
 	void GraphicsDevice::process_commands()
 	{
 		while (!commands.empty())
@@ -192,8 +195,6 @@ namespace Guarneri
 
 	void GraphicsDevice::draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		assert(shader != nullptr);
-
 		UNUSED(m);
 		UNUSED(v);
 		UNUSED(p);
@@ -449,7 +450,7 @@ namespace Guarneri
 
 				if (coverage_count > 0)
 				{
-					pixel_color *=  1.0f / msaa_subsample_count;
+					pixel_color *= 1.0f / msaa_subsample_count;
 					framebuffer->write(row, col, Color::encode_rgba(pixel_color));
 				}
 			}
@@ -651,6 +652,7 @@ namespace Guarneri
 					uint32_t subsample_row = (uint32_t)(row * subsamples_per_axis + x_subsample_idx);
 					uint32_t subsample_col = (uint32_t)(col * subsamples_per_axis + y_subsample_idx);
 
+
 					bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 					bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 					bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -668,10 +670,16 @@ namespace Guarneri
 					BlendFactor src_factor = shader->src_factor;
 					BlendFactor dst_factor = shader->dst_factor;
 					BlendOp blend_op = shader->blend_op;
+
+					UNUSED(enable_scissor_test);
+					UNUSED(enable_alpha_test);
+					UNUSED(color_mask);
+					UNUSED(stencil_write_mask);
+
 					bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader->transparent;
 
 					PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
-					
+
 					msaa_coveragebuffer->write(subsample_row, subsample_col, 1);
 
 					if (!color_calculated)
@@ -682,21 +690,20 @@ namespace Guarneri
 						w2 = Triangle::area_double(p0, p1, pixel);
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex v = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-						if (shader != nullptr)
-						{
-							v2f v_out;
-							float w = 1.0f / v.rhw;
-							v_out.position = v.position;
-							v_out.world_pos = v.world_pos * w;
-							v_out.shadow_coord = v.shadow_coord * w;
-							v_out.color = v.color * w;
-							v_out.normal = v.normal * w;
-							v_out.uv = v.uv * w;
-							v_out.tangent = v.tangent * w;
-							v_out.bitangent = v.bitangent * w;
-							fragment_result = shader->fragment_shader(v_out);
-							pixel_color = Color::encode_rgba(fragment_result);
-						}
+						
+						v2f v_out;
+						float w = 1.0f / v.rhw;
+						v_out.position = v.position;
+						v_out.world_pos = v.world_pos * w;
+						v_out.shadow_coord = v.shadow_coord * w;
+						v_out.color = v.color * w;
+						v_out.normal = v.normal * w;
+						v_out.uv = v.uv * w;
+						v_out.tangent = v.tangent * w;
+						v_out.bitangent = v.bitangent * w;
+						fragment_result = shader->fragment_shader(v_out);
+						pixel_color = Color::encode_rgba(fragment_result);
+						
 						color_calculated = true;
 					}
 
@@ -726,7 +733,7 @@ namespace Guarneri
 					}
 
 					// blending
-					if (enable_blending && shader != nullptr && shader->transparent)
+					if (enable_blending && shader->transparent)
 					{
 						color_rgba dst;
 						if (fbuf->read(subsample_row, subsample_col, dst))
@@ -743,6 +750,7 @@ namespace Guarneri
 						fbuf->write(subsample_row, subsample_col, pixel_color);
 					}
 				}
+
 				sample_idx++;
 			}
 		}
@@ -793,24 +801,21 @@ namespace Guarneri
 
 		// fragment shader
 		Color fragment_result;
-		if (s != nullptr)
-		{
-			v2f v_out;
-			float w = 1.0f / v.rhw;
-			v_out.position = v.position;
-			v_out.world_pos = v.world_pos * w;
-			v_out.shadow_coord = v.shadow_coord * w;
-			v_out.color = v.color * w;
-			v_out.normal = v.normal * w;
-			v_out.uv = v.uv * w;
-			v_out.tangent = v.tangent * w;
-			v_out.bitangent = v.bitangent * w;
+		v2f v_out;
+		float w = 1.0f / v.rhw;
+		v_out.position = v.position;
+		v_out.world_pos = v.world_pos * w;
+		v_out.shadow_coord = v.shadow_coord * w;
+		v_out.color = v.color * w;
+		v_out.normal = v.normal * w;
+		v_out.uv = v.uv * w;
+		v_out.tangent = v.tangent * w;
+		v_out.bitangent = v.bitangent * w;
 
-			// todo: ddx ddy
-			fragment_result = s->fragment_shader(v_out);
-			pixel_color = Color::encode_rgba(fragment_result);
-		}
-
+		// todo: ddx ddy
+		fragment_result = s->fragment_shader(v_out);
+		pixel_color = Color::encode_rgba(fragment_result);
+		
 		// todo: scissor test
 		if (enable_scissor_test)
 		{
@@ -852,7 +857,7 @@ namespace Guarneri
 		}
 
 		// blending
-		if (enable_blending && s != nullptr && s->transparent)
+		if (enable_blending && s->transparent)
 		{
 			color_rgba dst;
 			if (fbuf->read(row, col, dst))
@@ -1270,4 +1275,4 @@ namespace Guarneri
 		this->draw_segment(pos, pos + right, Color::RED, m, v, p);
 		this->draw_segment(pos, pos + up, Color::GREEN, m, v, p);
 	}
-}
+	}

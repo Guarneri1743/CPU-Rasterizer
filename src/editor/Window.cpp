@@ -192,7 +192,7 @@ namespace Guarneri
 		}
 		catch (std::ifstream::failure& e)
 		{
-			std::cout << "[SHADER] One of the shaders failed to load!" << std::endl;
+			std::cout << "load shader failed.\n" << e.what() << std::endl;
 		}
 
 		const char* vShaderCode = vertexCode.c_str();
@@ -261,11 +261,14 @@ namespace Guarneri
 
 	void Window::glfw_error_callback(const int error, const char* const description)
 	{
-		std::cout << "glfw error: " << description << std::endl;
+		std::cout << "glfw error: " << error << "desc: " << description << std::endl;
 	}
 
 	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 	{
+		UNUSED(scancode);
+		UNUSED(mods);
+		UNUSED(window);
 		if (action == GLFW_PRESS)
 		{
 			INST(InputManager).on_key_down(key);
@@ -282,11 +285,14 @@ namespace Guarneri
 
 	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
 	{
+		UNUSED(window);
 		INST(InputManager).on_mouse_move(x, y);
 	}
 
 	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
 	{
+		UNUSED(window);
+		UNUSED(mods);
 		if (action == GLFW_PRESS)
 		{
 			INST(InputManager).on_key_down(button);
@@ -303,6 +309,8 @@ namespace Guarneri
 
 	void Window::glfw_scroll_callback(GLFWwindow* window, const double delta_x, const double delta_y)
 	{
+		UNUSED(window);
+		UNUSED(delta_x);
 		INST(InputManager).on_wheel_rolling(delta_y);
 	}
 

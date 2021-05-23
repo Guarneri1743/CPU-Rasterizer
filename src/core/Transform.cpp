@@ -214,9 +214,11 @@ namespace Guarneri
 		sync();
 	}
 
-	void Transform::rotate(const Vector3& _axis, const float& angle)
+	void Transform::rotate(const Vector3& axis, const float& angle)
 	{
-		
+		//todo
+		UNUSED(axis);
+		UNUSED(angle);
 	}
 
 	void Transform::rotate_self(const float& yaw_offset, const float& pitch_offset, const float& roll_offset)

@@ -7,7 +7,7 @@ namespace Guarneri
 	{
 	public:
 		BaseEditor();
-		~BaseEditor();
+		virtual ~BaseEditor();
 		void open();
 		void close();
 		void render();
