@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include "CPURasterizer.hpp"
+#include "Application.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
@@ -125,7 +125,7 @@ void texture_material_serialization()
 	Texture::deserialize("/common_textures/Metal_ScavengerMetal_2k_ao_1.texture", *plane_ao);
 
 
-	auto backpac_mat = Material::create();
+	auto backpac_mat = std::make_shared<Material>();
 	backpac_mat->material_name = "back_pack";
 
 	std::vector<std::string> cubemaps = {
@@ -138,10 +138,10 @@ void texture_material_serialization()
 	};
 
 	std::string cubemap_path = "/cubemaps/space.cubemap";
-	auto runtime_cubemap = CubeMap::create("space", cubemaps);
+	auto runtime_cubemap = std::make_shared<CubeMap>("space", cubemaps);
 	CubeMap::serialize(*runtime_cubemap, cubemap_path.c_str());
 
-	auto cubemap = CubeMap::create(cubemap_path.c_str());
+	auto cubemap = std::make_shared<CubeMap>(cubemap_path.c_str());
 	backpac_mat->cast_shadow = true;
 	backpac_mat->set_texture(albedo_prop, tex_bp_a);
 	backpac_mat->set_texture(normal_prop, tex_bp_n);
@@ -153,7 +153,7 @@ void texture_material_serialization()
 	std::string path = "/materials/backpack.material";
 	Material::serialize(*backpac_mat, path);
 
-	std::shared_ptr<Material> demat = Material::create();
+	std::shared_ptr<Material> demat = std::make_shared<Material>();
 	Material::deserialize(path, *demat);
 
 	assert(demat->material_name == backpac_mat->material_name);
@@ -178,17 +178,17 @@ void texture_material_serialization()
 	assert(demat->name2float4.size() == backpac_mat->name2float4.size());
 
 	auto light_shader = std::make_shared<LightShader>();
-	auto light_material = Material::create("light_material", std::dynamic_pointer_cast<Shader>(light_shader));
+	auto light_material = std::make_shared<Material>("light_material", std::dynamic_pointer_cast<Shader>(light_shader));
 	light_material->double_face = true;
 	Material::serialize(*light_material, "/materials/light.material");
 
 	auto skybox_shader = std::make_shared<SkyboxShader>();
-	auto space_material = Material::create("skybox_material", std::move(skybox_shader));
+	auto space_material = std::make_shared<Material>("skybox_material", std::move(skybox_shader));
 	space_material->ztest_func = CompareFunc::LEQUAL;
 	space_material->set_cubemap(cubemap_prop, cubemap);
 	Material::serialize(*space_material, "/materials/space.material");
 
-	auto plane_material = Material::create("plane_material", std::make_shared<Shader>("pbr_shader"));
+	auto plane_material = std::make_shared<Material>("plane_material", std::make_shared<Shader>("pbr_shader"));
 	plane_material->transparent = false;
 	plane_material->set_texture(albedo_prop, plane_albedo);
 	plane_material->set_texture(normal_prop, plane_normal);
@@ -200,7 +200,7 @@ void texture_material_serialization()
 
 void generate_lighting_scene()
 {
-	auto plane_material = Material::create("/materials/plane.material");
+	auto plane_material = Material::load_asset("/materials/plane.material");
 	auto plane = PrimitiveFactory::plane(plane_material);
 	plane->name = "plane";
 	plane->transform->set_local_scale(Vector3(30.0f, 1.0f, 30.0f));
@@ -208,19 +208,20 @@ void generate_lighting_scene()
 
 	auto backpack = Model::load_raw("/backpack/backpack.obj", true);
 	backpack->name = "backpack";
-	backpack->material = Material::create("/materials/backpack.material");
+	backpack->material = Material::load_asset("/materials/backpack.material");
 	backpack->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
 	backpack->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
 	Model::serialize(*backpack, "/models/backpack.model");
 
-	auto light_material = Material::create("/materials/light.material");
+	auto light_material = Material::load_asset("/materials/light.material");
 	auto cube = PrimitiveFactory::cube(light_material);
 	cube->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	cube->transform->set_world_position(Vector3(10.0f, 2.0f, 10.0f));
 	Model::serialize(*cube, "/models/light.model");
 
 	// setup main Light
-	auto demo_scene = Scene::create("lighting_sample");
+	auto demo_scene = Scene::load_asset("lighting_sample");
+	demo_scene->initialize();
 	DirectionalLight main_light;
 	Matrix4x4 rot = Matrix4x4::from_euler({ 0.388f, -0.629f, -0.67f });
 	main_light.yaw = rot.to_euler().y;
@@ -263,34 +264,34 @@ void generate_lighting_scene()
 	demo_scene->main_cam->transform->set_world_angle(-328.0f, -151.7f, 0.0f);
 
 	// setup skybox
-	auto space_material = Material::create("/materials/space.material");
+	auto space_material = Material::load_asset("/materials/space.material");
 	demo_scene->skybox->target->material = space_material;
 	demo_scene->enable_skybox = true;
 
 	// light cube
-	auto p1 = Model::create("/models/light.model");
+	auto p1 = Model::load_asset("/models/light.model");
 	p1->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p1->transform->set_world_position(pl1.position);
 	demo_scene->add(p1);
 
-	auto p2 = Model::create(*p1);
+	auto p2 = std::shared_ptr<Model>(p1);
 	p2->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p2->transform->set_world_position(pl2.position);
 	demo_scene->add(p2);
 
-	auto p3 = Model::create(*p1);
+	auto p3 = std::shared_ptr<Model>(p1);
 	p3->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p3->transform->set_world_position(pl3.position);
 	demo_scene->add(p3);
 
 	// Plane
-	auto p = Model::create("/models/plane.model");
+	auto p = Model::load_asset("/models/plane.model");
 	p->transform->set_local_scale(Vector3(30.0f, 0.0f, 30.0f));
 	demo_scene->add(p);
 
 	// backpack
-	auto bp = Model::create("/models/backpack.model");
-	bp->material = Material::create("/materials/backpack.material");
+	auto bp = Model::load_asset("/models/backpack.model");
+	bp->material = Material::load_asset("/materials/backpack.material");
 	bp->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
 	bp->transform->set_world_position(Vector3(0.0f, 8.0f, 0.0f));
 	demo_scene->add(bp);
@@ -307,7 +308,8 @@ void generate_lighting_scene()
 void generate_stencil_scene()
 {
 	// setup main Light
-	auto demo_scene = Scene::create("stencil_sample");
+	auto demo_scene = Scene::load_asset("stencil_sample"); 
+	demo_scene->initialize();
 	DirectionalLight main_light;
 	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
@@ -322,7 +324,7 @@ void generate_stencil_scene()
 	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
 
 	// stencil demo cube
-	auto stencil_test_material = Material::create();
+	auto stencil_test_material = std::make_shared<Material>();
 	stencil_test_material->stencil_pass_op = StencilOp::REPLACE;
 	stencil_test_material->stencil_ref_val = 1;
 	stencil_test_material->zwrite_mode = ZWrite::OFF;
@@ -330,30 +332,30 @@ void generate_stencil_scene()
 	stencil_test_material->double_face = true;
 	Material::serialize(*stencil_test_material, "/materials/stencil_sample.material");
 
-	auto cube = PrimitiveFactory::cube(Material::create("/materials/stencil_sample.material"));
+	auto cube = PrimitiveFactory::cube(Material::load_asset("/materials/stencil_sample.material"));
 	cube->name = "stencil_cube";
 	cube->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
 	cube->transform->set_local_scale(Vector3(5.0f, 5.0f, 5.0f));
 	Model::serialize(*cube, "/models/stencil_cube.model");
-	demo_scene->add(Model::create("/models/stencil_cube.model"));
+	demo_scene->add(Model::load_asset("/models/stencil_cube.model"));
 
 	// backpack
 	auto backpack = Model::load_raw("/backpack/backpack.obj", true);
 	backpack->name = "backpack";
-	backpack->material = Material::create("/materials/backpack.material");
+	backpack->material = Material::load_asset("/materials/backpack.material");
 	backpack->material->stencil_ref_val = 1;
 	backpack->material->stencil_func = CompareFunc::EQUAL;
 	Material::serialize(*backpack->material, "/materials/stencil_backpack.material");
-	backpack->material = Material::create("/materials/stencil_backpack.material");
+	backpack->material = Material::load_asset("/materials/stencil_backpack.material");
 	backpack->transform->set_local_scale(Vector3(3.0f, 3.0f, 3.0f));
 	backpack->transform->set_local_position(Vector3(0.0f, 8.0f, 0.0f));
 	Model::serialize(*backpack, "/models/stencil_backpack.model");
 
-	backpack = Model::create("/models/stencil_backpack.model");
+	backpack = Model::load_asset("/models/stencil_backpack.model");
 	demo_scene->add(backpack);
 
 	// Plane
-	auto plane = Model::create("/models/plane.model");
+	auto plane = Model::load_asset("/models/plane.model");
 	demo_scene->add(plane);
 	demo_scene->shadow_bias = 0.00125f;
 	demo_scene->color_space = ColorSpace::Gamma;
@@ -364,7 +366,8 @@ void generate_stencil_scene()
 void generate_filtering_scene()
 {
 	// setup main Light
-	auto demo_scene = Scene::create("filtering_sample");
+	auto demo_scene = Scene::load_asset("filtering_sample");
+	demo_scene->initialize();
 	DirectionalLight main_light;
 	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
@@ -379,7 +382,7 @@ void generate_filtering_scene()
 	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
 
 	// Plane
-	auto plane = Model::create("/models/plane.model");
+	auto plane = Model::load_asset("/models/plane.model");
 	demo_scene->add(plane);
 	demo_scene->shadow_bias = 0.00125f;
 	demo_scene->color_space = ColorSpace::Gamma;
@@ -390,11 +393,11 @@ void generate_filtering_scene()
 void generate_cubemap_scene()
 {
 	auto helmet = Model::load_raw("/pbr_helmet/helmet.obj", false);
-	helmet->material = Material::create();
+	helmet->material = std::make_shared<Material>();
 	helmet->material->lighting_param.glossiness = 32.0f;
 	helmet->material->cast_shadow = true;
 	std::string cubemap_path = "/cubemaps/space.cubemap";
-	auto cubemap = CubeMap::create(cubemap_path);
+	auto cubemap = CubeMap::load_asset(cubemap_path);
 	helmet->material->set_cubemap(cubemap_prop, cubemap);
 	auto tex_a_path = "/pbr_helmet/textures/albedo.jpg";
 	auto tex_r_path = "/pbr_helmet/textures/roughness.png";
@@ -412,27 +415,28 @@ void generate_cubemap_scene()
 	Texture::serialize(*tex_r, "/helmet/roughness.texture");
 	Texture::serialize(*tex_ao, "/helmet/ao.texture");
 	Texture::serialize(*tex_m, "/helmet/metallic.texture");
-	tex_albedo = Texture::create("/helmet/albedo.texture");
-	tex_r = Texture::create("/helmet/roughness.texture");
-	tex_ao = Texture::create("/helmet/ao.texture");
-	tex_m = Texture::create("/helmet/metallic.texture");
+	tex_albedo = Texture::load_asset("/helmet/albedo.texture");
+	tex_r = Texture::load_asset("/helmet/roughness.texture");
+	tex_ao = Texture::load_asset("/helmet/ao.texture");
+	tex_m = Texture::load_asset("/helmet/metallic.texture");
 
 	helmet->material->set_texture(albedo_prop, tex_albedo);
 	helmet->material->set_texture(roughness_prop, tex_r);
 	helmet->material->set_texture(metallic_prop, tex_m);
 	helmet->material->set_texture(ao_prop, tex_ao);
 	Material::serialize(*helmet->material, "/materials/helmet.material");
-	helmet->material = Material::create("/materials/helmet.material");
+	helmet->material = Material::load_asset("/materials/helmet.material");
 
 	helmet->transform->set_local_scale(Vector3(0.1f, 0.1f, 0.1f));
 	helmet->transform->rotate(Vector3::UP, 300.0f);
 	helmet->transform->set_local_position(Vector3(0.0f, 5.0f, 0.0f));
 	helmet->flip_uv = false;
 	Model::serialize(*helmet, "/models/helmet.model");
-	helmet = Model::create("/models/helmet.model");
+	helmet = Model::load_asset("/models/helmet.model");
 
 	// setup main Light
-	auto demo_scene = Scene::create("cubemap_sample");
+	auto demo_scene = Scene::load_asset("cubemap_sample");
+	demo_scene->initialize();
 	DirectionalLight main_light;
 	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
@@ -447,7 +451,7 @@ void generate_cubemap_scene()
 	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
 
 	// Plane
-	auto plane = Model::create("/models/plane.model");
+	auto plane = Model::load_asset("/models/plane.model");
 	demo_scene->shadow_bias = 0.00125f;
 	demo_scene->color_space = ColorSpace::Linear;
 	demo_scene->work_flow = PBRWorkFlow::Metallic;
@@ -475,17 +479,17 @@ void generate_cubemap_scene()
 	pl3.intensity = 3.0f;
 
 	// light cube
-	auto p1 = Model::create("/models/light.model");
+	auto p1 = Model::load_asset("/models/light.model");
 	p1->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p1->transform->set_world_position(pl1.position);
 	demo_scene->add(p1);
 
-	auto p2 = Model::create(*p1);
+	auto p2 = std::shared_ptr<Model>(p1);
 	p2->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p2->transform->set_world_position(pl2.position);
 	demo_scene->add(p2);
 
-	auto p3 = Model::create(*p1);
+	auto p3 = std::shared_ptr<Model>(p1);
 	p3->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	p3->transform->set_world_position(pl3.position);
 	demo_scene->add(p3);
@@ -508,21 +512,21 @@ void generate_blending_scene()
 {
 	// cube
 	auto ca = Texture::load_raw("/textures/misc_Garbage_2k_alb_1.jpg");
-	auto mat = Material::create();
+	auto mat = std::make_shared<Material>();
 	mat->set_texture(albedo_prop, ca);
 	mat->double_face = true;
 	mat->cast_shadow = true;
 	Material::serialize(*mat, "/materials/opaque_cube.material");
-	mat = Material::create("/materials/opaque_cube.material");
+	mat = Material::load_asset("/materials/opaque_cube.material");
 	auto opaque_cube = PrimitiveFactory::cube(mat);
 	opaque_cube->transform->set_local_scale(Vector3(4.0f, 4.0f, 4.0f));
 	opaque_cube->transform->set_local_position(Vector3(6.0f, 4.0f, 4.0f));
 	Model::serialize(*opaque_cube, "/models/opaque_cube.model");
-	opaque_cube = Model::create("/models/opaque_cube.model");
+	opaque_cube = Model::load_asset("/models/opaque_cube.model");
 
 	// transparent cube
-	auto cube_albedo = Texture::create("/common_textures/Metal_ScavengerMetal_2k_alb_1.texture");
-	auto box_material = Material::create();
+	auto cube_albedo = Texture::load_asset("/common_textures/Metal_ScavengerMetal_2k_alb_1.texture");
+	auto box_material = std::make_shared<Material>();
 	box_material->transparent = true;
 	box_material->blend_op = BlendOp::ADD;
 	box_material->src_factor = BlendFactor::SRC_ALPHA;
@@ -531,15 +535,16 @@ void generate_blending_scene()
 	box_material->double_face = true;
 	box_material->set_texture(albedo_prop, cube_albedo);
 	Material::serialize(*box_material, "/materials/transparent_cube.material");
-	box_material = Material::create("/materials/transparent_cube.material");
+	box_material = Material::load_asset("/materials/transparent_cube.material");
 	auto transparent_cube = PrimitiveFactory::cube(box_material);
 	transparent_cube->transform->set_local_scale(Vector3(5.0f, 5.0f, 5.0f));
 	transparent_cube->transform->set_local_position(Vector3(0.0f, 3.0f, 0.0f));
 	Model::serialize(*transparent_cube, "/models/transparent_cube.model");
-	transparent_cube = Model::create("/models/transparent_cube.model");
+	transparent_cube = Model::load_asset("/models/transparent_cube.model");
 
 	// setup main Light
-	auto demo_scene = Scene::create("blending_sample");
+	auto demo_scene = Scene::load_asset("blending_sample");
+	demo_scene->initialize();
 	DirectionalLight main_light;
 	main_light.position = Vector3(0.0f, 8.0f, 0.0f);
 	main_light.ambient = Color(0.05f, 0.05f, 0.05f, 1.0f);
@@ -554,7 +559,7 @@ void generate_blending_scene()
 	demo_scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
 
 	// Plane
-	auto plane = Model::create("/models/plane.model");
+	auto plane = Model::load_asset("/models/plane.model");
 
 	demo_scene->add(plane);
 	demo_scene->add(transparent_cube);
@@ -571,7 +576,6 @@ void generate_blending_scene()
 
 int main()
 {
-	CPURasterizer::prepare(800, 700, "test");
 	matrix_case();
 	transform_serialization();
 	texture_material_serialization();

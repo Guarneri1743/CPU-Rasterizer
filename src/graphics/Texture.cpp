@@ -39,54 +39,40 @@ namespace Guarneri
 		INST(ResourceManager<Texture>).free(this->raw_path);
 	}
 
-	std::shared_ptr<Texture> Texture::create(const Texture& other)
+	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
 	{
-		return std::shared_ptr<Texture>(new Texture(other));
-	}
-
-	std::shared_ptr<Texture> Texture::create()
-	{
-		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
-		return ret;
-	}
-
-	std::shared_ptr<Texture> Texture::create(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
-	{
-		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
-		ret->release();
-		ret->width = _width;
-		ret->height = _height;
-		ret->format = _fmt;
-		switch (ret->format)
+		release();
+		width = _width;
+		height = _height;
+		format = _fmt;
+		switch (format)
 		{
 		case TextureFormat::rgb:
-			ret->rgb_buffer = RawBuffer<color_rgb>::create(ret->width, ret->height);
+			rgb_buffer = RawBuffer<color_rgb>::create(width, height);
 			break;
 		case TextureFormat::rgba:
-			ret->rgba_buffer = RawBuffer<color_rgba>::create(ret->width, ret->height);
+			rgba_buffer = RawBuffer<color_rgba>::create(width, height);
 			break;
 		case TextureFormat::rg:
-			ret->rg_buffer = RawBuffer<color_rg>::create(ret->width, ret->height);
+			rg_buffer = RawBuffer<color_rg>::create(width, height);
 			break;
 		case TextureFormat::r32:
-			ret->gray_buffer = RawBuffer<color_gray>::create(ret->width, ret->height);
+			gray_buffer = RawBuffer<color_gray>::create(width, height);
 			break;
 		}
-		return ret;
 	}
 
-	std::shared_ptr<Texture> Texture::create(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
 	{
-		std::shared_ptr<Texture> ret = std::shared_ptr<Texture>(new Texture());
-		ret->release();
-		ret->width = _width;
-		ret->height = _height;
-		ret->format = _fmt;
-		switch (ret->format)
+		release();
+		width = _width;
+		height = _height;
+		format = _fmt;
+		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
-			ret->rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, ret->width, ret->height, [](color_rgb* ptr)
+			rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, width, height, [](color_rgb* ptr)
 			{
 				delete[] ptr;
 			});
@@ -94,7 +80,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rgba:
 		{
-			ret->rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, ret->width, ret->height, [](color_rgba* ptr)
+			rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, width, height, [](color_rgba* ptr)
 			{
 				delete[] ptr;
 			});
@@ -102,7 +88,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rg:
 		{
-			ret->rg_buffer = RawBuffer<color_rg>::create(tex_buffer, ret->width, ret->height, [](color_rg* ptr)
+			rg_buffer = RawBuffer<color_rg>::create(tex_buffer, width, height, [](color_rg* ptr)
 			{
 				delete[] ptr;
 			});
@@ -110,17 +96,16 @@ namespace Guarneri
 		break;
 		case TextureFormat::r32:
 		{
-			ret->gray_buffer = RawBuffer<color_gray>::create(tex_buffer, ret->width, ret->height, [](color_gray* ptr)
+			gray_buffer = RawBuffer<color_gray>::create(tex_buffer, width, height, [](color_gray* ptr)
 			{
 				delete[] ptr;
 			});
 		}
 		break;
 		}
-		return ret;
 	}
 
-	std::shared_ptr<Texture> Texture::create(const char* path)
+	std::shared_ptr<Texture> Texture::load_asset(const char* path)
 	{
 		std::shared_ptr<Texture> ret = nullptr;
 		if (INST(ResourceManager<Texture>).get(path, ret) && ret != nullptr)
@@ -133,9 +118,9 @@ namespace Guarneri
 		return ret;
 	}
 
-	std::shared_ptr<Texture> Texture::create(const std::string& path)
+	std::shared_ptr<Texture> Texture::load_asset(const std::string& path)
 	{
-		return create(path.c_str());
+		return load_asset(path.c_str());
 	}
 
 	std::shared_ptr<Texture> Texture::load_raw(const std::string& path)

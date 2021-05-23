@@ -40,13 +40,16 @@ namespace Guarneri
 	}
 
 	Scene::~Scene()
-	{}
+	{
+		std::cout << "destruct scene: " << this->name << std::endl;
+	}
 
 	void Scene::initialize()
 	{
 		float aspect = (float)INST(GlobalShaderParams).width / INST(GlobalShaderParams).height;
 		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
 		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
+		Camera::set_main_camera(main_cam.get());
 		debug_cam_distance = 6.0f;
 		debug_world_cam_distance = 8.0f;
 		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
@@ -340,13 +343,16 @@ namespace Guarneri
 		{
 			obj->draw_gizmos();
 		}
+
 		draw_camera_coords();
 		//draw_world_coords();
 	}
 
-	std::unique_ptr<Scene> Scene::create(const std::string& name)
+	std::unique_ptr<Scene> Scene::load_asset(const std::string& path)
 	{
-		return std::unique_ptr<Scene>(new Scene(name));
+		auto scene = std::unique_ptr<Scene>(new Scene(""));
+		deserialize(path, *scene);
+		return scene;
 	}
 
 	void Scene::serialize(const Scene& scene, const std::string& path)
@@ -419,8 +425,10 @@ namespace Guarneri
 		}
 	}
 
-	std::unique_ptr<Scene> Scene::deserialize(const std::string& path)
+	void Scene::deserialize(const std::string& path, Scene& scene)
 	{
+		scene.initialize();
+		scene.asset_path = path;
 		std::filesystem::path abs_path(ASSETS_PATH + path);
 		std::FILE* fd = fopen(abs_path.string().c_str(), "r");
 		if (fd != nullptr)
@@ -431,38 +439,36 @@ namespace Guarneri
 			doc.ParseStream(fs);
 			
 			const char* name = doc["name"].GetString();
-			auto scene = std::unique_ptr<Scene>(new Scene(name));
+			scene.name = name;
 
-			scene->main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
+			scene.main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
 			auto point_lights = doc["point_lights"].GetArray();
 			for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
 			{
-				scene->point_lights.push_back(PointLight::deserialize(point_lights[idx].GetObject()));
+				scene.point_lights.push_back(PointLight::deserialize(point_lights[idx].GetObject()));
 			}
 
 			auto models = doc["models"].GetArray();
 			for (rapidjson::SizeType idx = 0; idx < models.Size(); idx++)
 			{
-				scene->add(Model::create(models[idx].GetString()));
+				scene.add(Model::load_asset(models[idx].GetString()));
 			}
 
-			scene->enable_skybox = doc["enable_skybox"].GetBool();
-			scene->enable_shadow = doc["enable_shadow"].GetBool();
-			scene->pcf_on = doc["pcf_on"].GetBool();
-			scene->shadow_bias = doc["shadow_bias"].GetFloat();
-			scene->color_space = (ColorSpace)doc["color_space"].GetInt();
-			scene->work_flow = (PBRWorkFlow)doc["work_flow"].GetInt();
+			scene.enable_skybox = doc["enable_skybox"].GetBool();
+			scene.enable_shadow = doc["enable_shadow"].GetBool();
+			scene.pcf_on = doc["pcf_on"].GetBool();
+			scene.shadow_bias = doc["shadow_bias"].GetFloat();
+			scene.color_space = (ColorSpace)doc["color_space"].GetInt();
+			scene.work_flow = (PBRWorkFlow)doc["work_flow"].GetInt();
 
-			scene->main_cam = Camera::deserialize(doc["main_cam"].GetObject());
-			scene->initialize();
+			scene.main_cam = Camera::deserialize(doc["main_cam"].GetObject());
+			Camera::set_main_camera(scene.main_cam.get());
 
 			fclose(fd);
-			return scene;
 		}
 		else
 		{
 			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
 		}
-		return nullptr;
 	}
 }

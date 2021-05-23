@@ -8,10 +8,10 @@
 
 namespace Guarneri
 {
-	Renderer::Renderer()
+	Renderer::Renderer() : gizmos(true)
 	{}
 
-	Renderer::Renderer(std::shared_ptr<Model> model)
+	Renderer::Renderer(std::shared_ptr<Model> model) : Renderer()
 	{
 		this->target = model;
 	}
@@ -137,7 +137,8 @@ namespace Guarneri
 
 	void Renderer::draw_gizmos() const
 	{
-		auto view = INST(GlobalShaderParams).view_matrix;
+		//todo
+		/*auto view = INST(GlobalShaderParams).view_matrix;
 		auto proj = INST(GlobalShaderParams).proj_matrix;
 		auto pos = Vector3::ZERO;
 		auto up = Vector3::UP;
@@ -145,7 +146,7 @@ namespace Guarneri
 		auto right = Vector3::RIGHT;
 		auto scale = Matrix4x4::scale(model_matrix().get_scale());
 		Matrix4x4 mat = scale.inverse() * model_matrix();
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, mat, view, proj);
+		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, mat, view, proj);*/
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

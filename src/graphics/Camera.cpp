@@ -4,6 +4,8 @@
 
 namespace Guarneri
 {
+	Camera* Camera::main_cam;
+
 	Camera::Camera()
 	{
 		transform = std::make_unique<Transform>();
@@ -40,6 +42,11 @@ namespace Guarneri
 	const Matrix4x4 Camera::projection_matrix() const
 	{
 		return proj_matrix;
+	}
+
+	void Camera::focus(const Vector3& position)
+	{
+		this->transform->lookat(position);
 	}
 
 	void Camera::set_near(const float& _near)

@@ -149,6 +149,17 @@ namespace Guarneri
 		}
 	}
 
+	void InputManager::clear_evts()
+	{
+		on_mouse_move_events.clear();
+		on_key_down_events.clear();
+		on_key_up_events.clear();
+		on_mouse_down_events.clear();
+		on_mouse_up_events.clear();
+		on_wheel_rolling_events.clear();
+		on_update_evts.clear();
+	}
+
 	void InputManager::add_on_update_evt(void (*on_update)(void* ud), void* user_data)
 	{
 		if (on_update_evts.count(on_update) > 0)

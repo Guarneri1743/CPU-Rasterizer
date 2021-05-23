@@ -8,6 +8,7 @@ namespace Guarneri
 	class SettingEditor : public BaseEditor
 	{
 	public:
+		SettingEditor();
 		virtual void on_gui();
 	};
 }

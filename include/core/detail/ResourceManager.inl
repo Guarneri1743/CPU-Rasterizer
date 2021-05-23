@@ -2,8 +2,15 @@
 namespace Guarneri
 {
 	template<typename T>
+	ResourceManager<T>::~ResourceManager()
+	{
+		destructed = true;
+	}
+
+	template<typename T>
 	void ResourceManager<T>::cache(const std::string& path, const std::shared_ptr<T>& res)
 	{
+		if (destructed) return;
 		if (path2res.count(path) > 0)
 		{
 			std::cerr << "can not load a resource twice: " << path << std::endl;
@@ -15,6 +22,7 @@ namespace Guarneri
 	template<typename T>
 	bool ResourceManager<T>::get(const std::string& path, std::shared_ptr<T>& res)
 	{
+		if (destructed) return false;
 		if (path2res.count(path) > 0)
 		{
 			res = path2res[path].lock();
@@ -26,6 +34,7 @@ namespace Guarneri
 	template<typename T>
 	void ResourceManager<T>::free(const std::string& path)
 	{
+		if (destructed) return;
 		if (path2res.count(path) > 0)
 		{
 			path2res[path].reset();
@@ -36,6 +45,7 @@ namespace Guarneri
 	template<typename T>
 	void ResourceManager<T>::cache(const uint32_t& id, const std::shared_ptr<T>& res)
 	{
+		if (destructed) return;
 		if (id2res.count(id) > 0)
 		{
 			std::cerr << "id duplicated: " << id << std::endl;
@@ -47,6 +57,7 @@ namespace Guarneri
 	template<typename T>
 	bool ResourceManager<T>::get(const uint32_t& id, std::shared_ptr<T>& res)
 	{
+		if (destructed) return false;
 		if (id2res.count(id) > 0)
 		{
 			res = id2res[id].lock();
@@ -58,6 +69,7 @@ namespace Guarneri
 	template<typename T>
 	void ResourceManager<T>::free(const uint32_t& id)
 	{
+		if (destructed) return;
 		if (id2res.count(id) > 0)
 		{
 			id2res[id].reset();

@@ -54,33 +54,18 @@ namespace Guarneri
 		}
 	}
 
-	std::shared_ptr<CubeMap> CubeMap::create()
-	{
-		return std::shared_ptr<CubeMap>(new CubeMap());
-	}
-
-	std::shared_ptr<CubeMap> CubeMap::create(std::string path)
+	std::shared_ptr<CubeMap> CubeMap::load_asset(std::string path)
 	{
 		std::shared_ptr<CubeMap> cubemap = std::shared_ptr<CubeMap>(new CubeMap());
 		CubeMap::deserialize(path, *cubemap);
 		return cubemap;
 	}	
 
-	std::shared_ptr<CubeMap> CubeMap::create(const char* path)
+	std::shared_ptr<CubeMap> CubeMap::load_asset(const char* path)
 	{
 		std::shared_ptr<CubeMap> cubemap = std::shared_ptr<CubeMap>(new CubeMap());
 		CubeMap::deserialize(path, *cubemap);
 		return cubemap;
-	}
-
-	std::shared_ptr<CubeMap> CubeMap::create(const char* name, std::vector<std::string> paths)
-	{
-		return std::shared_ptr<CubeMap>(new CubeMap(name, paths));
-	}
-
-	std::shared_ptr<CubeMap> CubeMap::create(std::string name, std::vector<std::string> paths)
-	{
-		return std::shared_ptr<CubeMap>(new CubeMap(name.c_str(), paths));
 	}
 	 
 	bool CubeMap::sample(const Vector3& dir, Color& ret)

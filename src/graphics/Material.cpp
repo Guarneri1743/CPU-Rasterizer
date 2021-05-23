@@ -56,27 +56,11 @@ namespace Guarneri
 	Material::~Material()
 	{}
 
-	std::shared_ptr<Material> Material::create()
-	{
-		std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material());
-		return mat;
-	}
-
-	std::shared_ptr<Material> Material::create(std::string path)
+	std::shared_ptr<Material> Material::load_asset(std::string path)
 	{
 		std::shared_ptr<Material> mat = std::shared_ptr<Material>(new Material());
 		Material::deserialize(path, *mat);
 		return mat;
-	}
-
-	std::shared_ptr<Material> Material::create(std::string name, std::shared_ptr<Shader> shader)
-	{
-		return std::shared_ptr<Material>(new Material(name, shader));
-	}
-
-	std::shared_ptr<Material> Material::create(const Material& other)
-	{
-		return std::shared_ptr<Material>(new Material(other));
 	}
 
 	Shader* Material::get_shader(const RenderPass& pass) const
@@ -429,14 +413,14 @@ namespace Guarneri
 			{
 				const rapidjson::Value& pair = name2tex[idx].GetArray();
 				const char* tex_path = pair[1].GetString();
-				material.name2tex[pair.GetArray()[0].GetUint()] = Texture::create(tex_path);
+				material.name2tex[pair.GetArray()[0].GetUint()] = Texture::load_asset(tex_path);
 			}
 
 			for (rapidjson::SizeType idx = 0; idx < name2cubemap.Size(); idx++)
 			{
 				const rapidjson::Value& pair = name2cubemap[idx].GetArray();
 				const char* tex_path = pair[1].GetString();
-				material.name2cubemap[pair.GetArray()[0].GetUint()] = CubeMap::create(tex_path);
+				material.name2cubemap[pair.GetArray()[0].GetUint()] = CubeMap::load_asset(tex_path);
 			}
 
 			fclose(fd);

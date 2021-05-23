@@ -57,15 +57,18 @@ namespace Guarneri
 		void render_shadow();
 		void render_objects();
 		void draw_gizmos();
+		std::string get_asset_path() { return asset_path; }
 
 		static Scene* current() { return current_scene; }
 		static void set_current(Scene* scene) { current_scene = scene; }
-		static std::unique_ptr<Scene> create(const std::string& name);
+
+		static std::unique_ptr<Scene> load_asset(const std::string& name);
 		static void serialize(const Scene& scene, const std::string& path);
-		static std::unique_ptr<Scene> deserialize(const std::string& path);
+		static void deserialize(const std::string& path, Scene& scene);
 
 	private:
 		static Scene* current_scene;
+		std::string asset_path;
 		Scene(std::string name);
 	};
 }

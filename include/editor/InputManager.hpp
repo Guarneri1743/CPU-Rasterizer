@@ -99,6 +99,7 @@ namespace Guarneri
 		void on_wheel_rolling(double delta);
 		void on_key_down(int code);
 		void on_key_up(int code);
+		void clear_evts();
 		void add_on_update_evt(void (*on_update)(void* ud), void* user_data);
 		void remove_on_update_evt(void (*on_update)(void* ud));
 		void add_on_key_down_evt(void (*on_key_down)(KeyCode code, void* ud), void* user_data);

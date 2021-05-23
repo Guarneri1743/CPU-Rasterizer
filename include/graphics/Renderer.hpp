@@ -35,6 +35,9 @@ namespace Guarneri
 		Renderer& operator =(const Renderer& other);
 		void copy(const Renderer& other);
 		std::string str() const;
+
+	protected:
+		bool gizmos;
 	};
 }
 #endif

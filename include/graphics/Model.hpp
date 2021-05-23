@@ -32,8 +32,7 @@ namespace Guarneri
 
 		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
 		static std::shared_ptr<Model> load_raw(std::string path, bool flip_uv);
-		static std::shared_ptr<Model> create(const Model& other);
-		static std::shared_ptr<Model> create(std::string path);
+		static std::shared_ptr<Model> load_asset(std::string path);
 		static void serialize(const Model& model, std::string path);
 		static void deserialize(std::string path, Model& model);
 
@@ -42,7 +41,7 @@ namespace Guarneri
 		Model();
 		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
 		Model(std::string path, bool flip_uv);
-		void load_raw_internal(std::string path, bool flip_uv);
+		void load_raw_internal(std::string path);
 		void load_vertices(aiMesh* ai_mesh);
 		void reload_mesh(aiNode* node, const aiScene* Scene);
 	};

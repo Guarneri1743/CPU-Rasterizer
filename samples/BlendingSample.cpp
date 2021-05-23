@@ -1,9 +1,10 @@
-#include "CPURasterizer.hpp"
+#include "Application.hpp"
 
 int main()
 {
-	Guarneri::CPURasterizer::prepare(800, 600, "CPU-Rasterizer");
-	auto scene = Guarneri::Scene::deserialize("/scenes/blending_sample.scene");
-	Guarneri::CPURasterizer::kick_off(*scene);
+	Guarneri::Application app("CPU-Rasterizer(filtering_demo)");
+	auto scene = Guarneri::Scene::load_asset("/scenes/blending_sample.scene");
+	Guarneri::Scene::set_current(scene.get());
+	app.kickoff(*scene);
 	return 0;
 }

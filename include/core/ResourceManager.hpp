@@ -15,12 +15,16 @@ namespace Guarneri
 		std::unordered_map<uint32_t, std::weak_ptr<T>> id2res;
 
 	public:
+		~ResourceManager<T>();
 		void cache(const std::string& path, const std::shared_ptr<T>& res);
 		void cache(const uint32_t& id, const std::shared_ptr<T>& res);
 		void free(const std::string& path);
 		void free(const uint32_t& id);
 		bool get(const std::string& path, std::shared_ptr<T>& res);
 		bool get(const uint32_t& id, std::shared_ptr<T>& res);
+
+	private: 
+		bool destructed;
 	};
 }
 

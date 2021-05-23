@@ -1,10 +1,11 @@
-#include "CPURasterizer.hpp"
+#include "Application.hpp"
 
 int main()
 {
-	Guarneri::CPURasterizer::prepare(800, 600, "CPU-Rasterizer");
-	auto scene = Guarneri::Scene::deserialize("/scenes/filtering_sample.scene");
-	Guarneri::CPURasterizer::kick_off(*scene);
+	Guarneri::Application app("CPU-Rasterizer(filtering_demo)");
+	auto scene = Guarneri::Scene::load_asset("/scenes/filtering_sample.scene");
+	Guarneri::Scene::set_current(scene.get());
+	app.kickoff(*scene);
 
 	//INST(InputManager).add_on_update_evt([](void* user_data) {
 	//	if (INST(InputManager).is_key_down(KeyCode::B)) {

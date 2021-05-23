@@ -62,15 +62,13 @@ namespace Guarneri
 		std::vector< std::shared_ptr<RawBuffer<color_rg>>> rg_mipmaps;
 
 	public:
+		Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
+		Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
 		Texture(const Texture& other);
 		~Texture();
 
-		static std::shared_ptr<Texture> create();
-		static std::shared_ptr<Texture> create(const uint32_t& width, const uint32_t& height, const TextureFormat& format);
-		static std::shared_ptr<Texture> create(void* tex_buffer, const uint32_t& width, const uint32_t& height, const TextureFormat& format);
-		static std::shared_ptr<Texture> create(const Texture& other);
-		static std::shared_ptr<Texture> create(const std::string& path);
-		static std::shared_ptr<Texture> create(const char* path);
+		static std::shared_ptr<Texture> load_asset(const std::string& path);
+		static std::shared_ptr<Texture> load_asset(const char* path);
 		static std::shared_ptr<Texture> load_raw(const std::string& path);
 		static std::shared_ptr<Texture> load_raw(const char* path);
 

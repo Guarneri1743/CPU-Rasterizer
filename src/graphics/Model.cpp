@@ -31,19 +31,20 @@ namespace Guarneri
 		this->material = material;
 	}
 
-	Model::Model(std::string path, bool flip_uv) : Model()
+	Model::Model(std::string path, bool flip) : Model()
 	{
 		this->raw_path = path;
-		this->material = Material::create();
-		load_raw_internal(path, flip_uv);
+		this->material = std::make_shared<Material>();
+		this->flip_uv = flip;
+		load_raw_internal(path);
 	}
 
-	void Model::load_raw_internal(std::string path, bool flip)
+	void Model::load_raw_internal(std::string path)
 	{
 		std::string abs_path = RES_PATH + path;
 		Assimp::Importer importer;
 		auto flag = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
-		if (flip)
+		if (flip_uv)
 		{
 			flag |= aiProcess_FlipUVs;
 		}
@@ -86,7 +87,7 @@ namespace Guarneri
 		return *this;
 	}
 
-	std::shared_ptr<Model> Model::create(std::string path)
+	std::shared_ptr<Model> Model::load_asset(std::string path)
 	{
 		std::shared_ptr<Model> ret = std::shared_ptr<Model>(new Model());
 		Model::deserialize(path, *ret);
@@ -101,11 +102,6 @@ namespace Guarneri
 	std::shared_ptr<Model> Model::load_raw(std::string path, bool flip_uv)
 	{
 		return std::shared_ptr<Model>(new Model(path, flip_uv));
-	}
-
-	std::shared_ptr<Model> Model::create(const Model& other)
-	{
-		return std::shared_ptr<Model>(new Model(other));
 	}
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
@@ -263,7 +259,7 @@ namespace Guarneri
 
 			if (model.raw_path != "")
 			{
-				model.load_raw_internal(model.raw_path, model.flip_uv);
+				model.load_raw_internal(model.raw_path);
 			}
 			else
 			{
@@ -276,14 +272,15 @@ namespace Guarneri
 
 			if (material_path != "")
 			{
-				model.material = Material::create(material_path);
+				model.material = Material::load_asset(material_path);
 			}
 			else
 			{
-				model.material = Material::create();
+				model.material = std::make_shared<Material>();
 			}
 
 			model.transform = std::unique_ptr<Transform>(Transform::deserialize(doc["transform"].GetObject()));
+			model.transform->name = model.name;
 		}
 		else
 		{

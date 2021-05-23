@@ -30,6 +30,7 @@ namespace Guarneri
 		void initialize(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);
 		Matrix4x4 view_matrix() const;
 		const Matrix4x4 projection_matrix() const;
+		void focus(const Vector3& position);
 		void set_near(const float& _near);
 		void set_far(const float& _far);
 		void set_fov(const float& _fov);
@@ -38,9 +39,12 @@ namespace Guarneri
 		static rapidjson::Value serialize(rapidjson::Document& doc, const Camera& cam);
 		static std::unique_ptr<Camera> deserialize(const rapidjson::Value& v);
 		std::string str() const;
+		static Camera* get_main_camera() { return main_cam; }
+		static void set_main_camera(Camera* cam) { main_cam = cam; }
 
 	private:
 		Camera();
+		static Camera* main_cam;
 	};
 }
 #endif

@@ -6,6 +6,7 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
+#include "Application.hpp"
 
 #undef near
 #undef far
@@ -18,80 +19,23 @@ namespace Guarneri
 	float main_light_specular[4];
 	int rt_size[2];
 
-	void DrawModelMenu()
+	SettingEditor::SettingEditor() : BaseEditor()
 	{
-		ImGui::MenuItem("(load model)", NULL, false, false);
-
-		if (ImGui::MenuItem("Open", "Ctrl+O")) 
-		{
-			
-		}
-
-		if (ImGui::BeginMenu("Open Recent"))
-		{
-			ImGui::MenuItem("fish_hat.c");
-			ImGui::MenuItem("fish_hat.inl");
-			ImGui::MenuItem("fish_hat.h");
-			if (ImGui::BeginMenu("More.."))
-			{
-				ImGui::MenuItem("Hello");
-				ImGui::MenuItem("Sailor");
-				if (ImGui::BeginMenu("Recurse.."))
-				{
-					DrawModelMenu();
-					ImGui::EndMenu();
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenu();
-		}
-		if (ImGui::MenuItem("Save", "Ctrl+S")) {}
-		if (ImGui::MenuItem("Save As..")) {}
+		no_collapse = true;
+		no_resize = true;
+		no_close = true;
+		no_move = true;
 	}
-
-	bool mani_editor_open = true;
 
 	void SettingEditor::on_gui()
 	{
-		static bool no_titlebar = false;
-		static bool no_scrollbar = false;
-		static bool no_menu = false;
-		static bool no_move = false;
-		static bool no_resize = false;
-		static bool no_collapse = false;
-		static bool no_close = false;
-		static bool no_nav = false;
-		static bool no_background = false;
-		static bool no_bring_to_front = false;
-
-		ImGuiWindowFlags window_flags = 0;
-		if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
-		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
-		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
-		if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
-		if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
-		if (no_collapse)        window_flags |= ImGuiWindowFlags_NoCollapse;
-		if (no_nav)             window_flags |= ImGuiWindowFlags_NoNav;
-		if (no_background)      window_flags |= ImGuiWindowFlags_NoBackground;
-		if (no_bring_to_front)  window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
-
 		{
-			ImGui::SetNextWindowPos(ImVec2(0, 0));
-			ImGui::SetNextWindowSize(ImVec2(400, 700));
-			if (!ImGui::Begin("Settings", &mani_editor_open, window_flags))
+			ImGui::SetNextWindowPos(ImVec2(Window::main()->get_width() - kSettingWidth, kTopToolbarHeight));
+			ImGui::SetNextWindowSize(ImVec2(kSettingWidth, Window::main()->get_height() - kTopToolbarHeight));
+			if (!ImGui::Begin("Settings", &show, get_window_flag()))
 			{
 				ImGui::End();
 				return;
-			}
-
-			if (ImGui::BeginMenuBar())
-			{
-				if (ImGui::BeginMenu("Model"))
-				{
-					DrawModelMenu();
-					ImGui::EndMenu();
-				}
-				ImGui::EndMenuBar();
 			}
 
 			{

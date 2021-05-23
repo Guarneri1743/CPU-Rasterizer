@@ -40,6 +40,9 @@ namespace Guarneri
 		std::shared_ptr<Shader> shadow_caster;
 
 	public:
+		Material();
+		Material(std::string name);
+		Material(std::string name, std::shared_ptr<Shader> shader);
 		Material(const Material& other);
 		~Material();
 
@@ -61,17 +64,9 @@ namespace Guarneri
 		void copy(const Material& other);
 		std::string str() const;
 
-		static std::shared_ptr<Material> create();
-		static std::shared_ptr<Material> create(std::string path);
-		static std::shared_ptr<Material> create(std::string name, std::shared_ptr<Shader> shader);
-		static std::shared_ptr<Material> create(const Material& other);
+		static std::shared_ptr<Material> load_asset(std::string path);
 		static void serialize(const Material& material, std::string path);
 		static void deserialize(std::string path, Material& material);
-
-	private:
-		Material();
-		Material(std::string name);
-		Material(std::string name, std::shared_ptr<Shader> shader);
 	};
 }
 #endif

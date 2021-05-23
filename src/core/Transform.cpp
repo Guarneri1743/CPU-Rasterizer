@@ -103,7 +103,6 @@ namespace Guarneri
 	void Transform::lookat(const Vector3& target)
 	{
 		this->world_trs = Matrix4x4::lookat(this->world_position(), target, Vector3::UP);
-		this->local_rotation = this->world_trs.to_euler();
 	}
 
 	void Transform::set_parent(Transform* p)
