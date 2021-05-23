@@ -222,7 +222,6 @@ namespace Guarneri
 
 	void Window::clear()
 	{
-		glViewport(0, 0, width, height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
@@ -230,6 +229,12 @@ namespace Guarneri
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 		glBindTexture(GL_TEXTURE_2D, texture);
+		uint32_t view_px, view_py, view_w, view_h;
+		view_px = kHierarchyWidth;
+		view_py = kTopToolbarHeight;
+		view_w = get_scene_view_width();
+		view_h = get_scene_view_height();
+		glViewport(view_px, view_py, view_w, view_h);
 		glUseProgram(shader_id);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

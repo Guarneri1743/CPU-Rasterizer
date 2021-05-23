@@ -57,7 +57,7 @@ namespace Guarneri
 	void HierarchyEditor::on_gui()
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, kTopToolbarHeight));
-		ImGui::SetNextWindowSize(ImVec2(kHierarchyWidth, Window::main()->get_height() - kTopToolbarHeight));
+		ImGui::SetNextWindowSize(ImVec2((float)kHierarchyWidth, (float)(Window::main()->get_height() - kTopToolbarHeight)));
 
 		if (!ImGui::Begin("Hierarchy", no_close ? nullptr : &show, get_window_flag()))
 		{

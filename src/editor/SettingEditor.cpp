@@ -36,8 +36,8 @@ namespace Guarneri
 
 	void SettingEditor::on_gui()
 	{
-		ImGui::SetNextWindowPos(ImVec2(Window::main()->get_width() - kSettingWidth, kTopToolbarHeight));
-		ImGui::SetNextWindowSize(ImVec2(kSettingWidth, Window::main()->get_height() - kTopToolbarHeight));
+		ImGui::SetNextWindowPos(ImVec2((float)(Window::main()->get_width() - kSettingWidth), (float)kTopToolbarHeight));
+		ImGui::SetNextWindowSize(ImVec2((float)kSettingWidth, (float)(Window::main()->get_height() - kTopToolbarHeight)));
 
 		if (!ImGui::Begin("Settings", no_close ? nullptr : &show, get_window_flag()))
 		{
@@ -116,7 +116,7 @@ namespace Guarneri
 
 		if (ImGui::CollapsingHeader("Shadow"))
 		{
-			ImGui::Checkbox("Shadow", &INST(GlobalShaderParams).enable_shadow);
+			ImGui::Checkbox("On", &INST(GlobalShaderParams).enable_shadow);
 			if (INST(GlobalShaderParams).enable_shadow)
 			{
 				ImGui::Checkbox("PCF", &INST(GlobalShaderParams).pcf_on);

@@ -40,7 +40,9 @@ namespace Guarneri
 				}
 
 				// blit framebuffer to screen
-				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()), INST(GraphicsDevice).get_width(), INST(GraphicsDevice).get_height());
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()), 
+											INST(GraphicsDevice).get_width(), 
+											INST(GraphicsDevice).get_height());
 				
 				// render editors
 				BaseEditor::pre_render();

@@ -8,9 +8,9 @@
 namespace Guarneri
 {
 	constexpr char* kGlslVersion = "#version 130";
-	constexpr float kHierarchyWidth = 320.0f;
-	constexpr float kSettingWidth = 320.0f;
-	constexpr float kTopToolbarHeight = 19.0f;
+	constexpr int kHierarchyWidth = 320;
+	constexpr int kSettingWidth = 320;
+	constexpr int kTopToolbarHeight = 19;
 	constexpr int kDefaultWindowWidth = 1920;
 	constexpr int kDefaultWindowHeight = 1080;
 
@@ -32,6 +32,8 @@ namespace Guarneri
 		bool is_open();
 		int get_width() { return width; }
 		int get_height() { return height; }
+		int get_scene_view_width() { return width - kHierarchyWidth - kSettingWidth;}
+		int get_scene_view_height() { return height - kTopToolbarHeight; }
 		void add_on_resize_evt(void (*on_resize)(int w, int h, void* ud), void* user_data);
 
 

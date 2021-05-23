@@ -94,7 +94,7 @@ namespace Guarneri
 		UNUSED(op);
 		ImVec2 pos = ImGui::GetWindowPos();
 		ImVec2 size = ImGui::GetWindowSize();
-		ImGui::SetNextWindowPos(ImVec2(Window::main()->get_width() / 4, 128.0f));
+		ImGui::SetNextWindowPos(ImVec2((float)(Window::main()->get_width() / 4), 128.0f));
 		ImGui::SetNextWindowSize(ImVec2(512, 512));
 		if (!ImGui::Begin("FileDialog", &show_file_dialog, 0))
 		{
