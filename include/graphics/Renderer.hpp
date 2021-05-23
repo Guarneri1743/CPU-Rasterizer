@@ -4,7 +4,6 @@
 #include <vector>
 #include <memory>
 #include <stdint.h>
-
 #include "Object.hpp"
 #include "Matrix4x4.hpp"
 #include "Triangle.hpp"
@@ -27,7 +26,6 @@ namespace Guarneri
 		virtual Matrix4x4 view_matrix(const RenderPass& render_pass) const;
 		virtual Matrix4x4 projection_matrix(const RenderPass& render_pass) const;
 		virtual Matrix4x4 model_matrix() const;
-		static void draw_triangle(Shader* shader, const std::vector<Triangle>& triangles, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		virtual void render_shadow() const;
 		virtual void render() const;
 		void render_internal(const RenderPass& render_pass) const;

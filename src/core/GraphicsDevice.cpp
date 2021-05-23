@@ -1,5 +1,5 @@
 #include "GraphicsDevice.hpp"
-#include "ThreadPool.hpp"
+#include <iostream>
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
 #include "Plane.hpp"
@@ -7,7 +7,8 @@
 #include "Clipper.hpp"
 #include "SegmentDrawer.hpp"
 #include "Config.h"
-#include <iostream>
+#include <execution>
+#include <algorithm>
 
 namespace Guarneri
 {
@@ -18,7 +19,6 @@ namespace Guarneri
 		row_tile_count = 0;
 		col_tile_count = 0;
 		tile_length = 0;
-		tiles = 0;
 		msaa_subsample_count = 0;
 		subsamples_per_axis = 0;
 		statistics.culled_backface_triangle_count = 0;
@@ -30,7 +30,8 @@ namespace Guarneri
 	}
 
 	GraphicsDevice::~GraphicsDevice()
-	{}
+	{
+	}
 
 	void GraphicsDevice::resize(uint32_t w, uint32_t h)
 	{
@@ -85,8 +86,9 @@ namespace Guarneri
 
 	void GraphicsDevice::draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		if (shader == nullptr) { 
-			shader = Shader::get_error_shader(); 
+		if (shader == nullptr)
+		{
+			shader = Shader::get_error_shader();
 		}
 		auto object_space_frustum = Frustum::create(p * v * m);
 		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
@@ -115,6 +117,24 @@ namespace Guarneri
 		{
 			draw_triangle(shader, v1, v2, v3, m, v, p);
 		}
+	}
+
+	void GraphicsDevice::enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	{
+		ia_tasks.push_back({ shader, v1, v2, v3, m, v, p });
+	}
+
+	void GraphicsDevice::fence()
+	{
+		std::for_each(
+			std::execution::par_unseq,
+			ia_tasks.begin(),
+			ia_tasks.end(),
+			[&](InputAssemblyTask task)
+		{
+			draw(task.shader, task.v1, task.v2, task.v3, task.m, task.v, task.p);
+		}
+		);
 	}
 
 	void GraphicsDevice::process_commands()
@@ -282,70 +302,30 @@ namespace Guarneri
 
 	void GraphicsDevice::msaa_resolve()
 	{
-		if (this->multi_thread)
-		{
-			auto thread_size = (size_t)std::thread::hardware_concurrency();
-			ThreadPool tp(thread_size);
-			int task_size = Config::TILE_TASK_SIZE;
-			int task_rest = tile_length % task_size;
-			int task_count = tile_length / task_size;
-			for (auto tid = 0; tid < task_count; tid++)
+		std::vector<int> v(tile_length);
+		std::iota(std::begin(v), std::end(v), 0);
+		std::for_each(
+			std::execution::par_unseq,
+			v.begin(),
+			v.end(),
+			[&](int idx)
 			{
-				int start = tid * task_size;
-				int end = (static_cast<long>(tid) + 1) * task_size;
-				tp.enqueue([=]
-				{
-					resolve_tiles(start, end);
-				});
-			}
-			int last_start = task_count * task_size;
-			int last_end = last_start + task_rest;
-			tp.enqueue([=]
-			{
-				resolve_tiles(last_start, last_end);
+				resolve_tile(tiles[idx]);
 			});
-		}
-		else
-		{
-			for (uint32_t tidx = 0; tidx < tile_length; tidx++)
-			{
-				resolve_tile(tiles[tidx]);
-			}
-		}
 	}
 
 	void GraphicsDevice::render_tiles()
 	{
-		if (this->multi_thread)
-		{
-			auto thread_size = (size_t)std::thread::hardware_concurrency();
-			ThreadPool tp(thread_size);
-			int task_size = Config::TILE_TASK_SIZE;
-			int task_rest = tile_length % task_size;
-			int task_count = tile_length / task_size;
-			for (auto tid = 0; tid < task_count; tid++)
+		std::vector<int> v(tile_length);
+		std::iota(std::begin(v), std::end(v), 0);
+		std::for_each(
+			std::execution::par_unseq,
+			v.begin(),
+			v.end(),
+			[&](int idx)
 			{
-				int start = tid * task_size;
-				int end = (static_cast<long>(tid) + 1) * task_size;
-				tp.enqueue([=]
-				{
-					rasterize_tiles(start, end);
-				});
-			}
-			int last_start = task_count * task_size;
-			int last_end = last_start + task_rest;
-			tp.enqueue([=]
-			{
-				rasterize_tiles(last_start, last_end);
+				rasterize_tile(tiles[idx]);
 			});
-		}
-		else
-		{
-			for (uint32_t tidx = 0; tidx < tile_length; tidx++)
-			{
-				rasterize_tile(tiles[tidx]);
-			}
-		}
 
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
@@ -690,7 +670,7 @@ namespace Guarneri
 						w2 = Triangle::area_double(p0, p1, pixel);
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex v = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-						
+
 						v2f v_out;
 						float w = 1.0f / v.rhw;
 						v_out.position = v.position;
@@ -703,7 +683,7 @@ namespace Guarneri
 						v_out.bitangent = v.bitangent * w;
 						fragment_result = shader->fragment_shader(v_out);
 						pixel_color = Color::encode_rgba(fragment_result);
-						
+
 						color_calculated = true;
 					}
 
@@ -815,7 +795,7 @@ namespace Guarneri
 		// todo: ddx ddy
 		fragment_result = s->fragment_shader(v_out);
 		pixel_color = Color::encode_rgba(fragment_result);
-		
+
 		// todo: scissor test
 		if (enable_scissor_test)
 		{
@@ -1275,4 +1255,4 @@ namespace Guarneri
 		this->draw_segment(pos, pos + right, Color::RED, m, v, p);
 		this->draw_segment(pos, pos + up, Color::GREEN, m, v, p);
 	}
-	}
+}

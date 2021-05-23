@@ -1,8 +1,9 @@
 #ifndef _FRAME_TILE_HPP_
 #define _FRAME_TILE_HPP_
-#include "SafeQueue.hpp"
+#include <vector>
 #include "Triangle.hpp"
 #include "Shader.hpp"
+#include "SafeQueue.hpp"
 
 namespace Guarneri
 {

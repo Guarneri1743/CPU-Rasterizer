@@ -1,5 +1,6 @@
 #include "FrameTile.hpp"
 #include <assert.h>
+#include <vector>
 #include "Marcos.h"
 #include "Rect.hpp"
 
@@ -25,10 +26,7 @@ namespace Guarneri
 		col_end = 0;
 	}
 
-	FrameTile::~FrameTile()
-	{
-
-	}
+	FrameTile::~FrameTile(){}
 
 	void FrameTile::push_task(const Triangle& tri, Shader* shader)
 	{

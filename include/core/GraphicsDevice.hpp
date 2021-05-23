@@ -14,9 +14,21 @@
 #include "Color.hpp"
 #include "Triangle.hpp"
 #include "FrameTile.hpp"
+#include <vector>
 
 namespace Guarneri
 {
+	struct InputAssemblyTask
+	{
+		Shader* shader;
+		Vertex v1;
+		Vertex v2;
+		Vertex v3;
+		Matrix4x4 m;
+		Matrix4x4 v;
+		Matrix4x4 p;
+	};
+
 	class GraphicsDevice
 	{
 	public:
@@ -38,6 +50,8 @@ namespace Guarneri
 		std::unique_ptr<RawBuffer<color_rgba>> msaa_colorbuffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
+		// IA tasks
+		std::vector<InputAssemblyTask> ia_tasks;
 		// commands
 		std::queue<GraphicsCommand*> commands;
 		// framebuffer tiles
@@ -56,6 +70,8 @@ namespace Guarneri
 		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
 		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void fence();
 		void present();
 		void clear_buffer(const BufferFlag& flag);
 		void set_subsample_count(const uint8_t& multiplier);
