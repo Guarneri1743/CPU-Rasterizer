@@ -74,7 +74,7 @@
 
 overview
 
-<img src="/gallery/overview.jpg" width = "512" height = "420" alt="Backpack" align=bottom /> 
+<img src="/gallery/overview.jpg" width = "1024" height = "768" alt="Backpack" align=bottom /> 
 
 <img src="/gallery/helmet_ibl.jpg" width = "512" height = "512" alt="Star War" align=bottom />
 
