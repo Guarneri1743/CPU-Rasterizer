@@ -4,7 +4,6 @@
 #include "GraphicsDevice.hpp"
 #include "GlobalShaderParams.hpp"
 #include "Config.h"
-#include "Parallel.hpp"
 
 namespace Guarneri
 {
