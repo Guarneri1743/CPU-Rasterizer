@@ -215,6 +215,7 @@ void generate_lighting_scene()
 
 	auto light_material = Material::load_asset("/materials/light.material");
 	auto cube = PrimitiveFactory::cube(light_material);
+	cube->name = "point_light";
 	cube->transform->set_local_scale(Vector3(0.5f, 0.5f, 0.5f));
 	cube->transform->set_world_position(Vector3(10.0f, 2.0f, 10.0f));
 	Model::serialize(*cube, "/models/light.model");

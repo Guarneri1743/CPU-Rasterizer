@@ -102,8 +102,8 @@ function setupSlotion()
          links { "assimp", "opengl32", "glfw3"  }
 end
 
-function setupBlendingDemo()
-   project "BlendingDemo"
+function setupProject()
+   project "CPURasterizer"
    kind "ConsoleApp"
    language "C++"
 
@@ -135,180 +135,7 @@ function setupBlendingDemo()
       third_party_dir .. "/imgui/backends/*.*",
       third_party_dir .. "/gl3w/GL/*.*",
       third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/BlendingSample.cpp"
-   }
-
-   filter { "configurations:Debug*" }
-      targetdir (solution_dir .. "/bin/Debug")
-
-   filter { "configurations:Release*" }
-      targetdir (solution_dir .. "/bin/release")
-end
-
-function setupStencilDemo()
-   project "StencilDemo"
-   kind "ConsoleApp"
-   language "C++"
-
-   files { 
-      src_dir .. "/*.*", 
-      src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
-      src_dir .. "/primitives/*.*",
-      src_dir .. "/core/*.*",
-      src_dir .. "/graphics/*.*",
-      src_dir .. "/shader/*.*",
-      src_dir .. "/editor/*.*",
-      include_dir .. "/*.*", 
-      include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/graphics/*.*",
-      include_dir .. "/core/detail/*.*",
-      include_dir .. "/shader/*.*",
-      include_dir .. "/editor/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/threading/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/rapidjson/*.*",
-      third_party_dir .. "/imgui/*.*",
-      third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/gl3w/GL/*.*",
-      third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/StencilSample.cpp"
-   }
-
-   filter { "configurations:Debug*" }
-      targetdir (solution_dir .. "/bin/Debug")
-
-   filter { "configurations:Release*" }
-      targetdir (solution_dir .. "/bin/release")
-end
-
-function setupLightingDemo()
-   project "LightingDemo"
-   kind "ConsoleApp"
-   language "C++"
-
-   files { 
-      src_dir .. "/*.*", 
-      src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
-      src_dir .. "/primitives/*.*",
-      src_dir .. "/core/*.*",
-      src_dir .. "/graphics/*.*",
-      src_dir .. "/shader/*.*",
-      src_dir .. "/editor/*.*",
-      include_dir .. "/*.*", 
-      include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/graphics/*.*",
-      include_dir .. "/core/detail/*.*",
-      include_dir .. "/shader/*.*",
-      include_dir .. "/editor/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/threading/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/rapidjson/*.*",
-      third_party_dir .. "/imgui/*.*",
-      third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/gl3w/GL/*.*",
-      third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/PBRSample.cpp"
-   }
-
-   filter { "configurations:Debug*" }
-      targetdir (solution_dir .. "/bin/Debug")
-
-   filter { "configurations:Release*" }
-      targetdir (solution_dir .. "/bin/release")
-end
-
-function setupFilteringDemo()
-   project "FilteringDemo"
-   kind "ConsoleApp"
-   language "C++"
-
-   files { 
-      src_dir .. "/*.*", 
-      src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
-      src_dir .. "/primitives/*.*",
-      src_dir .. "/core/*.*",
-      src_dir .. "/graphics/*.*",
-      src_dir .. "/shader/*.*",
-      src_dir .. "/editor/*.*",
-      include_dir .. "/*.*", 
-      include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/graphics/*.*",
-      include_dir .. "/core/detail/*.*",
-      include_dir .. "/shader/*.*",
-      include_dir .. "/editor/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/threading/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/rapidjson/*.*",
-      third_party_dir .. "/imgui/*.*",
-      third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/gl3w/GL/*.*",
-      third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/FilteringSample.cpp"
-   }
-
-   filter { "configurations:Debug*" }
-      targetdir (solution_dir .. "/bin/Debug")
-
-   filter { "configurations:Release*" }
-      targetdir (solution_dir .. "/bin/release")
-end
-
-
-function setupCubemapDemo()
-   project "CubemapDemo"
-   kind "ConsoleApp"
-   language "C++"
-
-   files { 
-      src_dir .. "/*.*", 
-      src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
-      src_dir .. "/primitives/*.*",
-      src_dir .. "/core/*.*",
-      src_dir .. "/graphics/*.*",
-      src_dir .. "/shader/*.*",
-      src_dir .. "/editor/*.*",
-      include_dir .. "/*.*", 
-      include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/graphics/*.*",
-      include_dir .. "/core/detail/*.*",
-      include_dir .. "/shader/*.*",
-      include_dir .. "/editor/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/threading/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/rapidjson/*.*",
-      third_party_dir .. "/imgui/*.*",
-      third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/gl3w/GL/*.*",
-      third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/CubemapSample.cpp"
+      sample_dir .. "/Application.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -363,9 +190,5 @@ end
 
 setupIncludeDirs()
 setupSlotion()
-setupBlendingDemo()
-setupStencilDemo()
-setupLightingDemo()
-setupFilteringDemo()
-setupCubemapDemo()
+setupProject()
 setupGenerateScenesProj()

@@ -1,5 +1,5 @@
 {
-    "name": "",
+    "name": "point_light",
     "raw_path": "",
     "meshes": [
         {
@@ -1134,5 +1134,5 @@
         "rotation_angle": 0.0,
         "children": []
     },
-    "flip_uv": true
+    "flip_uv": false
 }

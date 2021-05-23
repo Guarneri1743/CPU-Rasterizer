@@ -1,5 +1,5 @@
 {
-    "name": "stencil_sample",
+    "name": "",
     "main_light": {
         "ambient": {
             "r": 0.05000000074505806,
@@ -42,7 +42,7 @@
     "work_flow": 1,
     "main_cam": {
         "fov": 45.0,
-        "aspect": 1.1428571939468384,
+        "aspect": 1.0,
         "near": 0.5,
         "far": 100.0,
         "enable_msaa": false,
@@ -91,7 +91,7 @@
         },
         "projection": 0,
         "proj_matrix": {
-            "m00": 2.112436532974243,
+            "m00": 2.4142134189605715,
             "m01": 0.0,
             "m02": 0.0,
             "m03": 0.0,
