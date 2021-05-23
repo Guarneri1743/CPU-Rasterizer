@@ -19,6 +19,7 @@ namespace Guarneri
 		row_tile_count = 0;
 		col_tile_count = 0;
 		tile_length = 0;
+		tiles = nullptr;
 		msaa_subsample_count = 0;
 		subsamples_per_axis = 0;
 		statistics.culled_backface_triangle_count = 0;

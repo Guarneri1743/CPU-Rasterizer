@@ -14,7 +14,7 @@ namespace Guarneri
 	HierarchyEditor::HierarchyEditor() : BaseEditor()
 	{
 		no_collapse = true;
-		no_resize = true;
+		no_resize = false;
 		no_close = true;
 		no_move = true;
 	}

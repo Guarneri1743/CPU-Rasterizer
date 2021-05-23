@@ -8,8 +8,8 @@
 namespace Guarneri
 {
 	constexpr char* kGlslVersion = "#version 130";
-	constexpr int kHierarchyWidth = 320;
-	constexpr int kSettingWidth = 320;
+	constexpr int kHierarchyWidth = 256;
+	constexpr int kSettingWidth = 256;
 	constexpr int kTopToolbarHeight = 19;
 	constexpr int kDefaultWindowWidth = 1920;
 	constexpr int kDefaultWindowHeight = 1080;

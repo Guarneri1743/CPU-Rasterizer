@@ -22,11 +22,14 @@ namespace Guarneri
 	float position[3];
 	float angles[3];
 	float scale[3];
+	float main_light_yaw;
+	float main_light_pitch;
+	int sub_samples = 4;
 
 	SettingEditor::SettingEditor() : BaseEditor()
 	{
 		no_collapse = true;
-		no_resize = true;
+		no_resize = false;
 		no_close = true;
 		no_move = true;
 		std::fill(std::begin(position), std::end(position), 0.0f);
@@ -111,7 +114,21 @@ namespace Guarneri
 			cam_update = ImGui::SliderFloat("Fov", &scene.main_cam->fov, 0.0f, 180.0f) || cam_update;
 			cam_update = ImGui::SliderFloat("Aspect", &scene.main_cam->aspect, 0.0f, 2.0f) || cam_update;
 			if (cam_update) scene.main_cam->update_proj_mode();
-			ImGui::Checkbox("MSAA", &scene.main_cam->enable_msaa);
+			if (ImGui::Checkbox("MSAA", &INST(GlobalShaderParams).enable_msaa))
+			{
+				INST(GraphicsDevice).set_subsample_count(sub_samples);
+			}
+			if (INST(GlobalShaderParams).enable_msaa)
+			{
+				if (ImGui::InputInt("Subsamples", &sub_samples))
+				{
+					INST(GraphicsDevice).set_subsample_count(sub_samples);
+				}
+				else
+				{
+					sub_samples = INST(GraphicsDevice).get_subsample_count();
+				}
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Shadow"))
@@ -126,6 +143,16 @@ namespace Guarneri
 
 		if (ImGui::CollapsingHeader("Light"))
 		{
+			if (ImGui::SliderFloat("Yaw", &scene.main_light.yaw, -180.0f, 180.0f))
+			{
+				scene.main_light.update_rotation();
+			}
+
+			if (ImGui::SliderFloat("Pitch", &scene.main_light.pitch, -180.0f, 180.0f))
+			{
+				scene.main_light.update_rotation();
+			}
+
 			ImGui::SliderFloat("Intensity", &scene.main_light.intensity, 0.0f, 10.0f);
 			if (ImGui::ColorEdit3("Ambient", main_light_ambient))
 			{

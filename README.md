@@ -72,9 +72,11 @@
 
 ### Gallery
 
-| overview |
-| --- |
-| <img src="/gallery/helmet_ibl.jpg" width = "200" height = "200" alt="Star War" align=bottom /> <img src="/gallery/overview.jpg" width = "220" height = "200" alt="Backpack" align=bottom /> <img src="/gallery/wireframe.jpg" width = "220" height = "200" alt="Wireframe" align=bottom/> |
+overview
+
+<img src="/gallery/overview.jpg" width = "512" height = "420" alt="Backpack" align=bottom /> 
+
+<img src="/gallery/helmet_ibl.jpg" width = "512" height = "512" alt="Star War" align=bottom />
 
 | tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
@@ -95,7 +97,7 @@
 
 | shadow mapping |
 | --- |
-| <img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/overview.jpg" width = "200" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> |
+| <img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> |
 
 | ao |
 | --- | 
@@ -107,7 +109,7 @@
 - assimp 
 - stb_image 
 - [rapidjson](https://github.com/Tencent/rapidjson) 
-- [ThreadPool](https://github.com/progschj/ThreadPool) 
+- imgui
 
 ---
 
