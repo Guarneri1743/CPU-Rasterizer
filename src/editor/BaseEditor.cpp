@@ -91,11 +91,12 @@ namespace Guarneri
 
 	bool BaseEditor::DrawFileDialog(FileOp op, std::string& filename)
 	{
+		UNUSED(op);
 		ImVec2 pos = ImGui::GetWindowPos();
 		ImVec2 size = ImGui::GetWindowSize();
-		ImGui::SetNextWindowPos(ImVec2(pos.x + size.x / 2, pos.y + 128));
+		ImGui::SetNextWindowPos(ImVec2(Window::main()->get_width() / 4, 128.0f));
 		ImGui::SetNextWindowSize(ImVec2(512, 512));
-		if (!ImGui::Begin("FileDialog", &show_file_dialog, get_window_flag()))
+		if (!ImGui::Begin("FileDialog", &show_file_dialog, 0))
 		{
 			ImGui::End();
 			return false;

@@ -14,6 +14,9 @@
 
 namespace Guarneri
 {
+	std::vector<int> Model::free_names;
+	int Model::current_name;
+
 	Model::Model()
 	{
 		transform = std::make_unique<Transform>();
@@ -252,6 +255,19 @@ namespace Guarneri
 			fclose(fd);
 			
 			model.name = doc["name"].GetString();
+			if (model.name == "")
+			{
+				if (free_names.size() > 0)
+				{
+					int num = free_names.back();
+					free_names.pop_back();
+					model.name = "Model(" + std::to_string(num) + ")";
+				}
+				else
+				{
+					model.name = "Model(" + std::to_string(current_name++) + ")";
+				}
+			}
 			model.raw_path = doc["raw_path"].GetString();
 			model.meta_path = doc["meta_path"].GetString();
 			model.flip_uv = doc["flip_uv"].GetBool();

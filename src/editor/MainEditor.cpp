@@ -1,4 +1,4 @@
-#include "TopToolbarEditor.hpp"
+#include "MainEditor.hpp"
 #include "imgui/imgui.h"
 #include "Marcos.h"
 #include "InputManager.hpp"
@@ -12,7 +12,7 @@
 
 namespace Guarneri
 {
-	TopToolbarEditor::TopToolbarEditor() : BaseEditor()
+	MainEditor::MainEditor() : BaseEditor()
 	{
 		no_titlebar = true;
 		no_collapse = true;
@@ -21,7 +21,7 @@ namespace Guarneri
 		no_move = true;
 	}
 
-	void TopToolbarEditor::DrawSceneMenu()
+	void MainEditor::DrawSceneMenu()
 	{
 		ImGui::MenuItem("(load scene)", NULL, false, false);
 
@@ -43,7 +43,7 @@ namespace Guarneri
 		}
 	}
 
-	void TopToolbarEditor::DrawModelMenu()
+	void MainEditor::DrawModelMenu()
 	{
 		ImGui::MenuItem("(load model)", NULL, false, false);
 
@@ -65,12 +65,13 @@ namespace Guarneri
 		}
 	}
 
-	void TopToolbarEditor::on_gui()
+	void MainEditor::on_gui()
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::SetNextWindowSize(ImVec2((float)Window::main()->get_width(), kTopToolbarHeight));
-
-		if (!ImGui::Begin("Toolbar", &show, get_window_flag()))
+		ImGuiWindowFlags flags = get_window_flag();
+		flags |= ImGuiWindowFlags_NoBackground;
+		if (!ImGui::Begin("Toolbar", no_close ? nullptr : &show, flags))
 		{
 			ImGui::End();
 			return;
@@ -102,6 +103,8 @@ namespace Guarneri
 					Application::load_scene(filename.c_str());
 					break;
 				case MenuType::kModel:
+					auto model = Model::load_asset(filename);
+					Scene::current()->add(model);
 					break;
 				}
 			}

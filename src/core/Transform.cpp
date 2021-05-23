@@ -12,6 +12,7 @@ namespace Guarneri
 		local_position = Vector3::ZERO;
 		local_scale = Vector3::ONE;
 		world_trs = Matrix4x4::IDENTITY;
+		selected = false;
 	}
 
 	Transform::Transform(const Transform& other)
@@ -23,6 +24,7 @@ namespace Guarneri
 		rotation_axis = other.rotation_axis;
 		rotation_angle = other.rotation_angle;
 		world_trs = other.world_trs;
+		selected = other.selected;
 	}
 
 	Vector3 Transform::forward() const

@@ -10,6 +10,7 @@
 #include "Material.hpp"
 #include "Transform.hpp"
 #include <assimp/Scene.h>
+#include <vector>
 
 namespace Guarneri
 {
@@ -43,7 +44,9 @@ namespace Guarneri
 		Model(std::string path, bool flip_uv);
 		void load_raw_internal(std::string path);
 		void load_vertices(aiMesh* ai_mesh);
-		void reload_mesh(aiNode* node, const aiScene* Scene);
+		void reload_mesh(aiNode* node, const aiScene* Scene);	
+		static std::vector<int> free_names;
+		static int current_name;
 	};
 }
 #endif

@@ -46,7 +46,7 @@ namespace Guarneri
 
 	void Scene::initialize()
 	{
-		float aspect = (float)INST(GlobalShaderParams).width / INST(GlobalShaderParams).height;
+		float aspect = (float)INST(GraphicsDevice).get_width() / INST(GraphicsDevice).get_height();
 		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
 		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
 		Camera::set_main_camera(main_cam.get());
@@ -204,24 +204,24 @@ namespace Guarneri
 		INST(GlobalShaderParams).main_light = main_light;
 		INST(GlobalShaderParams).point_lights = point_lights;
 		INST(GlobalShaderParams).camera_pos = main_cam->transform->world_position();
-		/*if (input_mgr().is_key_down(KeyCode::W)) {
-			main_cam->move_forward(CAMERA_MOVE_SPEED);
+		if (INST(InputManager).is_key_down(KeyCode::W)) {
+			main_cam->transform->move_forward(CAMERA_MOVE_SPEED);
 		}
-		if (input_mgr().is_key_down(KeyCode::A)) {
-			main_cam->move_left(CAMERA_MOVE_SPEED);
+		if (INST(InputManager).is_key_down(KeyCode::A)) {
+			main_cam->transform->move_left(CAMERA_MOVE_SPEED);
 		}
-		if (input_mgr().is_key_down(KeyCode::S)) {
-			main_cam->move_backward(CAMERA_MOVE_SPEED);
+		if (INST(InputManager).is_key_down(KeyCode::S)) {
+			main_cam->transform->move_backward(CAMERA_MOVE_SPEED);
 		}
-		if (input_mgr().is_key_down(KeyCode::D)) {
-			main_cam->move_right(CAMERA_MOVE_SPEED);
+		if (INST(InputManager).is_key_down(KeyCode::D)) {
+			main_cam->transform->move_right(CAMERA_MOVE_SPEED);
 		}
-		if (input_mgr().is_key_down(KeyCode::Q)) {
-			main_cam->move_ascend(CAMERA_MOVE_SPEED);
+		if (INST(InputManager).is_key_down(KeyCode::Q)) {
+			main_cam->transform->move_ascend(CAMERA_MOVE_SPEED);
 		}
-		if (input_mgr().is_key_down(KeyCode::E)) {
-			main_cam->move_descend(CAMERA_MOVE_SPEED);
-		}*/
+		if (INST(InputManager).is_key_down(KeyCode::E)) {
+			main_cam->transform->move_descend(CAMERA_MOVE_SPEED);
+		}
 		if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 		{
 			main_cam->transform->move_ascend(CAMERA_MOVE_SPEED);
@@ -230,11 +230,52 @@ namespace Guarneri
 		{
 			main_cam->transform->move_descend(CAMERA_MOVE_SPEED);
 		}
+
+		if (INST(InputManager).is_key_down(KeyCode::DELETION))
+		{
+			int remove_idx = -1;
+			if (selection != nullptr)
+			{
+				int idx = 0;
+				for (auto& obj : objects)
+				{
+					if (obj->target->transform.get() == selection)
+					{
+						remove_idx = idx;
+					}
+					idx++;
+				}
+
+				if (remove_idx != -1)
+				{
+					std::cout << "remove " << objects[remove_idx]->target->name << std::endl;
+					objects.erase(objects.begin() + remove_idx);
+					remove_idx = -1;
+				}
+
+				idx = 0;
+				for (auto& obj : transparent_objects)
+				{
+					if (obj->target->transform.get() == selection)
+					{
+						remove_idx = idx;
+					}
+					idx++;
+				}
+
+				if (remove_idx != -1)
+				{
+					std::cout << "remove " << transparent_objects[remove_idx]->target->name << std::endl;
+					transparent_objects.erase(transparent_objects.begin() + remove_idx);
+					remove_idx = -1;
+				}
+			}
+		}
 	}
 
 	void Scene::draw_camera_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GlobalShaderParams).width / 2.0f - 50.0f), -(INST(GlobalShaderParams).height / 2.0f - 50.0f));
+		Vector2 offset = Vector2(-(INST(GraphicsDevice).get_width() / 2.0f - 50.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 50.0f));
 		Vector3 pos = main_cam->transform->world_position();
 		Vector3 forward = main_cam->transform->forward();
 		Vector3 right = main_cam->transform->right();
@@ -246,7 +287,7 @@ namespace Guarneri
 
 	void Scene::draw_world_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GlobalShaderParams).width / 2.0f - 150.0f), -(INST(GlobalShaderParams).height / 2.0f - 150.0f));
+		Vector2 offset = Vector2(-(INST(GraphicsDevice).get_width() / 2.0f - 150.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 150.0f));
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 

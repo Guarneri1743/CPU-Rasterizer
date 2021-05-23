@@ -16,7 +16,7 @@ namespace Guarneri
 		std::string name;
 
 		// editor
-		std::shared_ptr<Model> selection;
+		Transform* selection;
 
 		// lights
 		DirectionalLight main_light;

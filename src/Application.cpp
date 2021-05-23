@@ -1,7 +1,7 @@
 #include "Application.hpp"
 #include "SettingEditor.hpp"
 #include "HierarchyEditor.hpp"
-#include "TopToolbarEditor.hpp"
+#include "MainEditor.hpp"
 #include <iostream>
 
 namespace Guarneri
@@ -15,9 +15,9 @@ namespace Guarneri
 		if (playing) return;
 
 		Window::initialize_main_window("CPU-Rasterizer");
+		editors.emplace_back(std::move(std::make_unique<MainEditor>()));
 		editors.emplace_back(std::move(std::make_unique<SettingEditor>()));
 		editors.emplace_back(std::move(std::make_unique<HierarchyEditor>()));
-		editors.emplace_back(std::move(std::make_unique<TopToolbarEditor>()));
 		INST(GraphicsDevice).initialize(400, 300);
 		Time::start();
 

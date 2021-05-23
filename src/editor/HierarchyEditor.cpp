@@ -7,6 +7,7 @@
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
 #include "Application.hpp"
+#include <iostream>
 
 namespace Guarneri
 {
@@ -20,13 +21,36 @@ namespace Guarneri
 
 	void DrawTransform(Transform* transform)
 	{
-		if (ImGui::CollapsingHeader(transform->name.c_str()))
+		ImGuiTreeNodeFlags flags =
+			ImGuiTreeNodeFlags_OpenOnArrow |
+			ImGuiTreeNodeFlags_OpenOnDoubleClick |
+			ImGuiTreeNodeFlags_SpanAvailWidth;
+
+		if(transform == Scene::current()->selection)
 		{
-			for (size_t idx = 0; idx < transform->child_count(); idx++)
-			{
-				auto child = transform->access_child(idx);
+			flags |= ImGuiTreeNodeFlags_Selected;
+		}
+
+        if (ImGui::TreeNodeEx(transform->name.c_str(), flags))
+        {
+            for (int i = 0; i < transform->child_count(); i++)
+            {
+                auto child = transform->access_child(i);
 				DrawTransform(child);
-			}
+            }
+            ImGui::TreePop();
+        }
+
+        if (ImGui::IsItemClicked())
+        {
+			Scene::current()->selection = transform;
+        }
+		
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::SetDragDropPayload("transform", NULL, 0);
+			ImGui::Text(transform->name.c_str());
+			ImGui::EndDragDropSource();
 		}
 	}
 
@@ -34,7 +58,8 @@ namespace Guarneri
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, kTopToolbarHeight));
 		ImGui::SetNextWindowSize(ImVec2(kHierarchyWidth, Window::main()->get_height() - kTopToolbarHeight));
-		if (!ImGui::Begin("Hierarchy", &show, get_window_flag()))
+
+		if (!ImGui::Begin("Hierarchy", no_close ? nullptr : &show, get_window_flag()))
 		{
 			ImGui::End();
 			return;
@@ -42,14 +67,16 @@ namespace Guarneri
 
 		auto scene = Scene::current();
 
-		for (auto& obj : scene->objects)
+		for (size_t idx = 0; idx < scene->objects.size(); idx++)
 		{
+			auto obj = scene->objects[idx];
 			if (obj == nullptr || obj->target == nullptr || obj->target->name == "") continue;
 			DrawTransform(obj->target->transform.get());
 		}
 
-		for (auto& obj : scene->transparent_objects)
+		for (size_t idx = 0; idx < scene->transparent_objects.size(); idx++)
 		{
+			auto obj = scene->transparent_objects[idx];
 			if (obj == nullptr || obj->target == nullptr || obj->target->name == "") continue;
 			DrawTransform(obj->target->transform.get());
 		}

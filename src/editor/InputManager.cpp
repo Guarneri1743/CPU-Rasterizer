@@ -56,7 +56,8 @@ namespace Guarneri
 		{ GLFW_KEY_RIGHT_CONTROL, KeyCode::CTRL_R},
 		{ GLFW_KEY_LEFT_SHIFT, KeyCode::SHIFT_L},
 		{ GLFW_KEY_RIGHT_SHIFT, KeyCode::SHIFT_R},
-		{ GLFW_KEY_ENTER, KeyCode::ENTER}
+		{ GLFW_KEY_ENTER, KeyCode::ENTER},
+		{ GLFW_KEY_DELETE, KeyCode::DELETION}
 	};
 
 	std::unordered_map<WPARAM, MouseButton> mouse_mapping =

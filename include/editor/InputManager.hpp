@@ -72,7 +72,8 @@ namespace Guarneri
 		SHIFT_L,
 		SHIFT_R,
 		ENTER,
-		WIN
+		WIN,
+		DELETION
 	};
 
 	class InputManager

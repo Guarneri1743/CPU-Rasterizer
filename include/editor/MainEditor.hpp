@@ -5,10 +5,10 @@
 
 namespace Guarneri
 {
-	class TopToolbarEditor : public BaseEditor
+	class MainEditor : public BaseEditor
 	{
 	public:
-		TopToolbarEditor();
+		MainEditor();
 		virtual void on_gui();
 
 	private:

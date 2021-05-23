@@ -18,6 +18,7 @@ namespace Guarneri
 		Matrix4x4 world_trs;
 		Vector3 rotation_axis;
 		float rotation_angle;
+		bool selected;
 
 	private:
 		Transform* parent;
