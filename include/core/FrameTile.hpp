@@ -53,11 +53,12 @@ namespace Guarneri
 			const int& row_rest, const int& col_rest);
 		static void dispatch_render_task(
 			FrameTile* tiles,
+			const uint32_t& row_tile_count,
+			const uint32_t& col_tile_count,
 			const Triangle& tri,
 			const Shader& shader,
 			const int& w, const int& h,
-			const int& tile_size,
-			const int& col_tile_count);
+			const int& tile_size);
 	};
 }
 #endif

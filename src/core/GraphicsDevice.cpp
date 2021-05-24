@@ -50,7 +50,7 @@ namespace Guarneri
 		int col_rest = w % Config::TILE_SIZE;
 		row_tile_count = h / Config::TILE_SIZE + (row_rest > 0 ? 1 : 0);
 		col_tile_count = w / Config::TILE_SIZE + (col_rest > 0 ? 1 : 0);
-		tile_length = (int)(static_cast<long>(row_tile_count) * static_cast<long>(col_tile_count));
+		tile_length = (int)((long)row_tile_count * (long)col_tile_count);
 		tiles = new FrameTile[tile_length];
 		FrameTile::build_tiles(tiles, Config::TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
 
@@ -302,7 +302,7 @@ namespace Guarneri
 			}
 			if (this->tile_based)
 			{
-				FrameTile::dispatch_render_task(tiles, *iter, shader, this->width, this->height, Config::TILE_SIZE, this->col_tile_count);
+				FrameTile::dispatch_render_task(tiles, row_tile_count, col_tile_count, *iter, shader, this->width, this->height, Config::TILE_SIZE);
 			}
 			else
 			{

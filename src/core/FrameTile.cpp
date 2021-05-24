@@ -1,6 +1,8 @@
 #include "FrameTile.hpp"
 #include <assert.h>
 #include <vector>
+#include <iostream>
+#include <iomanip>
 #include "Marcos.h"
 #include "Rect.hpp"
 
@@ -95,11 +97,12 @@ namespace Guarneri
 
 	void FrameTile::dispatch_render_task(
 		FrameTile* tiles,
+		const uint32_t& row_tile_count,
+		const uint32_t& col_tile_count,
 		const Triangle& tri,
 		const Shader& shader,
 		const int& w, const int& h,
-		const int& tile_size,
-		const int& col_tile_count)
+		const int& tile_size)
 	{
 		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
@@ -117,6 +120,11 @@ namespace Guarneri
 
 		pixel2tile(row_start, col_start, tile_row_start, tile_col_start, tile_size);
 		pixel2tile(row_end, col_end, tile_row_end, tile_col_end, tile_size);
+
+		tile_row_start = tile_row_start >= 0 ? tile_row_start : 0;
+		tile_col_start = tile_col_start >= 0 ? tile_col_start : 0;
+		tile_row_end = tile_row_end < (int)row_tile_count ? tile_row_end : (int)row_tile_count - 1;
+		tile_col_end = tile_col_end < (int)col_tile_count ? tile_col_end : (int)col_tile_count - 1;
 
 		for (int row = tile_row_start; row <= tile_row_end; row++)
 		{
