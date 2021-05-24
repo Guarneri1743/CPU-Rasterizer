@@ -11,10 +11,10 @@ namespace Guarneri
 		shader = nullptr;
 	}
 
-	TileTask::TileTask(const Triangle& triangle, Shader* shader)
+	TileTask::TileTask(const Triangle& triangle, const Shader& shader)
 	{
 		this->triangle = triangle;
-		this->shader = shader;
+		this->shader = &shader;
 	}
 
 	FrameTile::FrameTile()
@@ -28,7 +28,7 @@ namespace Guarneri
 
 	FrameTile::~FrameTile(){}
 
-	void FrameTile::push_task(const Triangle& tri, Shader* shader)
+	void FrameTile::push_task(const Triangle& tri, const Shader& shader)
 	{
 		tasks.produce(TileTask(tri, shader));
 	}
@@ -96,7 +96,7 @@ namespace Guarneri
 	void FrameTile::dispatch_render_task(
 		FrameTile* tiles,
 		const Triangle& tri,
-		Shader* shader,
+		const Shader& shader,
 		const int& w, const int& h,
 		const int& tile_size,
 		const int& col_tile_count)

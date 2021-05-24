@@ -87,17 +87,14 @@ namespace Guarneri
 
 	void GraphicsDevice::draw(InputAssemblyTask task)
 	{
-		auto shader = task.shader;
+		const Shader& shader = *task.shader;
 		auto v1 = task.v1;
 		auto v2 = task.v2;
 		auto v3 = task.v3;
 		auto m = task.m;
 		auto v = task.v;
 		auto p = task.p;
-		if (shader == nullptr)
-		{
-			shader = Shader::get_error_shader();
-		}
+
 		auto object_space_frustum = Frustum::create(p * v * m);
 		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
 		{
@@ -239,7 +236,7 @@ namespace Guarneri
 		statistics.earlyz_optimized = 0;
 	}
 
-	void GraphicsDevice::draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
 		UNUSED(m);
 		UNUSED(v);
@@ -256,7 +253,7 @@ namespace Guarneri
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
 		// clip in screen space
-		//if (!shader->skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
+		//if (!shader.skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
 		//	return;
 		//}
 
@@ -265,12 +262,12 @@ namespace Guarneri
 		Vertex n2 = clip2ndc(c2);
 		Vertex n3 = clip2ndc(c3);
 
-		bool double_face = shader->double_face;
+		bool double_face = shader.double_face;
 		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 
 		bool culled_back_face = false;
 
-		if (!double_face && enable_backface_culling && !shader->skybox)
+		if (!double_face && enable_backface_culling && !shader.skybox)
 		{
 			if (Clipper::backface_culling(n1.position, n2.position, n3.position))
 			{
@@ -315,7 +312,7 @@ namespace Guarneri
 	}
 
 	// per vertex processing
-	v2f GraphicsDevice::process_vertex(Shader* shader, const Vertex& vert) const
+	v2f GraphicsDevice::process_vertex(const Shader& shader, const Vertex& vert) const
 	{
 		a2v input;
 		input.position = vert.position;
@@ -323,7 +320,7 @@ namespace Guarneri
 		input.color = vert.color;
 		input.normal = vert.normal;
 		input.tangent = vert.tangent;
-		return shader->vertex_shader(input);
+		return shader.vertex_shader(input);
 	}
 
 	void GraphicsDevice::rasterize_tiles(const size_t& start, const size_t& end)
@@ -343,7 +340,7 @@ namespace Guarneri
 			if (tile.pop_task(task))
 			{
 				auto tri = task.triangle;
-				auto shader = task.shader;
+				const Shader& shader = *task.shader;
 
 				execute_task(tile, tri, shader);
 
@@ -430,7 +427,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::execute_task(const FrameTile& tile, const Triangle& tri, Shader* shader)
+	void GraphicsDevice::execute_task(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
@@ -458,7 +455,7 @@ namespace Guarneri
 
 		float area = Triangle::area_double(p0, p1, p2);
 
-		if (INST(GlobalShaderParams).enable_msaa && !shader->shadow)
+		if (INST(GlobalShaderParams).enable_msaa && !shader.shadow)
 		{
 			for (uint32_t row = (uint32_t)row_start; row < (uint32_t)row_end; row++)
 			{
@@ -482,7 +479,7 @@ namespace Guarneri
 					{
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-						RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+						RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
 						process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
 					}
 				}
@@ -490,7 +487,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy)
+	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy)
 	{
 		if (strategy == RasterizerStrategy::SCANBLOCK)
 		{
@@ -509,7 +506,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::scanblock(const Triangle& tri, Shader* shader)
+	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
@@ -550,14 +547,14 @@ namespace Guarneri
 				{
 					w0 *= inv_area; w1 *= inv_area; w2 *= inv_area;
 					Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-					RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+					RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
 					process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
 				}
 			}
 		}
 	}
 
-	void GraphicsDevice::scanline(const Triangle& tri, Shader* shader)
+	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader)
 	{
 		bool flip = tri.flip;
 		int top_idx = flip ? 2 : 0;
@@ -587,7 +584,7 @@ namespace Guarneri
 
 			for (uint32_t col = (uint32_t)left; col < (uint32_t)right; col++)
 			{
-				RawBuffer<float>* zbuf = shader->shadow ? shadowmap.get() : zbuffer.get();
+				RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
 				process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), lhs, row, col, shader);
 				auto dx = Vertex::differential(lhs, rhs);
 				lhs = Vertex::intagral(lhs, dx);
@@ -595,7 +592,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
+	void GraphicsDevice::process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
 	{
 		auto p0 = v0.position.xy();
 		auto p1 = v1.position.xy();
@@ -630,26 +627,26 @@ namespace Guarneri
 					bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 					bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
 					bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
-					ColorMask color_mask = shader->color_mask;
-					CompareFunc stencil_func = shader->stencil_func;
-					StencilOp stencil_pass_op = shader->stencil_pass_op;
-					StencilOp stencil_fail_op = shader->stencil_fail_op;
-					StencilOp stencil_zfail_op = shader->stencil_zfail_op;
-					uint8_t stencil_read_mask = shader->stencil_read_mask;
-					uint8_t stencil_write_mask = shader->stencil_write_mask;
-					uint8_t stencil_ref_val = shader->stencil_ref_val;
-					CompareFunc ztest_func = shader->ztest_func;
-					ZWrite zwrite_mode = shader->zwrite_mode;
-					BlendFactor src_factor = shader->src_factor;
-					BlendFactor dst_factor = shader->dst_factor;
-					BlendOp blend_op = shader->blend_op;
+					ColorMask color_mask = shader.color_mask;
+					CompareFunc stencil_func = shader.stencil_func;
+					StencilOp stencil_pass_op = shader.stencil_pass_op;
+					StencilOp stencil_fail_op = shader.stencil_fail_op;
+					StencilOp stencil_zfail_op = shader.stencil_zfail_op;
+					uint8_t stencil_read_mask = shader.stencil_read_mask;
+					uint8_t stencil_write_mask = shader.stencil_write_mask;
+					uint8_t stencil_ref_val = shader.stencil_ref_val;
+					CompareFunc ztest_func = shader.ztest_func;
+					ZWrite zwrite_mode = shader.zwrite_mode;
+					BlendFactor src_factor = shader.src_factor;
+					BlendFactor dst_factor = shader.dst_factor;
+					BlendOp blend_op = shader.blend_op;
 
 					UNUSED(enable_scissor_test);
 					UNUSED(enable_alpha_test);
 					UNUSED(color_mask);
 					UNUSED(stencil_write_mask);
 
-					bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader->transparent;
+					bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader.transparent;
 
 					PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
@@ -674,7 +671,7 @@ namespace Guarneri
 						v_out.uv = v.uv * w;
 						v_out.tangent = v.tangent * w;
 						v_out.bitangent = v.bitangent * w;
-						fragment_result = shader->fragment_shader(v_out);
+						fragment_result = shader.fragment_shader(v_out);
 						pixel_color = Color::encode_rgba(fragment_result);
 
 						color_calculated = true;
@@ -706,7 +703,7 @@ namespace Guarneri
 					}
 
 					// blending
-					if (enable_blending && shader->transparent)
+					if (enable_blending && shader.transparent)
 					{
 						color_rgba dst;
 						if (fbuf->read(subsample_row, subsample_col, dst))
@@ -730,7 +727,7 @@ namespace Guarneri
 	}
 
 	// per fragment processing
-	void GraphicsDevice::process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader)
+	void GraphicsDevice::process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, const Shader& shader)
 	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
@@ -739,26 +736,25 @@ namespace Guarneri
 
 		PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
-		auto s = shader;
 		float z = v.position.z;
 
-		ColorMask color_mask = s->color_mask;
-		CompareFunc stencil_func = s->stencil_func;
-		StencilOp stencil_pass_op = s->stencil_pass_op;
-		StencilOp stencil_fail_op = s->stencil_fail_op;
-		StencilOp stencil_zfail_op = s->stencil_zfail_op;
-		uint8_t stencil_read_mask = s->stencil_read_mask;
-		uint8_t stencil_write_mask = s->stencil_write_mask;
-		uint8_t stencil_ref_val = s->stencil_ref_val;
-		CompareFunc ztest_func = s->ztest_func;
-		ZWrite zwrite_mode = s->zwrite_mode;
-		BlendFactor src_factor = s->src_factor;
-		BlendFactor dst_factor = s->dst_factor;
-		BlendOp blend_op = s->blend_op;
+		ColorMask color_mask = shader.color_mask;
+		CompareFunc stencil_func = shader.stencil_func;
+		StencilOp stencil_pass_op = shader.stencil_pass_op;
+		StencilOp stencil_fail_op = shader.stencil_fail_op;
+		StencilOp stencil_zfail_op = shader.stencil_zfail_op;
+		uint8_t stencil_read_mask = shader.stencil_read_mask;
+		uint8_t stencil_write_mask = shader.stencil_write_mask;
+		uint8_t stencil_ref_val = shader.stencil_ref_val;
+		CompareFunc ztest_func = shader.ztest_func;
+		ZWrite zwrite_mode = shader.zwrite_mode;
+		BlendFactor src_factor = shader.src_factor;
+		BlendFactor dst_factor = shader.dst_factor;
+		BlendOp blend_op = shader.blend_op;
 
 		UNUSED(stencil_write_mask);
 
-		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && s->transparent;
+		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader.transparent;
 
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
@@ -786,7 +782,7 @@ namespace Guarneri
 		v_out.bitangent = v.bitangent * w;
 
 		// todo: ddx ddy
-		fragment_result = s->fragment_shader(v_out);
+		fragment_result = shader.fragment_shader(v_out);
 		pixel_color = Color::encode_rgba(fragment_result);
 
 		// todo: scissor test
@@ -798,7 +794,7 @@ namespace Guarneri
 		// acctually alpha test is a deprecated feature in newer graphics API, cuz it can be emulated by discard() or clip()
 		if (enable_alpha_test)
 		{
-			if (s->discarded)
+			if (shader.discarded)
 			{
 				return;
 			}
@@ -830,7 +826,7 @@ namespace Guarneri
 		}
 
 		// blending
-		if (enable_blending && s->transparent)
+		if (enable_blending && shader.transparent)
 		{
 			color_rgba dst;
 			if (fbuf->read(row, col, dst))

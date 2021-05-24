@@ -101,19 +101,19 @@ namespace Guarneri
 		RawBuffer<float>* get_shadowmap();
 
 	private:
-		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void process_commands();
 		void rasterize_tiles(const size_t& start, const size_t& end);
 		void rasterize_tile(FrameTile& tile);
 		void resolve_tiles(const size_t& start, const size_t& end);
 		void resolve_tile(FrameTile& tile);
-		void execute_task(const FrameTile& tile, const Triangle& tri, Shader* shader);
-		void rasterize(const Triangle& tri, Shader* shader, const RasterizerStrategy& strategy);
-		void scanblock(const Triangle& tri, Shader* shader);
-		void scanline(const Triangle& tri, Shader* shader);
-		v2f process_vertex(Shader* shader, const Vertex& vert) const;
-		void process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, Shader* shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area);
-		void process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, Shader* shader);
+		void execute_task(const FrameTile& tile, const Triangle& tri, const Shader& shader);
+		void rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy);
+		void scanblock(const Triangle& tri, const Shader& shader);
+		void scanline(const Triangle& tri, const Shader& shader);
+		v2f process_vertex(const Shader& shader, const Vertex& vert) const;
+		void process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area);
+		void process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, const Shader& shader);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
 		bool perform_stencil_test(RawBuffer<uint8_t>* stencilbuf, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const uint32_t& row, const uint32_t& col) const;
 		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const;

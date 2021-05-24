@@ -20,11 +20,11 @@ namespace Guarneri
 	{
 	public:
 		Triangle triangle;
-		Shader* shader;
+		const Shader* shader;
 
 	public:
 		TileTask();
-		TileTask(const Triangle& triangle, Shader* shader);
+		TileTask(const Triangle& triangle, const Shader& shader);
 	};
 
 	struct FrameTile
@@ -40,7 +40,7 @@ namespace Guarneri
 	public:
 		FrameTile();
 		~FrameTile();
-		void push_task(const Triangle& tri, Shader* shader);
+		void push_task(const Triangle& tri, const Shader& shader);
 		bool pop_task(TileTask& task);
 		bool is_task_empty();
 		size_t task_size();
@@ -54,7 +54,7 @@ namespace Guarneri
 		static void dispatch_render_task(
 			FrameTile* tiles,
 			const Triangle& tri,
-			Shader* shader,
+			const Shader& shader,
 			const int& w, const int& h,
 			const int& tile_size,
 			const int& col_tile_count);
