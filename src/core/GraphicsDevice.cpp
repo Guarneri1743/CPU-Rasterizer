@@ -28,11 +28,11 @@ namespace Guarneri
 		statistics.triangle_count = 0;
 		multi_thread = true;
 		tile_based = true;
+		thread_pool = std::make_unique<ThreadPool>(std::thread::hardware_concurrency() - 1);
 	}
 
 	GraphicsDevice::~GraphicsDevice()
-	{
-	}
+	{}
 
 	void GraphicsDevice::resize(uint32_t w, uint32_t h)
 	{
@@ -85,8 +85,15 @@ namespace Guarneri
 		return { Config::TILE_SIZE , Config::TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length };
 	}
 
-	void GraphicsDevice::draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw(InputAssemblyTask task)
 	{
+		auto shader = task.shader;
+		auto v1 = task.v1;
+		auto v2 = task.v2;
+		auto v3 = task.v3;
+		auto m = task.m;
+		auto v = task.v;
+		auto p = task.p;
 		if (shader == nullptr)
 		{
 			shader = Shader::get_error_shader();
@@ -122,20 +129,46 @@ namespace Guarneri
 
 	void GraphicsDevice::enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		ia_tasks.push_back({ shader, v1, v2, v3, m, v, p });
+		InputAssemblyTask task = { shader, v1, v2, v3, m, v, p };
+		input_assembly_tasks.emplace_back(thread_pool->enqueue([this, task]
+		{
+			this->draw(task);
+		}));
 	}
 
 	void GraphicsDevice::fence()
 	{
-		std::for_each(
-			std::execution::par_unseq,
-			ia_tasks.begin(),
-			ia_tasks.end(),
-			[&](InputAssemblyTask task)
+		// fence input assembly tasks
+		for (auto& task : input_assembly_tasks) { task.get(); }
+		input_assembly_tasks.clear();
+	}
+
+	void GraphicsDevice::present()
+	{
+		// fence rasteriztion tasks
+		for (uint32_t i = 0; i < tile_length; i++)
 		{
-			draw(task.shader, task.v1, task.v2, task.v3, task.m, task.v, task.p);
+			FrameTile* tile = &tiles[i];
+			tile_tasks.emplace_back(thread_pool->enqueue([this, tile] {
+				this->rasterize_tile(*tile);
+			}));
 		}
-		);
+
+		for (auto& task : tile_tasks) { task.get(); }
+		tile_tasks.clear();
+
+		// fence msaa resolve tasks
+		for (uint32_t i = 0; i < tile_length; i++)
+		{
+			FrameTile* tile = &tiles[i];
+			tile_tasks.emplace_back(thread_pool->enqueue([this, tile]
+			{
+				this->resolve_tile(*tile);
+			}));
+		}
+
+		for (auto& task : tile_tasks) { task.get(); }
+		tile_tasks.clear();
 	}
 
 	void GraphicsDevice::process_commands()
@@ -162,14 +195,6 @@ namespace Guarneri
 				}
 				delete msaa;
 			}
-		}
-	}
-
-	void GraphicsDevice::present()
-	{
-		if (this->tile_based)
-		{
-			render_tiles();
 		}
 	}
 
@@ -299,39 +324,6 @@ namespace Guarneri
 		input.normal = vert.normal;
 		input.tangent = vert.tangent;
 		return shader->vertex_shader(input);
-	}
-
-	void GraphicsDevice::msaa_resolve()
-	{
-		std::vector<int> v(tile_length);
-		std::iota(std::begin(v), std::end(v), 0);
-		std::for_each(
-			std::execution::par_unseq,
-			v.begin(),
-			v.end(),
-			[&](int idx)
-			{
-				resolve_tile(tiles[idx]);
-			});
-	}
-
-	void GraphicsDevice::render_tiles()
-	{
-		std::vector<int> v(tile_length);
-		std::iota(std::begin(v), std::end(v), 0);
-		std::for_each(
-			std::execution::par_unseq,
-			v.begin(),
-			v.end(),
-			[&](int idx)
-			{
-				rasterize_tile(tiles[idx]);
-			});
-
-		if (INST(GlobalShaderParams).enable_msaa)
-		{
-			msaa_resolve();
-		}
 	}
 
 	void GraphicsDevice::rasterize_tiles(const size_t& start, const size_t& end)

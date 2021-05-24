@@ -133,7 +133,7 @@ function setupProject()
       third_party_dir .. "/imgui/backends/*.*",
       third_party_dir .. "/gl3w/GL/*.*",
       third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/Application.cpp"
+      sample_dir .. "/Editor.cpp"
    }
 
    filter { "configurations:Debug*" }

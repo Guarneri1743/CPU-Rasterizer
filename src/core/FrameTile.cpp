@@ -30,22 +30,17 @@ namespace Guarneri
 
 	void FrameTile::push_task(const Triangle& tri, Shader* shader)
 	{
-		tasks.produce(TileTask(tri, shader));
+		tasks.push(TileTask(tri, shader));
 	}
 
 	bool FrameTile::pop_task(TileTask& task)
 	{
-		return tasks.try_consume(task);
+		return tasks.try_pop(task);
 	}
 
 	bool FrameTile::is_task_empty()
 	{
 		return tasks.empty();
-	}
-
-	void FrameTile::clear()
-	{
-		tasks.clear();
 	}
 
 	size_t FrameTile::task_size()

@@ -116,17 +116,17 @@ namespace Guarneri
 			if (cam_update) scene.main_cam->update_proj_mode();
 			if (ImGui::Checkbox("MSAA", &INST(GlobalShaderParams).enable_msaa))
 			{
-				INST(GraphicsDevice).set_subsample_count(sub_samples);
+				INST(GraphicsDevice).set_subsample_count((uint8_t)sub_samples);
 			}
 			if (INST(GlobalShaderParams).enable_msaa)
 			{
 				if (ImGui::InputInt("Subsamples", &sub_samples))
 				{
-					INST(GraphicsDevice).set_subsample_count(sub_samples);
+					INST(GraphicsDevice).set_subsample_count((uint8_t)sub_samples);
 				}
 				else
 				{
-					sub_samples = INST(GraphicsDevice).get_subsample_count();
+					sub_samples = (int)INST(GraphicsDevice).get_subsample_count();
 				}
 			}
 		}

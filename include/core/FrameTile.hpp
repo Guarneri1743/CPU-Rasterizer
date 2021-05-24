@@ -43,7 +43,6 @@ namespace Guarneri
 		void push_task(const Triangle& tri, Shader* shader);
 		bool pop_task(TileTask& task);
 		bool is_task_empty();
-		void clear();
 		size_t task_size();
 		static int coord2index(const int& row, const int& col, const int& col_tile_count);
 		static void pixel2tile(const int& prow, const int& pcol, int& trow, int& tcol, const int& tile_size);

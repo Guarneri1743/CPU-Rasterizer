@@ -72,7 +72,6 @@ namespace Guarneri
 		{
 			return;
 		}
-
 		Vertex vertices[3];
 		target->material->set_shadowmap(INST(GraphicsDevice).get_shadowmap());
 		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
@@ -89,12 +88,13 @@ namespace Guarneri
 					idx++;
 					if (idx == 3)
 					{
-						INST(GraphicsDevice).draw(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+						INST(GraphicsDevice).enqueue(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 						idx = 0;
 					}
 				}
 			}
 		}
+		INST(GraphicsDevice).fence();
 	}
 
 	void Renderer::draw_gizmos() const

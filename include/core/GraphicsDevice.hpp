@@ -14,7 +14,9 @@
 #include "Color.hpp"
 #include "Triangle.hpp"
 #include "FrameTile.hpp"
+#include <ThreadPool.hpp>
 #include <vector>
+#include <future>
 
 namespace Guarneri
 {
@@ -51,7 +53,11 @@ namespace Guarneri
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 		// IA tasks
-		std::vector<InputAssemblyTask> ia_tasks;
+		std::vector<std::future<void>> input_assembly_tasks;
+		// tile tasks
+		std::vector <std::future<void>> tile_tasks;
+		// primitive pool
+		std::unique_ptr<ThreadPool> thread_pool;
 		// commands
 		std::queue<GraphicsCommand*> commands;
 		// framebuffer tiles
@@ -69,7 +75,7 @@ namespace Guarneri
 		~GraphicsDevice();
 		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
-		void draw(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void draw(InputAssemblyTask task);
 		void enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void fence();
 		void present();
@@ -96,8 +102,6 @@ namespace Guarneri
 
 	private:
 		void draw_triangle(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
-		void render_tiles();
-		void msaa_resolve();
 		void process_commands();
 		void rasterize_tiles(const size_t& start, const size_t& end);
 		void rasterize_tile(FrameTile& tile);
