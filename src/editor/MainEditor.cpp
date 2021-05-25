@@ -12,13 +12,15 @@
 
 namespace Guarneri
 {
-	MainEditor::MainEditor() : BaseEditor()
+	MainEditor::MainEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
 	{
 		no_titlebar = true;
 		no_collapse = true;
 		no_resize = true;
 		no_close = true;
 		no_move = true;
+		no_bring_to_front = true;
+		title = "Main";
 	}
 
 	void MainEditor::DrawSceneMenu()
@@ -67,16 +69,7 @@ namespace Guarneri
 
 	void MainEditor::on_gui()
 	{
-		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::SetNextWindowSize(ImVec2((float)Window::main()->get_width(), kTopToolbarHeight));
-		ImGuiWindowFlags flags = get_window_flag();
-		flags |= ImGuiWindowFlags_NoBackground;
-		if (!ImGui::Begin("Toolbar", no_close ? nullptr : &show, flags))
-		{
-			ImGui::End();
-			return;
-		}
-
+		this->rect = Rect(0.0f, 0.0f, (float)Window::main()->get_width(), (float)Window::main()->get_height());
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Scene"))
@@ -95,7 +88,7 @@ namespace Guarneri
 		if (show_file_dialog)
 		{
 			std::string filename;
-			if (DrawFileDialog(FileOp::Open, filename))
+			if (draw_file_dialog(FileOp::Open, filename))
 			{
 				switch (menu_type)
 				{
@@ -109,7 +102,5 @@ namespace Guarneri
 				}
 			}
 		}
-
-		ImGui::End();
 	}
 }

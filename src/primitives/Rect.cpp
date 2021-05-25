@@ -9,37 +9,22 @@ namespace Guarneri
 		extents = Guarneri::Vector2();
 	}
 
+	Rect::Rect(float x, float y, float w, float h)
+	{
+		this->extents = Vector2(w, h) / 2;
+		this->center = Vector2(x, y) + extents;
+	}
+
 	Rect::Rect(const Guarneri::Vector2& center, const Guarneri::Vector2& size)
 	{
 		this->center = center;
 		this->extents = size / 2;
 	}
 
-	Rect::Rect(const Guarneri::Vector2& p)
-	{
-		this->center = p;
-		this->extents = p;
-	}
-
 	Rect::Rect(const Rect& b)
 	{
 		this->center = b.center;
 		this->extents = b.extents;
-	}
-
-	Rect::Rect(const Vector4& v1, const Vector4& v2, const Vector4& v3)
-	{
-		from_triangle(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), Vector2(v3.x, v3.y));
-	}
-
-	Rect::Rect(const Vector3& v1, const Vector3& v2, const Vector3& v3)
-	{
-		from_triangle(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), Vector2(v3.x, v3.y));
-	}
-
-	Rect::Rect(const Vector2& v1, const Vector2& v2, const Vector2& v3)
-	{
-		from_triangle(v1, v2, v3);
 	}
 
 	void Rect::from_triangle(const Vector2& v1, const Vector2& v2, const Vector2& v3)
