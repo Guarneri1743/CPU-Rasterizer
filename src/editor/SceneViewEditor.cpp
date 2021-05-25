@@ -10,6 +10,7 @@ namespace Guarneri
 		no_resize = true;
 		no_close = true;
 		no_move = true;
+		no_background = true;
 		title = "SceneView";
 	}
 

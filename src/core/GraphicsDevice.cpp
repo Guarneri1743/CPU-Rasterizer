@@ -424,6 +424,7 @@ namespace Guarneri
 				if (coverage_count > 0)
 				{
 					pixel_color *= 1.0f / msaa_subsample_count;
+					pixel_color.a = 1.0f;
 					framebuffer->write(row, col, Color::encode_rgba(pixel_color));
 				}
 			}
