@@ -26,27 +26,21 @@ namespace Guarneri
 	float main_light_pitch;
 	int sub_samples = 4;
 
-	SettingEditor::SettingEditor() : BaseEditor()
+	SettingEditor::SettingEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
 	{
 		no_collapse = true;
-		no_resize = false;
+		no_resize = true;
 		no_close = true;
 		no_move = true;
 		std::fill(std::begin(position), std::end(position), 0.0f);
 		std::fill(std::begin(angles), std::end(angles), 0.0f);
 		std::fill(std::begin(scale), std::end(scale), 0.0f);
+		title = "Setting";
 	}
 
 	void SettingEditor::on_gui()
 	{
-		ImGui::SetNextWindowPos(ImVec2((float)(Window::main()->get_width() - kSettingWidth), (float)kTopToolbarHeight));
-		ImGui::SetNextWindowSize(ImVec2((float)kSettingWidth, (float)(Window::main()->get_height() - kTopToolbarHeight)));
-
-		if (!ImGui::Begin("Settings", no_close ? nullptr : &show, get_window_flag()))
-		{
-			ImGui::End();
-			return;
-		}
+		rect = Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
 
 		{
 			ImGui::Text(("Window Size: " + Vector2((float)Window::main()->get_width(), (float)Window::main()->get_height()).str()).c_str());
@@ -280,7 +274,5 @@ namespace Guarneri
 				ImGui::EndPopup();
 			}
 		}
-
-		ImGui::End();
 	}
 }

@@ -2,9 +2,16 @@
 #define _BASE_EDITOR_
 #include "imgui/imgui.h"
 #include <string>
+#include <vector>
+#include "Rect.hpp"
 
 namespace Guarneri
 {
+	constexpr int kTopHeight = 19;
+	constexpr int kLeftWidth = 256;
+	constexpr int kRightWidth = 256;
+	constexpr int kBottomHeight = 256;
+
 	class BaseEditor
 	{
 	public:
@@ -15,7 +22,7 @@ namespace Guarneri
 			SaveAs
 		};
 
-		BaseEditor();
+		BaseEditor(float x, float y, float w, float h);
 		virtual ~BaseEditor();
 		void open();
 		void close();
@@ -23,9 +30,15 @@ namespace Guarneri
 		virtual void on_gui() = 0;
 		static void pre_render();
 		static void post_render();
+		void add_left(BaseEditor* editor);
+		void add_right(BaseEditor* editor);
+		void add_top(BaseEditor* editor);
+		void add_bottom(BaseEditor* editor);
+		void on_pos_size_change(Rect prev, Rect cur);
+		void set_rect(float x, float y, float w, float h);
 
 	protected:
-		bool DrawFileDialog(FileOp op, std::string& filename);
+		bool draw_file_dialog(FileOp op, std::string& filename);
 		bool show_file_dialog;
 		std::string file_dialog_directory;
 		bool show;
@@ -33,6 +46,14 @@ namespace Guarneri
 		
 		static void initialize_imgui();
 		static bool imgui_initialized;
+
+		std::vector<BaseEditor*> left;
+		std::vector<BaseEditor*> right;
+		std::vector<BaseEditor*> top;
+		std::vector<BaseEditor*> bottom;
+
+		Rect rect;
+		const char* title;
 
 		bool no_titlebar = false;
 		bool no_scrollbar = false;

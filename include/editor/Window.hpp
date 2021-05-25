@@ -8,11 +8,6 @@
 namespace Guarneri
 {
 	constexpr char* kGlslVersion = "#version 130";
-	constexpr int kHierarchyWidth = 256;
-	constexpr int kSettingWidth = 256;
-	constexpr int kTopToolbarHeight = 19;
-	constexpr int kDefaultWindowWidth = 1920;
-	constexpr int kDefaultWindowHeight = 1080;
 
 	class Window
 	{
@@ -32,10 +27,8 @@ namespace Guarneri
 		bool is_open();
 		int get_width() { return width; }
 		int get_height() { return height; }
-		int get_scene_view_width() { return width - kHierarchyWidth - kSettingWidth;}
-		int get_scene_view_height() { return height - kTopToolbarHeight; }
 		void add_on_resize_evt(void (*on_resize)(int w, int h, void* ud), void* user_data);
-
+		uint32_t get_fbo() { return FBO; }
 
 	private:
 		static void glfw_error_callback(int error, const char* description);
@@ -58,7 +51,7 @@ namespace Guarneri
 		bool closed;
 
 		uint32_t shader_id;
-		uint32_t texture;
+		uint32_t FBO;
 		uint32_t VBO;
 		uint32_t VAO;
 		uint32_t EBO;
