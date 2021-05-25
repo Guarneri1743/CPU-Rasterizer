@@ -18,7 +18,7 @@ namespace Guarneri
 		editors.emplace_back(std::move(std::make_unique<MainEditor>()));
 		editors.emplace_back(std::move(std::make_unique<SettingEditor>()));
 		editors.emplace_back(std::move(std::make_unique<HierarchyEditor>()));
-		INST(GraphicsDevice).initialize(1920, 1080);
+		INST(GraphicsDevice).initialize(600, 400);
 		Time::start();
 
 		playing = true;

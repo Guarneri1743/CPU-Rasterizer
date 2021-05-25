@@ -72,7 +72,6 @@ namespace Guarneri
 		{
 			return;
 		}
-		Vertex vertices[3];
 		target->material->set_shadowmap(INST(GraphicsDevice).get_shadowmap());
 		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 		if (target != nullptr)
@@ -80,17 +79,12 @@ namespace Guarneri
 			for (auto& m : target->meshes)
 			{
 				assert(m.indices.size() % 3 == 0);
-				uint32_t idx = 0;
-				for (auto& index : m.indices)
+				for (size_t idx = 0; idx < m.indices.size(); idx += 3)
 				{
-					assert(idx < 3 && index < m.vertices.size());
-					vertices[idx] = m.vertices[index];
-					idx++;
-					if (idx == 3)
-					{
-						INST(GraphicsDevice).enqueue(target->material->get_shader(render_pass), vertices[0], vertices[1], vertices[2], model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
-						idx = 0;
-					}
+					auto& v0 = m.vertices[m.indices[idx]];
+					auto& v1 = m.vertices[m.indices[idx + 1]];
+					auto& v2 = m.vertices[m.indices[idx + 2]];
+					INST(GraphicsDevice).enqueue(target->material->get_shader(render_pass), v0, v1, v2, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 				}
 			}
 		}

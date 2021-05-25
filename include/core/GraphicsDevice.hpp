@@ -107,7 +107,7 @@ namespace Guarneri
 		void rasterize_tile(FrameTile& tile);
 		void resolve_tiles(const size_t& start, const size_t& end);
 		void resolve_tile(FrameTile& tile);
-		void execute_task(const FrameTile& tile, const Triangle& tri, const Shader& shader);
+		void rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader);
 		void rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy);
 		void scanblock(const Triangle& tri, const Shader& shader);
 		void scanline(const Triangle& tri, const Shader& shader);

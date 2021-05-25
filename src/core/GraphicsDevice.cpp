@@ -345,7 +345,7 @@ namespace Guarneri
 				auto tri = task.triangle;
 				const Shader& shader = *task.shader;
 
-				execute_task(tile, tri, shader);
+				rasterize(tile, tri, shader);
 
 				// wireframe
 				if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
@@ -430,7 +430,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::execute_task(const FrameTile& tile, const Triangle& tri, const Shader& shader)
+	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;

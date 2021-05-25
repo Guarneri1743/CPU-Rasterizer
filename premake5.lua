@@ -49,7 +49,7 @@ function setupSlotion()
 
       configuration "Release*"
          defines { "NDEBUG"}
-         optimize "On"
+         optimize "Speed"
          targetdir ( solution_dir .. "lib/Release"  )
 
       filter { "platforms:Win*", "configurations:Debug*" }
