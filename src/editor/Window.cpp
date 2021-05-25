@@ -12,8 +12,6 @@
 
 namespace Guarneri
 {
-	constexpr int kDefaultWindowWidth = 1920;
-	constexpr int kDefaultWindowHeight = 1080;
 	Window* Window::main_window;
 
 	Window::Window(const char* title, int w, int h)
@@ -25,8 +23,8 @@ namespace Guarneri
 		EBO(0),
 		VAO(0),
 		VBO(0),
-		FBO(0),
 		shader_id(0),
+		texture(0),
 		cursor_x(0.0f),
 		cursor_y(0.0f),
 		window(nullptr)
@@ -40,8 +38,6 @@ namespace Guarneri
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-		//glfwWindowHint(GLFW_DECORATED, 0);
-		glfwWindowHint(GLFW_RESIZABLE, 1);
 
 		window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 
@@ -106,8 +102,8 @@ namespace Guarneri
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
-		glGenTextures(1, &FBO);
-		glBindTexture(GL_TEXTURE_2D, FBO);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -232,16 +228,16 @@ namespace Guarneri
 	void Window::blit2screen(uint8_t* framebuffer, uint32_t w, uint32_t h)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
-		glBindTexture(GL_TEXTURE_2D, FBO);
-		//uint32_t view_px, view_py, view_w, view_h;
-		//view_px = kHierarchyWidth;
-		//view_py = kTopToolbarHeight;
-		//view_w = get_scene_view_width();
-		//view_h = get_scene_view_height();
-		//glViewport(view_px, view_py, view_w, view_h);
-		//glUseProgram(shader_id);
-		//glBindVertexArray(VAO);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		uint32_t view_px, view_py, view_w, view_h;
+		view_px = kHierarchyWidth;
+		view_py = kTopToolbarHeight;
+		view_w = get_scene_view_width();
+		view_h = get_scene_view_height();
+		glViewport(view_px, view_py, view_w, view_h);
+		glUseProgram(shader_id);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
 	void Window::flush()

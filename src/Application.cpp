@@ -2,7 +2,6 @@
 #include "SettingEditor.hpp"
 #include "HierarchyEditor.hpp"
 #include "MainEditor.hpp"
-#include "SceneViewEditor.hpp"
 #include <iostream>
 
 namespace Guarneri
@@ -16,17 +15,9 @@ namespace Guarneri
 		if (playing) return;
 
 		Window::initialize_main_window("CPU-Rasterizer");
-		editors.emplace_back(std::move(std::make_unique<MainEditor>(0.0f, 0.0f, (float)Window::main()->get_width(), (float)Window::main()->get_height())));
-		auto sceneview = std::make_unique<SceneViewEditor>((float)kLeftWidth, (float)kTopHeight, (float)Window::main()->get_width() - (float)kRightWidth - (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		auto setting = std::make_unique<SettingEditor>(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		auto hierarchy = std::make_unique<HierarchyEditor>((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		sceneview->add_left(hierarchy.get());
-		//hierarchy->add_right(sceneview.get());
-		sceneview->add_right(setting.get());
-		//setting->add_left(sceneview.get());
-		editors.emplace_back(std::move(setting));
-		editors.emplace_back(std::move(hierarchy));
-		editors.emplace_back(std::move(sceneview));
+		editors.emplace_back(std::move(std::make_unique<MainEditor>()));
+		editors.emplace_back(std::move(std::make_unique<SettingEditor>()));
+		editors.emplace_back(std::move(std::make_unique<HierarchyEditor>()));
 		INST(GraphicsDevice).initialize(600, 400);
 		Time::start();
 

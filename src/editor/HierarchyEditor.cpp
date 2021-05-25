@@ -11,13 +11,12 @@
 
 namespace Guarneri
 {
-	HierarchyEditor::HierarchyEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	HierarchyEditor::HierarchyEditor() : BaseEditor()
 	{
 		no_collapse = true;
-		no_resize = true;
+		no_resize = false;
 		no_close = true;
 		no_move = true;
-		title = "Hierarchy";
 	}
 
 	void DrawTransform(Transform* transform)
@@ -27,26 +26,26 @@ namespace Guarneri
 			ImGuiTreeNodeFlags_OpenOnDoubleClick |
 			ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		if (transform == Scene::current()->selection)
+		if(transform == Scene::current()->selection)
 		{
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
 
-		if (ImGui::TreeNodeEx(transform->name.c_str(), flags))
-		{
-			for (int i = 0; i < transform->child_count(); i++)
-			{
-				auto child = transform->access_child(i);
+        if (ImGui::TreeNodeEx(transform->name.c_str(), flags))
+        {
+            for (int i = 0; i < transform->child_count(); i++)
+            {
+                auto child = transform->access_child(i);
 				DrawTransform(child);
-			}
-			ImGui::TreePop();
-		}
+            }
+            ImGui::TreePop();
+        }
 
-		if (ImGui::IsItemClicked())
-		{
+        if (ImGui::IsItemClicked())
+        {
 			Scene::current()->selection = transform;
-		}
-
+        }
+		
 		if (ImGui::BeginDragDropSource())
 		{
 			ImGui::SetDragDropPayload("transform", NULL, 0);
@@ -57,8 +56,15 @@ namespace Guarneri
 
 	void HierarchyEditor::on_gui()
 	{
-		rect = Rect(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		
+		ImGui::SetNextWindowPos(ImVec2(0, kTopToolbarHeight));
+		ImGui::SetNextWindowSize(ImVec2((float)kHierarchyWidth, (float)(Window::main()->get_height() - kTopToolbarHeight)));
+
+		if (!ImGui::Begin("Hierarchy", no_close ? nullptr : &show, get_window_flag()))
+		{
+			ImGui::End();
+			return;
+		}
+
 		auto scene = Scene::current();
 
 		for (size_t idx = 0; idx < scene->objects.size(); idx++)
@@ -74,5 +80,7 @@ namespace Guarneri
 			if (obj == nullptr || obj->target == nullptr || obj->target->name == "") continue;
 			DrawTransform(obj->target->transform.get());
 		}
+
+		ImGui::End();
 	}
 }

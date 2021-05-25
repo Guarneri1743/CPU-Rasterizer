@@ -22,7 +22,7 @@ namespace Guarneri
 {
 	bool BaseEditor::imgui_initialized = false;
 
-	BaseEditor::BaseEditor(float x, float y, float w, float h) : rect(x, y, w, h), show(true), show_file_dialog(false), title("Editor")
+	BaseEditor::BaseEditor() : show(true), show_file_dialog(false)
 	{
 		initialize_imgui();
 	}
@@ -43,19 +43,7 @@ namespace Guarneri
 	void BaseEditor::render()
 	{
 		if (!show) { return; }
-
-		ImGui::SetNextWindowPos(ImVec2(rect.x(), rect.y()));
-		ImGui::SetNextWindowSize(ImVec2(rect.w(), rect.h()));
-
-		if (!ImGui::Begin(title, no_close ? nullptr : &show, get_window_flag()))
-		{
-			ImGui::End();
-			return;
-		}
-
 		on_gui();
-
-		ImGui::End();
 	}
 
 	void BaseEditor::pre_render()
@@ -69,70 +57,6 @@ namespace Guarneri
 	{
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	}
-
-	void BaseEditor::add_left(BaseEditor* editor)
-	{
-		if (editor != nullptr)
-		{
-			if (rect.x() > 0)
-			{
-				if (left.size() > 0)
-				{
-					left.back()->add_right(editor);
-					editor->rect = Rect(left.back()->rect.x() + left.back()->rect.w(), rect.y(), rect.x() - left.back()->rect.x(), rect.h());
-				}
-				else
-				{
-					editor->rect = Rect(0, rect.y(), rect.x(), rect.h());
-					left.push_back(editor);
-				}
-			}
-		}
-	}
-
-	void BaseEditor::add_right(BaseEditor* editor)
-	{
-		if (editor != nullptr)
-		{
-			if (rect.x() < Window::main()->get_width())
-			{
-				if (right.size() > 0)
-				{
-					right.front()->add_left(editor);
-					editor->rect = Rect(rect.x() + rect.w(), rect.y(), right.front()->rect.x() - rect.x() - rect.w(), rect.h());
-				}
-				else
-				{
-					editor->rect = Rect(rect.x() + rect.w(), rect.y(), Window::main()->get_width() - rect.x(), rect.h());
-					right.push_back(editor);
-				}
-			}
-		}
-	}
-
-	void BaseEditor::add_top(BaseEditor* editor)
-	{
-		if (editor != nullptr)
-		{
-			if (rect.y() > 0)
-			{
-				editor->rect = Rect(rect.x(), 0, rect.w(), rect.y());
-				top.push_back(editor);
-			}
-		}
-	}
-
-	void BaseEditor::add_bottom(BaseEditor* editor)
-	{
-		if (editor != nullptr)
-		{
-			if (rect.y() < Window::main()->get_height())
-			{
-				editor->rect = Rect(rect.x(), rect.y(), rect.w(), Window::main()->get_height() - rect.y());
-				bottom.push_back(editor);
-			}
-		}
 	}
 
 	ImGuiWindowFlags BaseEditor::get_window_flag()
@@ -165,58 +89,7 @@ namespace Guarneri
 		imgui_initialized = true;
 	}
 
-	void BaseEditor::on_pos_size_change(Rect prev, Rect cur)
-	{
-		float l = cur.x() - prev.x();
-		float r = cur.x() + cur.w() - prev.x() - prev.w();
-		float t = cur.y() - prev.y();
-		float b = cur.y() + cur.h() - prev.y() - prev.h();
-
-		for (auto& editor : left)
-		{
-			if (editor != nullptr)
-			{
-				editor->rect.center.x -= l;
-				editor->rect.extents.x -= l * 0.5f;
-			}
-		}
-
-		for (auto& editor : right)
-		{
-			if (editor != nullptr)
-			{
-				editor->rect.center.x += r;
-				editor->rect.extents.x += r * 0.5f;
-			}
-		}
-
-		for (auto& editor : top)
-		{
-			if (editor != nullptr)
-			{
-				editor->rect.center.y -= t;
-				editor->rect.extents.y -= t * 0.5f;
-			}
-		}
-
-		for (auto& editor : bottom)
-		{
-			if (editor != nullptr)
-			{
-				editor->rect.center.y -= b;
-				editor->rect.extents.y -= b * 0.5f;
-			}
-		}
-	}
-
-	void BaseEditor::set_rect(float x, float y, float w, float h)
-	{
-		Rect new_rect = Rect(x, y, w, h);
-		on_pos_size_change(rect, new_rect);
-		rect = new_rect;
-	}
-
-	bool BaseEditor::draw_file_dialog(FileOp op, std::string& filename)
+	bool BaseEditor::DrawFileDialog(FileOp op, std::string& filename)
 	{
 		UNUSED(op);
 		ImVec2 pos = ImGui::GetWindowPos();

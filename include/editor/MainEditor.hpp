@@ -1,5 +1,5 @@
-#ifndef _MAIN_EDITOR_
-#define _MAIN_EDITOR_
+#ifndef _TOP_TOOL_BAR_EDITOR_
+#define _TOP_TOOL_BAR_EDITOR_
 
 #include "BaseEditor.hpp"
 
@@ -8,7 +8,7 @@ namespace Guarneri
 	class MainEditor : public BaseEditor
 	{
 	public:
-		MainEditor(float x, float y, float w, float h);
+		MainEditor();
 		virtual void on_gui();
 
 	private:

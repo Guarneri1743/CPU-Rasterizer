@@ -432,7 +432,7 @@ namespace Guarneri
 
 	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy(), tri[1].position.xy(), tri[2].position.xy());
+		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
 		int row_end = (int)(bounds.max().y + 0.5f) + 1;
 		int col_start = (int)(bounds.min().x + 0.5f) - 1;
@@ -511,7 +511,7 @@ namespace Guarneri
 
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy(), tri[1].position.xy(), tri[2].position.xy());
+		auto bounds = Rect(tri[0].position, tri[1].position, tri[2].position);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
 		int row_end = (int)(bounds.max().y + 0.5f) + 1;
 		int col_start = (int)(bounds.min().x + 0.5f) - 1;
