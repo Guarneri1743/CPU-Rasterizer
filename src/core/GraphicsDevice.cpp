@@ -155,17 +155,20 @@ namespace Guarneri
 		tile_tasks.clear();
 
 		// fence msaa resolve tasks
-		for (uint32_t i = 0; i < tile_length; i++)
+		if (INST(GlobalShaderParams).enable_msaa)
 		{
-			FrameTile* tile = &tiles[i];
-			tile_tasks.emplace_back(thread_pool->enqueue([this, tile]
+			for (uint32_t i = 0; i < tile_length; i++)
 			{
-				this->resolve_tile(*tile);
-			}));
-		}
+				FrameTile* tile = &tiles[i];
+				tile_tasks.emplace_back(thread_pool->enqueue([this, tile]
+				{
+					this->resolve_tile(*tile);
+				}));
+			}
 
-		for (auto& task : tile_tasks) { task.get(); }
-		tile_tasks.clear();
+			for (auto& task : tile_tasks) { task.get(); }
+			tile_tasks.clear();
+		}
 	}
 
 	void GraphicsDevice::process_commands()
