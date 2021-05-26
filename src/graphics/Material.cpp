@@ -35,7 +35,7 @@ namespace Guarneri
 		this->blend_op = BlendOp::ADD;
 		this->double_face = false;
 		this->transparent = false;
-		this->cast_shadow = false;
+		this->cast_shadow = true;
 	}
 
 	Material::Material(std::string name) : Material()

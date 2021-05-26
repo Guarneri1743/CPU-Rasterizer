@@ -41,6 +41,7 @@ namespace Guarneri
 
 	Scene::~Scene()
 	{
+		selection = nullptr;
 		std::cout << "destruct scene: " << this->name << std::endl;
 	}
 

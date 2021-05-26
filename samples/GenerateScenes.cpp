@@ -575,6 +575,19 @@ void generate_blending_scene()
 	Scene::serialize(*demo_scene, "/scenes/blending_sample.scene");
 }
 
+void generate_model(std::string name, std::string path)
+{
+	auto model = Model::load_raw(path, false);
+	model->name = name;
+	Model::serialize(*model, "/models/" + name + ".model");
+}
+
+void generate_models()
+{
+	generate_model("bunny", "/misc/bunny.obj");
+	generate_model("teapot", "/misc/teapot.obj");
+}
+
 int main()
 {
 	matrix_case();
@@ -585,4 +598,5 @@ int main()
 	generate_filtering_scene();
 	generate_cubemap_scene();
 	generate_blending_scene();
+	generate_models();
 }
