@@ -60,8 +60,9 @@ namespace Guarneri
 	class Application
 	{
 	public:
-		static void play();
-		static void load_scene(const char* path);
+		static void initialize();
+		static void loop();
+		static void stop();
 
 	private:
 		static bool playing;

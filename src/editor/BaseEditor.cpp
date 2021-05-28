@@ -9,7 +9,6 @@
 #include "Window.hpp"
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
-#include "Application.hpp"
 #include "Scene.hpp"
 #include <filesystem>
 #include <string>
@@ -22,7 +21,7 @@ namespace Guarneri
 {
 	bool BaseEditor::imgui_initialized = false;
 
-	BaseEditor::BaseEditor(float x, float y, float w, float h) : rect(x, y, w, h), show(true), show_file_dialog(false), title("Editor")
+	BaseEditor::BaseEditor(float x, float y, float w, float h) : rect(x, y, w, h), show(true), title("Editor")
 	{
 		initialize_imgui();
 	}
@@ -52,7 +51,7 @@ namespace Guarneri
 			ImGui::End();
 			return;
 		}
-
+		
 		on_gui();
 
 		ImGui::End();
@@ -140,6 +139,7 @@ namespace Guarneri
 		ImGuiWindowFlags window_flags = 0;
 		if (no_titlebar)        window_flags |= ImGuiWindowFlags_NoTitleBar;
 		if (no_scrollbar)       window_flags |= ImGuiWindowFlags_NoScrollbar;
+		if (no_scrollbar_with_mouse) window_flags |= ImGuiWindowFlags_NoScrollWithMouse;
 		if (!no_menu)           window_flags |= ImGuiWindowFlags_MenuBar;
 		if (no_move)            window_flags |= ImGuiWindowFlags_NoMove;
 		if (no_resize)          window_flags |= ImGuiWindowFlags_NoResize;
@@ -214,36 +214,5 @@ namespace Guarneri
 		Rect new_rect = Rect(x, y, w, h);
 		on_pos_size_change(rect, new_rect);
 		rect = new_rect;
-	}
-
-	bool BaseEditor::draw_file_dialog(FileOp op, std::string& filename)
-	{
-		UNUSED(op);
-		ImVec2 pos = ImGui::GetWindowPos();
-		ImVec2 size = ImGui::GetWindowSize();
-		ImGui::SetNextWindowPos(ImVec2((float)(Window::main()->get_width() / 4), 128.0f));
-		ImGui::SetNextWindowSize(ImVec2(512, 512));
-		if (!ImGui::Begin("FileDialog", &show_file_dialog, 0))
-		{
-			ImGui::End();
-			return false;
-		}
-
-		bool selected = false;
-		for (auto& file : std::filesystem::directory_iterator(file_dialog_directory))
-		{
-			ImGui::Separator();
-			if (ImGui::Selectable(file.path().filename().string().c_str()))
-			{
-				std::string file_path = file.path().generic_string();
-				std::string asset_path = ASSETS_PATH;
-				size_t length = asset_path.length();
-				filename = file_path.replace(file_path.begin(), file_path.begin() + length, "");
-				selected = true;
-			}
-		}
-
-		ImGui::End();
-		return selected;
 	}
 }

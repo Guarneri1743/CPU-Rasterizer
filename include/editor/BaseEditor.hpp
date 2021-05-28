@@ -38,9 +38,6 @@ namespace Guarneri
 		void set_rect(float x, float y, float w, float h);
 
 	protected:
-		bool draw_file_dialog(FileOp op, std::string& filename);
-		bool show_file_dialog;
-		std::string file_dialog_directory;
 		bool show;
 		ImGuiWindowFlags get_window_flag();
 		
@@ -57,6 +54,7 @@ namespace Guarneri
 
 		bool no_titlebar = false;
 		bool no_scrollbar = false;
+		bool no_scrollbar_with_mouse = false;
 		bool no_menu = false;
 		bool no_move = false;
 		bool no_resize = false;

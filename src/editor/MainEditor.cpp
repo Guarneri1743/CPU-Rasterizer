@@ -6,7 +6,6 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
-#include "Application.hpp"
 #include "Utility.hpp"
 #include <filesystem>
 
@@ -23,15 +22,13 @@ namespace Guarneri
 		title = "Main";
 	}
 
-	void MainEditor::DrawSceneMenu()
+	//todo
+	void MainEditor::draw_file_menu()
 	{
-		ImGui::MenuItem("(load scene)", NULL, false, false);
+		//ImGui::MenuItem("()", NULL, false, false);
 
-		if (ImGui::MenuItem("Open", "Ctrl+O"))
+		if (ImGui::MenuItem("Import", "Ctrl+O"))
 		{
-			file_dialog_directory = ASSETS_PATH + "/scenes";
-			menu_type = MenuType::kScene;
-			show_file_dialog = true;
 		}
 
 		if (ImGui::MenuItem("Save", "Ctrl+S"))
@@ -41,29 +38,6 @@ namespace Guarneri
 
 		if (ImGui::MenuItem("Save As.."))
 		{
-			//todo
-		}
-	}
-
-	void MainEditor::DrawModelMenu()
-	{
-		ImGui::MenuItem("(load model)", NULL, false, false);
-
-		if (ImGui::MenuItem("Add", "Ctrl+O"))
-		{
-			file_dialog_directory = ASSETS_PATH + "/models"; 
-			menu_type = MenuType::kModel;
-			show_file_dialog = true;
-		}
-
-		if (ImGui::MenuItem("Save", "Ctrl+S"))
-		{
-			//todo
-		}
-
-		if (ImGui::MenuItem("Save As.."))
-		{
-			//todo
 		}
 	}
 
@@ -72,35 +46,12 @@ namespace Guarneri
 		this->rect = Rect(0.0f, 0.0f, (float)Window::main()->get_width(), (float)Window::main()->get_height());
 		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::BeginMenu("Scene"))
+			if (ImGui::BeginMenu("File"))
 			{
-				DrawSceneMenu();
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Model"))
-			{
-				DrawModelMenu();
+				draw_file_menu();
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
-		}
-
-		if (show_file_dialog)
-		{
-			std::string filename;
-			if (draw_file_dialog(FileOp::Open, filename))
-			{
-				switch (menu_type)
-				{
-				case MenuType::kScene:
-					Application::load_scene(filename.c_str());
-					break;
-				case MenuType::kModel:
-					auto model = Model::load_asset(filename);
-					Scene::current()->add(model);
-					break;
-				}
-			}
 		}
 	}
 }

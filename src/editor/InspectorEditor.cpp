@@ -1,4 +1,4 @@
-#include "SettingEditor.hpp"
+#include "InspectorEditor.hpp"
 #include "imgui/imgui.h"
 #include "Marcos.h"
 #include "InputManager.hpp"
@@ -6,7 +6,6 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
-#include "Application.hpp"
 #include <algorithm>
 
 #undef near
@@ -26,8 +25,11 @@ namespace Guarneri
 	float main_light_pitch;
 	int sub_samples = 4;
 
-	SettingEditor::SettingEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	InspectorEditor::InspectorEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
 	{
+		no_scrollbar = true;
+		no_titlebar = true;
+		no_menu = true;
 		no_collapse = true;
 		no_resize = true;
 		no_close = true;
@@ -38,10 +40,51 @@ namespace Guarneri
 		title = "Setting";
 	}
 
-	void SettingEditor::on_gui()
+	void InspectorEditor::draw_inspector()
 	{
-		rect = Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		if (Scene::current() == nullptr) return;
 
+		Scene& scene = *Scene::current();
+
+		if (scene.selection != nullptr)
+		{
+			if (ImGui::InputFloat3("position", position))
+			{
+				scene.selection->set_local_position({ position[0], position[1], position[2] });
+			}
+			else
+			{
+				position[0] = scene.selection->local_position.x;
+				position[1] = scene.selection->local_position.y;
+				position[2] = scene.selection->local_position.z;
+			}
+
+			if (ImGui::InputFloat3("angles", angles))
+			{
+				scene.selection->set_local_rotation({ DEGREE2RAD(angles[0]), DEGREE2RAD(angles[1]), DEGREE2RAD(angles[2]) });
+			}
+			else
+			{
+				angles[0] = RAD2DEGREE(scene.selection->local_rotation.x);
+				angles[1] = RAD2DEGREE(scene.selection->local_rotation.y);
+				angles[2] = RAD2DEGREE(scene.selection->local_rotation.z);
+			}
+
+			if (ImGui::InputFloat3("scale", scale))
+			{
+				scene.selection->set_local_scale({ scale[0], scale[1], scale[2] });
+			}
+			else
+			{
+				scale[0] = scene.selection->local_scale.x;
+				scale[1] = scene.selection->local_scale.y;
+				scale[2] = scene.selection->local_scale.z;
+			}
+		}
+	}
+
+	void InspectorEditor::draw_settings()
+	{
 		{
 			ImGui::Text(("Window Size: " + Vector2((float)Window::main()->get_width(), (float)Window::main()->get_height()).str()).c_str());
 			if (ImGui::InputInt2("RT Size", rt_size))
@@ -57,45 +100,6 @@ namespace Guarneri
 		}
 
 		Scene& scene = *Scene::current();
-
-		if (ImGui::CollapsingHeader("Inspector"))
-		{
-			if (scene.selection != nullptr)
-			{
-				if (ImGui::InputFloat3("position", position))
-				{
-					scene.selection->set_local_position({ position[0], position[1], position[2] });
-				}
-				else
-				{
-					position[0] = scene.selection->local_position.x;
-					position[1] = scene.selection->local_position.y;
-					position[2] = scene.selection->local_position.z;
-				}
-
-				if (ImGui::InputFloat3("angles", angles))
-				{
-					scene.selection->set_local_rotation({ DEGREE2RAD(angles[0]), DEGREE2RAD(angles[1]), DEGREE2RAD(angles[2]) });
-				}
-				else
-				{
-					angles[0] = RAD2DEGREE(scene.selection->local_rotation.x);
-					angles[1] = RAD2DEGREE(scene.selection->local_rotation.y);
-					angles[2] = RAD2DEGREE(scene.selection->local_rotation.z);
-				}
-
-				if (ImGui::InputFloat3("scale", scale))
-				{
-					scene.selection->set_local_scale({ scale[0], scale[1], scale[2] });
-				}
-				else
-				{
-					scale[0] = scene.selection->local_scale.x;
-					scale[1] = scene.selection->local_scale.y;
-					scale[2] = scene.selection->local_scale.z;
-				}
-			}
-		}
 
 		if (ImGui::CollapsingHeader("Camera"))
 		{
@@ -273,6 +277,27 @@ namespace Guarneri
 					}
 				ImGui::EndPopup();
 			}
+		}
+	}
+
+	void InspectorEditor::on_gui()
+	{
+		rect = Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+
+		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+		if (ImGui::BeginTabBar("Inspector", tab_bar_flags))
+		{
+			if (ImGui::BeginTabItem("Inspector"))
+			{
+				draw_inspector();
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem("Setting"))
+			{
+				draw_settings();
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
 		}
 	}
 }

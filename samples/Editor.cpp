@@ -2,7 +2,8 @@
 
 int main()
 {
-	Guarneri::Application::load_scene("/scenes/lighting_sample.scene");
-	Guarneri::Application::play();
+	Guarneri::Scene::open_scene("/scenes/lighting_sample.scene");
+	Guarneri::Application::initialize();
+	Guarneri::Application::loop();
 	return 0;
 }

@@ -12,15 +12,7 @@ namespace Guarneri
 		virtual void on_gui();
 
 	private:
-		enum class MenuType
-		{
-			kNone = 0,
-			kScene = 1,
-			kModel = 2
-		};
-		MenuType menu_type = MenuType::kNone;
-		void DrawSceneMenu();
-		void DrawModelMenu();
+		void draw_file_menu();
 	};
 }
 

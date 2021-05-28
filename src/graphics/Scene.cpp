@@ -25,10 +25,11 @@
 
 namespace Guarneri
 {
-	Scene* Scene::current_scene;
+	std::unique_ptr<Scene> Scene::current_scene ;
 
 	Scene::Scene(std::string name)
 	{
+		selection = nullptr;
 		this->name = name;
 		enable_skybox = false;
 		main_light.intensity = 1.0f;
@@ -41,6 +42,7 @@ namespace Guarneri
 
 	Scene::~Scene()
 	{
+		selection = nullptr;
 		std::cout << "destruct scene: " << this->name << std::endl;
 	}
 
@@ -295,9 +297,23 @@ namespace Guarneri
 
 	std::unique_ptr<Scene> Scene::load_asset(const std::string& path)
 	{
-		auto scene = std::unique_ptr<Scene>(new Scene(""));
+		auto scene = std::make_unique<Scene>("");
 		deserialize(path, *scene);
 		return scene;
+	}
+
+	void Scene::open_scene(const char* path)
+	{
+		INST(InputManager).clear_evts();
+		auto scene = Scene::load_asset(path);
+		if (scene == nullptr) return;
+		INST(GlobalShaderParams).enable_shadow = scene->enable_shadow;
+		INST(GlobalShaderParams).pcf_on = scene->pcf_on;
+		INST(GlobalShaderParams).shadow_bias = scene->shadow_bias;
+		INST(GlobalShaderParams).color_space = scene->color_space;
+		INST(GlobalShaderParams).workflow = scene->work_flow;
+		Scene::set_current(std::move(scene));
+		std::cout << "open scene: " << path << std::endl;
 	}
 
 	void Scene::serialize(const Scene& scene, const std::string& path)
@@ -385,7 +401,13 @@ namespace Guarneri
 			
 			const char* name = doc["name"].GetString();
 			scene.name = name;
-
+			if (scene.name == "")
+			{
+				size_t last_slash = path.find_last_of("/\\");
+				std::string nice_name = path;
+				nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
+				scene.name = nice_name;
+			}
 			scene.main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
 			auto point_lights = doc["point_lights"].GetArray();
 			for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
