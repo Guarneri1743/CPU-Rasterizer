@@ -74,7 +74,9 @@
 
 overview
 
-<img src="/gallery/overview.jpg" width = "1280" height = "720" alt="Backpack" align=bottom /> 
+<img src="/gallery/bunny_teapot.gif" width = "800" height = "500" alt="overview" align=bottom /> 
+
+<img src="/gallery/overview.jpg" width = "800" height = "600" alt="Backpack" align=bottom /> 
 
 <img src="/gallery/helmet_ibl.jpg" width = "512" height = "512" alt="Star War" align=bottom />
 
