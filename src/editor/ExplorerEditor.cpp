@@ -5,6 +5,7 @@
 #include "Scene.hpp"
 #include "Model.hpp"
 #include <iostream>
+#include <string>
 
 namespace Guarneri
 {
@@ -27,10 +28,9 @@ namespace Guarneri
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("ExplorerBar", tab_bar_flags))
 		{
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
 			if (ImGui::BeginTabItem("Explorer"))
 			{
-				ImGuiWindowFlags window_flags = 0;
-				
 				// explorer
 				{
 					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, rect.h()), true, window_flags);
@@ -57,6 +57,11 @@ namespace Guarneri
 
 			if (ImGui::BeginTabItem("Console"))
 			{
+				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
+				ImGui::BeginChild("Console", ImVec2(ImGui::GetWindowContentRegionWidth(), rect.h()), true, window_flags);
+				draw_console();
+				ImGui::EndChild();
+				ImGui::PopStyleVar();
 				ImGui::EndTabItem();
 			}
 
@@ -66,11 +71,6 @@ namespace Guarneri
 
 	void ExplorerEditor::draw_files(std::filesystem::path dir, std::filesystem::path& selected)
 	{
-		ImGuiTreeNodeFlags flags =
-			ImGuiTreeNodeFlags_OpenOnArrow |
-			ImGuiTreeNodeFlags_OpenOnDoubleClick |
-			ImGuiTreeNodeFlags_SpanAvailWidth;
-
 		for (auto& path : std::filesystem::directory_iterator(dir))
 		{
 			std::string full_name = path.path().generic_string();
@@ -78,24 +78,14 @@ namespace Guarneri
 			std::string nice_name = full_name;
 			nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
 
-			if (path.path() == selected)
-			{
-				flags |= ImGuiTreeNodeFlags_Selected;
-			}
-			else
-			{
-				flags &= ~ImGuiTreeNodeFlags_Selected;
-			}
-
+			ImGui::PushID(full_name.c_str());
 			if (!path.is_directory())
 			{
-				ImGui::Text(nice_name.c_str(), selected == path.path());
-
-				if (ImGui::IsItemClicked(0))
+				if (ImGui::Selectable(nice_name.c_str(), selected == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
 				{
 					selected = path.path();
 				}
-
+				
 				if (path.path().has_extension())
 				{
 					std::string asset_path = ASSETS_PATH;
@@ -130,7 +120,12 @@ namespace Guarneri
 				ImGui::Text(nice_name.c_str());
 				ImGui::EndDragDropSource();
 			}
+			ImGui::PopID();
 		}
+	}
+
+	void ExplorerEditor::draw_console()
+	{
 	}
 
 	std::size_t count_dirs(std::filesystem::path path)
