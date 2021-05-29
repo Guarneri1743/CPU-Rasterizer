@@ -40,6 +40,7 @@ namespace Guarneri
 	protected:
 		bool show;
 		ImGuiWindowFlags get_window_flag();
+		void draw_space(const int& count);
 		
 		static void initialize_imgui();
 		static bool imgui_initialized;

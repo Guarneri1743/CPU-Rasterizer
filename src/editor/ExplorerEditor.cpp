@@ -20,6 +20,7 @@ namespace Guarneri
 		no_move = true;
 		no_scrollbar_with_mouse = true;
 		no_scrollbar = true;
+		selected_log = INT_MAX;
 		title = "Explorer";
 	}
 
@@ -136,6 +137,7 @@ namespace Guarneri
 				selected_log = idx;
 			}
 		}
+		draw_space(3);
 	}
 
 	std::size_t count_dirs(std::filesystem::path path)

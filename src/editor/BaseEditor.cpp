@@ -150,6 +150,16 @@ namespace Guarneri
 		return window_flags;
 	}
 
+	void BaseEditor::draw_space(const int& count)
+	{
+		if (count <= 0) return;
+		int total = count;
+		while (total--)
+		{
+			ImGui::Spacing();
+		}
+	}
+
 	void BaseEditor::initialize_imgui()
 	{
 		if (imgui_initialized) return;
