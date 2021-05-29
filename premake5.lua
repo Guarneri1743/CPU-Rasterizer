@@ -23,7 +23,8 @@ function setupIncludeDirs()
       third_party_dir .. "/rapidjson",
       third_party_dir .. "/imgui",
       third_party_dir .. "/glfw",
-      third_party_dir .. "/gl3w"
+      third_party_dir .. "/gl3w",
+      third_party_dir .. "/threading"
    }
 end
 
@@ -133,6 +134,7 @@ function setupProject()
       third_party_dir .. "/imgui/backends/*.*",
       third_party_dir .. "/gl3w/GL/*.*",
       third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/threading/*.*",
       sample_dir .. "/Editor.cpp"
    }
 
@@ -175,6 +177,7 @@ function setupGenerateScenesProj()
       third_party_dir .. "/imgui/backends/*.*",
       third_party_dir .. "/gl3w/GL/*.*",
       third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/threading/*.*",
       sample_dir .. "/GenerateScenes.cpp"
    }
 
