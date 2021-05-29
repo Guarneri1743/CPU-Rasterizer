@@ -74,7 +74,7 @@
 
 overview
 
-<img src="/gallery/bunny.gif" width = "800" height = "500" alt="overview" align=bottom /> 
+<img src="/gallery/bunny.gif" width = "800" height = "600" alt="overview" align=bottom /> 
 
 | tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
