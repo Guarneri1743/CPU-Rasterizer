@@ -11,6 +11,7 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
+#include "Logger.hpp"
 
 namespace Guarneri
 {
@@ -60,7 +61,7 @@ namespace Guarneri
 		}
 		meshes.clear();
 		reload_mesh(Scene->mRootNode, Scene);
-		std::cout << "load model: " << abs_path << " mesh count: " << this->meshes.size() << std::endl;
+		LOG("load model: {}, mesh count: {}", abs_path, meshes.size());
 		importer.FreeScene();
 	}
 
@@ -109,7 +110,6 @@ namespace Guarneri
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
 	{
-		//std::cout << "traverse_nodes: " << node->mName.C_Str() << ", mesh: " << node->mNumMeshes << std::endl;
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
@@ -235,11 +235,11 @@ namespace Guarneri
 			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
 			doc.Accept(material_writer);
 			fclose(fd);
-			std::cout << "save model: " << path << std::endl;
+			LOG("save model: {}", path);
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 
@@ -300,7 +300,7 @@ namespace Guarneri
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 

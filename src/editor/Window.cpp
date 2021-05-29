@@ -9,6 +9,7 @@
 #include "Utility.hpp"
 #include "InputManager.hpp"
 #include "Singleton.hpp"
+#include "Logger.hpp"
 
 namespace Guarneri
 {
@@ -34,7 +35,7 @@ namespace Guarneri
 		glfwSetErrorCallback(glfw_error_callback);
 		if (!glfwInit())
 		{
-			std::cout << "create window failed." << std::endl;
+			FATAL("create window failed.");
 			return;
 		}
 
@@ -48,7 +49,7 @@ namespace Guarneri
 		if (window == nullptr)
 		{
 			glfwTerminate();
-			std::cout << "create window failed." << std::endl;
+			FATAL("create window failed.");
 			return;
 		}
 
@@ -57,7 +58,7 @@ namespace Guarneri
 
 		if (gl3wInit() != 0)
 		{
-			std::cout << "create window failed." << std::endl;
+			FATAL("create window failed.");
 			return;
 		}
 
@@ -121,7 +122,7 @@ namespace Guarneri
 		glUniform1i(glGetUniformLocation(shader_id, "framebuffer"), 0);
 
 		valid = true;
-		std::cout << "window initialized." << std::endl;
+		LOG("window initialized.");
 	}
 
 	Window::~Window()
@@ -149,7 +150,7 @@ namespace Guarneri
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-				std::cout << "[SHADER] Program compile error " << type << "\n" << infoLog << std::endl;
+				ERROR("shader program compile error: {}", infoLog);
 			}
 		}
 		else
@@ -158,14 +159,14 @@ namespace Guarneri
 			if (!success)
 			{
 				glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-				std::cout << "[SHADER] Shader link error " << type << "\n" << infoLog << std::endl;
+				ERROR("shader program link error: {}", infoLog);
 			}
 		}
 	}
 
 	uint32_t Window::compile_blit_shader(std::string vert_path, std::string frag_path)
 	{
-		std::cout << "try compile blit shader: " << vert_path << ", " << frag_path << std::endl;
+		LOG("try compile blit shader, vertex: {}  fragment: {}", vert_path, frag_path);
 		std::string vertexCode;
 		std::string fragmentCode;
 
@@ -193,7 +194,7 @@ namespace Guarneri
 		}
 		catch (std::ifstream::failure& e)
 		{
-			std::cout << "load shader failed.\n" << e.what() << std::endl;
+			ERROR("load shader failed. {}", e.what());
 		}
 
 		const char* vShaderCode = vertexCode.c_str();
@@ -267,7 +268,7 @@ namespace Guarneri
 
 	void Window::glfw_error_callback(const int error, const char* const description)
 	{
-		std::cout << "glfw error: " << error << "desc: " << description << std::endl;
+		ERROR("glfw error: {}, desc: {}", error, description);
 	}
 
 	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)

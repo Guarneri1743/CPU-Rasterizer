@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <iostream>
 #include "Utility.hpp"
+#include "Logger.hpp"
 
 #undef near
 #undef far
@@ -43,7 +44,7 @@ namespace Guarneri
 	Scene::~Scene()
 	{
 		selection = nullptr;
-		std::cout << "destruct scene: " << this->name << std::endl;
+		LOG("destruct scene: {}", name);
 	}
 
 	void Scene::initialize()
@@ -154,7 +155,7 @@ namespace Guarneri
 
 				if (remove_idx != -1)
 				{
-					std::cout << "remove " << objects[remove_idx]->target->name << std::endl;
+					LOG("remove: {}", objects[remove_idx]->target->name);
 					objects.erase(objects.begin() + remove_idx);
 					remove_idx = -1;
 				}
@@ -171,7 +172,7 @@ namespace Guarneri
 
 				if (remove_idx != -1)
 				{
-					std::cout << "remove " << transparent_objects[remove_idx]->target->name << std::endl;
+					LOG("remove: {}", transparent_objects[remove_idx]->target->name);
 					transparent_objects.erase(transparent_objects.begin() + remove_idx);
 					remove_idx = -1;
 				}
@@ -313,7 +314,7 @@ namespace Guarneri
 		INST(GlobalShaderParams).color_space = scene->color_space;
 		INST(GlobalShaderParams).workflow = scene->work_flow;
 		Scene::set_current(std::move(scene));
-		std::cout << "open scene: " << path << std::endl;
+		LOG("open scene: {}", path);
 	}
 
 	void Scene::serialize(const Scene& scene, const std::string& path)
@@ -363,7 +364,6 @@ namespace Guarneri
 		sb.Clear();
 		rapidjson::PrettyWriter<rapidjson::StringBuffer> ww(sb);
 		doc.Accept(ww);
-		std::cout << sb.GetString() << std::endl;
 
 		std::filesystem::path abs_path(ASSETS_PATH + path);
 		if (!std::filesystem::exists(abs_path.parent_path()))
@@ -378,11 +378,11 @@ namespace Guarneri
 			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
 			doc.Accept(writer);
 			fclose(fd);
-			std::cout << "save scene: " << path << std::endl;
+			LOG("save scene: {}", path);
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 
@@ -435,7 +435,7 @@ namespace Guarneri
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 }

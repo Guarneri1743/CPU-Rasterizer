@@ -4,6 +4,7 @@
 #include "Utility.hpp"
 #include "Scene.hpp"
 #include "Model.hpp"
+#include "Logger.hpp"
 #include <iostream>
 #include <string>
 
@@ -124,8 +125,17 @@ namespace Guarneri
 		}
 	}
 
+	// todo: get the console an independent editor
 	void ExplorerEditor::draw_console()
 	{
+		auto logs = Logger::get_console_logs();
+		for (size_t idx = 0; idx < logs.size(); idx++)
+		{
+			if (ImGui::Selectable(logs[idx].c_str(), selected_log == idx))
+			{
+				selected_log = idx;
+			}
+		}
 	}
 
 	std::size_t count_dirs(std::filesystem::path path)

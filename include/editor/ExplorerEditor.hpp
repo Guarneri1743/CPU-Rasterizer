@@ -18,6 +18,7 @@ namespace Guarneri
 		void draw_console();
 		std::filesystem::path selected_in_explorer;
 		std::filesystem::path selected_in_contents;
+		size_t selected_log;
 	};
 }
 

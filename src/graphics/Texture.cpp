@@ -11,6 +11,7 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
+#include "Logger.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>
@@ -192,7 +193,8 @@ namespace Guarneri
 				std::cerr << "invalid channels: " << channels << std::endl;
 			}
 		}
-		std::cout << this->str() << " raw texture loaded" << std::endl;
+
+		LOG("raw texture loaded: {}", str());
 	}
 
 	bool Texture::bilinear(const float& u, const float& v, Color& ret) const
@@ -504,11 +506,12 @@ namespace Guarneri
 			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
 			doc.Accept(material_writer);
 			fclose(fd);
-			std::cout << "save texture: " << path << std::endl;
+
+			LOG("save texture: {}", path);
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 
@@ -517,7 +520,7 @@ namespace Guarneri
 		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
 		if (fd != nullptr)
 		{
-			std::cout << "deserialize: " << ASSETS_PATH + path << std::endl;
+			LOG("deserialize: {}", ASSETS_PATH + path);
 			char read_buffer[256];
 			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
 			rapidjson::Document doc;
@@ -533,11 +536,11 @@ namespace Guarneri
 			tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
 			tex.reload(tex.raw_path.c_str());
 			fclose(fd);
-			std::cout << "read texture: " << path << std::endl;
+			LOG("read textures: {}", path);
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 

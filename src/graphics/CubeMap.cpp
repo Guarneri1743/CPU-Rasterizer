@@ -9,6 +9,7 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
+#include "Logger.hpp"
 
 namespace Guarneri
 {
@@ -179,11 +180,11 @@ namespace Guarneri
 			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
 			doc.Accept(material_writer);
 			fclose(fd);
-			std::cout << "save cubemap: " << path << std::endl;
+			LOG("save cubemap: {}", path);
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 
@@ -192,7 +193,7 @@ namespace Guarneri
 		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
 		if (fd != nullptr)
 		{
-			std::cout << "deserialize: " << ASSETS_PATH + path << std::endl;
+			LOG("deserialize: {}", ASSETS_PATH + path);
 			char read_buffer[256];
 			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
 			rapidjson::Document doc;
@@ -219,7 +220,7 @@ namespace Guarneri
 		}
 		else
 		{
-			std::cout << "path does not exist: " << ASSETS_PATH + path << std::endl;
+			ERROR("path does not exist: {}", ASSETS_PATH + path);
 		}
 	}
 }
