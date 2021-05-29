@@ -76,10 +76,6 @@ overview
 
 <img src="/gallery/bunny.gif" width = "800" height = "500" alt="overview" align=bottom /> 
 
-<img src="/gallery/overview.jpg" width = "800" height = "600" alt="Backpack" align=bottom /> 
-
-<img src="/gallery/helmet_ibl.jpg" width = "512" height = "512" alt="Star War" align=bottom />
-
 | tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
 | <img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/> | <img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/perspective_correct_uv.jpg" width = "180" height = "180" alt="Perspective Correct Interpolation" align=bottom /> |
