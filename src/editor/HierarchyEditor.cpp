@@ -35,14 +35,22 @@ namespace Guarneri
 			flags |= ImGuiTreeNodeFlags_Selected;
 		}
 
-		if (ImGui::TreeNodeEx(transform->name.c_str(), flags))
+		if (transform->child_count() > 0)
 		{
-			for (int i = 0; i < transform->child_count(); i++)
+			if (ImGui::TreeNodeEx(transform->name.c_str(), flags))
 			{
-				auto child = transform->access_child(i);
-				draw_transform(child);
+				for (int i = 0; i < transform->child_count(); i++)
+				{
+					auto child = transform->access_child(i);
+					draw_transform(child);
+				}
+				ImGui::TreePop();
 			}
-			ImGui::TreePop();
+		}
+		else
+		{
+			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+			ImGui::TreeNodeEx(transform->name.c_str(), flags);
 		}
 
 		if (ImGui::IsItemClicked())

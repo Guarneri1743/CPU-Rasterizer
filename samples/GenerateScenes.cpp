@@ -585,7 +585,10 @@ void generate_model(std::string name, std::string path)
 void generate_models()
 {
 	generate_model("bunny", "/misc/bunny.obj");
+	generate_model("bunny_hq", "/misc/bunny_hq.ply");
 	generate_model("teapot", "/misc/teapot.obj");
+	generate_model("dragon", "/misc/dragon.ply");
+	generate_model("buddha", "/misc/buddha.ply");
 }
 
 int main()
