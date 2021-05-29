@@ -175,12 +175,12 @@ namespace Guarneri
 		return F0 + (std::max(Vector3(1.0f - roughness), F0) - F0) * std::pow(1.0f - cosTheta, 5.0f);
 	}
 
-	Vector3 metallic_workflow(const Vector3& albedo, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
+	Vector3 metallic_workflow(const Vector3& albedo, const float& intensity, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
 	{
 		Vector3 f0 = 0.04f;
 		f0 = Vector3::lerp(f0, albedo, metallic);
 		float attenuation = 1.0f / (light_distance * light_distance);
-		Vector3 radiance = Vector3(attenuation);
+		Vector3 radiance = Vector3(attenuation * intensity);
 
 		float ndf = distribution_ggx(normal, halfway, roughness);
 		float geo = geometry_smith(normal, view_dir, light_dir, roughness);
@@ -247,10 +247,7 @@ namespace Guarneri
 			Color roughness = 0.0f;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 
-			/*metallic = 0.0f;
-			roughness = 0.16f;*/
-
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
 
 			//simple IBL
 			Color irradiance_diffuse;
@@ -273,8 +270,8 @@ namespace Guarneri
 			//...
 
 			auto ambient = (diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao.r;
-
-			auto ret = Color(ambient) + Color(lo);
+			auto diffuse = Color::saturate(light_diffuse * lo);
+			auto ret = Color(ambient) + diffuse;
 
 			return ret;
 		}
