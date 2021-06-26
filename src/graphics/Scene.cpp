@@ -265,7 +265,7 @@ namespace Guarneri
 			obj->render();
 		}
 
-		if (enable_skybox)
+		if (enable_skybox && INST(GlobalShaderParams).enable_skybox)
 		{
 			// todo: fix tile based skybox 
 			INST(GraphicsDevice).tile_based = false;

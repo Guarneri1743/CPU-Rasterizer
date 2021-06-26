@@ -84,11 +84,11 @@ namespace Guarneri
 					auto& v0 = m.vertices[m.indices[idx]];
 					auto& v1 = m.vertices[m.indices[idx + 1]];
 					auto& v2 = m.vertices[m.indices[idx + 2]];
-					INST(GraphicsDevice).enqueue(target->material->get_shader(render_pass), v0, v1, v2, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+					INST(GraphicsDevice).submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 				}
 			}
 		}
-		INST(GraphicsDevice).fence();
+		INST(GraphicsDevice).fence_draw_commands();
 	}
 
 	void Renderer::draw_gizmos() const

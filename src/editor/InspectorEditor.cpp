@@ -101,7 +101,7 @@ namespace Guarneri
 
 		Scene& scene = *Scene::current();
 
-		if (ImGui::CollapsingHeader("Camera"))
+		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::Text(("Position: " + scene.main_cam->transform->world_position().str()).c_str());
 			ImGui::Text(("Direction: " + scene.main_cam->transform->world_euler_angles().str()).c_str());
@@ -136,9 +136,9 @@ namespace Guarneri
 			}
 		}
 
-		if (ImGui::CollapsingHeader("Shadow"))
+		if (ImGui::CollapsingHeader("Shadow", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Checkbox("On", &INST(GlobalShaderParams).enable_shadow);
+			ImGui::Checkbox("ShadowOn", &INST(GlobalShaderParams).enable_shadow);
 			if (INST(GlobalShaderParams).enable_shadow)
 			{
 				ImGui::Checkbox("PCF", &INST(GlobalShaderParams).pcf_on);
@@ -146,7 +146,12 @@ namespace Guarneri
 			}
 		}
 
-		if (ImGui::CollapsingHeader("Light"))
+		if (ImGui::CollapsingHeader("Skybox", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Checkbox("SkyboxOn", &INST(GlobalShaderParams).enable_skybox);
+		}
+
+		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			if (ImGui::SliderFloat("Yaw", &scene.main_light.yaw, -180.0f, 180.0f))
 			{
@@ -194,7 +199,7 @@ namespace Guarneri
 			}
 		}
 
-		if (ImGui::CollapsingHeader("Debug"))
+		if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			const char* debug_views[] = {
 				"None",

@@ -19,7 +19,6 @@ namespace Guarneri
 		row_tile_count = 0;
 		col_tile_count = 0;
 		tile_length = 0;
-		tiles = nullptr;
 		msaa_subsample_count = 0;
 		subsamples_per_axis = 0;
 		statistics.culled_backface_triangle_count = 0;
@@ -28,7 +27,6 @@ namespace Guarneri
 		statistics.triangle_count = 0;
 		multi_thread = true;
 		tile_based = true;
-		thread_pool = std::make_unique<ThreadPool>(std::thread::hardware_concurrency() - 1);
 	}
 
 	GraphicsDevice::~GraphicsDevice()
@@ -36,7 +34,6 @@ namespace Guarneri
 
 	void GraphicsDevice::resize(uint32_t w, uint32_t h)
 	{
-		delete[] tiles;
 		initialize(w, h);
 	}
 
@@ -124,50 +121,46 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
 		InputAssemblyTask task = { shader, v1, v2, v3, m, v, p };
-		input_assembly_tasks.emplace_back(thread_pool->enqueue([this, task]
-		{
-			this->draw(task);
-		}));
+		draw_commands.emplace_back(task);
 	}
 
-	void GraphicsDevice::fence()
+	void GraphicsDevice::fence_draw_commands()
 	{
-		// fence input assembly tasks
-		for (auto& task : input_assembly_tasks) { task.get(); }
-		input_assembly_tasks.clear();
+		std::for_each(
+			std::execution::par_unseq,
+			draw_commands.begin(),
+			draw_commands.end(),
+			[this](auto&& task)
+			{
+				this->draw(task);
+			});
+		draw_commands.clear();
 	}
 
 	void GraphicsDevice::present()
 	{
-		// fence rasteriztion tasks
-		for (uint32_t i = 0; i < tile_length; i++)
-		{
-			FrameTile* tile = &tiles[i];
-			tile_tasks.emplace_back(thread_pool->enqueue([this, tile] {
-				this->rasterize_tile(*tile);
-			}));
-		}
+		std::for_each(
+			std::execution::par_unseq,
+			tiles,
+			tiles + tile_length,
+			[this](auto&& tile)
+			{
+				this->rasterize_tile(tile);
+			});
 
-		for (auto& task : tile_tasks) { task.get(); }
-		tile_tasks.clear();
-
-		// fence msaa resolve tasks
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
-			for (uint32_t i = 0; i < tile_length; i++)
-			{
-				FrameTile* tile = &tiles[i];
-				tile_tasks.emplace_back(thread_pool->enqueue([this, tile]
+			std::for_each(
+				std::execution::par_unseq,
+				tiles,
+				tiles + tile_length,
+				[this](auto&& tile)
 				{
-					this->resolve_tile(*tile);
-				}));
-			}
-
-			for (auto& task : tile_tasks) { task.get(); }
-			tile_tasks.clear();
+					this->resolve_tile(tile);
+				});
 		}
 	}
 

@@ -14,7 +14,6 @@
 #include "Color.hpp"
 #include "Triangle.hpp"
 #include "FrameTile.hpp"
-#include <ThreadPool.hpp>
 #include <vector>
 #include <future>
 
@@ -53,11 +52,7 @@ namespace Guarneri
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
 		// IA tasks
-		std::vector<std::future<void>> input_assembly_tasks;
-		// tile tasks
-		std::vector <std::future<void>> tile_tasks;
-		// primitive pool
-		std::unique_ptr<ThreadPool> thread_pool;
+		std::vector<InputAssemblyTask> draw_commands;
 		// commands
 		std::queue<GraphicsCommand*> commands;
 		// framebuffer tiles
@@ -76,8 +71,8 @@ namespace Guarneri
 		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
 		void draw(InputAssemblyTask task);
-		void enqueue(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
-		void fence();
+		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void fence_draw_commands();
 		void present();
 		void clear_buffer(const BufferFlag& flag);
 		void set_subsample_count(const uint8_t& multiplier);
