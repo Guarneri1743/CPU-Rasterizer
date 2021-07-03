@@ -15,32 +15,31 @@ namespace Guarneri
 	/// <returns></returns>
 	std::vector<Triangle> Clipper::cvv_clipping(const float& near_plane, const Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
-		std::vector<Vertex> list_out = {c1, c2, c3};
+		std::vector<Vertex> polygon = { c1, c2, c3 };
 
 		// clipping against near plane
 		{
-			std::vector<Vertex> list_in(list_out);
-			list_out.clear();
-			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
+			std::vector<Vertex> vertices(polygon);
+			polygon.clear();
+			Vertex last = c3;
+			for (size_t cur_idx = 0; cur_idx < vertices.size(); cur_idx++)
 			{
-				size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
+				Vertex cur = vertices[cur_idx];
+				int cur_inside = cur.position.w < near_plane ? -1 : 1;
+				int last_inside = last.position.w < near_plane ? -1 : 1;
 
-				Vertex cur = list_in[cur_idx];
-				Vertex last = list_in[last_idx];
-
-				int d1 = cur.position.w < near_plane ? -1 : 1;
-				int d2 = last.position.w < near_plane ? -1 : 1;
-
-				if (d1 * d2 < 0)
+				if (cur_inside * last_inside < 0)
 				{
 					float t = (cur.position.w - near_plane) / (cur.position.w - last.position.w);
-					list_out.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
+					polygon.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
 				}
 
-				if (d1 > 0)
+				if (cur_inside > 0)
 				{
-					list_out.emplace_back(cur);
+					polygon.emplace_back(cur);
 				}
+
+				last = cur;
 			}
 		}
 
@@ -48,33 +47,37 @@ namespace Guarneri
 		for (int i = 1; i < 6; i++)
 		{
 			auto& plane = cvv[i];
-			std::vector<Vertex> list_in(list_out);
-			list_out.clear();
-			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
+			if (polygon.size() >= 3)
 			{
-				size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
-
-				Vertex cur = list_in[cur_idx];
-				Vertex last = list_in[last_idx];
-
-				float d1, d2;
-				d1 = plane.homo_distance(cur.position);
-				d2 = plane.homo_distance(last.position);
-				float t = d1 / (d1 - d2);
-
-				if (d1 * d2 < 0.0f)
+				std::vector<Vertex> vertices(polygon);
+				polygon.clear();
+				Vertex last = vertices[vertices.size() - 1];
+				for (size_t cur_idx = 0; cur_idx < vertices.size(); cur_idx++)
 				{
-					list_out.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
-				}
+					Vertex cur = vertices[cur_idx];
 
-				if (d1 > 0.0f)
-				{
-					list_out.emplace_back(cur);
+					float d1, d2;
+					d1 = plane.homo_distance(cur.position);
+					d2 = plane.homo_distance(last.position);
+
+					float t = d1 / (d1 - d2);
+
+					if (d1 * d2 < 0.0f)
+					{
+						polygon.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
+					}
+
+					if (d1 > 0.0f)
+					{
+						polygon.emplace_back(cur);
+					}
+
+					last = cur;
 				}
 			}
 		}
 
-		if (list_out.size() < 3)
+		if (polygon.size() < 3)
 		{
 			return {};
 		}
@@ -83,9 +86,9 @@ namespace Guarneri
 		// todo: strip mode
 		std::vector<Triangle> triangles;
 
-		for (size_t idx = 1; idx < list_out.size() - 1; idx++)
+		for (size_t idx = 1; idx < polygon.size() - 1; idx++)
 		{
-			triangles.emplace_back(list_out[0], list_out[idx], list_out[idx + 1]);
+			triangles.emplace_back(polygon[0], polygon[idx], polygon[idx + 1]);
 		}
 
 		return triangles;

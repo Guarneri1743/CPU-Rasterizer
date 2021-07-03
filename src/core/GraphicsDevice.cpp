@@ -231,7 +231,7 @@ namespace Guarneri
 			bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 			if (!double_face && enable_backface_culling && !shader.skybox)
 			{
-				if (Clipper::backface_culling(clip1.position, clip2.position, clip3.position)) { statistics.culled_backface_triangle_count++; }
+				if (Clipper::backface_culling(clip1.position, clip2.position, clip3.position)) { statistics.culled_backface_triangle_count++; return; }
 			}
 
 			// clip space to ndc (perspective division)
