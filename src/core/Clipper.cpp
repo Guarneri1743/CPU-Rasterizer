@@ -43,6 +43,41 @@ namespace Guarneri
 			}
 		}
 
+		if (polygon.size() < 3)
+		{
+			return {};
+		}
+
+		int inside_count = 0;
+		for (int i = 1; i < 6; i++)
+		{
+			auto& plane = cvv[i];
+			size_t visible_count = 0;
+			for (size_t cur_idx = 0; cur_idx < polygon.size(); cur_idx++)
+			{
+				float d = plane.homo_distance(polygon[cur_idx].position);
+				if (d > 0.0f)
+				{
+					visible_count++;
+				}
+			}
+			if (visible_count == polygon.size())
+			{
+				inside_count++;
+			}
+		}
+
+		// early out if all in frustum
+		if (inside_count == 6)
+		{
+			std::vector<Triangle> ret;
+			for (size_t idx = 1; idx < polygon.size() - 1; idx++)
+			{
+				ret.emplace_back(polygon[0], polygon[idx], polygon[idx + 1]);
+			}
+			return ret;
+		}
+
 		// clipping against rest planes
 		for (int i = 1; i < 6; i++)
 		{
@@ -147,21 +182,14 @@ namespace Guarneri
 		return false;
 	}
 
-	/// <summary>
-	///  cull backface in homogenous clip space
-	/// </summary>
-	/// <param name="c1">vertex in clip space</param>
-	/// <param name="c2">vertex in clip space</param>
-	/// <param name="c3">vertex in clip space</param>
-	/// <returns></returns>
-	bool Clipper::backface_culling(const Vector4& c1, const Vector4& c2, const Vector4& c3)
+	bool Clipper::backface_culling_ndc(const Vector3& c1, const Vector3& c2, const Vector3& c3)
 	{
 		// front face: ndv >= 0
 		// back face: ndv < 0
 		auto seg1 = c2 - c1;
 		auto seg2 = c3 - c1;
-		float ndv = Vector3::dot(Vector3::cross(seg1.xyz(), seg2.xyz()), Vector3::BACK);
-		return ndv < 0;
+		float ndv = Vector3::dot(Vector3::cross(seg1, seg2), Vector3::BACK);
+		return ndv < 0.0f;
 	}
 
 	// todo: frustum & aabb, frustum & obb, etc.

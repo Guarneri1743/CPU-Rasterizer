@@ -226,18 +226,18 @@ namespace Guarneri
 		{
 			Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
 
+			// clip space to ndc (perspective division)
+			Vertex ndc1 = Vertex::clip2ndc(clip1);   
+			Vertex ndc2 = Vertex::clip2ndc(clip2);
+			Vertex ndc3 = Vertex::clip2ndc(clip3);
+
 			// backface culling
 			bool double_face = shader.double_face;
 			bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 			if (!double_face && enable_backface_culling && !shader.skybox)
 			{
-				if (Clipper::backface_culling(clip1.position, clip2.position, clip3.position)) { statistics.culled_backface_triangle_count++; return; }
+				if (Clipper::backface_culling_ndc(ndc1.position.xyz(), ndc2.position.xyz(), ndc3.position.xyz())) { statistics.culled_backface_triangle_count++; return; }
 			}
-
-			// clip space to ndc (perspective division)
-			Vertex ndc1 = Vertex::clip2ndc(clip1);   
-			Vertex ndc2 = Vertex::clip2ndc(clip2);
-			Vertex ndc3 = Vertex::clip2ndc(clip3);
 
 			// ndc to screen space
 			Vertex s1 = Vertex::ndc2screen(this->width, this->height, ndc1);
