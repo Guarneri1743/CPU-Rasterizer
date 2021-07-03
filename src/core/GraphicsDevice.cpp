@@ -9,6 +9,7 @@
 #include "Config.h"
 #include <execution>
 #include <algorithm>
+#include "Logger.hpp"
 
 namespace Guarneri
 {
@@ -25,6 +26,7 @@ namespace Guarneri
 		statistics.culled_triangle_count = 0;
 		statistics.earlyz_optimized = 0;
 		statistics.triangle_count = 0;
+		tiles = nullptr;
 		multi_thread = true;
 		tile_based = true;
 	}
@@ -82,7 +84,7 @@ namespace Guarneri
 		return { Config::TILE_SIZE , Config::TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length };
 	}
 
-	void GraphicsDevice::draw(InputAssemblyTask task)
+	void GraphicsDevice::draw(DrawCommand task)
 	{
 		const Shader& shader = *task.shader;
 		auto v1 = task.v1;
@@ -97,7 +99,7 @@ namespace Guarneri
 
 	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
 	{
-		InputAssemblyTask task = { shader, v1, v2, v3, m, v, p };
+		DrawCommand task = { shader, v1, v2, v3, m, v, p };
 		draw_commands.emplace_back(task);
 	}
 
@@ -107,9 +109,9 @@ namespace Guarneri
 			std::execution::par_unseq,
 			draw_commands.begin(),
 			draw_commands.end(),
-			[this](auto&& task)
+			[this](auto&& cmd)
 			{
-				this->draw(task);
+				this->draw(cmd);
 			});
 		draw_commands.clear();
 	}
@@ -167,7 +169,6 @@ namespace Guarneri
 
 	void GraphicsDevice::clear_buffer(const BufferFlag& flag)
 	{
-		//todo
 		process_commands();
 
 		if ((flag & BufferFlag::COLOR) != BufferFlag::NONE)
@@ -182,16 +183,10 @@ namespace Guarneri
 			}
 		}
 
-		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE)
-		{
-			zbuffer->clear(FAR_Z);
-		}
-		if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE)
-		{
-			stencilbuffer->clear(DEFAULT_STENCIL);
-		}
-
 		shadowmap->clear(FAR_Z);
+
+		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) { zbuffer->clear(FAR_Z); }
+		if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) { stencilbuffer->clear(DEFAULT_STENCIL); }
 
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
@@ -200,6 +195,7 @@ namespace Guarneri
 			msaa_coveragebuffer->clear(0);
 			msaa_stencilbuffer->clear(DEFAULT_STENCIL);
 		}
+
 		statistics.culled_triangle_count = 0;
 		statistics.culled_backface_triangle_count = 0;
 		statistics.triangle_count = 0;
@@ -210,81 +206,62 @@ namespace Guarneri
 	{
 		statistics.triangle_count++;
 
+		// vertex stage
 		v2f o1 = process_vertex(shader, v1);
 		v2f o2 = process_vertex(shader, v2);
 		v2f o3 = process_vertex(shader, v3);
-
 		Vertex c1(o1.position, o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-		auto triangles = Clipper::near_plane_clipping(c1, c2, c3);
-		if (triangles.size() == 0)
-		{
-			statistics.culled_triangle_count++;
-			return;
-		}
+		// naive cvv culling
+		//if (Clipper::cvv_culling(c1.position, c2.position, c3.position)) { return; };
+
+		// clip in homogenous space
+		auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, Frustum::homogenous_volume(), c1, c2, c3);
+
+		if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
 		for (size_t idx = 0; idx < triangles.size(); idx++)
 		{
-			auto& clipped_tri = triangles[idx];
+			Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
 
-			// perspective division, position.
-			Vertex n1 = clip2ndc(clipped_tri[0]);
-			Vertex n2 = clip2ndc(clipped_tri[1]);
-			Vertex n3 = clip2ndc(clipped_tri[2]);
-
+			// backface culling
 			bool double_face = shader.double_face;
 			bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
-
-			bool culled_back_face = false;
-
 			if (!double_face && enable_backface_culling && !shader.skybox)
 			{
-				if (Clipper::backface_culling(n1.position, n2.position, n3.position))
-				{
-					culled_back_face = true;
-					if ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
-					{
-						statistics.culled_backface_triangle_count++;
-						return;
-					}
-				}
+				if (Clipper::backface_culling(clip1.position, clip2.position, clip3.position)) { statistics.culled_backface_triangle_count++; }
 			}
 
-			// perspective division, uv, color, normal, etc. 
-			n1.perspective_division();
-			n2.perspective_division();
-			n3.perspective_division();
+			// clip space to ndc (perspective division)
+			Vertex ndc1 = Vertex::clip2ndc(clip1);   
+			Vertex ndc2 = Vertex::clip2ndc(clip2);
+			Vertex ndc3 = Vertex::clip2ndc(clip3);
 
-			Vertex s1 = ndc2viewport(n1);
-			Vertex s2 = ndc2viewport(n2);
-			Vertex s3 = ndc2viewport(n3);
+			// ndc to screen space
+			Vertex s1 = Vertex::ndc2screen(this->width, this->height, ndc1);
+			Vertex s2 = Vertex::ndc2screen(this->width, this->height, ndc2);
+			Vertex s3 = Vertex::ndc2screen(this->width, this->height, ndc3);
 
-			Triangle tri(s1, s2, s3);
-
-			// primitive assembly
-			std::vector<Triangle> tris = tri.horizontally_split();
-
-			for (auto iter = tris.begin(); iter != tris.end(); iter++)
+			// triangle assembly
+			std::vector<Triangle> assembled_triangles = Triangle(s1, s2, s3).horizontally_split();
+			for (auto triangle = assembled_triangles.begin(); triangle != assembled_triangles.end(); triangle++)
 			{
-				if (culled_back_face && (INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
-				{
-					(*iter).culled = true;
-				}
 				if (this->tile_based)
 				{
-					FrameTile::dispatch_render_task(tiles, row_tile_count, col_tile_count, *iter, shader, this->width, this->height, Config::TILE_SIZE);
+					// push tile based draw task
+					FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, Config::TILE_SIZE);
 				}
 				else
 				{
-					rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
+					// rasterize triangle directly
+					rasterize(*triangle, shader, RasterizerStrategy::SCANLINE);
 				}
 			}
 		}
 	}
 
-	// per vertex processing
 	v2f GraphicsDevice::process_vertex(const Shader& shader, const Vertex& vert) const
 	{
 		a2v input;
@@ -312,25 +289,14 @@ namespace Guarneri
 			TileTask task;
 			if (tile.pop_task(task))
 			{
-				auto tri = task.triangle;
-				const Shader& shader = *task.shader;
-
-				rasterize(tile, tri, shader);
+				rasterize(tile, task.triangle, *task.shader);
 
 				// wireframe
 				if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 				{
-					draw_screen_segment(tri[0].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
-					draw_screen_segment(tri[0].position, tri[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
-					draw_screen_segment(tri[2].position, tri[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
-				}
-
-				if (tri.culled && ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE))
-				{
-					statistics.culled_backface_triangle_count++;
-					draw_screen_segment(tri[0].position, tri[1].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
-					draw_screen_segment(tri[0].position, tri[2].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
-					draw_screen_segment(tri[2].position, tri[1].position, Color(0.0f, 1.0f, 0.0f, 1.0f));
+					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+					draw_screen_segment(task.triangle[2].position, task.triangle[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
 				}
 			}
 		}
@@ -471,6 +437,7 @@ namespace Guarneri
 		{
 			scanline(tri, shader);
 		}
+
 		// wireframe
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 		{
@@ -700,7 +667,6 @@ namespace Guarneri
 		}
 	}
 
-	// per fragment processing
 	void GraphicsDevice::process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, const Shader& shader)
 	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
@@ -1085,42 +1051,6 @@ namespace Guarneri
 		return lhs + rhs;
 	}
 
-	Vertex GraphicsDevice::clip2ndc(const Vertex& v) const
-	{
-		Vertex ret = v;
-		ret.position = clip2ndc(v.position);
-		return ret;
-	}
-
-	Vector4 GraphicsDevice::clip2ndc(const Vector4& v) const
-	{
-		Vector4 ndc_pos = v;
-		float w = v.w;
-		if (w == 0.0f)
-		{
-			w += EPSILON;
-		}
-		ndc_pos /= w;
-		return ndc_pos;
-	}
-
-	Vertex GraphicsDevice::ndc2viewport(const Vertex& v) const
-	{
-		Vertex ret = v;
-		ret.position = ndc2viewport(v.position);
-		return ret;
-	}
-
-	Vector4 GraphicsDevice::ndc2viewport(const Vector4& v) const
-	{
-		Vector4 viewport_pos;
-		viewport_pos.x = (v.x + 1.0f) * this->width * 0.5f;
-		viewport_pos.y = (v.y + 1.0f) * this->height * 0.5f;
-		viewport_pos.z = v.z * 0.5f + 0.5f;
-		viewport_pos.w = v.w;
-		return viewport_pos;
-	}
-
 	float GraphicsDevice::linearize_01depth(const float& depth, const float& near, const float& far) const
 	{
 		return (linearize_depth(depth, near, far) - near) / (far - near);
@@ -1154,11 +1084,11 @@ namespace Guarneri
 		Vector4 clip_start = p * v * Vector4(start);
 		Vector4 clip_end = p * v * Vector4(end);
 
-		Vector4 n1 = clip2ndc(clip_start);
-		Vector4 n2 = clip2ndc(clip_end);
+		Vector4 n1 = Vertex::clip2ndc(clip_start);
+		Vector4 n2 = Vertex::clip2ndc(clip_end);
 
-		Vector4 s1 = ndc2viewport(n1);
-		Vector4 s2 = ndc2viewport(n2);
+		Vector4 s1 = Vertex::ndc2screen(this->width, this->height, n1);
+		Vector4 s2 = Vertex::ndc2screen(this->width, this->height, n2);
 
 		Matrix4x4 translation = Matrix4x4::translation(Vector3(screen_translation));
 
@@ -1189,11 +1119,11 @@ namespace Guarneri
 
 	void GraphicsDevice::draw_segment(const Vector4& clip_start, const Vector4& clip_end, const Color& col)
 	{
-		Vector4 n1 = clip2ndc(clip_start);
-		Vector4 n2 = clip2ndc(clip_end);
+		Vector4 n1 = Vertex::clip2ndc(clip_start);
+		Vector4 n2 = Vertex::clip2ndc(clip_end);
 
-		Vector4 s1 = ndc2viewport(n1);
-		Vector4 s2 = ndc2viewport(n2);
+		Vector4 s1 = Vertex::ndc2screen(this->width, this->height, n1);
+		Vector4 s2 = Vertex::ndc2screen(this->width, this->height, n2);
 
 		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
 	}

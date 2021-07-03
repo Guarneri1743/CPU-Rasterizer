@@ -4,99 +4,50 @@
 
 namespace Guarneri
 {
-	std::vector<Triangle> Clipper::near_plane_clipping(const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	/// <summary>
+	/// clip against cvv in homogenous clip space
+	/// </summary>
+	/// <param name="near_plane">camera's near plane</param>
+	/// <param name="cvv">an unit cube in homogenous space</param>
+	/// <param name="c1">vertex in clip space</param>
+	/// <param name="c2">vertex in clip space</param>
+	/// <param name="c3">vertex in clip space</param>
+	/// <returns></returns>
+	std::vector<Triangle> Clipper::cvv_clipping(const float& near_plane, const Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
-		std::vector<Vertex> list_in = { v1, v2, v3 };
-		std::vector<Vertex> list_out;
+		std::vector<Vertex> list_out = {c1, c2, c3};
 
-		char ld, cd;
-		Vertex last = list_in[2];
-		ld = last.position.w < 0.0f ? -1 : 1;
-
-		for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
+		// clipping against near plane
 		{
-			Vertex cur = list_in[cur_idx];
-			cd = cur.position.w < 0.0f ? -1 : 1;
-
-			if (cd != ld)
+			std::vector<Vertex> list_in(list_out);
+			list_out.clear();
+			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
 			{
-				float t = cur.position.w / (cur.position.w - last.position.w + EPSILON);
-				list_out.emplace_back(Vertex::interpolate(cur, last, t));
-			}
+				size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
 
-			if (cd > 0)
-			{
-				list_out.emplace_back(cur);
-			}
+				Vertex cur = list_in[cur_idx];
+				Vertex last = list_in[last_idx];
 
-			ld = cd;
-			last = cur;
-		}
+				int d1 = cur.position.w < near_plane ? -1 : 1;
+				int d2 = last.position.w < near_plane ? -1 : 1;
 
-		if (list_out.size() < 3)
-		{
-			return {};
-		}
+				if (d1 * d2 < 0)
+				{
+					float t = (cur.position.w - near_plane) / (cur.position.w - last.position.w);
+					list_out.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
+				}
 
-		std::vector<Triangle> triangles;
-
-		/*Vertex v0 = list_out[0];
-		for (size_t idx = 1; idx < list_out.size() - 1; idx++)
-		{
-			Vertex v1 = list_out[idx];
-			Vertex v2 = list_out[idx + 1];
-			triangles.emplace_back(v0, v1, v2);
-		}*/
-
-		if (list_out.size() == 3)
-		{
-			triangles.emplace_back(Triangle(list_out[0], list_out[1], list_out[2]));
-		}
-		else if (list_out.size() == 4)
-		{
-			triangles.emplace_back(Triangle(list_out[0], list_out[1], list_out[2]));
-			triangles.emplace_back(Triangle(list_out[2], list_out[3], list_out[0]));
-		}
-
-		return triangles;
-	}
-
-	std::vector<Triangle> Clipper::frustum_clipping(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3)
-	{
-		int inside_count = 0;
-		int outside_count = 0;
-		for (int i = 0; i < 6; i++)
-		{
-			auto& plane = frustum[i];
-			if (plane.homo_distance(v1.position) < 0 || 
-				plane.homo_distance(v2.position) < 0 || 
-				plane.homo_distance(v3.position) < 0)
-			{
-				outside_count++;
-			}
-
-			if (plane.homo_distance(v1.position) >= 0 &&
-				plane.homo_distance(v2.position) >= 0 &&
-				plane.homo_distance(v3.position) >= 0)
-			{
-				inside_count++;
+				if (d1 > 0)
+				{
+					list_out.emplace_back(cur);
+				}
 			}
 		}
 
-		if (inside_count == 6)
+		// clipping against rest planes
+		for (int i = 1; i < 6; i++)
 		{
-			return { Triangle(v1, v2, v3) };
-		}
-
-		if (outside_count == 6)
-		{
-			return {};
-		}
-
-		std::vector<Vertex> list_out = {v1, v2, v3};
-		for (int i = 0; i < 6; i++)
-		{
-			auto& plane = frustum[i];
+			auto& plane = cvv[i];
 			std::vector<Vertex> list_in(list_out);
 			list_out.clear();
 			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
@@ -111,12 +62,12 @@ namespace Guarneri
 				d2 = plane.homo_distance(last.position);
 				float t = d1 / (d1 - d2);
 
-				if (d1 * d2 < 0)
+				if (d1 * d2 < 0.0f)
 				{
-					list_out.emplace_back(Vertex::interpolate(cur, last, t));
+					list_out.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
 				}
 
-				if (d1 >= 0)
+				if (d1 > 0.0f)
 				{
 					list_out.emplace_back(cur);
 				}
@@ -128,43 +79,60 @@ namespace Guarneri
 			return {};
 		}
 
+		// naive triagnle assembly
+		// todo: strip mode
 		std::vector<Triangle> triangles;
 
-		Vertex v0 = list_out[0];
 		for (size_t idx = 1; idx < list_out.size() - 1; idx++)
 		{
-			Vertex v1 = list_out[idx];
-			Vertex v2 = list_out[idx + 1];
-			triangles.emplace_back(v0, v1, v2);
+			triangles.emplace_back(list_out[0], list_out[idx], list_out[idx + 1]);
 		}
 
 		return triangles;
 	}
 
+	/// <summary>
+	/// clip in screen space
+	/// </summary>
+	/// <param name="lhs">left screen vertex</param>
+	/// <param name="rhs">right screen vertex</param>
+	/// <param name="width">screen width</param>
 	void Clipper::screen_clipping(Vertex& lhs, Vertex& rhs, const int& width)
 	{
 		if (lhs.position.x <= 0.0f)
 		{
 			float t = -lhs.position.x / (rhs.position.x - lhs.position.x);
-			lhs = Vertex::interpolate(lhs, rhs, t);
+			lhs = Vertex::interpolate_screen_space(lhs, rhs, t);
 		}
 		if (rhs.position.x >= width)
 		{
 			float t = ((float)width - lhs.position.x) / (rhs.position.x - lhs.position.x);
-			rhs = Vertex::interpolate(lhs, rhs, t);
+			rhs = Vertex::interpolate_screen_space(lhs, rhs, t);
 		}
 	}
 
-	bool Clipper::cvv_clipping(const Vector4& c1, const Vector4& c2, const Vector4& c3)
+	/// <summary>
+	/// cull against cvv in homogenous clip space
+	/// </summary>
+	/// <param name="c1">vertex in clip space</param>
+	/// <param name="c2">vertex in clip space</param>
+	/// <param name="c3">vertex in clip space</param>
+	/// <returns></returns>
+	bool Clipper::cvv_culling(const Vector4& c1, const Vector4& c2, const Vector4& c3)
+	{
+		return cvv_culling(c1) && cvv_culling(c2) && cvv_culling(c3);
+	}
+
+	/// <summary>
+	/// cull against cvv in homogenous clip space
+	/// </summary>
+	/// <param name="v">vertex in clip space</param>
+	/// <returns></returns>
+	bool Clipper::cvv_culling(const Vector4& v)
 	{
 		// z: [-w, w](GL) [0, w](DX)
 		// x: [-w, w]
 		// y: [-w, w]
-		return cvv_clipping(c1) && cvv_clipping(c2) && cvv_clipping(c3);
-	}
-
-	bool Clipper::cvv_clipping(const Vector4& v)
-	{
 		float x, y, z, w;
 		x = v.x; y = v.y; z = v.z; w = v.w;
 		if (x < -w) return true;
@@ -176,13 +144,20 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Clipper::backface_culling(const Vector4& v1, const Vector4& v2, const Vector4& v3)
+	/// <summary>
+	///  cull backface in homogenous clip space
+	/// </summary>
+	/// <param name="c1">vertex in clip space</param>
+	/// <param name="c2">vertex in clip space</param>
+	/// <param name="c3">vertex in clip space</param>
+	/// <returns></returns>
+	bool Clipper::backface_culling(const Vector4& c1, const Vector4& c2, const Vector4& c3)
 	{
-		auto v1v2 = v2 - v1;
-		auto v1v3 = v3 - v1;
-		float ndv = Vector3::dot(Vector3::cross(v1v2.xyz(), v1v3.xyz()), Vector3::BACK);
 		// front face: ndv >= 0
 		// back face: ndv < 0
+		auto seg1 = c2 - c1;
+		auto seg2 = c3 - c1;
+		float ndv = Vector3::dot(Vector3::cross(seg1.xyz(), seg2.xyz()), Vector3::BACK);
 		return ndv < 0;
 	}
 

@@ -95,7 +95,7 @@ namespace Guarneri
 		}
 	}
 
-	void FrameTile::dispatch_render_task(
+	void FrameTile::push_draw_task(
 		FrameTile* tiles,
 		const uint32_t& row_tile_count,
 		const uint32_t& col_tile_count,

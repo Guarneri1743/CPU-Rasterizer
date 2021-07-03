@@ -51,7 +51,7 @@ namespace Guarneri
 			const int& tile_size,
 			const int& row_tile_count, const int& col_tile_count,
 			const int& row_rest, const int& col_rest);
-		static void dispatch_render_task(
+		static void push_draw_task(
 			FrameTile* tiles,
 			const uint32_t& row_tile_count,
 			const uint32_t& col_tile_count,

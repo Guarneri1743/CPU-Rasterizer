@@ -19,7 +19,7 @@
 
 namespace Guarneri
 {
-	struct InputAssemblyTask
+	struct DrawCommand
 	{
 		Shader* shader;
 		Vertex v1;
@@ -51,9 +51,9 @@ namespace Guarneri
 		std::unique_ptr<RawBuffer<color_rgba>> msaa_colorbuffer;
 		// shadowmap
 		std::unique_ptr<RawBuffer<float>> shadowmap;
-		// IA tasks
-		std::vector<InputAssemblyTask> draw_commands;
-		// commands
+		// draw commands
+		std::vector<DrawCommand> draw_commands;
+		// general commands
 		std::queue<GraphicsCommand*> commands;
 		// framebuffer tiles
 		FrameTile* tiles;
@@ -70,7 +70,6 @@ namespace Guarneri
 		~GraphicsDevice();
 		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
-		void draw(InputAssemblyTask task);
 		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
 		void fence_draw_commands();
 		void present();
@@ -96,6 +95,7 @@ namespace Guarneri
 		RawBuffer<float>* get_shadowmap();
 
 	private:
+		void draw(DrawCommand task);
 		void draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void process_commands();
 		void rasterize_tiles(const size_t& start, const size_t& end);
@@ -114,10 +114,6 @@ namespace Guarneri
 		void update_stencil_buffer(RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const;
 		bool perform_depth_test(RawBuffer<float>* zbuf, const CompareFunc& func, const uint32_t& row, const uint32_t& col, const float& z) const;
 		Color blend(const Color& src_color, const Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op);
-		Vertex clip2ndc(const Vertex& v) const;
-		Vector4 clip2ndc(const Vector4& v) const;
-		Vertex ndc2viewport(const Vertex& v) const;
-		Vector4 ndc2viewport(const Vector4& v) const;
 		float linearize_depth(const float& depth, const float& near, const float& far) const;
 		float linearize_01depth(const float& depth, const float& near, const float& far) const;
 	};

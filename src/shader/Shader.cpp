@@ -45,7 +45,7 @@ namespace Guarneri
 		v2f o;
 		auto opos = Vector4(input.position.xyz(), 1.0f);
 		auto wpos = model * opos;
-		auto cpos = projection * view * wpos;
+		auto cpos = vp_matrix * wpos;
 		o.position = cpos;
 		o.world_pos = wpos.xyz();
 		if (!is_error_shader)

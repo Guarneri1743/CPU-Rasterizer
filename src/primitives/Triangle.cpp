@@ -71,8 +71,8 @@ namespace Guarneri
 		r0 = flip ? 2 : 0;
 		l1 = flip ? 0 : 1;
 		r1 = flip ? 0 : 2;
-		lhs = Vertex::interpolate(this->vertices[l0], this->vertices[l1], t);
-		rhs = Vertex::interpolate(this->vertices[r0], this->vertices[r1], t);
+		lhs = Vertex::interpolate_screen_space(this->vertices[l0], this->vertices[l1], t);
+		rhs = Vertex::interpolate_screen_space(this->vertices[r0], this->vertices[r1], t);
 	}
 
 	// split a Triangle to 1-2 triangles
@@ -109,13 +109,13 @@ namespace Guarneri
 		assert(sorted[0].position.y <= sorted[1].position.y);
 		assert(sorted[1].position.y <= sorted[2].position.y);
 
-		// Line
+		// segment
 		if (sorted[0].position.y == sorted[1].position.y && sorted[1].position.y == sorted[2].position.y)
 		{
 			return ret;
 		}
 
-		// top Triangle
+		// top triangle
 		if (sorted[1].position.y == sorted[2].position.y)
 		{
 			if (sorted[1].position.x >= sorted[2].position.x)
@@ -129,7 +129,7 @@ namespace Guarneri
 			return ret;
 		}
 
-		// bottom Triangle
+		// bottom triangle
 		if (sorted[0].position.y == sorted[1].position.y)
 		{
 			if (sorted[0].position.x >= sorted[1].position.x)
@@ -148,10 +148,10 @@ namespace Guarneri
 
 		float t = (mid_y - sorted[0].position.y) / (sorted[2].position.y - sorted[0].position.y);
 
-		// interpolate new Vertex
-		Vertex v = Vertex::interpolate(sorted[0], sorted[2], t);
+		// interpolate new vertex
+		Vertex v = Vertex::interpolate_screen_space(sorted[0], sorted[2], t);
 
-		// top Triangle: top-left-right
+		// top triangle: top-left-right
 		if (v.position.x >= sorted[1].position.x)
 		{
 			ret.emplace_back(Triangle(sorted[0], sorted[1], v));
@@ -161,7 +161,7 @@ namespace Guarneri
 			ret.emplace_back(Triangle(sorted[0], v, sorted[1]));
 		}
 
-		// bottom Triangle: bottom-left-right
+		// bottom triangle: bottom-left-right
 		if (v.position.x >= sorted[1].position.x)
 		{
 			ret.emplace_back(Triangle(sorted[2], sorted[1], v, true));

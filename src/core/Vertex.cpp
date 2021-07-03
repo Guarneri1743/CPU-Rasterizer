@@ -42,17 +42,6 @@ namespace Guarneri
 		this->rhw = 1.0f / this->position.w;
 	}
 
-	void Vertex::perspective_division()
-	{
-		world_pos *= rhw;
-		shadow_coord *= rhw;
-		color *= rhw;
-		normal *= rhw;
-		uv *= rhw;
-		tangent *= rhw;
-		bitangent *= rhw;
-	}
-
 	Vertex Vertex::barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& w0, const float& w1, const float& w2)
 	{
 		Vertex ret;
@@ -68,7 +57,21 @@ namespace Guarneri
 		return ret;
 	}
 
-	Vertex Vertex::interpolate(const Vertex& left, const Vertex& right, const float& t)
+	Vertex Vertex::interpolate_screen_space(const Vertex& left, const Vertex& right, const float& t)
+	{
+		Vertex ret = interpolate_attributes(left, right, t);
+		ret.rhw = left.rhw + (right.rhw - left.rhw) * t;
+		return ret;
+	}
+
+	Vertex Vertex::interpolate_clip_space(const Vertex& left, const Vertex& right, const float& t)
+	{
+		Vertex ret = interpolate_attributes(left, right, t);
+		ret.rhw = 1.0f / ret.position.w;
+		return ret;
+	}
+
+	Vertex Vertex::interpolate_attributes(const Vertex& left, const Vertex& right, const float& t)
 	{
 		Vertex ret;
 		ret.position = left.position + (right.position - left.position) * t;
@@ -79,7 +82,6 @@ namespace Guarneri
 		ret.uv = left.uv + (right.uv - left.uv) * t;
 		ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
 		ret.bitangent = left.bitangent + (right.bitangent - left.bitangent) * t;
-		ret.rhw = left.rhw + (right.rhw - left.rhw) * t;
 		return ret;
 	}
 
@@ -113,6 +115,44 @@ namespace Guarneri
 		ret.bitangent = (left.bitangent + differential.bitangent);
 		ret.rhw = (left.rhw + differential.rhw);
 		return ret;
+	}
+
+	Vertex Vertex::clip2ndc(const Vertex& clip)
+	{
+		Vertex ndc = clip;
+		ndc.position /= clip.position.w;
+		ndc.world_pos /= clip.position.w;
+		ndc.shadow_coord /= clip.position.w;
+		ndc.color /= clip.position.w;
+		ndc.normal /= clip.position.w;
+		ndc.uv /= clip.position.w;
+		ndc.tangent /= clip.position.w;
+		ndc.bitangent /= clip.position.w;
+		return ndc;
+	}
+
+	Vertex Vertex::ndc2screen(const int& width, const int& height, const Vertex& ndc)
+	{
+		Vertex screen = ndc;
+		screen.position = ndc2screen(width, height, ndc.position);
+		return screen;
+	}
+
+	Vector4 Vertex::clip2ndc(const Vector4& clip)
+	{
+		Vector4 ndc = clip;
+		ndc *= 1.0f / clip.w;
+		return ndc;
+	}
+
+	Vector4 Vertex::ndc2screen(const int& width, const int& height, const Vector4& ndc)
+	{
+		Vector4 screen = ndc;
+		screen.x = (ndc.x + 1.0f) * width * 0.5f;
+		screen.y = (ndc.y + 1.0f) * height * 0.5f;
+		screen.z = ndc.z * 0.5f + 0.5f;
+		screen.w = ndc.w;
+		return screen;
 	}
 
 	rapidjson::Value Vertex::serialize(rapidjson::Document& doc, const Vertex& vertex)

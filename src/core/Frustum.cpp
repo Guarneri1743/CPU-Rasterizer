@@ -67,7 +67,7 @@ namespace Guarneri
 		return Frustum(left, right, top, bottom, near, far);
 	}
 
-	Frustum Frustum::create_homogeneous_cube()
+	Frustum Frustum::homogenous_volume()
 	{
 		Plane left = Plane(1.0f, 0.0f, 0.0f, 1.0f);
 		Plane right = Plane(-1.0f, 0.0f, 0.0f, 1.0f);
