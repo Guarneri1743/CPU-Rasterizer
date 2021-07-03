@@ -96,7 +96,7 @@ namespace Guarneri
 		RawBuffer<float>* get_shadowmap();
 
 	private:
-		void draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void process_commands();
 		void rasterize_tiles(const size_t& start, const size_t& end);
 		void rasterize_tile(FrameTile& tile);

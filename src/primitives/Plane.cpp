@@ -39,6 +39,11 @@ namespace Guarneri
 		return Vector3::dot(normal, pt) + constant;
 	}
 
+	float Plane::homo_distance(const Vector4& pt) const
+	{
+		return normal.x * pt.x + normal.y * pt.y + normal.z * pt.z + constant * pt.w;
+	}
+
 	std::string Plane::str() const
 	{
 		std::stringstream ss;

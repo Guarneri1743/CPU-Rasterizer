@@ -1,46 +1,52 @@
 #include "Clipper.hpp"
 #include <assert.h>
+#include "Logger.hpp"
 
 namespace Guarneri
 {
-	// near plane clipping
-	std::vector<Triangle> Clipper::near_plane_clipping(const Plane& near_plane, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	std::vector<Triangle> Clipper::near_plane_clipping(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		std::vector<Vertex> list_in = { v1, v2, v3 };
-
 		std::vector<Vertex> list_out;
+
+		char ld, cd;
+		Vertex last = list_in[2];
+		ld = last.position.w < 0.0f ? -1 : 1;
+
 		for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
 		{
-			size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
-
 			Vertex cur = list_in[cur_idx];
-			Vertex last = list_in[last_idx];
+			cd = cur.position.w < 0.0f ? -1 : 1;
 
-			float d1, d2;
-			d1 = near_plane.distance(cur.position.xyz());
-			d2 = near_plane.distance(last.position.xyz());
-			float t = d1 / (d1 - d2);
-
-			// clip segment
-			if (d1 >= 0)
+			if (cd != ld)
 			{
-				if (d2 < 0)
-				{
-					list_out.emplace_back(Vertex::interpolate(cur, last, t));
-				}
-				list_out.emplace_back(cur);
-			}
-			else if (d2 >= 0)
-			{
+				float t = cur.position.w / (cur.position.w - last.position.w + EPSILON);
 				list_out.emplace_back(Vertex::interpolate(cur, last, t));
 			}
+
+			if (cd > 0)
+			{
+				list_out.emplace_back(cur);
+			}
+
+			ld = cd;
+			last = cur;
 		}
 
-		assert((list_out.size() == 0 || list_out.size() == 3 || list_out.size() == 4));
+		if (list_out.size() < 3)
+		{
+			return {};
+		}
 
 		std::vector<Triangle> triangles;
 
-		assert(list_out.size() == 3 || list_out.size() == 4);
+		/*Vertex v0 = list_out[0];
+		for (size_t idx = 1; idx < list_out.size() - 1; idx++)
+		{
+			Vertex v1 = list_out[idx];
+			Vertex v2 = list_out[idx + 1];
+			triangles.emplace_back(v0, v1, v2);
+		}*/
 
 		if (list_out.size() == 3)
 		{
@@ -50,6 +56,86 @@ namespace Guarneri
 		{
 			triangles.emplace_back(Triangle(list_out[0], list_out[1], list_out[2]));
 			triangles.emplace_back(Triangle(list_out[2], list_out[3], list_out[0]));
+		}
+
+		return triangles;
+	}
+
+	std::vector<Triangle> Clipper::frustum_clipping(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	{
+		int inside_count = 0;
+		int outside_count = 0;
+		for (int i = 0; i < 6; i++)
+		{
+			auto& plane = frustum[i];
+			if (plane.homo_distance(v1.position) < 0 || 
+				plane.homo_distance(v2.position) < 0 || 
+				plane.homo_distance(v3.position) < 0)
+			{
+				outside_count++;
+			}
+
+			if (plane.homo_distance(v1.position) >= 0 &&
+				plane.homo_distance(v2.position) >= 0 &&
+				plane.homo_distance(v3.position) >= 0)
+			{
+				inside_count++;
+			}
+		}
+
+		if (inside_count == 6)
+		{
+			return { Triangle(v1, v2, v3) };
+		}
+
+		if (outside_count == 6)
+		{
+			return {};
+		}
+
+		std::vector<Vertex> list_out = {v1, v2, v3};
+		for (int i = 0; i < 6; i++)
+		{
+			auto& plane = frustum[i];
+			std::vector<Vertex> list_in(list_out);
+			list_out.clear();
+			for (size_t cur_idx = 0; cur_idx < list_in.size(); cur_idx++)
+			{
+				size_t last_idx = (cur_idx + list_in.size() - 1) % list_in.size();
+
+				Vertex cur = list_in[cur_idx];
+				Vertex last = list_in[last_idx];
+
+				float d1, d2;
+				d1 = plane.homo_distance(cur.position);
+				d2 = plane.homo_distance(last.position);
+				float t = d1 / (d1 - d2);
+
+				if (d1 * d2 < 0)
+				{
+					list_out.emplace_back(Vertex::interpolate(cur, last, t));
+				}
+
+				if (d1 >= 0)
+				{
+					list_out.emplace_back(cur);
+				}
+			}
+		}
+
+		if (list_out.size() < 3)
+		{
+			return {};
+		}
+
+		std::vector<Triangle> triangles;
+
+		Vertex v0 = list_out[0];
+		for (size_t idx = 1; idx < list_out.size() - 1; idx++)
+		{
+			Vertex v1 = list_out[idx];
+			Vertex v2 = list_out[idx + 1];
+			triangles.emplace_back(v0, v1, v2);
 		}
 
 		return triangles;

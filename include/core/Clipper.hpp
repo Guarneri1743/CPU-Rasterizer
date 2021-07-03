@@ -14,7 +14,8 @@ namespace Guarneri
 	class Clipper
 	{
 	public:
-		static std::vector<Triangle> near_plane_clipping(const Plane& near_plane, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		static std::vector<Triangle> near_plane_clipping(const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		static std::vector<Triangle> frustum_clipping(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		static void screen_clipping(Vertex& lhs, Vertex& rhs, const int& width);
 		static bool cvv_clipping(const Vector4& c1, const Vector4& c2, const Vector4& c3);
 		static bool cvv_clipping(const Vector4& v);

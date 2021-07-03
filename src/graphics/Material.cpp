@@ -83,6 +83,8 @@ namespace Guarneri
 		shader->model = m;
 		shader->view = v;
 		shader->projection = p;
+		shader->vp_matrix = p * v;
+		shader->mvp_matrix = p * v * m;
 		shader->ztest_func = ztest_func;
 		shader->zwrite_mode = zwrite_mode;
 		shader->src_factor = src_factor;

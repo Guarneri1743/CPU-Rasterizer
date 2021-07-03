@@ -19,8 +19,7 @@ namespace Guarneri
 		Frustum(const Plane& l, const Plane& r, const Plane& t, const Plane& b, const Plane& n, const Plane& f);
 		~Frustum();
 		static Frustum create(const Matrix4x4& mat);
-		static Frustum create_clip(const float& w);
-		static Frustum create_ndc();
+		static Frustum create_homogeneous_cube();
 		const Plane& operator[](const int& index) const;
 		Plane& operator[](const int& index);
 	};

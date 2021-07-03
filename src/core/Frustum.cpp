@@ -67,18 +67,7 @@ namespace Guarneri
 		return Frustum(left, right, top, bottom, near, far);
 	}
 
-	Frustum Frustum::create_clip(const float& w)
-	{
-		Plane left = Plane(w, 0.0f, 0.0f, 1.0f);
-		Plane right = Plane(-w, 0.0f, 0.0f, 1.0f);
-		Plane bottom = Plane(0.0f, w, 0.0f, 1.0f);
-		Plane top = Plane(0.0f, -w, 0.0f, 1.0f);
-		Plane near = Plane(0.0f, 0.0f, w, 1.0f);
-		Plane far = Plane(0.0f, 0.0f, -w, 1.0f);
-		return Frustum(left, right, top, bottom, near, far);
-	}
-
-	Frustum Frustum::create_ndc()
+	Frustum Frustum::create_homogeneous_cube()
 	{
 		Plane left = Plane(1.0f, 0.0f, 0.0f, 1.0f);
 		Plane right = Plane(-1.0f, 0.0f, 0.0f, 1.0f);
@@ -95,17 +84,17 @@ namespace Guarneri
 		switch (index)
 		{
 		case 0:
-			return left;
+			return near;
 		case 1:
-			return right;
+			return far;
 		case 2:
 			return top;
 		case 3:
 			return bottom;
 		case 4:
-			return near;
+			return left;
 		case 5:
-			return far;
+			return right;
 		}
 		return near;
 	}
@@ -116,17 +105,17 @@ namespace Guarneri
 		switch (index)
 		{
 		case 0:
-			return left;
+			return near;
 		case 1:
-			return right;
+			return far;
 		case 2:
 			return top;
 		case 3:
 			return bottom;
 		case 4:
-			return near;
+			return left;
 		case 5:
-			return far;
+			return right;
 		}
 		return near;
 	}

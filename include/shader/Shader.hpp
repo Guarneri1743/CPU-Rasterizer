@@ -56,6 +56,8 @@ namespace Guarneri
 	{
 	public:
 		Matrix4x4 model, view, projection;
+		Matrix4x4 vp_matrix;
+		Matrix4x4 mvp_matrix;
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, Vector4> name2float4;
 		std::unordered_map<property_name, int> name2int;

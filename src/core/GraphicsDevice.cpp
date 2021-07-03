@@ -92,33 +92,7 @@ namespace Guarneri
 		auto v = task.v;
 		auto p = task.p;
 
-		auto object_space_frustum = Frustum::create(p * v * m);
-		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE)
-		{
-			if (Clipper::conservative_frustum_culling(object_space_frustum, v1, v2, v3))
-			{
-				statistics.culled_triangle_count++;
-				return;
-			}
-		}
-		if ((INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::NEAR_PLANE_CLIPPING) != CullingAndClippingFlag::DISABLE)
-		{
-			auto triangles = Clipper::near_plane_clipping(object_space_frustum.near, v1, v2, v3);
-			if (triangles.size() == 0)
-			{
-				statistics.culled_triangle_count++;
-				return;
-			}
-			for (size_t idx = 0; idx < triangles.size(); idx++)
-			{
-				auto tri = triangles[idx];
-				draw_triangle(shader, tri[0], tri[1], tri[2], m, v, p);
-			}
-		}
-		else
-		{
-			draw_triangle(shader, v1, v2, v3, m, v, p);
-		}
+		draw_triangle(shader, v1, v2, v3);
 	}
 
 	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -232,12 +206,8 @@ namespace Guarneri
 		statistics.earlyz_optimized = 0;
 	}
 
-	void GraphicsDevice::draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
-		UNUSED(m);
-		UNUSED(v);
-		UNUSED(p);
-
 		statistics.triangle_count++;
 
 		v2f o1 = process_vertex(shader, v1);
@@ -248,61 +218,68 @@ namespace Guarneri
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-		// clip in screen space
-		//if (!shader.skybox && Clipper::cvv_clipping(c1.position, c2.position, c3.position)) {
-		//	return;
-		//}
-
-		// perspective division, position.
-		Vertex n1 = clip2ndc(c1);
-		Vertex n2 = clip2ndc(c2);
-		Vertex n3 = clip2ndc(c3);
-
-		bool double_face = shader.double_face;
-		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
-
-		bool culled_back_face = false;
-
-		if (!double_face && enable_backface_culling && !shader.skybox)
+		auto triangles = Clipper::near_plane_clipping(c1, c2, c3);
+		if (triangles.size() == 0)
 		{
-			if (Clipper::backface_culling(n1.position, n2.position, n3.position))
-			{
-				culled_back_face = true;
-				if ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
-				{
-					statistics.culled_backface_triangle_count++;
-					return;
-				}
-			}
+			statistics.culled_triangle_count++;
+			return;
 		}
 
-		// perspective division, uv, color, normal, etc. 
-		n1.perspective_division();
-		n2.perspective_division();
-		n3.perspective_division();
-
-		Vertex s1 = ndc2viewport(n1);
-		Vertex s2 = ndc2viewport(n2);
-		Vertex s3 = ndc2viewport(n3);
-
-		Triangle tri(s1, s2, s3);
-
-		// primitive assembly
-		std::vector<Triangle> tris = tri.horizontally_split();
-
-		for (auto iter = tris.begin(); iter != tris.end(); iter++)
+		for (size_t idx = 0; idx < triangles.size(); idx++)
 		{
-			if (culled_back_face && (INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+			auto& clipped_tri = triangles[idx];
+
+			// perspective division, position.
+			Vertex n1 = clip2ndc(clipped_tri[0]);
+			Vertex n2 = clip2ndc(clipped_tri[1]);
+			Vertex n3 = clip2ndc(clipped_tri[2]);
+
+			bool double_face = shader.double_face;
+			bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
+
+			bool culled_back_face = false;
+
+			if (!double_face && enable_backface_culling && !shader.skybox)
 			{
-				(*iter).culled = true;
+				if (Clipper::backface_culling(n1.position, n2.position, n3.position))
+				{
+					culled_back_face = true;
+					if ((INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) == RenderFlag::DISABLE)
+					{
+						statistics.culled_backface_triangle_count++;
+						return;
+					}
+				}
 			}
-			if (this->tile_based)
+
+			// perspective division, uv, color, normal, etc. 
+			n1.perspective_division();
+			n2.perspective_division();
+			n3.perspective_division();
+
+			Vertex s1 = ndc2viewport(n1);
+			Vertex s2 = ndc2viewport(n2);
+			Vertex s3 = ndc2viewport(n3);
+
+			Triangle tri(s1, s2, s3);
+
+			// primitive assembly
+			std::vector<Triangle> tris = tri.horizontally_split();
+
+			for (auto iter = tris.begin(); iter != tris.end(); iter++)
 			{
-				FrameTile::dispatch_render_task(tiles, row_tile_count, col_tile_count, *iter, shader, this->width, this->height, Config::TILE_SIZE);
-			}
-			else
-			{
-				rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
+				if (culled_back_face && (INST(GlobalShaderParams).render_flag & RenderFlag::CULLED_BACK_FACE) != RenderFlag::DISABLE)
+				{
+					(*iter).culled = true;
+				}
+				if (this->tile_based)
+				{
+					FrameTile::dispatch_render_task(tiles, row_tile_count, col_tile_count, *iter, shader, this->width, this->height, Config::TILE_SIZE);
+				}
+				else
+				{
+					rasterize(*iter, shader, RasterizerStrategy::SCANLINE);
+				}
 			}
 		}
 	}
@@ -660,7 +637,7 @@ namespace Guarneri
 
 						v2f v_out;
 						float w = 1.0f / v.rhw;
-						v_out.position = v.position;
+						v_out.position = v.position * w;
 						v_out.world_pos = v.world_pos * w;
 						v_out.shadow_coord = v.shadow_coord * w;
 						v_out.color = v.color * w;
@@ -769,7 +746,7 @@ namespace Guarneri
 		Color fragment_result;
 		v2f v_out;
 		float w = 1.0f / v.rhw;
-		v_out.position = v.position;
+		v_out.position = v.position * w;
 		v_out.world_pos = v.world_pos * w;
 		v_out.shadow_coord = v.shadow_coord * w;
 		v_out.color = v.color * w;
