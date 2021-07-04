@@ -24,19 +24,19 @@
     "name2tex": [
         [
             0,
-            "/common_textures/Metal_ScavengerMetal_2k_alb_1.texture"
+            "/common_textures/wood_AlternatingSquareTiles_2k_alb_1.texture"
         ],
         [
             1,
-            "/common_textures/Metal_ScavengerMetal_2k_n_1.texture"
+            "/common_textures/wood_AlternatingSquareTiles_2k_n_1.texture"
         ],
         [
             11,
-            "/common_textures/Metal_ScavengerMetal_2k_g_1.texture"
+            "/common_textures/wood_AlternatingSquareTiles_2k_g_1.texture"
         ],
         [
             2,
-            "/common_textures/Metal_ScavengerMetal_2k_ao_1.texture"
+            "/common_textures/wood_AlternatingSquareTiles_2k_ao_1.texture"
         ]
     ],
     "name2cubemap": [
