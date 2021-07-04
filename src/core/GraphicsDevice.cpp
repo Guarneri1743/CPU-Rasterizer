@@ -94,7 +94,7 @@ namespace Guarneri
 		auto v = task.v;
 		auto p = task.p;
 
-		draw_triangle(shader, v1, v2, v3);
+		input2clip(shader, v1, v2, v3);
 	}
 
 	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -202,10 +202,8 @@ namespace Guarneri
 		statistics.earlyz_optimized = 0;
 	}
 
-	void GraphicsDevice::draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2clip(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
-		statistics.triangle_count++;
-
 		// vertex stage
 		v2f o1 = process_vertex(shader, v1);
 		v2f o2 = process_vertex(shader, v2);
@@ -214,50 +212,62 @@ namespace Guarneri
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-		// naive cvv culling
-		//if (Clipper::cvv_culling(c1.position, c2.position, c3.position)) { return; };
-
-		// clip in homogenous space
-		auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, Frustum::homogenous_volume(), c1, c2, c3);
-
-		if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
-
-		for (size_t idx = 0; idx < triangles.size(); idx++)
+		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
-			Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
+			// all in cvv, rasterize directly
+			clip2rasterizer(shader, c1, c2, c3);
+			statistics.triangle_count++;
+		}
+		else
+		{
+			// clip in homogenous space
+			auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, Frustum::homogenous_volume(), c1, c2, c3);
 
-			// clip space to ndc (perspective division)
-			Vertex ndc1 = Vertex::clip2ndc(clip1);   
-			Vertex ndc2 = Vertex::clip2ndc(clip2);
-			Vertex ndc3 = Vertex::clip2ndc(clip3);
+			if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
-			// backface culling
-			bool double_face = shader.double_face;
-			bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
-			if (!double_face && enable_backface_culling && !shader.skybox)
+			for (size_t idx = 0; idx < triangles.size(); idx++)
 			{
-				if (Clipper::backface_culling_ndc(ndc1.position.xyz(), ndc2.position.xyz(), ndc3.position.xyz())) { statistics.culled_backface_triangle_count++; return; }
+				Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
+				clip2rasterizer(shader, clip1, clip2, clip3);
 			}
 
-			// ndc to screen space
-			Vertex s1 = Vertex::ndc2screen(this->width, this->height, ndc1);
-			Vertex s2 = Vertex::ndc2screen(this->width, this->height, ndc2);
-			Vertex s3 = Vertex::ndc2screen(this->width, this->height, ndc3);
+			statistics.triangle_count += (uint32_t)triangles.size();
+		}
+	}
 
-			// triangle assembly
-			std::vector<Triangle> assembled_triangles = Triangle(s1, s2, s3).horizontally_split();
-			for (auto triangle = assembled_triangles.begin(); triangle != assembled_triangles.end(); triangle++)
+	void GraphicsDevice::clip2rasterizer(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	{
+		// clip space to ndc (perspective division)
+		Vertex ndc1 = Vertex::clip2ndc(c1);
+		Vertex ndc2 = Vertex::clip2ndc(c2);
+		Vertex ndc3 = Vertex::clip2ndc(c3);
+
+		// backface culling
+		bool double_face = shader.double_face;
+		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
+		if (!double_face && enable_backface_culling && !shader.skybox)
+		{
+			if (Clipper::backface_culling_ndc(ndc1.position.xyz(), ndc2.position.xyz(), ndc3.position.xyz())) { statistics.culled_backface_triangle_count++; return; }
+		}
+
+		// ndc to screen space
+		Vertex s1 = Vertex::ndc2screen(this->width, this->height, ndc1);
+		Vertex s2 = Vertex::ndc2screen(this->width, this->height, ndc2);
+		Vertex s3 = Vertex::ndc2screen(this->width, this->height, ndc3);
+
+		// triangle assembly
+		std::vector<Triangle> assembled_triangles = Triangle(s1, s2, s3).horizontally_split();
+		for (auto triangle = assembled_triangles.begin(); triangle != assembled_triangles.end(); triangle++)
+		{
+			if (this->tile_based)
 			{
-				if (this->tile_based)
-				{
-					// push tile based draw task
-					FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, Config::TILE_SIZE);
-				}
-				else
-				{
-					// rasterize triangle directly
-					rasterize(*triangle, shader, RasterizerStrategy::SCANLINE);
-				}
+				// push tile based draw task
+				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, Config::TILE_SIZE);
+			}
+			else
+			{
+				// rasterize triangle directly
+				rasterize(*triangle, shader, RasterizerStrategy::SCANLINE);
 			}
 		}
 	}

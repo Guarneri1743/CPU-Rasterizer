@@ -48,36 +48,6 @@ namespace Guarneri
 			return {};
 		}
 
-		int inside_count = 0;
-		for (int i = 1; i < 6; i++)
-		{
-			auto& plane = cvv[i];
-			size_t visible_count = 0;
-			for (size_t cur_idx = 0; cur_idx < polygon.size(); cur_idx++)
-			{
-				float d = plane.homo_distance(polygon[cur_idx].position);
-				if (d > 0.0f)
-				{
-					visible_count++;
-				}
-			}
-			if (visible_count == polygon.size())
-			{
-				inside_count++;
-			}
-		}
-
-		// early out if all in frustum
-		if (inside_count == 6)
-		{
-			std::vector<Triangle> ret;
-			for (size_t idx = 1; idx < polygon.size() - 1; idx++)
-			{
-				ret.emplace_back(polygon[0], polygon[idx], polygon[idx + 1]);
-			}
-			return ret;
-		}
-
 		// clipping against rest planes
 		for (int i = 1; i < 6; i++)
 		{
@@ -156,9 +126,9 @@ namespace Guarneri
 	/// <param name="c2">vertex in clip space</param>
 	/// <param name="c3">vertex in clip space</param>
 	/// <returns></returns>
-	bool Clipper::cvv_culling(const Vector4& c1, const Vector4& c2, const Vector4& c3)
+	bool Clipper::inside_cvv(const Vector4& c1, const Vector4& c2, const Vector4& c3)
 	{
-		return cvv_culling(c1) && cvv_culling(c2) && cvv_culling(c3);
+		return inside_cvv(c1) && inside_cvv(c2) && inside_cvv(c3);
 	}
 
 	/// <summary>
@@ -166,20 +136,20 @@ namespace Guarneri
 	/// </summary>
 	/// <param name="v">vertex in clip space</param>
 	/// <returns></returns>
-	bool Clipper::cvv_culling(const Vector4& v)
+	bool Clipper::inside_cvv(const Vector4& v)
 	{
 		// z: [-w, w](GL) [0, w](DX)
 		// x: [-w, w]
 		// y: [-w, w]
 		float x, y, z, w;
 		x = v.x; y = v.y; z = v.z; w = v.w;
-		if (x < -w) return true;
-		if (x > w) return true;
-		if (y < -w) return true;
-		if (y > w) return true;
-		if (z < -w) return true;
-		if (z > w) return true;
-		return false;
+		if (x < -w) return false;
+		if (x > w) return false;
+		if (y < -w) return false;
+		if (y > w) return false;
+		if (z < 0.0f) return false;
+		if (z > w) return false;
+		return true;
 	}
 
 	bool Clipper::backface_culling_ndc(const Vector3& c1, const Vector3& c2, const Vector3& c3)

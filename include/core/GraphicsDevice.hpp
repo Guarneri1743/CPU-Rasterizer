@@ -96,8 +96,8 @@ namespace Guarneri
 
 	private:
 		void draw(DrawCommand task);
-		void draw_triangle(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
-		void process_commands();
+		void input2clip(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void clip2rasterizer(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tiles(const size_t& start, const size_t& end);
 		void rasterize_tile(FrameTile& tile);
 		void resolve_tiles(const size_t& start, const size_t& end);
@@ -116,6 +116,7 @@ namespace Guarneri
 		Color blend(const Color& src_color, const Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op);
 		float linearize_depth(const float& depth, const float& near, const float& far) const;
 		float linearize_01depth(const float& depth, const float& near, const float& far) const;
+		void process_commands();
 	};
 }
 #endif
