@@ -94,7 +94,7 @@ namespace Guarneri
 		auto v = task.v;
 		auto p = task.p;
 
-		input2clip(shader, v1, v2, v3);
+		input2raster(shader, v1, v2, v3);
 	}
 
 	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
@@ -202,7 +202,7 @@ namespace Guarneri
 		statistics.earlyz_optimized = 0;
 	}
 
-	void GraphicsDevice::input2clip(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2raster(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		// vertex stage
 		v2f o1 = process_vertex(shader, v1);
@@ -215,7 +215,7 @@ namespace Guarneri
 		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
 			// all in cvv, rasterize directly
-			clip2rasterizer(shader, c1, c2, c3);
+			clip2raster(shader, c1, c2, c3);
 			statistics.triangle_count++;
 		}
 		else
@@ -228,14 +228,14 @@ namespace Guarneri
 			for (size_t idx = 0; idx < triangles.size(); idx++)
 			{
 				Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
-				clip2rasterizer(shader, clip1, clip2, clip3);
+				clip2raster(shader, clip1, clip2, clip3);
 			}
 
 			statistics.triangle_count += (uint32_t)triangles.size();
 		}
 	}
 
-	void GraphicsDevice::clip2rasterizer(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	void GraphicsDevice::clip2raster(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		// clip space to ndc (perspective division)
 		Vertex ndc1 = Vertex::clip2ndc(c1);
