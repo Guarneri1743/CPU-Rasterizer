@@ -42,7 +42,7 @@
     "name2cubemap": [
         [
             20,
-            "/cubemaps/space.cubemap"
+            "/cubemaps/ibl.cubemap"
         ]
     ]
 }

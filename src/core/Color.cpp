@@ -286,6 +286,46 @@ namespace Guarneri
 		return encode_rgba(c.x, c.y, 0.0f, 1.0f);
 	}
 
+	color_rgb16f Color::encode_rgb16f(const Color& c)
+	{
+		return encode_rgb16f(c.r, c.g, c.b);
+	}
+
+	color_rgb16f Color::encode_rgb16f(const Vector4& c)
+	{
+		return encode_rgb16f(c.x, c.y, c.z);
+	}
+
+	color_rgb16f Color::encode_rgb16f(const Vector3& c)
+	{
+		return encode_rgb16f(c.x, c.y, c.z);
+	}
+
+	color_rgb16f Color::encode_rgb16f(const Vector2& c)
+	{
+		return encode_rgb16f(c.x, c.y, 0.0f);
+	}
+
+	color_rgba16f Color::encode_rgba16f(const Color& c)
+	{
+		return encode_rgba16f(c.r, c.g, c.b, c.a);
+	}
+
+	color_rgba16f Color::encode_rgba16f(const Vector4& c)
+	{
+		return encode_rgba16f(c.x, c.y, c.z, c.w);
+	}
+
+	color_rgba16f Color::encode_rgba16f(const Vector3& c)
+	{
+		return encode_rgba16f(c.x, c.y, c.z, 1.0f);
+	}
+
+	color_rgba16f Color::encode_rgba16f(const Vector2& c)
+	{
+		return encode_rgba16f(c.x, c.y, 0.0f, 1.0f);
+	}
+
 	int Color::encode(const float& r, const float& g, const float& b, const float& alpha)
 	{
 		int c = 0;
@@ -313,6 +353,16 @@ namespace Guarneri
 		c.g = std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
 		c.b = std::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
 		return c;
+	}
+
+	color_rgb16f Color::encode_rgb16f(const float& r, const float& g, const float& b)
+	{
+		return {r, g, b};
+	}
+
+	color_rgba16f Color::encode_rgba16f(const float& r, const float& g, const float& b, const float& alpha)
+	{
+		return {r, g, b, alpha};
 	}
 
 	color_bgra Color::encode_bgra(const float& r, const float& g, const float& b, const float& alpha)
@@ -363,6 +413,16 @@ namespace Guarneri
 	Color Color::decode(const color_rgba& c)
 	{
 		return Color((float)c.r / 255.0f, (float)c.g / 255.0f, (float)c.b / 255.0f, (float)c.a / 255.0f);
+	}
+
+	Color Color::decode(const color_rgb16f& c)
+	{
+		return Color(c.r, c.g, c.b, 1.0f);
+	}
+
+	Color Color::decode(const color_rgba16f& c)
+	{
+		return Color(c.r, c.g, c.b, c.a);
 	}
 
 	Color Color::decode(const color_bgra& c)

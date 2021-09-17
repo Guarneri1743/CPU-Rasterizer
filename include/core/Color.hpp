@@ -69,9 +69,19 @@ namespace Guarneri
 		static color_rgba encode_rgba(const Vector4& c);
 		static color_rgba encode_rgba(const Vector3& c);
 		static color_rgba encode_rgba(const Vector2& c);
+		static color_rgb16f encode_rgb16f(const Color& c);
+		static color_rgb16f encode_rgb16f(const Vector4& c);
+		static color_rgb16f encode_rgb16f(const Vector3& c);
+		static color_rgb16f encode_rgb16f(const Vector2& c);
+		static color_rgba16f encode_rgba16f(const Color& c);
+		static color_rgba16f encode_rgba16f(const Vector4& c);
+		static color_rgba16f encode_rgba16f(const Vector3& c);
+		static color_rgba16f encode_rgba16f(const Vector2& c);
 		static int encode(const float& r, const float& g, const float& b, const float& alpha);
 		static color_rgb encode_rgb(const float& r, const float& g, const float& b);
 		static color_rgba encode_rgba(const float& r, const float& g, const float& b, const float& alpha);
+		static color_rgb16f encode_rgb16f(const float& r, const float& g, const float& b);
+		static color_rgba16f encode_rgba16f(const float& r, const float& g, const float& b, const float& alpha);
 		static color_bgra encode_bgra(const float& r, const float& g, const float& b, const float& alpha);
 		static color_bgra encode_bgra(const uint8_t& r, const uint8_t& g, const uint8_t& b, const uint8_t& a);
 		static Color decode(const int& c);
@@ -79,6 +89,8 @@ namespace Guarneri
 		static Color decode(const color_rgb& c);
 		static Color decode(const color_rg& c);
 		static Color decode(const color_rgba& c);
+		static Color decode(const color_rgb16f& c);
+		static Color decode(const color_rgba16f& c);
 		static Color decode(const color_bgra& c);
 		static float dot(const Color& lhs, const Color& rhs);
 		static float magnitude(const Color& vector);

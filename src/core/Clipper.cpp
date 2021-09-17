@@ -48,44 +48,44 @@ namespace Guarneri
 			return {};
 		}
 
-		// clipping against rest planes
-		for (int i = 1; i < 6; i++)
-		{
-			auto& plane = cvv[i];
-			if (polygon.size() >= 3)
-			{
-				std::vector<Vertex> vertices(polygon);
-				polygon.clear();
-				Vertex last = vertices[vertices.size() - 1];
-				for (size_t cur_idx = 0; cur_idx < vertices.size(); cur_idx++)
-				{
-					Vertex cur = vertices[cur_idx];
+		//// clipping against rest planes
+		//for (int i = 1; i < 6; i++)
+		//{
+		//	auto& plane = cvv[i];
+		//	if (polygon.size() >= 3)
+		//	{
+		//		std::vector<Vertex> vertices(polygon);
+		//		polygon.clear();
+		//		Vertex last = vertices[vertices.size() - 1];
+		//		for (size_t cur_idx = 0; cur_idx < vertices.size(); cur_idx++)
+		//		{
+		//			Vertex cur = vertices[cur_idx];
 
-					float d1, d2;
-					d1 = plane.homo_distance(cur.position);
-					d2 = plane.homo_distance(last.position);
+		//			float d1, d2;
+		//			d1 = plane.homo_distance(cur.position);
+		//			d2 = plane.homo_distance(last.position);
 
-					float t = d1 / (d1 - d2);
+		//			float t = d1 / (d1 - d2);
 
-					if (d1 * d2 < 0.0f)
-					{
-						polygon.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
-					}
+		//			if (d1 * d2 < 0.0f)
+		//			{
+		//				polygon.emplace_back(Vertex::interpolate_clip_space(cur, last, t));
+		//			}
 
-					if (d1 > 0.0f)
-					{
-						polygon.emplace_back(cur);
-					}
+		//			if (d1 > 0.0f)
+		//			{
+		//				polygon.emplace_back(cur);
+		//			}
 
-					last = cur;
-				}
-			}
-		}
+		//			last = cur;
+		//		}
+		//	}
+		//}
 
-		if (polygon.size() < 3)
-		{
-			return {};
-		}
+		//if (polygon.size() < 3)
+		//{
+		//	return {};
+		//}
 
 		// naive triagnle assembly
 		// todo: strip mode

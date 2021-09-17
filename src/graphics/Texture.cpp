@@ -60,6 +60,12 @@ namespace Guarneri
 		case TextureFormat::r32:
 			gray_buffer = RawBuffer<color_gray>::create(width, height);
 			break;
+		case TextureFormat::rgb16f:
+			rgb16f_buffer = RawBuffer<color_rgb16f>::create(width, height);
+			break; 
+		case TextureFormat::rgba16f:
+			rgba16f_buffer = RawBuffer<color_rgba16f>::create(width, height);
+			break;
 		}
 	}
 
@@ -98,6 +104,22 @@ namespace Guarneri
 		case TextureFormat::r32:
 		{
 			gray_buffer = RawBuffer<color_gray>::create(tex_buffer, width, height, [](color_gray* ptr)
+			{
+				delete[] ptr;
+			});
+		}
+		break; 
+		case TextureFormat::rgb16f:
+		{
+			rgb16f_buffer = RawBuffer<color_rgb16f>::create(tex_buffer, width, height, [](color_rgb16f* ptr)
+			{
+				delete[] ptr;
+			});
+		}
+		break;
+		case TextureFormat::rgba16f:
+		{
+			rgba16f_buffer = RawBuffer<color_rgba16f>::create(tex_buffer, width, height, [](color_rgba16f* ptr)
 			{
 				delete[] ptr;
 			});
@@ -150,7 +172,25 @@ namespace Guarneri
 		else
 		{
 			stbi_set_flip_vertically_on_load(true);
-			auto tex = stbi_load(abs_path.c_str(), &w, &h, &channels, 0);
+			const char* path = abs_path.c_str();
+			
+			bool hdr = false;
+			if (abs_path.compare(abs_path.size() - 3, 3, "hdr") == 0)
+			{
+				hdr = true;
+			}
+			
+			void* tex = nullptr;
+
+			if (hdr)
+			{
+				tex = (void*)stbi_loadf(path, &w, &h, &channels, 0);
+			}
+			else
+			{
+				tex = (void*)stbi_load(path, &w, &h, &channels, 0);
+			}
+
 			this->width = w;
 			this->height = h;
 			assert(channels > 0);
@@ -158,19 +198,41 @@ namespace Guarneri
 			assert(h <= TEXTURE_MAX_SIZE);
 			if (channels == RGB_CHANNEL)
 			{
-				rgb_buffer = RawBuffer<color_rgb>::create(tex, w, h, [](color_rgb* ptr)
+				if (hdr)
 				{
-					stbi_image_free((void*)ptr);
-				});
-				this->format = TextureFormat::rgb;
+					rgb16f_buffer = RawBuffer<color_rgb16f>::create(tex, w, h, [](color_rgb16f* ptr)
+					{
+						stbi_image_free((void*)ptr);
+					});
+					this->format = TextureFormat::rgb16f;
+				}
+				else
+				{
+					rgb_buffer = RawBuffer<color_rgb>::create(tex, w, h, [](color_rgb* ptr)
+					{
+						stbi_image_free((void*)ptr);
+					});
+					this->format = TextureFormat::rgb;
+				}
 			}
 			else if (channels == RGBA_CHANNEL)
 			{
-				rgba_buffer = RawBuffer<color_rgba>::create(tex, w, h, [](color_rgba* ptr)
+				if (hdr)
 				{
-					stbi_image_free((void*)ptr);
-				});
-				this->format = TextureFormat::rgba;
+					rgba16f_buffer = RawBuffer<color_rgba16f>::create(tex, w, h, [](color_rgba16f* ptr)
+					{
+						stbi_image_free((void*)ptr);
+					});
+					this->format = TextureFormat::rgba16f;
+				}
+				else
+				{
+					rgba_buffer = RawBuffer<color_rgba>::create(tex, w, h, [](color_rgba* ptr)
+					{
+						stbi_image_free((void*)ptr);
+					});
+					this->format = TextureFormat::rgba;
+				}
 			}
 			else if (channels == RG_CHANNEL)
 			{
@@ -359,6 +421,22 @@ namespace Guarneri
 			ret = Color::decode(pixel);
 			return ok;
 		}
+		case TextureFormat::rgb16f:
+		{
+			if (rgb16f_buffer == nullptr) return false;
+			color_rgb16f pixel;
+			bool ok = rgb16f_buffer->read(wu, wv, pixel);
+			ret = Color::decode(pixel);
+			return ok;
+		}
+		case TextureFormat::rgba16f:
+		{
+			if (rgba16f_buffer == nullptr) return false;
+			color_rgba16f pixel;
+			bool ok = rgba16f_buffer->read(wu, wv, pixel);
+			ret = Color::decode(pixel);
+			return ok;
+		}
 		}
 		return false;
 	}
@@ -399,6 +477,22 @@ namespace Guarneri
 			ret = Color::decode(pixel);
 			return ok;
 		}
+		case TextureFormat::rgb16f:
+		{
+			if (rgb16f_buffer == nullptr) return false;
+			color_rgb16f pixel;
+			bool ok = rgb16f_buffer->read(row, col, pixel);
+			ret = Color::decode(pixel);
+			return ok;
+		}
+		case TextureFormat::rgba16f:
+		{
+			if (rgba16f_buffer == nullptr) return false;
+			color_rgba16f pixel;
+			bool ok = rgba16f_buffer->read(row, col, pixel);
+			ret = Color::decode(pixel);
+			return ok;
+		}
 		}
 		return false;
 	}
@@ -408,8 +502,10 @@ namespace Guarneri
 		switch (format)
 		{
 		case TextureFormat::rgb:
-			if (rgba_buffer == nullptr) return false;
+		{
+			if (rgb_buffer == nullptr) return false;
 			return rgb_buffer->write(x, y, Color::encode_rgb(data));
+		}
 		case TextureFormat::rgba:
 		{
 			if (rgba_buffer == nullptr) return false;
@@ -424,6 +520,16 @@ namespace Guarneri
 		{
 			if (gray_buffer == nullptr) return false;
 			return gray_buffer->write(x, y, Color::encode_gray(data));
+		}
+		case TextureFormat::rgb16f:
+		{
+			if (rgb16f_buffer == nullptr) return false;
+			return rgb16f_buffer->write(x, y, Color::encode_rgb16f(data));
+		}
+		case TextureFormat::rgba16f:
+		{
+			if (rgba16f_buffer == nullptr) return false;
+			return rgba16f_buffer->write(x, y, Color::encode_rgba16f(data));
 		}
 		}
 		return false;
@@ -454,6 +560,8 @@ namespace Guarneri
 		rg_buffer.reset();
 		rgb_buffer.reset();
 		rgba_buffer.reset();
+		rgb16f_buffer.reset();
+		rgba16f_buffer.reset();
 		for (uint32_t i = 1; i < this->mip_count; i++)
 		{
 			switch (this->format)
@@ -621,6 +729,12 @@ namespace Guarneri
 		case TextureFormat::r32:
 			gray_buffer->clear(color_gray());
 			break;
+		case TextureFormat::rgb16f:
+			rgb16f_buffer->clear(color_rgb16f());
+			break;
+		case TextureFormat::rgba16f:
+			rgba16f_buffer->clear(color_rgba16f());
+			break;
 		}
 	}
 
@@ -638,6 +752,8 @@ namespace Guarneri
 		this->format = other.format;
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
+		this->rgb16f_buffer = other.rgb16f_buffer;
+		this->rgba16f_buffer = other.rgba16f_buffer;
 		this->gray_buffer = other.gray_buffer;
 		this->rg_buffer = other.rg_buffer;
 		this->mip_count = other.mip_count;

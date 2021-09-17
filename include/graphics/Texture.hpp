@@ -34,7 +34,9 @@ namespace Guarneri
 		rgb = 1,
 		rgba = 2,
 		rg = 3,
-		r32 = 4
+		r32 = 4,
+		rgb16f = 5,
+		rgba16f = 6
 	};
 
 	class Texture : public Object
@@ -52,6 +54,8 @@ namespace Guarneri
 
 	private:
 		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
+		std::shared_ptr<RawBuffer<color_rgb16f>> rgb16f_buffer;
+		std::shared_ptr<RawBuffer<color_rgba16f>> rgba16f_buffer;
 		std::shared_ptr<RawBuffer<color_rgb>> rgb_buffer;
 		std::shared_ptr<RawBuffer<color_rgba>> rgba_buffer;
 		std::shared_ptr<RawBuffer<color_gray>> gray_buffer;

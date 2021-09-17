@@ -249,13 +249,13 @@ namespace Guarneri
 
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
 
-			//simple IBL
+			// IBL
 			Color irradiance_diffuse;
 			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(normal, irradiance_diffuse);
 
 			Color irradiance_specular;
 			auto reflect_dir = reflect(normal, -light_dir);
-			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_diffuse);
+			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_specular);
 
 			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), 0.04f, roughness.r);
 

@@ -26,17 +26,18 @@ namespace Guarneri
 
 	Color SkyboxShader::fragment_shader(const v2f& input) const
 	{
-		Color sky_color;
+		Color ret;
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			int index;
-			return name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), index);
+			return name2cubemap.at(cubemap_prop)->sample_spherical_map(input.shadow_coord.xyz());
 		}
 
-		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), sky_color))
+		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), ret))
 		{
-			return sky_color;
+			ret = ret / (ret + Color::WHITE);
+			ret = Color::pow(ret, 1.0f / 2.2f);
+			return ret;
 		}
 
 		return Color::BLACK;

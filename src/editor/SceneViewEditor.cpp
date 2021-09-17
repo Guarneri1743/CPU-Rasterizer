@@ -29,6 +29,7 @@ namespace Guarneri
 			{
 				ImTextureID fbo = reinterpret_cast<ImTextureID>(Window::main()->get_fbo());
 				ImGui::Image(fbo, ImVec2(this->rect.w(), this->rect.h()), ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();
 		}

@@ -9,7 +9,7 @@ namespace Guarneri
 	SkyboxRenderer::SkyboxRenderer() : Renderer()
 	{
 		gizmos = false;
-		auto mat = Material::load_asset("/materials/space.material");
+		auto mat = Material::load_asset("/materials/ibl.material");
 		target = PrimitiveFactory::skybox(mat);
 	}
 

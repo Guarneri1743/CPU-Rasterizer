@@ -92,6 +92,7 @@ namespace Guarneri
 				if (obj == nullptr || obj->target == nullptr || obj->target->name == "") continue;
 				draw_transform(obj->target->transform.get());
 			}
+
 			ImGui::TreePop();
 		}
 	}
@@ -108,6 +109,7 @@ namespace Guarneri
 				draw_scene_hierarchy();
 				ImGui::EndTabItem();
 			}
+			ImGui::EndTabBar();
 		}
 	}
 }

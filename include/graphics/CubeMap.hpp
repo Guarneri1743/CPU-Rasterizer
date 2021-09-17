@@ -12,15 +12,16 @@ namespace Guarneri
 {
 	class CubeMap {
 	private:
-		std::vector<std::shared_ptr<Texture>> textures;
-		std::vector<std::string> texture_paths;
+		std::shared_ptr<Texture> texture;
+		std::string texture_path;
 
 	public:
 		CubeMap(const char* path);
-		CubeMap(const char* name, const std::vector<std::string>& paths);
-		void reload(const std::vector<std::string>& paths);
+		CubeMap(const char* name, const std::string& path);
+		void reload(const std::string& path);
+		Vector2 sample_spherical_map(Vector3 dir);
 		bool sample(const Vector3& dir, Color& ret);
-		Vector2 sample(const Vector3& dir, int& index);
+		//Vector2 sample(const Vector3& dir, int& index);
 		std::string meta_path;
 		std::string name;
 		WrapMode wrap_mode;
