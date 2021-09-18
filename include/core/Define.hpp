@@ -195,7 +195,9 @@ namespace Guarneri{
 		FRAME_TILE = 1 << 9,
 		CULLED_BACK_FACE = 1 << 10,
 		SPECULAR = 1 << 11,
-		EARLY_Z_DEBUG = 1 << 12
+		EARLY_Z_DEBUG = 1 << 12,
+		IRRADIANCE_MAP = 1 << 13,
+		ROUGHNESS = 1 << 14
 	};
 
 #ifdef OPAQUE

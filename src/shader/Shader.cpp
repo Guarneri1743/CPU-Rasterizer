@@ -227,8 +227,12 @@ namespace Guarneri
 		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
 			//todo
-			Color roughness = Color::WHITE;
+			Color roughness;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+			{
+				return Color(roughness.r, roughness.g, roughness.b, 1.0f);
+			}
 			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
@@ -244,11 +248,23 @@ namespace Guarneri
 		{
 			Color metallic = Color::BLACK;
 			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-			Color roughness = 0.0f;
-			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+			Color roughness;
+			if (name2tex.count(roughness_prop) > 0) { 
+				name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness); 
+			}
+			else if(name2tex.count(specular_prop))
+			{
+				Color spec;
+				name2tex.at(specular_prop)->sample(uv.x, uv.y, spec);
+				roughness = 1.0f - spec;
+			}
 
-			roughness = 0.2f;
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
+			if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+			{
+				return Color(roughness.r, roughness.g, roughness.b, 1.0f);
+			}
+
+			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.5f, half_dir, light_dir, view_dir, normal);
 
 			// IBL
 			Color irradiance_diffuse;
@@ -283,52 +299,63 @@ namespace Guarneri
 
 	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
 	{
-		UNUSED(lighting_data);
+		// TODO
+		return Color::BLACK;
 
-		auto light_ambient = light.ambient;
-		auto light_spec = light.specular;
-		auto light_diffuse = light.diffuse;
-		auto intensity = light.intensity;
-		UNUSED(intensity);
-		light_diffuse *= intensity;
-		light_spec *= intensity;
-		auto light_dir = (light.position - wpos).normalized();
-		if (this->normal_map)
-		{
-			light_dir = tbn * light_dir;
-		}
+		//UNUSED(lighting_data);
 
-		auto half_dir = (light_dir + view_dir).normalized();
+		//auto light_ambient = light.ambient;
+		//auto light_spec = light.specular;
+		//auto light_diffuse = light.diffuse;
+		//auto intensity = light.intensity;
+		//UNUSED(intensity);
+		//light_diffuse *= intensity;
+		//light_spec *= intensity;
+		//auto light_dir = (light.position - wpos).normalized();
+		//if (this->normal_map)
+		//{
+		//	light_dir = tbn * light_dir;
+		//}
 
-		//todo
+		//auto half_dir = (light_dir + view_dir).normalized();
+
+		////todo
 		//if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
-		{
-			Color roughness = Color::WHITE;
-			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
-			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-			float distance = Vector3::length(light.position, wpos);
-			float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
-			Color spec_tex = Color::WHITE;
-			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
-			auto specular = Color::saturate(light_spec * spec * spec_tex);
-			auto ambient = light_ambient * ao.r;
-			auto ret = (ambient + diffuse + specular) * atten;
-			return ret;
-		}
-		/*else
-		{
-			auto ambient = light_ambient * ao.r;
-			auto dist = Vector3::length(light.position, wpos);
-			Color metallic = Color::BLACK;
-			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-			Color roughness = 0.0f;
-			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
-			auto ret = ambient + Color(lo);
-			return ret;
-		}*/
+		//{
+		//	Color roughness;
+		//	name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+		//	if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+		//	{
+		//		return Color(roughness.r, roughness.g, roughness.b, 1.0f);
+		//	}
+		//	auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
+		//	auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+		//	float distance = Vector3::length(light.position, wpos);
+		//	float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+		//	auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
+		//	Color spec_tex = Color::WHITE;
+		//	name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
+		//	auto specular = Color::saturate(light_spec * spec * spec_tex);
+		//	auto ambient = light_ambient * ao.r;
+		//	auto ret = (ambient + diffuse + specular) * atten;
+		//	return ret;
+		//}
+		//else
+		//{
+		//	auto ambient = light_ambient * ao.r;
+		//	auto dist = Vector3::length(light.position, wpos);
+		//	Color metallic = Color::BLACK;
+		//	name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
+		//	Color roughness;
+		//	name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
+		//	if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+		//	{
+		//		return Color(roughness.r, roughness.g, roughness.b, 1.0f);
+		//	}
+		//	auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
+		//	auto ret = ambient + Color(lo);
+		//	return ret;
+		//}
 	}
 
 	Color Shader::fragment_shader(const v2f& input) const

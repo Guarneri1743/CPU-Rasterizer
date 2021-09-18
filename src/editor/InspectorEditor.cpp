@@ -211,7 +211,9 @@ namespace Guarneri
 				"Normal",
 				"VertexColor",
 				"Specular",
-				"Tiles"
+				"Tiles",
+				"IrradianceMap",
+				"Roughness"
 			};
 			const RenderFlag view_flags[] =
 			{
@@ -224,7 +226,9 @@ namespace Guarneri
 				RenderFlag::NORMAL,
 				RenderFlag::VERTEX_COLOR,
 				RenderFlag::SPECULAR,
-				RenderFlag::FRAME_TILE
+				RenderFlag::FRAME_TILE,
+				RenderFlag::IRRADIANCE_MAP,
+				RenderFlag::ROUGHNESS
 			};
 			static int selected_view = 0;
 			if (ImGui::Button("Views.."))
