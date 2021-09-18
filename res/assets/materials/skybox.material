@@ -1,7 +1,7 @@
 {
     "material_name": "skybox_material",
     "target_shader": "skybox_shader",
-    "meta_path": "/materials/ibl.material",
+    "meta_path": "/materials/skybox.material",
     "color_mask": 15,
     "blend_op": 0,
     "src_factor": 2,

@@ -38,11 +38,5 @@
             2,
             "/common_textures/wood_AlternatingSquareTiles_2k_ao_1.texture"
         ]
-    ],
-    "name2cubemap": [
-        [
-            20,
-            "/cubemaps/ibl.cubemap"
-        ]
     ]
 }

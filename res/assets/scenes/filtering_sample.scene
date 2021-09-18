@@ -32,12 +32,13 @@
     "models": [
         "/models/plane.model"
     ],
-    "enable_skybox": false,
+    "cubemap_path": "/cubemaps/ibl.cubemap",
+    "enable_skybox": true,
     "enable_shadow": false,
     "pcf_on": false,
     "shadow_bias": 0.0012499999720603228,
-    "color_space": 0,
-    "work_flow": 1,
+    "color_space": 1,
+    "work_flow": 0,
     "main_cam": {
         "fov": 45.0,
         "aspect": 1.0,

@@ -30,10 +30,10 @@ namespace Guarneri
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			return name2cubemap.at(cubemap_prop)->sample_spherical_map(input.shadow_coord.xyz());
+			return name2cubemap.at(cubemap_prop)->spherical_coord_to_uv(input.shadow_coord.xyz());
 		}
 
-		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), ret))
+		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz(), ret))
 		{
 			ret = ret / (ret + Color::WHITE);
 			ret = Color::pow(ret, 1.0f / 2.2f);

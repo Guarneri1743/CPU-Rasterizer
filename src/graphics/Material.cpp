@@ -322,21 +322,6 @@ namespace Guarneri
 		}
 		doc.AddMember("name2tex", name2tex, doc.GetAllocator());
 
-		rapidjson::Value name2cubemap;
-		name2cubemap.SetArray();
-		for (auto& kv : material.name2cubemap)
-		{
-			if (kv.second->meta_path == "") continue;
-			rapidjson::Value pair;
-			pair.SetArray();
-			pair.PushBack(kv.first, doc.GetAllocator());
-			rapidjson::Value tex_path;
-			tex_path.SetString(kv.second->meta_path.c_str(), doc.GetAllocator());
-			pair.PushBack(tex_path, doc.GetAllocator());
-			name2cubemap.PushBack(pair, doc.GetAllocator());
-		}
-		doc.AddMember("name2cubemap", name2cubemap, doc.GetAllocator());
-
 		std::filesystem::path abs_path(ASSETS_PATH + path);
 		if (!std::filesystem::exists(abs_path.parent_path()))
 		{
@@ -387,12 +372,11 @@ namespace Guarneri
 			material.meta_path = doc["meta_path"].GetString();
 			material.target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
 
-			rapidjson::Value name2int, name2float, name2float4, name2tex, name2cubemap;
+			rapidjson::Value name2int, name2float, name2float4, name2tex;
 			name2int = doc["name2int"].GetArray();
 			name2float = doc["name2float"].GetArray();
 			name2float4 = doc["name2float4"].GetArray();
 			name2tex = doc["name2tex"].GetArray();
-			name2cubemap = doc["name2cubemap"].GetArray();
 
 			for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
 			{
@@ -417,13 +401,6 @@ namespace Guarneri
 				const rapidjson::Value& pair = name2tex[idx].GetArray();
 				const char* tex_path = pair[1].GetString();
 				material.name2tex[pair.GetArray()[0].GetUint()] = Texture::load_asset(tex_path);
-			}
-
-			for (rapidjson::SizeType idx = 0; idx < name2cubemap.Size(); idx++)
-			{
-				const rapidjson::Value& pair = name2cubemap[idx].GetArray();
-				const char* tex_path = pair[1].GetString();
-				material.name2cubemap[pair.GetArray()[0].GetUint()] = CubeMap::load_asset(tex_path);
 			}
 
 			fclose(fd);

@@ -2,13 +2,13 @@
 namespace Guarneri
 {
 	template<typename T>
-	ResourceManager<T>::~ResourceManager()
+	Cache<T>::~Cache()
 	{
 		destructed = true;
 	}
 
 	template<typename T>
-	void ResourceManager<T>::cache(const std::string& path, const std::shared_ptr<T>& res)
+	void Cache<T>::put(const std::string& path, const std::shared_ptr<T>& res)
 	{
 		if (destructed) return;
 		if (path2res.count(path) > 0)
@@ -20,7 +20,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	bool ResourceManager<T>::get(const std::string& path, std::shared_ptr<T>& res)
+	bool Cache<T>::get(const std::string& path, std::shared_ptr<T>& res)
 	{
 		if (destructed) return false;
 		if (path2res.count(path) > 0)
@@ -32,7 +32,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	void ResourceManager<T>::free(const std::string& path)
+	void Cache<T>::free(const std::string& path)
 	{
 		if (destructed) return;
 		if (path2res.count(path) > 0)
@@ -43,7 +43,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	void ResourceManager<T>::cache(const uint32_t& id, const std::shared_ptr<T>& res)
+	void Cache<T>::put(const uint32_t& id, const std::shared_ptr<T>& res)
 	{
 		if (destructed) return;
 		if (id2res.count(id) > 0)
@@ -55,7 +55,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	bool ResourceManager<T>::get(const uint32_t& id, std::shared_ptr<T>& res)
+	bool Cache<T>::get(const uint32_t& id, std::shared_ptr<T>& res)
 	{
 		if (destructed) return false;
 		if (id2res.count(id) > 0)
@@ -67,7 +67,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	void ResourceManager<T>::free(const uint32_t& id)
+	void Cache<T>::free(const uint32_t& id)
 	{
 		if (destructed) return;
 		if (id2res.count(id) > 0)

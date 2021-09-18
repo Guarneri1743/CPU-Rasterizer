@@ -356,6 +356,10 @@ namespace Guarneri
 		doc.AddMember("shadow_bias", scene.shadow_bias, doc.GetAllocator());
 		doc.AddMember("color_space", (int32_t)scene.color_space, doc.GetAllocator());
 		doc.AddMember("work_flow", (int32_t)scene.work_flow, doc.GetAllocator());
+		
+		rapidjson::Value cubemap_path;
+		cubemap_path.SetString(scene.cubemap->meta_path.c_str(), doc.GetAllocator());
+		doc.AddMember("cubemap_path", cubemap_path, doc.GetAllocator());
 
 		rapidjson::Value main_cam = Camera::serialize(doc, *scene.main_cam).GetObject();
 		doc.AddMember("main_cam", main_cam, doc.GetAllocator());
@@ -419,6 +423,12 @@ namespace Guarneri
 			for (rapidjson::SizeType idx = 0; idx < models.Size(); idx++)
 			{
 				scene.add(Model::load_asset(models[idx].GetString()));
+			}
+
+			const char* cubemap_path = doc["cubemap_path"].GetString();
+			if (cubemap_path != nullptr)
+			{
+				scene.cubemap = std::shared_ptr<CubeMap>(new CubeMap(cubemap_path));
 			}
 
 			scene.enable_skybox = doc["enable_skybox"].GetBool();

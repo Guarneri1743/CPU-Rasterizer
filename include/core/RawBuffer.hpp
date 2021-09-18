@@ -30,7 +30,7 @@ namespace Guarneri
 		bool write(const uint32_t& row, const uint32_t& col, const T& data);
 		void uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const;
 		void clear(const T& val);
-		T* get_ptr(int& size);
+		T* get_ptr(size_t& size);
 		RawBuffer<T>& operator = (const RawBuffer<T>& other);
 		void copy(const RawBuffer<T>& other);
 	};

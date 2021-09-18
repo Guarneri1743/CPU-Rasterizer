@@ -124,6 +124,7 @@
         "/models/light.model",
         "/models/light.model"
     ],
+    "cubemap_path": "/cubemaps/ibl.cubemap",
     "enable_skybox": true,
     "enable_shadow": true,
     "pcf_on": true,

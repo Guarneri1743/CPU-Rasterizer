@@ -38,8 +38,8 @@
     "enable_shadow": true,
     "pcf_on": true,
     "shadow_bias": 0.0012499999720603228,
-    "color_space": 0,
-    "work_flow": 1,
+    "color_space": 1,
+    "work_flow": 0,
     "main_cam": {
         "fov": 45.0,
         "aspect": 1.0,

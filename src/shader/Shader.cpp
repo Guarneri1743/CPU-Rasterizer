@@ -247,15 +247,22 @@ namespace Guarneri
 			Color roughness = 0.0f;
 			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
 
+			roughness = 0.2f;
 			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.4f, half_dir, light_dir, view_dir, normal);
 
 			// IBL
 			Color irradiance_diffuse;
-			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(normal, irradiance_diffuse);
+			if (INST(GlobalShaderParams).enable_skybox)
+			{
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance_diffuse);
+			}
 
 			Color irradiance_specular;
-			auto reflect_dir = reflect(normal, -light_dir);
-			name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_specular);
+			if (INST(GlobalShaderParams).enable_skybox)
+			{
+				auto reflect_dir = reflect(normal, -light_dir);
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(reflect_dir, irradiance_specular);
+			}
 
 			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), 0.04f, roughness.r);
 
@@ -265,9 +272,6 @@ namespace Guarneri
 
 			Vector3 ibl_diffuse = Vector3(irradiance_diffuse.r, irradiance_diffuse.g, irradiance_diffuse.b) * Vector3(albedo.r, albedo.g, albedo.b);
 			Vector3 ibl_specular = Vector3(irradiance_specular.r, irradiance_specular.g, irradiance_specular.b);
-
-			//todo: irradiance convolution
-			//...
 
 			auto ambient = (diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao.r;
 			auto diffuse = Color::saturate(light_diffuse * lo);

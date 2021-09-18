@@ -75,7 +75,7 @@ namespace Guarneri
 		void present();
 		void clear_buffer(const BufferFlag& flag);
 		void set_subsample_count(const uint8_t& multiplier);
-		color_rgba* get_framebuffer() { int size;  return framebuffer->get_ptr(size); };
+		color_rgba* get_framebuffer() { size_t size;  return framebuffer->get_ptr(size); };
 		int get_width() { return width; }
 		int get_height() { return height; }
 

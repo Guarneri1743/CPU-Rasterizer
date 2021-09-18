@@ -15,22 +15,35 @@ namespace Guarneri
 		std::shared_ptr<Texture> texture;
 		std::string texture_path;
 
+		std::shared_ptr<Texture> irradiance_map;
+		std::shared_ptr<Texture> prefilter_map;
+		std::shared_ptr<Texture> brdf_lut;
+
 	public:
 		CubeMap(const char* path);
-		CubeMap(const char* name, const std::string& path);
 		void reload(const std::string& path);
-		Vector2 sample_spherical_map(Vector3 dir);
+		Vector2 spherical_coord_to_uv(const Vector3& dir);
+		Vector3 uv_to_spherical_coord(const Vector2& uv);
 		bool sample(const Vector3& dir, Color& ret);
+		bool sample_irradiance_map(const Vector3& dir, Color& ret);
+		bool sample_prefilter_map(const Vector3& dir, Color& ret);
+		bool sample_brdf(const Vector3& dir, Color& ret);
+		void precompute_ibl_textures();
+		void precompute_irradiance_map();
+		void precompute_prefilter_map();
+		void precompute_brdf_lut();
 		//Vector2 sample(const Vector3& dir, int& index);
 		std::string meta_path;
 		std::string name;
 		WrapMode wrap_mode;
 		Filtering filtering;
+		void copy_from(const CubeMap& cubemap);
 
 		static std::shared_ptr<CubeMap> load_asset(const char* path);
 		static std::shared_ptr<CubeMap> load_asset(std::string path);
 		static void serialize(const CubeMap& cube_map, std::string path);
-		static 	void CubeMap::deserialize(std::string path, CubeMap& cubemap);
+		static void deserialize(std::string path, CubeMap& cubemap);
+		static void spawn(std::string path, std::shared_ptr<CubeMap>& cubemap);
 
 	private:
 		CubeMap();

@@ -108,7 +108,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	T* RawBuffer<T>::get_ptr(int& size)
+	T* RawBuffer<T>::get_ptr(size_t& size)
 	{
 		size = width * height * sizeof(T);
 		return buffer;

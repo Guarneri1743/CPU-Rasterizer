@@ -84,11 +84,13 @@ namespace Guarneri
 		bool read(const float& u, const float& v, Color& ret) const;
 		bool read(const uint32_t& row, const uint32_t& col, Color& ret) const;
 		bool write(const uint32_t& x, const uint32_t& y, const Color& data);
+		bool write(const float& u, const float& v, const Color& data);
 		void save2file();
 		void resize();
 		void release();
 		static void serialize(const Texture& tex, std::string path);
 		static void deserialize(std::string path, Texture& tex);
+		static void export_image(const Texture& tex, std::string path);
 		std::string str() const;
 
 	private:

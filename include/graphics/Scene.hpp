@@ -26,6 +26,7 @@ namespace Guarneri
 		std::vector<std::shared_ptr<Renderer>> objects;
 		std::vector<std::shared_ptr<Renderer>> transparent_objects;
 		std::unique_ptr<SkyboxRenderer> skybox;
+		std::shared_ptr<CubeMap> cubemap;
 
 		// cam
 		std::unique_ptr<Camera> main_cam;

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <filesystem>
 #include "Singleton.hpp"
-#include "ResourceManager.hpp"
+#include "Cache.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include "rapidjson/stringbuffer.h"
@@ -14,7 +14,9 @@
 #include "Logger.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.hpp>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image/stb_image.h"
+#include "stb_image/stb_image_write.h"
 
 namespace Guarneri
 {
@@ -37,10 +39,10 @@ namespace Guarneri
 	Texture::~Texture()
 	{
 		release();
-		INST(ResourceManager<Texture>).free(this->raw_path);
+		INST(Cache<Texture>).free(this->raw_path);
 	}
 
-	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -69,7 +71,7 @@ namespace Guarneri
 		}
 	}
 
-	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt)
+	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -131,13 +133,13 @@ namespace Guarneri
 	std::shared_ptr<Texture> Texture::load_asset(const char* path)
 	{
 		std::shared_ptr<Texture> ret = nullptr;
-		if (INST(ResourceManager<Texture>).get(path, ret) && ret != nullptr)
+		if (INST(Cache<Texture>).get(path, ret) && ret != nullptr)
 		{
 			return ret;
 		}
 		ret = std::shared_ptr<Texture>(new Texture());
 		Texture::deserialize(path, *ret);
-		INST(ResourceManager<Texture>).cache(path, ret);
+		INST(Cache<Texture>).put(path, ret);
 		return ret;
 	}
 
@@ -535,6 +537,47 @@ namespace Guarneri
 		return false;
 	}
 
+	bool Texture::write(const float& u, const float& v, const Color& data)
+	{
+		float wu = u;
+		float wv = v;
+		this->wrap(wu, wv);
+		switch (format)
+		{
+		case TextureFormat::rgb:
+		{
+			if (rgb_buffer == nullptr) return false;
+			return rgb_buffer->write(wu, wv, Color::encode_rgb(data));
+		}
+		case TextureFormat::rgba:
+		{
+			if (rgba_buffer == nullptr) return false;
+			return rgba_buffer->write(wu, wv, Color::encode_rgba(data));
+		}
+		case TextureFormat::rg:
+		{
+			if (rg_buffer == nullptr) return false;
+			return rg_buffer->write(wu, wv, Color::encode_rg(data.r, data.g));
+		}
+		case TextureFormat::r32:
+		{
+			if (gray_buffer == nullptr) return false;
+			return gray_buffer->write(wu, wv, Color::encode_gray(data));
+		}
+		case TextureFormat::rgb16f:
+		{
+			if (rgb16f_buffer == nullptr) return false;
+			return rgb16f_buffer->write(wu, wv, Color::encode_rgb16f(data));
+		}
+		case TextureFormat::rgba16f:
+		{
+			if (rgba16f_buffer == nullptr) return false;
+			return rgba16f_buffer->write(wu, wv, Color::encode_rgba16f(data));
+		}
+		}
+		return false;
+	}
+
 	void Texture::save2file()
 	{
 		switch (format)
@@ -649,6 +692,55 @@ namespace Guarneri
 		else
 		{
 			ERROR("path does not exist: {}", ASSETS_PATH + path);
+		}
+	}
+
+	void Texture::export_image(const Texture& tex, std::string path)
+	{
+		switch (tex.format)
+		{
+		case TextureFormat::rgb:
+		{
+			size_t size;
+			auto data = (*tex.rgb_buffer).get_ptr(size);
+			stbi_write_png(path.c_str(), tex.width, tex.height, 3, data, 0);
+		}
+			break;
+		case TextureFormat::rgba:
+		{
+			size_t size;
+			auto data = (*tex.rgba_buffer).get_ptr(size);
+			stbi_write_png(path.c_str(), tex.width, tex.height, 4, data, 0);
+		}
+			break;
+		case TextureFormat::rg:
+		{
+			size_t size;
+			auto data = (*tex.rg_buffer).get_ptr(size);
+			stbi_write_png(path.c_str(), tex.width, tex.height, 2, data, 0);
+		}
+			break;
+		case TextureFormat::r32:
+		{
+			size_t size;
+			auto data = (*tex.gray_buffer).get_ptr(size);
+			stbi_write_png(path.c_str(), tex.width, tex.height, 1, data, 0);
+		}
+			break;
+		case TextureFormat::rgb16f:
+		{
+			size_t size;
+			auto data = (*tex.rgb16f_buffer).get_ptr(size);
+			stbi_write_hdr(path.c_str(), tex.width, tex.height, 3, (float*)data);
+		}
+			break;
+		case TextureFormat::rgba16f:
+		{
+			size_t size;
+			auto data = (*tex.rgba16f_buffer).get_ptr(size);
+			stbi_write_hdr(path.c_str(), tex.width, tex.height, 4, (float*)data);
+		}
+			break;
 		}
 	}
 
