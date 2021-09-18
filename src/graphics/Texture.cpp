@@ -258,7 +258,7 @@ namespace Guarneri
 			}
 		}
 
-		LOG("raw texture loaded: {}", str());
+		LOG("raw texture loaded: {}", str().c_str());
 	}
 
 	bool Texture::bilinear(const float& u, const float& v, Color& ret) const
@@ -625,7 +625,7 @@ namespace Guarneri
 		}
 	}
 
-	void Texture::serialize(const Texture& tex, std::string path)
+	void Texture::serialize(const Texture& tex, const std::string& path)
 	{
 		rapidjson::Document doc;
 		doc.SetObject();
@@ -658,20 +658,21 @@ namespace Guarneri
 			doc.Accept(material_writer);
 			fclose(fd);
 
-			LOG("save texture: {}", path);
+			LOG("save texture: {}", path.c_str());
 		}
 		else
 		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
+			ERROR("path does not exist: {}", abs_path.string().c_str());
 		}
 	}
 
 	void Texture::deserialize(std::string path, Texture & tex)
 	{
-		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
+		std::string abs_path = ASSETS_PATH + path;
+		std::FILE* fd = fopen(abs_path.c_str(), "r");
 		if (fd != nullptr)
 		{
-			LOG("deserialize: {}", ASSETS_PATH + path);
+			LOG("deserialize: {}", abs_path.c_str());
 			char read_buffer[256];
 			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
 			rapidjson::Document doc;
@@ -687,61 +688,66 @@ namespace Guarneri
 			tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
 			tex.reload(tex.raw_path.c_str());
 			fclose(fd);
-			LOG("read textures: {}", path);
+			LOG("read textures: {}", path.c_str());
 		}
 		else
 		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
+			ERROR("path does not exist: {}", abs_path.c_str());
 		}
 	}
 
-	void Texture::export_image(const Texture& tex, std::string path)
+	void Texture::export_image(const Texture& tex, const std::string& path)
 	{
+		std::string abs_path = RES_PATH + path;
+		const char* dest = abs_path.c_str();
+		int ret = 0;
 		switch (tex.format)
 		{
 		case TextureFormat::rgb:
 		{
 			size_t size;
 			auto data = (*tex.rgb_buffer).get_ptr(size);
-			stbi_write_png(path.c_str(), tex.width, tex.height, 3, data, 0);
+			ret = stbi_write_png(dest, tex.width, tex.height, 3, data, 0);
 		}
 			break;
 		case TextureFormat::rgba:
 		{
 			size_t size;
 			auto data = (*tex.rgba_buffer).get_ptr(size);
-			stbi_write_png(path.c_str(), tex.width, tex.height, 4, data, 0);
+			ret = stbi_write_png(dest, tex.width, tex.height, 4, data, 0);
 		}
 			break;
 		case TextureFormat::rg:
 		{
 			size_t size;
 			auto data = (*tex.rg_buffer).get_ptr(size);
-			stbi_write_png(path.c_str(), tex.width, tex.height, 2, data, 0);
+			ret = stbi_write_png(dest, tex.width, tex.height, 2, data, 0);
 		}
 			break;
 		case TextureFormat::r32:
 		{
 			size_t size;
 			auto data = (*tex.gray_buffer).get_ptr(size);
-			stbi_write_png(path.c_str(), tex.width, tex.height, 1, data, 0);
+			ret = stbi_write_png(dest, tex.width, tex.height, 1, data, 0);
 		}
 			break;
 		case TextureFormat::rgb16f:
 		{
 			size_t size;
 			auto data = (*tex.rgb16f_buffer).get_ptr(size);
-			stbi_write_hdr(path.c_str(), tex.width, tex.height, 3, (float*)data);
+			ret = stbi_write_hdr(dest, tex.width, tex.height, 3, (float*)data);
 		}
 			break;
 		case TextureFormat::rgba16f:
 		{
 			size_t size;
 			auto data = (*tex.rgba16f_buffer).get_ptr(size);
-			stbi_write_hdr(path.c_str(), tex.width, tex.height, 4, (float*)data);
+			ret = stbi_write_hdr(dest, tex.width, tex.height, 4, (float*)data);
 		}
 			break;
 		}
+
+		LOG("export image: {}, ret: {}", abs_path.c_str(), ret);
 	}
 
 	void Texture::wrap(float& u, float& v) const

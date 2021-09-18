@@ -88,9 +88,9 @@ namespace Guarneri
 		void save2file();
 		void resize();
 		void release();
-		static void serialize(const Texture& tex, std::string path);
+		static void serialize(const Texture& tex, const std::string& path);
 		static void deserialize(std::string path, Texture& tex);
-		static void export_image(const Texture& tex, std::string path);
+		static void export_image(const Texture& tex, const std::string& path);
 		std::string str() const;
 
 	private:

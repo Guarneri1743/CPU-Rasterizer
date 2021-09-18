@@ -277,7 +277,7 @@ namespace Guarneri
 			if (INST(GlobalShaderParams).enable_skybox)
 			{
 				auto reflect_dir = reflect(normal, -light_dir);
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(reflect_dir, irradiance_specular);
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_specular);
 			}
 
 			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), 0.04f, roughness.r);
@@ -289,9 +289,8 @@ namespace Guarneri
 			Vector3 ibl_diffuse = Vector3(irradiance_diffuse.r, irradiance_diffuse.g, irradiance_diffuse.b) * Vector3(albedo.r, albedo.g, albedo.b);
 			Vector3 ibl_specular = Vector3(irradiance_specular.r, irradiance_specular.g, irradiance_specular.b);
 
-			auto ambient = (diffuse_term * ibl_diffuse + ibl_specular * specular_term) * ao.r;
-			auto diffuse = Color::saturate(light_diffuse * lo);
-			auto ret = Color(ambient) + diffuse;
+			auto ambient = (diffuse_term * ibl_diffuse * light_diffuse /*+ ibl_specular * specular_term*/) * ao.r;
+			auto ret = Color(ambient) + lo;
 
 			return ret;
 		}

@@ -22,15 +22,13 @@ namespace Guarneri
 	public:
 		CubeMap(const char* path);
 		void reload(const std::string& path);
-		Vector2 spherical_coord_to_uv(const Vector3& dir);
-		Vector3 uv_to_spherical_coord(const Vector2& uv);
 		bool sample(const Vector3& dir, Color& ret);
 		bool sample_irradiance_map(const Vector3& dir, Color& ret);
 		bool sample_prefilter_map(const Vector3& dir, Color& ret);
 		bool sample_brdf(const Vector3& dir, Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
-		void precompute_prefilter_map();
+		void precompute_prefilter_map(const float& roughness);
 		void precompute_brdf_lut();
 		//Vector2 sample(const Vector3& dir, int& index);
 		std::string meta_path;

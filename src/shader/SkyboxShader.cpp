@@ -3,6 +3,7 @@
 #include "Vector4.hpp"
 #include "GlobalShaderParams.hpp"
 #include "Singleton.hpp"
+#include "Sampling.hpp"
 
 namespace Guarneri
 {
@@ -30,7 +31,7 @@ namespace Guarneri
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			return name2cubemap.at(cubemap_prop)->spherical_coord_to_uv(input.shadow_coord.xyz());
+			return spherical_coord_to_uv(input.shadow_coord.xyz());
 		}
 		else if ((INST(GlobalShaderParams).render_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
 		{
