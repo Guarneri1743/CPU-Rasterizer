@@ -1,3 +1,4 @@
+#include "..\RawBuffer.hpp"
 namespace Guarneri
 {
 	template<typename T>
@@ -56,7 +57,7 @@ namespace Guarneri
 	bool RawBuffer<T>::read(const float& u, const float& v, T& out) const
 	{
 		uint32_t row, col;
-		uv2pixel(u, v, row, col);
+		uv2pixel(width, height, u, v, row, col);
 		return read(row, col, out);
 	}
 
@@ -76,7 +77,7 @@ namespace Guarneri
 	bool RawBuffer<T>::write(const float& u, const float& v, const T& data)
 	{
 		uint32_t row, col;
-		uv2pixel(u, v, row, col);
+		uv2pixel(width, height, u, v, row, col);
 		return this->write(row, col, data);
 	}
 
@@ -92,12 +93,17 @@ namespace Guarneri
 		return true;
 	}
 
-	template<typename T>
-	void RawBuffer<T>::uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const
+	inline void uv2pixel(const uint32_t& width, const uint32_t& height, const float& u, const float& v, uint32_t& row, uint32_t& col) 
 	{
 		// [0.0, 1.0) -> [0, width-1]
-		row = (uint32_t)(std::floor(v * this->height + 0.5f));
-		col = (uint32_t)(std::floor(u * this->width + 0.5f));
+		row = (uint32_t)(std::floor(v * (float)height + 0.5f));
+		col = (uint32_t)(std::floor(u * (float)width + 0.5f));
+	}
+
+	inline void pixel2uv(const uint32_t& width, const uint32_t& height, const uint32_t& row, const uint32_t& col, float& u, float& v)
+	{
+		u = ((float)col + 0.5f) / (float)width;
+		v = ((float)row + 0.5f) / (float)height;
 	}
 
 	template<typename T>

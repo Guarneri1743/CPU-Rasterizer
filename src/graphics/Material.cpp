@@ -338,16 +338,17 @@ namespace Guarneri
 		}
 		else
 		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
+			ERROR("serialize material failed, path does not exist: {}", abs_path.string().c_str());
 		}
 	}
 
 	void Material::deserialize(std::string path, Material& material)
 	{
-		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
+		std::filesystem::path abs_path(ASSETS_PATH + path);
+		std::FILE* fd = fopen(abs_path.string().c_str(), "r");
 		if (fd != nullptr)
 		{
-			LOG("deserialize: {}", ASSETS_PATH + path);
+			LOG("deserialize: {}", abs_path.string().c_str());
 			char read_buffer[256];
 			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
 			rapidjson::Document doc;
@@ -380,19 +381,19 @@ namespace Guarneri
 
 			for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
 			{
-				const rapidjson::Value& pair = name2int.PopBack();
+				const rapidjson::Value& pair = name2int[idx].PopBack();
 				material.name2int[pair[0].GetUint()] = pair[1].GetInt();
 			}
 
 			for (rapidjson::SizeType idx = 0; idx < name2float.Size(); idx++)
 			{
-				const rapidjson::Value& pair = name2float.PopBack();
+				const rapidjson::Value& pair = name2float[idx].PopBack();
 				material.name2float[pair[0].GetUint()] = pair[1].GetFloat();
 			}
 
 			for (rapidjson::SizeType idx = 0; idx < name2float4.Size(); idx++)
 			{
-				const rapidjson::Value& pair = name2float4.PopBack();
+				const rapidjson::Value& pair = name2float4[idx].PopBack();
 				material.name2float4[pair[0].GetUint()] = Vector4::deserialize(pair[1].GetObject());
 			}
 
@@ -407,7 +408,7 @@ namespace Guarneri
 		}
 		else
 		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
+			ERROR("path does not exist: {}", abs_path.string().c_str());
 		}
 	}
 }

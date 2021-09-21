@@ -25,7 +25,8 @@ namespace Guarneri
 		bool sample(const Vector3& dir, Color& ret);
 		bool sample_irradiance_map(const Vector3& dir, Color& ret);
 		bool sample_prefilter_map(const Vector3& dir, Color& ret);
-		bool sample_brdf(const Vector3& dir, Color& ret);
+		bool sample_prefilter_map_lod(const Vector3& dir, const float& lod, Color& ret);
+		bool sample_brdf(const Vector2& uv, Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
 		void precompute_prefilter_map(const float& roughness);

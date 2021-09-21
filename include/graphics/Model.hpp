@@ -4,13 +4,15 @@
 #include <vector>
 #include <memory>
 #include <stdint.h>
+#include <vector>
+
+#include "assimp/Scene.h"
 
 #include "Mesh.hpp"
 #include "Vertex.hpp"
 #include "Material.hpp"
 #include "Transform.hpp"
-#include <assimp/Scene.h>
-#include <vector>
+
 
 namespace Guarneri
 {

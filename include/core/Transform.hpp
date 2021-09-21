@@ -8,6 +8,7 @@
 
 namespace Guarneri
 {
+	class Model;
 	class Transform
 	{
 	public:
@@ -21,6 +22,7 @@ namespace Guarneri
 		bool selected;
 
 	private:
+		Model* model; 
 		Transform* parent;
 		std::vector<Transform*> children;
 
@@ -37,6 +39,8 @@ namespace Guarneri
 		Vector3 transform_dir(const Vector3& dir);
 		Vector3 inverse_transform_pos(const Vector3& point);
 		Vector3 inverse_transform_dir(const Vector3& dir);
+		void set_model(Model* _model) { this->model = _model; }
+		Model* get_model() const { return this->model; }
 		void lookat(const Vector3& target);
 		void set_parent(Transform* parent);
 		void set_world_position(const Vector3& world_position);

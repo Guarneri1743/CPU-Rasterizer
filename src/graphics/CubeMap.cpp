@@ -82,12 +82,20 @@ namespace Guarneri
 
 	bool CubeMap::sample_prefilter_map(const Vector3& dir, Color& ret)
 	{
-		return false;
+		auto uv = spherical_coord_to_uv(dir);
+		return prefilter_map->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_brdf(const Vector3& dir, Color& ret)
+	bool CubeMap::sample_prefilter_map_lod(const Vector3& dir, const float& lod, Color& ret)
 	{
-		return false;
+		// todo: mipmap
+		auto uv = spherical_coord_to_uv(dir);
+		return prefilter_map->sample(uv.x, uv.y, ret);
+	}
+
+	bool CubeMap::sample_brdf(const Vector2& uv, Color& ret)
+	{
+		return brdf_lut->sample(uv.x, uv.y, ret);
 	}
 
 	void CubeMap::precompute_ibl_textures()
@@ -97,7 +105,7 @@ namespace Guarneri
 			precompute_irradiance_map();
 			// todo: mipmap
 			const float kMaxMip = 5.0f;
-			float mip = 3.2f;
+			float mip = 0.0f;
 			float roughness = mip / (float)(kMaxMip - 1.0f);
 			precompute_prefilter_map(roughness);
 			precompute_brdf_lut();
@@ -108,7 +116,7 @@ namespace Guarneri
 		}
 	}
 
-	constexpr float kSampleStep = 0.5f;
+	constexpr float kSampleStep = 0.05f;
 
 	void CubeMap::precompute_irradiance_map()
 	{
@@ -152,30 +160,33 @@ namespace Guarneri
 			Color irradiance = Color(0.0f);
 			float step = kSampleStep;
 			float samples = 0.0f;
+
+			// brute force sampling (whole sphere) 
 			for (float phi = 0.0f; phi < TWO_PI; phi += step)
 			{
-				for (float theta = 0.0f; theta < PI; theta += step)
+				for (float theta = -HALF_PI; theta < HALF_PI; theta += step)
 				{
-					Vector3 light_dir = radian_to_spherical_coord(theta, phi);
-					float ndl = std::max(0.0f, Vector3::dot(normal, light_dir));
+					Vector3 w_i = radian_to_spherical_coord(theta, phi);
+					float ndl = Vector3::dot(w_i, normal);
 					if (ndl > 0.0f)
 					{
 						Color color;
-						sample(light_dir, color);
+						sample(w_i, color);
 						irradiance += color * ndl;
 					}
-					samples++;
+					samples += 1.0f;
 				}
 			}
-
-			irradiance = irradiance * PI / samples;
+			
+			irradiance *= PI;
+			irradiance /= samples;
 			irradiance_map->write(u, 1.0f - v, irradiance);
 		});
 
 		Texture::export_image(*irradiance_map, irradiance_path);
 	}
 
-	constexpr uint32_t kSampleCount = 32u;
+	constexpr uint32_t kSampleCount = 4096u;
 
 	void CubeMap::precompute_prefilter_map(const float& roughness)
 	{
@@ -216,7 +227,7 @@ namespace Guarneri
 			Vector2 uv = { u, v };
 			Vector3 normal = uv_to_spherical_coord(uv);
 
-			// Epic Approximation
+			// Epic approximation
 			Vector3 reflect_dir = normal;
 			Vector3 view_dir = reflect_dir;
 
@@ -225,15 +236,14 @@ namespace Guarneri
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				Vector2 random_dir = Vector2((float)(rand() % 10000) / 10000.0f, (float)(rand() % 10000) / 10000.0f);//hammersley(sample_index, kSampleCount);
-				Vector3 half_way = importance_sample_ggx(random_dir, normal, r);
-				float vdh = std::max(Vector3::dot(view_dir, half_way), 0.0f);
-				Vector3 light_dir = Vector3::normalize(2.0f * vdh * half_way - view_dir);
-				float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+				Vector2 random_dir = random_vec2_01(sample_index, kSampleCount);
+				Vector3 half_way = importance_sampling(random_dir, normal, r);
+				Vector3 w_i = Vector3::normalize(2.0f * Vector3::dot(view_dir, half_way) * half_way - view_dir);
+				float ndl = Vector3::dot(normal, w_i);
 				if (ndl > 0.0f)
 				{
 					Color color;
-					sample(light_dir, color);
+					sample(w_i, color);
 					prefilter_color += color * ndl;
 					total_weight += ndl;
 				}
@@ -246,10 +256,84 @@ namespace Guarneri
 		Texture::export_image(*prefilter_map, prefilter_map_path);
 	}
 
+	constexpr int brdf_size = 2048;
+
 	void CubeMap::precompute_brdf_lut()
 	{
-		brdf_lut = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
-	
+		size_t begin = texture_path.find(".hdr");
+		std::string brdf_lut_path = texture_path;
+		brdf_lut_path = brdf_lut_path.replace(begin, begin + 4, "_brdf_lut.hdr");
+
+		if (std::filesystem::exists(RES_PATH + brdf_lut_path))
+		{
+			brdf_lut = Texture::load_raw(brdf_lut_path);
+			return;
+		}
+
+		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::rgb16f);
+		brdf_lut->filtering = Filtering::POINT;
+
+		std::vector<Vector2> indexers;
+		indexers.reserve((size_t)(brdf_size) * (size_t)(brdf_size));
+		for (uint32_t row = 0; row < brdf_size; row++)
+		{
+			for (uint32_t col = 0; col < brdf_size; col++)
+			{
+				indexers.push_back(Vector2((float)row, (float)col));
+			}
+		}
+
+		uint32_t size = brdf_size;
+		std::for_each(
+			std::execution::par_unseq,
+			indexers.begin(),
+			indexers.end(),
+			[this, size](auto&& coord)
+		{
+			float row = std::floorf(coord.x);
+			float col = std::floorf(coord.y);
+
+			float u = (col + 0.5f) / (float)size;
+			float v = (row + 0.5f) / (float)size;
+
+			float ndv = std::max(u, 0.0f);
+			float roughness = std::max(v, 0.0f);
+
+			Vector3 view_dir;
+			view_dir.x = sqrt(1.0f - ndv * ndv);
+			view_dir.y = ndv;
+			view_dir.z = 0.0f;
+
+			Vector3 normal = Vector3::UP;
+
+			Color brdf = Color(0.0f);
+
+			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
+			{
+				Vector2 random_dir = random_vec2_01(sample_index, kSampleCount);
+				Vector3 half_way = importance_sampling(random_dir, normal, roughness);
+				Vector3 w_i = Vector3::normalize(2.0f * Vector3::dot(view_dir, half_way) * half_way - view_dir);
+
+				float ndl = std::max(w_i.y, 0.0f);
+				float ndh = std::max(half_way.y, 0.0f);
+				float vdh = std::max(Vector3::dot(view_dir, half_way), 0.0f);
+
+				if (ndl > 0.0f)
+				{
+					float geo = geometry_smith(normal, view_dir, w_i, roughness);
+					float geo_vis = (geo * vdh) / (ndh * ndv);
+					float fc = std::pow(1.0f - vdh, 5.0f);
+
+					brdf.r += (1.0f - fc) * geo_vis;
+					brdf.g += fc * geo_vis;
+				}
+			}
+
+			brdf /= (float)kSampleCount;
+			brdf_lut->write(size - (uint32_t)row - 1, (uint32_t)col, brdf);
+		});
+
+		Texture::export_image(*brdf_lut, brdf_lut_path);
 	}
 
 	//Vector2 CubeMap::sample(const Vector3& dir, int& index)

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Marcos.h"
 #include "Singleton.hpp"
+#include "PBR.hpp"
 
 namespace Guarneri
 {
@@ -126,75 +127,28 @@ namespace Guarneri
 
 	Vector3 Shader::reflect(const Vector3& n, const Vector3& light_out_dir) const
 	{
-		auto ndl = std::max(Vector3::dot(n, light_out_dir), 0.0f);
-		return 2.0f * n * ndl - light_out_dir;
+		auto ndl = Vector3::dot(n, light_out_dir);
+		return (2.0f * n * ndl - light_out_dir).normalized();
 	}
 
-	float distribution_ggx(const Vector3& n, const Vector3& h, const float& roughness)
+	Vector3 metallic_workflow(const Vector3& f0, const Vector3& albedo, const float& intensity, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
 	{
-		float a = roughness * roughness;
-		float a2 = a * a;
-		float ndh = std::max(Vector3::dot(n, h), 0.0f);
-		float ndh2 = ndh * ndh;
-
-		float nom = a2;
-		float denom = (ndh2 * (a2 - 1.0f) + 1.0f);
-		denom = PI * denom * denom;
-
-		return nom / std::max(denom, 0.001f);
-	}
-
-	float geometry_schlick_ggx(const float& ndv, const float& roughness)
-	{
-		float r = (roughness + 1.0f);
-		float k = (r * r) / 8.0f;
-		float nom = ndv;
-		float denom = ndv * (1.0f - k) + k;
-		return nom / denom;
-	}
-
-	float geometry_smith(const Vector3& n, const Vector3& v, const Vector3& l, const float& roughness)
-	{
-		float ndv = std::max(Vector3::dot(n, v), 0.0f);
-		float ndl = std::max(Vector3::dot(n, l), 0.0f);
-		float ggx2 = geometry_schlick_ggx(ndv, roughness);
-		float ggx1 = geometry_schlick_ggx(ndl, roughness);
-
-		return ggx1 * ggx2;
-	}
-
-	Vector3 fresnel_schlick(const float& cos_theta, const Vector3& F0)
-	{
-		float omc = 1.0f - cos_theta;
-
-		return F0 + (1.0f - F0) * omc * omc * omc * omc * omc;
-	}
-
-	Vector3 fresnel_schlick_roughness(float cosTheta, Vector3 F0, float roughness)
-	{
-		return F0 + (std::max(Vector3(1.0f - roughness), F0) - F0) * std::pow(1.0f - cosTheta, 5.0f);
-	}
-
-	Vector3 metallic_workflow(const Vector3& albedo, const float& intensity, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
-	{
-		Vector3 f0 = 0.04f;
-		f0 = Vector3::lerp(f0, albedo, metallic);
 		float attenuation = 1.0f / (light_distance * light_distance);
 		Vector3 radiance = Vector3(attenuation * intensity);
 
 		float ndf = distribution_ggx(normal, halfway, roughness);
 		float geo = geometry_smith(normal, view_dir, light_dir, roughness);
-		Vector3 fresnel = fresnel_schlick(std::max(std::min(Vector3::dot(halfway, view_dir), 1.0f), 0.0f), f0);
+		Vector3 fresnel = fresnel_schlick(std::max(Vector3::dot(halfway, view_dir), 0.0f), f0);
 
 		Vector3 nominator = ndf * geo * fresnel;
-		float denominator = 4.0f * std::max(Vector3::dot(normal, view_dir), 0.0f) * std::max(Vector3::dot(normal, light_dir), 0.0f);
+		float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
+		float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+		float denominator = 4.0f * ndv * ndl;
 		Vector3 specular = nominator / std::max(denominator, 0.001f);
 
 		Vector3 spec_term = fresnel;
 		Vector3 diffuse_term = Vector3(1.0f) - spec_term;
 		diffuse_term *= 1.0f - metallic;
-
-		float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{
@@ -215,6 +169,7 @@ namespace Guarneri
 		UNUSED(intensity);
 		light_diffuse *= intensity;
 		light_spec *= intensity;
+		float light_distance = 1.0f;
 
 		auto light_dir = -light.forward.normalized();
 		if (this->normal_map)
@@ -224,16 +179,56 @@ namespace Guarneri
 
 		auto half_dir = (light_dir + view_dir).normalized();
 
+		// sample textures
+		Color metallic_color = Color::BLACK;
+		float metallic = 0.0f;
+		name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic_color);
+		metallic = metallic_color.r;
+		Color roughness_color;
+		float roughness = 0.0f;
+		if (name2tex.count(roughness_prop) > 0)
+		{
+			name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness_color);
+			roughness = roughness_color.r;
+		}
+		else if (name2tex.count(specular_prop))
+		{
+			Color spec;
+			name2tex.at(specular_prop)->sample(uv.x, uv.y, spec);
+			roughness = 1.0f - spec.r;
+		}
+
+		roughness = std::max(roughness, EPSILON); // brdf lut bug (baking error)
+
+		if (name2float.count(roughness_multiplier_prop) > 0 && name2float.count(roughness_offset_prop) > 0 )
+		{
+			roughness = roughness * name2float.at(roughness_multiplier_prop) + name2float.at(roughness_offset_prop);
+		}
+		
+		if (name2float.count(metallic_multiplier_prop) > 0 && name2float.count(metallic_offset_prop) > 0)
+		{
+			metallic = metallic * name2float.at(metallic_multiplier_prop) + name2float.at(metallic_offset_prop);
+		}
+
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+		{
+			return Color(roughness);
+		}
+
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::METALLIC) != RenderFlag::DISABLE)
+		{
+			return Color(metallic_color);
+		}
+
+		if ((INST(GlobalShaderParams).render_flag & RenderFlag::AO) != RenderFlag::DISABLE)
+		{
+			return ao;
+		}
+
 		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
 			//todo
-			Color roughness;
-			name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-			if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
-			{
-				return Color(roughness.r, roughness.g, roughness.b, 1.0f);
-			}
-			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
+			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
 			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
@@ -246,50 +241,51 @@ namespace Guarneri
 		}
 		else
 		{
-			Color metallic = Color::BLACK;
-			name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-			Color roughness;
-			if (name2tex.count(roughness_prop) > 0) { 
-				name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness); 
-			}
-			else if(name2tex.count(specular_prop))
-			{
-				Color spec;
-				name2tex.at(specular_prop)->sample(uv.x, uv.y, spec);
-				roughness = 1.0f - spec;
-			}
+			Vector3 f0 = 0.04f;
+			f0 = Vector3::lerp(f0, Vector3(albedo.r, albedo.g, albedo.b), metallic);
+			auto lo = metallic_workflow(f0, Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic, roughness, light_distance, half_dir, light_dir, view_dir, normal);
 
-			if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
-			{
-				return Color(roughness.r, roughness.g, roughness.b, 1.0f);
-			}
-
-			auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, 0.5f, half_dir, light_dir, view_dir, normal);
-
-			// IBL
-			Color irradiance_diffuse;
-			if (INST(GlobalShaderParams).enable_skybox)
-			{
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance_diffuse);
-			}
-
-			Color irradiance_specular;
-			if (INST(GlobalShaderParams).enable_skybox)
-			{
-				auto reflect_dir = reflect(normal, -light_dir);
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(reflect_dir, irradiance_specular);
-			}
-
-			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), 0.04f, roughness.r);
+			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), f0, roughness);
 
 			Vector3 specular_term = fresnel;
 			Vector3 diffuse_term = 1.0f - specular_term;
-			diffuse_term *= 1.0f - metallic.r;
+			diffuse_term *= 1.0f - metallic;
 
-			Vector3 ibl_diffuse = Vector3(irradiance_diffuse.r, irradiance_diffuse.g, irradiance_diffuse.b) * Vector3(albedo.r, albedo.g, albedo.b);
-			Vector3 ibl_specular = Vector3(irradiance_specular.r, irradiance_specular.g, irradiance_specular.b);
+			// IBL
+			Color irradiance;
+			if (INST(GlobalShaderParams).enable_skybox)
+			{
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance);
+			}
 
-			auto ambient = (diffuse_term * ibl_diffuse * light_diffuse /*+ ibl_specular * specular_term*/) * ao.r;
+			Color prefiltered_color;
+			if (INST(GlobalShaderParams).enable_skybox)
+			{
+				auto reflect_dir = reflect(normal, view_dir);
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_prefilter_map(reflect_dir, prefiltered_color);
+			}
+
+			Color brdf_lut;
+			if (INST(GlobalShaderParams).enable_skybox)
+			{
+				float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
+				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_brdf(Vector2(ndv, roughness), brdf_lut);
+			}
+
+			Vector3 indirect_diffuse = Vector3(irradiance.r, irradiance.g, irradiance.b) * Vector3(albedo.r, albedo.g, albedo.b) * diffuse_term;
+			Vector3 indirect_specular = Vector3(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * (specular_term * brdf_lut.r + brdf_lut.g);
+
+			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_DIFFUSE) != RenderFlag::DISABLE)
+			{
+				return Color(indirect_diffuse);
+			}
+
+			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_SPECULAR) != RenderFlag::DISABLE)
+			{
+				return Color(indirect_specular);
+			}
+
+			auto ambient = (indirect_diffuse + indirect_specular) * ao.r;
 			auto ret = Color(ambient) + lo;
 
 			return ret;
@@ -300,61 +296,6 @@ namespace Guarneri
 	{
 		// TODO
 		return Color::BLACK;
-
-		//UNUSED(lighting_data);
-
-		//auto light_ambient = light.ambient;
-		//auto light_spec = light.specular;
-		//auto light_diffuse = light.diffuse;
-		//auto intensity = light.intensity;
-		//UNUSED(intensity);
-		//light_diffuse *= intensity;
-		//light_spec *= intensity;
-		//auto light_dir = (light.position - wpos).normalized();
-		//if (this->normal_map)
-		//{
-		//	light_dir = tbn * light_dir;
-		//}
-
-		//auto half_dir = (light_dir + view_dir).normalized();
-
-		////todo
-		//if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
-		//{
-		//	Color roughness;
-		//	name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-		//	if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
-		//	{
-		//		return Color(roughness.r, roughness.g, roughness.b, 1.0f);
-		//	}
-		//	auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness.r) * 32.0f);
-		//	auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
-		//	float distance = Vector3::length(light.position, wpos);
-		//	float atten = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
-		//	auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
-		//	Color spec_tex = Color::WHITE;
-		//	name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
-		//	auto specular = Color::saturate(light_spec * spec * spec_tex);
-		//	auto ambient = light_ambient * ao.r;
-		//	auto ret = (ambient + diffuse + specular) * atten;
-		//	return ret;
-		//}
-		//else
-		//{
-		//	auto ambient = light_ambient * ao.r;
-		//	auto dist = Vector3::length(light.position, wpos);
-		//	Color metallic = Color::BLACK;
-		//	name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic);
-		//	Color roughness;
-		//	name2tex.count(roughness_prop) > 0 && name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness);
-		//	if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
-		//	{
-		//		return Color(roughness.r, roughness.g, roughness.b, 1.0f);
-		//	}
-		//	auto lo = metallic_workflow(Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic.r, roughness.r, dist, half_dir, light_dir, view_dir, normal);
-		//	auto ret = ambient + Color(lo);
-		//	return ret;
-		//}
 	}
 
 	Color Shader::fragment_shader(const v2f& input) const
@@ -394,6 +335,11 @@ namespace Guarneri
 			}
 		}
 
+		if (name2float4.count(tint_color_prop) > 0)
+		{
+			albedo *= Color(name2float4.at(tint_color_prop));
+		}
+
 		Color ao = Color::WHITE;
 		name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
 
@@ -409,42 +355,6 @@ namespace Guarneri
 
 		ret += emmision;
 		ret *= shadow_atten;
-
-		// todo: ddx ddy
-		/*if ((INST(GlobalShaderParams).render_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE) {
-			Vector2 ddx_uv = ddx.uv;
-			Vector2 ddy_uv = ddy.uv;
-			float rho = std::max(std::sqrt(Vector2::dot(ddx_uv, ddx_uv)), std::sqrt(Vector2::dot(ddy_uv, ddy_uv)));
-			float logrho = std::log2(rho);
-			int mip = std::max(int(logrho + 0.5f), 0);
-			if (mip == 0) {
-				return Color(1.0f, 0.0f, 0.0f, 1.0f);
-			}
-			else if (mip == 1) {
-				return Color(0.0f, 1.0f, 0.0f, 1.0f);
-			}
-			else if (mip == 2) {
-				return Color(0.0f, 0.0f, 1.0f, 1.0f);
-			}
-			else if (mip == 3) {
-				return Color(1.0f, 0.0f, 1.0f, 1.0f);
-			}
-			else if (mip == 4) {
-				return Color(0.0f, 1.0f, 1.0f, 1.0f);
-			}
-			else if (mip == 5) {
-				return Color(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-			else if (mip == 6) {
-				return Color(0.5f, 0.0f, 0.5f, 1.0f);
-			}
-			else if (mip == 7) {
-				return Color(0.0f, 0.5f, 0.5f, 1.0f);
-			}
-			else {
-				return Color(0.5f, 0.5f, 0.5f, 1.0f);
-			}
-		}*/
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{

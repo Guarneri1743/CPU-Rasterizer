@@ -297,6 +297,8 @@ namespace Guarneri
 
 			model.transform = std::unique_ptr<Transform>(Transform::deserialize(doc["transform"].GetObject()));
 			model.transform->name = model.name;
+
+			model.transform->set_model(&model);
 		}
 		else
 		{

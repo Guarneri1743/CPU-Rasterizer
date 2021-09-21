@@ -1,7 +1,7 @@
 #ifndef _MARCOS_
 #define _MARCOS_
 
-#define EPSILON 1e-04f
+#define EPSILON 1e-06f
 #define ONE_MINUS_EPSILON 1 - EPSILON
 #define EQUALS(a, b) std::abs(a-b) <= EPSILON
 #define LESS_THAN(a, b) (a - b < -EPSILON)
@@ -11,6 +11,7 @@
 #define DEGREE2RAD(degree) degree * 0.0174532925f
 #define RAD2DEGREE(rad) rad * 57.2957795786f
 #define PI 3.1415926f
+#define ONE_OVER_PI 0.31830989161357f
 #define TWO_PI 6.2831852f
 #define HALF_PI 1.5707963f
 #define FRAC(val) val - (long)val

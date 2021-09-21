@@ -20,6 +20,8 @@
 
 namespace Guarneri
 {
+	constexpr int kMaxMip = 8;
+
 	Texture::Texture()
 	{
 		wrap_mode = WrapMode::REPEAT;
@@ -29,6 +31,7 @@ namespace Guarneri
 		height = 0;
 		mip_count = 0;
 		mip_filtering = Filtering::POINT;
+		enable_mip = true;
 	}
 
 	Texture::Texture(const Texture& other)
@@ -68,6 +71,11 @@ namespace Guarneri
 		case TextureFormat::rgba16f:
 			rgba16f_buffer = RawBuffer<color_rgba16f>::create(width, height);
 			break;
+		}
+
+		if (enable_mip)
+		{
+			generate_mipmap(kMaxMip, Filtering::POINT);
 		}
 	}
 
@@ -127,6 +135,11 @@ namespace Guarneri
 			});
 		}
 		break;
+		}
+
+		if (enable_mip)
+		{
+			generate_mipmap(kMaxMip, Filtering::POINT);
 		}
 	}
 
@@ -258,10 +271,15 @@ namespace Guarneri
 			}
 		}
 
+		if (enable_mip)
+		{
+			generate_mipmap(kMaxMip, Filtering::POINT);
+		}
+
 		LOG("raw texture loaded: {}", str().c_str());
 	}
 
-	bool Texture::bilinear(const float& u, const float& v, Color& ret) const
+	bool Texture::bilinear(const float& u, const float& v, const uint32_t& mip, Color& ret) const
 	{
 		float rf = v * (float)this->width + 0.5f;
 		float cf = u * (float)this->height + 0.5f;
@@ -273,10 +291,10 @@ namespace Guarneri
 		float frac_col = cf - (float)col;
 
 		Color c00, c01, c11, c10;
-		read(row, col, c00);
-		read(row + 1, col, c01);
-		read(row + 1, col + 1, c11);
-		read(row, col + 1, c10);
+		read(row, col, mip, c00);
+		read(row + 1, col, mip, c01);
+		read(row + 1, col + 1, mip, c11);
+		read(row, col + 1, mip, c10);
 
 		Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
 		Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
@@ -284,9 +302,9 @@ namespace Guarneri
 		return true;
 	}
 
-	bool Texture::point(const float& u, const float& v, Color& ret) const
+	bool Texture::point(const float& u, const float& v, const uint32_t& mip, Color& ret) const
 	{
-		read(u, v, ret);
+		read(u, v, mip, ret);
 		return true;
 	}
 
@@ -296,7 +314,7 @@ namespace Guarneri
 		{
 		case TextureFormat::rgb:
 		{
-			for (int i = 1; i < count; i++)
+			for (int i = 1; i < rgb_mipmaps.size(); i++)
 			{
 				rgb_mipmaps[i].reset();
 			}
@@ -306,15 +324,30 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				long w = this->width >> i;
-				long h = this->height >> i;
-				rgb_mipmaps.emplace_back(std::make_shared<RawBuffer<color_rgb>>(w, h));
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_rgb>>(w, h);
+			
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_rgb color;
+						rgb_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				rgb_mipmaps.emplace_back(mipmap);
 			}
+
 			break;
 		}
 		case TextureFormat::rgba:
 		{
-			for (int i = 1; i < count; i++)
+			for (int i = 1; i < rgba_mipmaps.size(); i++)
 			{
 				rgba_mipmaps[i].reset();
 			}
@@ -324,15 +357,30 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				long w = this->width >> i;
-				long h = this->height >> i;
-				rgba_mipmaps.emplace_back(std::make_shared<RawBuffer<color_rgba>>(w, h));
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_rgba>>(w, h);
+
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_rgba color;
+						rgba_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				rgba_mipmaps.emplace_back(mipmap);
 			}
+
 			break;
 		}
 		case TextureFormat::rg:
 		{
-			for (int i = 1; i < count; i++)
+			for (int i = 1; i < rg_mipmaps.size(); i++)
 			{
 				rg_mipmaps[i].reset();
 			}
@@ -342,15 +390,29 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				long w = this->width >> i;
-				long h = this->height >> i;
-				rg_mipmaps.emplace_back(std::make_shared<RawBuffer<color_rg>>(w, h));
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_rg>>(w, h);
+
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_rg color;
+						rg_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				rg_mipmaps.emplace_back(mipmap);
 			}
 			break;
 		}
 		case TextureFormat::r32:
 		{
-			for (int i = 1; i < count; i++)
+			for (int i = 1; i < gray_mipmaps.size(); i++)
 			{
 				gray_mipmaps[i].reset();
 			}
@@ -360,9 +422,87 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				long w = this->width >> i;
-				long h = this->height >> i;
-				gray_mipmaps.emplace_back(std::make_shared<RawBuffer<color_gray>>(w, h));
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_gray>>(w, h);
+
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_gray color;
+						gray_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				gray_mipmaps.emplace_back(mipmap);
+			}
+			break;
+		}
+		case TextureFormat::rgb16f:
+		{
+			for (int i = 1; i < rgb16f_mipmaps.size(); i++)
+			{
+				rgb16f_mipmaps[i].reset();
+			}
+			rgb16f_mipmaps.clear();
+
+			rgb16f_mipmaps.emplace_back(rgb16f_buffer);
+
+			for (int i = 1; i < count; i++)
+			{
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_rgb16f>>(w, h);
+
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_rgb16f color;
+						rgb16f_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				rgb16f_mipmaps.emplace_back(mipmap);
+			}
+			break;
+		}
+		case TextureFormat::rgba16f:
+		{
+			for (int i = 1; i < rgba16f_mipmaps.size(); i++)
+			{
+				rgba16f_mipmaps[i].reset();
+			}
+			rgba16f_mipmaps.clear();
+
+			rgba16f_mipmaps.emplace_back(rgba16f_buffer);
+
+			for (int i = 1; i < count; i++)
+			{
+				uint32_t w = this->width >> i;
+				uint32_t h = this->height >> i;
+				auto mipmap = std::make_shared<RawBuffer<color_rgba16f>>(w, h);
+
+				for (uint32_t row = 0; row < h; row++)
+				{
+					for (uint32_t col = 0; col < w; col++)
+					{
+						float u, v;
+						pixel2uv(w, h, row, col, u, v);
+						color_rgba16f color;
+						rgba16f_buffer->read(u, v, color);
+						mipmap->write(row, col, color);
+					}
+				}
+
+				rgba16f_mipmaps.emplace_back(mipmap);
 			}
 			break;
 		}
@@ -374,17 +514,32 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, Color& ret) const
 	{
+		return sample(u, v, 0, ret);
+	}
+
+	bool Texture::sample(const float& u, const float& v, const uint32_t& mip, Color& ret) const
+	{
 		switch (this->filtering)
 		{
 		case Filtering::BILINEAR:
-			return bilinear(u, v, ret);
+			return bilinear(u, v, mip, ret);
 		case Filtering::POINT:
-			return point(u, v, ret);
+			return point(u, v, mip, ret);
 		}
 		return false;
 	}
 
 	bool Texture::read(const float& u, const float& v, Color& ret) const
+	{
+		return read(u, v, 0, ret);
+	}
+
+	bool Texture::read(const uint32_t& row, const uint32_t& col, Color& ret) const
+	{
+		return read(row, col, 0, ret);
+	}
+
+	bool Texture::read(const float& u, const float& v, const uint32_t& mip, Color& ret) const
 	{
 		float wu = u;
 		float wv = v;
@@ -393,49 +548,55 @@ namespace Guarneri
 		{
 		case TextureFormat::rgb:
 		{
-			if (rgb_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
+			if (buffer == nullptr) return false;
 			color_rgb pixel;
-			bool ok = rgb_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba:
 		{
-			if (rgba_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
+			if (buffer == nullptr) return false;
 			color_rgba pixel;
-			bool ok = rgba_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rg:
 		{
-			if (rg_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
+			if (buffer == nullptr) return false;
 			color_rg pixel;
-			bool ok = rg_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::r32:
 		{
-			if (gray_buffer == nullptr) return false;
+			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
+			if (buffer == nullptr) return false;
 			color_gray pixel;
-			bool ok = gray_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgb16f:
 		{
-			if (rgb16f_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
+			if (buffer == nullptr) return false;
 			color_rgb16f pixel;
-			bool ok = rgb16f_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba16f:
 		{
-			if (rgba16f_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
+			if (buffer == nullptr) return false;
 			color_rgba16f pixel;
-			bool ok = rgba16f_buffer->read(wu, wv, pixel);
+			bool ok = buffer->read(u, v, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
@@ -443,55 +604,61 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Texture::read(const uint32_t& row, const uint32_t& col, Color& ret) const
+	bool Texture::read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, Color& ret) const
 	{
 		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
-			if (rgb_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
+			if (buffer == nullptr) return false;
 			color_rgb pixel;
-			bool ok = rgb_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba:
 		{
-			if (rgba_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
+			if (buffer == nullptr) return false;
 			color_rgba pixel;
-			bool ok = rgba_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rg:
 		{
-			if (rg_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
+			if (buffer == nullptr) return false;
 			color_rg pixel;
-			bool ok = rg_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::r32:
 		{
-			if (gray_buffer == nullptr) return false;
+			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
+			if (buffer == nullptr) return false;
 			color_gray pixel;
-			bool ok = gray_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgb16f:
 		{
-			if (rgb16f_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
+			if (buffer == nullptr) return false;
 			color_rgb16f pixel;
-			bool ok = rgb16f_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba16f:
 		{
-			if (rgba16f_buffer == nullptr) return false;
+			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
+			if (buffer == nullptr) return false;
 			color_rgba16f pixel;
-			bool ok = rgba16f_buffer->read(row, col, pixel);
+			bool ok = buffer->read(row, col, pixel);
 			ret = Color::decode(pixel);
 			return ok;
 		}
@@ -643,6 +810,7 @@ namespace Guarneri
 		doc.AddMember("height", (uint32_t)tex.height, doc.GetAllocator());
 		doc.AddMember("mip_count", (uint32_t)tex.mip_count, doc.GetAllocator());
 		doc.AddMember("mip_filtering", (int32_t)tex.mip_filtering, doc.GetAllocator());
+		doc.AddMember("enable_mip", (int32_t)tex.enable_mip, doc.GetAllocator());
 
 		std::filesystem::path abs_path(ASSETS_PATH + path);
 		if (!std::filesystem::exists(abs_path.parent_path()))
@@ -654,8 +822,8 @@ namespace Guarneri
 		{
 			char write_buffer[256];
 			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
-			doc.Accept(material_writer);
+			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
+			doc.Accept(writer);
 			fclose(fd);
 
 			LOG("save texture: {}", path.c_str());
@@ -686,6 +854,8 @@ namespace Guarneri
 			tex.height = doc["height"].GetUint();
 			tex.mip_count = doc["mip_count"].GetUint();
 			tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
+			//tex.enable_mip = doc["enable_mip"].GetBool();
+			tex.enable_mip = true; // force enable mip, todo: serialize it
 			tex.reload(tex.raw_path.c_str());
 			fclose(fd);
 			LOG("read textures: {}", path.c_str());

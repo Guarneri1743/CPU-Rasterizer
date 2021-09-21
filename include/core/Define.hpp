@@ -7,8 +7,9 @@
 #include "Traits.hpp"
 
 namespace Guarneri{
-	// types
 	typedef uint32_t property_name;
+
+	// pbr
 	const property_name albedo_prop = 0; //"texture_diffuse/albedo";
 	const property_name normal_prop = 1; // "texture_normal";
 	const property_name ao_prop = 2; // "texture_ao";
@@ -25,9 +26,19 @@ namespace Guarneri{
 	const property_name roughness_prop = 14; // "texture_roughness"
 	const property_name base_color_prop = 15; //"texture_base_color";
 
-	// other
+	// misc 
 	const property_name cubemap_prop = 20; // "skybox_cubemap";
 	const property_name shadowmap_prop = 21; // "shadowmap";
+
+	// coefficients
+	const property_name roughness_multiplier_prop = 30;
+	const property_name roughness_offset_prop = 31;
+	const property_name metallic_multiplier_prop = 32;
+	const property_name metallic_offset_prop = 33;
+
+	// colors
+	const property_name tint_color_prop = 40;
+
 
 	// statistics
 	struct GraphicsStatistic
@@ -197,7 +208,11 @@ namespace Guarneri{
 		SPECULAR = 1 << 11,
 		EARLY_Z_DEBUG = 1 << 12,
 		IRRADIANCE_MAP = 1 << 13,
-		ROUGHNESS = 1 << 14
+		ROUGHNESS = 1 << 14,
+		METALLIC = 1 << 15,
+		AO = 1 << 16,
+		INDIRECT_DIFFUSE = 1 << 17,
+		INDIRECT_SPECULAR = 1 << 18
 	};
 
 #ifdef OPAQUE

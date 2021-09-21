@@ -28,12 +28,14 @@ namespace Guarneri
 		bool read(const uint32_t& row, const uint32_t& col, T& out) const;
 		bool write(const float& u, const float& v, const T& data);
 		bool write(const uint32_t& row, const uint32_t& col, const T& data);
-		void uv2pixel(const float& u, const float& v, uint32_t& row, uint32_t& col) const;
 		void clear(const T& val);
 		T* get_ptr(size_t& size);
 		RawBuffer<T>& operator = (const RawBuffer<T>& other);
 		void copy(const RawBuffer<T>& other);
 	};
+
+	void uv2pixel(const uint32_t& width, const uint32_t& height, const float& u, const float& v, uint32_t& row, uint32_t& col);
+	void pixel2uv(const uint32_t& width, const uint32_t& height, const uint32_t& row, const uint32_t& col, float& u, float& v);
 }
 
 #include "detail/RawBuffer.inl"
