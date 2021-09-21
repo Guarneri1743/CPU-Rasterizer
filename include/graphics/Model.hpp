@@ -30,6 +30,9 @@ namespace Guarneri
 	public:
 		Model(const Model& other);
 		~Model();
+
+		const Transform* get_transform() const { return transform.get(); }
+
 		Model& operator= (const Model& other);
 		std::string str() const;
 

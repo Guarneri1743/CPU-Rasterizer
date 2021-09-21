@@ -43,16 +43,16 @@ namespace Guarneri
         return ggx1 * ggx2;
     }
 
-    inline Vector3 fresnel_schlick(const float& cos_theta, const Vector3& F0)
+    inline Vector3 fresnel_schlick(const float& cos_theta, const Vector3& f0)
     {
         float omc = 1.0f - cos_theta;
 
-        return F0 + (1.0f - F0) * omc * omc * omc * omc * omc;
+        return f0 + (1.0f - f0) * omc * omc * omc * omc * omc;
     }
 
-    inline Vector3 fresnel_schlick_roughness(float cosTheta, Vector3 F0, float roughness)
+    inline Vector3 fresnel_schlick_roughness(float cos_theta, Vector3 f0, float roughness)
     {
-        return F0 + (std::max(Vector3(1.0f - roughness), F0) - F0) * std::pow(1.0f - cosTheta, 5.0f);
+        return f0 + (std::max(Vector3(1.0f - roughness), f0) - f0) * std::pow(std::clamp(1.0f - cos_theta, 0.0f, 1.0f) , 5.0f);
     }
 }
 

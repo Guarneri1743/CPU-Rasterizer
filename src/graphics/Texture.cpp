@@ -514,7 +514,7 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, Color& ret) const
 	{
-		return sample(u, v, 0, ret);
+		return sample(u, v, 0u, ret);
 	}
 
 	bool Texture::sample(const float& u, const float& v, const uint32_t& mip, Color& ret) const
@@ -527,6 +527,11 @@ namespace Guarneri
 			return point(u, v, mip, ret);
 		}
 		return false;
+	}
+
+	bool Texture::sample(const float& u, const float& v, const float& lod, Color& ret) const
+	{
+		return sample(u, v, (uint32_t)std::floor(lod * kMaxMip), ret);
 	}
 
 	bool Texture::read(const float& u, const float& v, Color& ret) const
@@ -544,11 +549,12 @@ namespace Guarneri
 		float wu = u;
 		float wv = v;
 		this->wrap(wu, wv);
+		bool use_mip = enable_mip;
 		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
-			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
+			auto buffer = use_mip ? rgb_mipmaps[mip] : rgb_buffer;
 			if (buffer == nullptr) return false;
 			color_rgb pixel;
 			bool ok = buffer->read(u, v, pixel);
@@ -557,7 +563,7 @@ namespace Guarneri
 		}
 		case TextureFormat::rgba:
 		{
-			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
+			auto buffer = use_mip ? rgba_mipmaps[mip] : rgba_buffer;
 			if (buffer == nullptr) return false;
 			color_rgba pixel;
 			bool ok = buffer->read(u, v, pixel);
@@ -566,7 +572,7 @@ namespace Guarneri
 		}
 		case TextureFormat::rg:
 		{
-			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
+			auto buffer = use_mip ? rg_mipmaps[mip] : rg_buffer;
 			if (buffer == nullptr) return false;
 			color_rg pixel;
 			bool ok = buffer->read(u, v, pixel);
@@ -575,7 +581,7 @@ namespace Guarneri
 		}
 		case TextureFormat::r32:
 		{
-			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
+			auto buffer = use_mip ? gray_mipmaps[mip] : gray_buffer;
 			if (buffer == nullptr) return false;
 			color_gray pixel;
 			bool ok = buffer->read(u, v, pixel);
@@ -584,7 +590,7 @@ namespace Guarneri
 		}
 		case TextureFormat::rgb16f:
 		{
-			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
+			auto buffer = use_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
 			if (buffer == nullptr) return false;
 			color_rgb16f pixel;
 			bool ok = buffer->read(u, v, pixel);
@@ -593,7 +599,7 @@ namespace Guarneri
 		}
 		case TextureFormat::rgba16f:
 		{
-			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
+			auto buffer = use_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
 			if (buffer == nullptr) return false;
 			color_rgba16f pixel;
 			bool ok = buffer->read(u, v, pixel);

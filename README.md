@@ -4,15 +4,7 @@
 
 overview
 
-<img src="/gallery/buddha.jpg" width = "800" height = "600" alt="overview" align=bottom /> 
-
-<img src="/gallery/dragon.jpg" width = "800" height = "600" alt="overview" align=bottom /> 
-
-<img src="/gallery/overview.jpg" width = "800" height = "600" alt="overview" align=bottom /> 
-
-<img src="/gallery/helmet.jpg" width = "800" height = "600" alt="overview" align=bottom /> 
-
-<img src="/gallery/bunny.gif" width = "800" height = "600" alt="overview" align=bottom /> 
+<img src="/gallery/IBL.png" width = "800" height = "600" alt="overview" align=bottom /> 
 
 | tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
@@ -43,7 +35,7 @@ overview
 
 #### Features
 
-- multi-thread drawcall submit
+- fully parallel of triangle/pixel processing
 			
 - vertex/fragment shader
 
@@ -52,8 +44,6 @@ overview
 - frustum culling
 			
 - back-face culling
-			
-- multi-thread and tile based rasterization
 
 - msaa
 
@@ -94,10 +84,12 @@ overview
 - texture
 
 - renderer
-
-- commonly used lighting techs
 			
-- cook-torrance brdf, simple ibl
+- cook-torrance brdf
+
+- ibl baking
+
+- ibl
 
 - metallic workflow
 
@@ -125,21 +117,15 @@ overview
 	
 	- simd
 				
-	- ddx, ddy, mipmap and lod sampler
+	- ddx, ddy
 	
 	- vector swizzling
 				
 	- gl/dx like api
-				
-	- scissor test
-				
-	- hsr (base on tbdr)
 		 
 - features:
 
 	- specular workflow
-			
-	- occlusion culling
 	
 	- skeleton-animation
 	

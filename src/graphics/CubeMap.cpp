@@ -19,6 +19,8 @@
 
 namespace Guarneri
 {
+	constexpr uint32_t kMaxPrefilteredMapCount = 4;
+
 	CubeMap::CubeMap()
 	{
 		this->wrap_mode = WrapMode::REPEAT;
@@ -57,7 +59,7 @@ namespace Guarneri
 		this->filtering = cubemap.filtering;
 		this->wrap_mode = cubemap.wrap_mode;
 		this->irradiance_map = cubemap.irradiance_map;
-		this->prefilter_map = cubemap.prefilter_map;
+		this->prefiltered_maps = cubemap.prefiltered_maps;
 		this->brdf_lut = cubemap.brdf_lut;
 	}
 
@@ -83,14 +85,15 @@ namespace Guarneri
 	bool CubeMap::sample_prefilter_map(const Vector3& dir, Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
-		return prefilter_map->sample(uv.x, uv.y, ret);
+		return prefiltered_maps[0]->sample(uv.x, uv.y, ret);
 	}
 
 	bool CubeMap::sample_prefilter_map_lod(const Vector3& dir, const float& lod, Color& ret)
 	{
 		// todo: mipmap
 		auto uv = spherical_coord_to_uv(dir);
-		return prefilter_map->sample(uv.x, uv.y, ret);
+		uint32_t mip = std::clamp((uint32_t)(lod * (float)kMaxPrefilteredMapCount), 0u, kMaxPrefilteredMapCount - 1);
+		return prefiltered_maps[mip]->sample(uv.x, uv.y, ret);
 	}
 
 	bool CubeMap::sample_brdf(const Vector2& uv, Color& ret)
@@ -103,11 +106,13 @@ namespace Guarneri
 		if (texture != nullptr)
 		{
 			precompute_irradiance_map();
-			// todo: mipmap
-			const float kMaxMip = 5.0f;
-			float mip = 0.0f;
-			float roughness = mip / (float)(kMaxMip - 1.0f);
-			precompute_prefilter_map(roughness);
+
+			prefiltered_maps.clear();
+			for (uint32_t mip = 0; mip < kMaxPrefilteredMapCount; mip++) 
+			{
+				precompute_prefilter_map(mip);
+			}
+
 			precompute_brdf_lut();
 		}
 		else
@@ -116,7 +121,7 @@ namespace Guarneri
 		}
 	}
 
-	constexpr float kSampleStep = 0.05f;
+	constexpr float kSampleStep = 0.1f;
 
 	void CubeMap::precompute_irradiance_map()
 	{
@@ -134,13 +139,13 @@ namespace Guarneri
 		irradiance_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
 		irradiance_map->filtering = Filtering::POINT;
 
-		std::vector<Vector2> indexers;
+		std::vector<std::pair<uint32_t, uint32_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
 		for (uint32_t row = 0; row < texture->height; row++)
 		{
 			for (uint32_t col = 0; col < texture->width; col++)
 			{
-				indexers.push_back(Vector2((float)row, (float)col));
+				indexers.push_back({ row, col });
 			}
 		}
 
@@ -150,10 +155,10 @@ namespace Guarneri
 			indexers.end(),
 			[this](auto&& coord)
 		{
-			uint32_t row = (uint32_t)coord.x;
-			uint32_t col = (uint32_t)coord.y;
-			float u = (float)col / (float)texture->width;
-			float v = (float)row / (float)texture->height;
+			uint32_t row = coord.first;
+			uint32_t col = coord.second;
+			float u, v;
+			pixel2uv(texture->width, texture->height, row, col, u, v);
 			Vector2 uv = { u, v };
 			Vector3 normal = uv_to_spherical_coord(uv);
 
@@ -164,7 +169,7 @@ namespace Guarneri
 			// brute force sampling (whole sphere) 
 			for (float phi = 0.0f; phi < TWO_PI; phi += step)
 			{
-				for (float theta = -HALF_PI; theta < HALF_PI; theta += step)
+				for (float theta = 0.0f; theta < PI; theta += step)
 				{
 					Vector3 w_i = radian_to_spherical_coord(theta, phi);
 					float ndl = Vector3::dot(w_i, normal);
@@ -180,36 +185,37 @@ namespace Guarneri
 			
 			irradiance *= PI;
 			irradiance /= samples;
-			irradiance_map->write(u, 1.0f - v, irradiance);
+			irradiance_map->write(texture->height - 1 - row, col, irradiance);
 		});
 
 		Texture::export_image(*irradiance_map, irradiance_path);
 	}
 
-	constexpr uint32_t kSampleCount = 4096u;
+	constexpr uint32_t kSampleCount = 1024u;
 
-	void CubeMap::precompute_prefilter_map(const float& roughness)
+	void CubeMap::precompute_prefilter_map(const uint32_t& mip)
 	{
+		float roughness = mip / (float)(kMaxPrefilteredMapCount - 1);
 		size_t begin = texture_path.find(".hdr");
 		std::string prefilter_map_path = texture_path;
-		prefilter_map_path = prefilter_map_path.replace(begin, begin + 4, "_prefilter_" + std::to_string((int)roughness) +".hdr");
+		prefilter_map_path = prefilter_map_path.replace(begin, begin + 4, "_prefilter_" + std::to_string(mip) +".hdr");
 
 		if (std::filesystem::exists(RES_PATH + prefilter_map_path))
 		{
-			prefilter_map = Texture::load_raw(prefilter_map_path);
+			prefiltered_maps.push_back(Texture::load_raw(prefilter_map_path));
 			return;
 		}
 
-		prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
+		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
 		prefilter_map->filtering = Filtering::POINT;
 
-		std::vector<Vector2> indexers;
+		std::vector<std::pair<uint32_t, uint32_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
 		for (uint32_t row = 0; row < texture->height; row++)
 		{
 			for (uint32_t col = 0; col < texture->width; col++)
 			{
-				indexers.push_back(Vector2((float)row, (float)col));
+				indexers.push_back({ row, col });
 			}
 		}
 
@@ -218,12 +224,12 @@ namespace Guarneri
 			std::execution::par_unseq,
 			indexers.begin(),
 			indexers.end(),
-			[this, r](auto&& coord)
+			[this, r, prefilter_map](auto&& coord)
 		{
-			uint32_t row = (uint32_t)coord.x;
-			uint32_t col = (uint32_t)coord.y;
-			float u = (float)col / (float)texture->width;
-			float v = (float)row / (float)texture->height;
+			uint32_t row = coord.first;
+			uint32_t col = coord.second;
+			float u, v;
+			pixel2uv(texture->width, texture->height, row, col, u, v);
 			Vector2 uv = { u, v };
 			Vector3 normal = uv_to_spherical_coord(uv);
 
@@ -236,9 +242,9 @@ namespace Guarneri
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				Vector2 random_dir = random_vec2_01(sample_index, kSampleCount);
+				Vector2 random_dir = random_vec2_01(kSampleCount);
 				Vector3 half_way = importance_sampling(random_dir, normal, r);
-				Vector3 w_i = Vector3::normalize(2.0f * Vector3::dot(view_dir, half_way) * half_way - view_dir);
+				Vector3 w_i = Vector3::normalize(2.0f * std::max(Vector3::dot(view_dir, half_way), 0.0f) * half_way - view_dir);
 				float ndl = Vector3::dot(normal, w_i);
 				if (ndl > 0.0f)
 				{
@@ -250,13 +256,14 @@ namespace Guarneri
 			}
 
 			prefilter_color /= total_weight;
-			prefilter_map->write(u, 1.0f - v, prefilter_color);
+			prefilter_map->write(texture->height - 1 - row, col, prefilter_color);
 		});
 
+		prefiltered_maps.push_back(prefilter_map);
 		Texture::export_image(*prefilter_map, prefilter_map_path);
 	}
 
-	constexpr int brdf_size = 2048;
+	constexpr int brdf_size = 512;
 
 	void CubeMap::precompute_brdf_lut()
 	{
@@ -273,13 +280,13 @@ namespace Guarneri
 		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::rgb16f);
 		brdf_lut->filtering = Filtering::POINT;
 
-		std::vector<Vector2> indexers;
+		std::vector<std::pair<uint32_t, uint32_t>> indexers;
 		indexers.reserve((size_t)(brdf_size) * (size_t)(brdf_size));
 		for (uint32_t row = 0; row < brdf_size; row++)
 		{
 			for (uint32_t col = 0; col < brdf_size; col++)
 			{
-				indexers.push_back(Vector2((float)row, (float)col));
+				indexers.push_back({ row, col });
 			}
 		}
 
@@ -290,14 +297,14 @@ namespace Guarneri
 			indexers.end(),
 			[this, size](auto&& coord)
 		{
-			float row = std::floorf(coord.x);
-			float col = std::floorf(coord.y);
+			uint32_t row = coord.first;
+			uint32_t col = coord.second;
 
-			float u = (col + 0.5f) / (float)size;
-			float v = (row + 0.5f) / (float)size;
+			float u, v;
+			pixel2uv(size, size, row, col, u, v);
 
-			float ndv = std::max(u, 0.0f);
-			float roughness = std::max(v, 0.0f);
+			float ndv = std::max(u, 1.0f / (float)brdf_size);
+			float roughness = std::max(v, 1.0f / (float)brdf_size);
 
 			Vector3 view_dir;
 			view_dir.x = sqrt(1.0f - ndv * ndv);
@@ -310,7 +317,7 @@ namespace Guarneri
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				Vector2 random_dir = random_vec2_01(sample_index, kSampleCount);
+				Vector2 random_dir = hammersley(sample_index, kSampleCount);
 				Vector3 half_way = importance_sampling(random_dir, normal, roughness);
 				Vector3 w_i = Vector3::normalize(2.0f * Vector3::dot(view_dir, half_way) * half_way - view_dir);
 
@@ -330,7 +337,7 @@ namespace Guarneri
 			}
 
 			brdf /= (float)kSampleCount;
-			brdf_lut->write(size - (uint32_t)row - 1, (uint32_t)col, brdf);
+			brdf_lut->write(size - row - 1, col, brdf);
 		});
 
 		Texture::export_image(*brdf_lut, brdf_lut_path);

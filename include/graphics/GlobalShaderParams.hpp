@@ -20,7 +20,7 @@ namespace Guarneri {
 			enable_shadow = true;
 			pcf_on = true;
 			enable_msaa = false;
-			enable_skybox = false;
+			enable_ibl = true;
 			color_space = ColorSpace::Gamma;
 			persample_op_flag =
 				PerSampleOperation::SCISSOR_TEST |
@@ -48,7 +48,7 @@ namespace Guarneri {
 		CullingAndClippingFlag culling_clipping_flag;
 
 		bool enable_shadow;
-		bool enable_skybox;
+		bool enable_ibl;
 		bool pcf_on;
 		float shadow_bias;
 		bool enable_msaa;

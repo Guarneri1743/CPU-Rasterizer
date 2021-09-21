@@ -38,11 +38,5 @@
             2,
             "/helmet/ao.texture"
         ]
-    ],
-    "name2cubemap": [
-        [
-            20,
-            "/cubemaps/ibl.cubemap"
-        ]
     ]
 }

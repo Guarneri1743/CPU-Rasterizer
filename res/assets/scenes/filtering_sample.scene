@@ -33,7 +33,7 @@
         "/models/plane.model"
     ],
     "cubemap_path": "/cubemaps/ibl.cubemap",
-    "enable_skybox": true,
+    "enable_ibl": true,
     "enable_shadow": false,
     "pcf_on": false,
     "shadow_bias": 0.0012499999720603228,

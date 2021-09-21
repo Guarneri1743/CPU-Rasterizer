@@ -16,7 +16,7 @@ namespace Guarneri
 		std::string texture_path;
 
 		std::shared_ptr<Texture> irradiance_map;
-		std::shared_ptr<Texture> prefilter_map;
+		std::vector<std::shared_ptr<Texture>> prefiltered_maps;
 		std::shared_ptr<Texture> brdf_lut;
 
 	public:
@@ -29,7 +29,7 @@ namespace Guarneri
 		bool sample_brdf(const Vector2& uv, Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
-		void precompute_prefilter_map(const float& roughness);
+		void precompute_prefilter_map(const uint32_t& roughness);
 		void precompute_brdf_lut();
 		//Vector2 sample(const Vector3& dir, int& index);
 		std::string meta_path;

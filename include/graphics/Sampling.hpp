@@ -43,13 +43,9 @@ namespace Guarneri
         return Vector2(float(i) / float(N), radical_inverse_vdc(i));
     }
 
-    inline Vector2 random_vec2_01(const uint32_t& i, const uint32_t& N)
+    inline Vector2 random_vec2_01(const uint32_t& N)
     {
-    #ifdef USE_LOW_DISCREPANCY_SEQUENCE
-        return hammersley(i, N);
-    #else
         return Vector2((float)(rand() % N) / (float)N, (float)(rand() % N) / (float)N);
-    #endif
     }
 
     inline Vector3 radian_to_spherical_coord(const float& theta, const float& phi)

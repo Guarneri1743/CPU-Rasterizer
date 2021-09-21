@@ -85,6 +85,7 @@ namespace Guarneri
 		void generate_mipmap(const int& mip_count, const Filtering& filtering);
 		bool sample(const float& u, const float& v, Color& ret) const;
 		bool sample(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
+		bool sample(const float& u, const float& v, const float& lod, Color& ret) const;
 		bool read(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
 		bool read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, Color& ret) const;
 		bool read(const float& u, const float& v, Color& ret) const;

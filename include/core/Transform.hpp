@@ -59,7 +59,7 @@ namespace Guarneri
 		void rotate(const Vector3& _axis, const float& angle);
 		void rotate_self(const float& yaw_offset, const float& pitch_offset, const float& roll_offset);
 		void sync();
-		Transform* access_child(const size_t& index) { assert(index < children.size()); return children[index]; }
+		Transform* access_child(const size_t& index) const { assert(index < children.size()); return children[index]; }
 		size_t child_count() const { return children.size(); }
 		Transform& operator =(const Transform& other);
 

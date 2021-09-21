@@ -176,6 +176,7 @@ namespace Guarneri
 					transparent_objects.erase(transparent_objects.begin() + remove_idx);
 					remove_idx = -1;
 				}
+				selection = nullptr;
 			}
 		}
 	}
@@ -265,7 +266,7 @@ namespace Guarneri
 			obj->render();
 		}
 
-		if (enable_skybox && INST(GlobalShaderParams).enable_skybox)
+		if (enable_skybox && INST(GlobalShaderParams).enable_ibl)
 		{
 			// todo: fix tile based skybox 
 			INST(GraphicsDevice).tile_based = false;
@@ -350,7 +351,7 @@ namespace Guarneri
 			models.PushBack(meta_path, doc.GetAllocator());
 		}
 		doc.AddMember("models", models, doc.GetAllocator()); 
-		doc.AddMember("enable_skybox", scene.enable_skybox, doc.GetAllocator());
+		doc.AddMember("enable_ibl", scene.enable_skybox, doc.GetAllocator());
 		doc.AddMember("enable_shadow", scene.enable_shadow, doc.GetAllocator());
 		doc.AddMember("pcf_on", scene.pcf_on, doc.GetAllocator());
 		doc.AddMember("shadow_bias", scene.shadow_bias, doc.GetAllocator());
@@ -431,7 +432,7 @@ namespace Guarneri
 				scene.cubemap = std::shared_ptr<CubeMap>(new CubeMap(cubemap_path));
 			}
 
-			scene.enable_skybox = doc["enable_skybox"].GetBool();
+			scene.enable_skybox = doc["enable_ibl"].GetBool();
 			scene.enable_shadow = doc["enable_shadow"].GetBool();
 			scene.pcf_on = doc["pcf_on"].GetBool();
 			scene.shadow_bias = doc["shadow_bias"].GetFloat();

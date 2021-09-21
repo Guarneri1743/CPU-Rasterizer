@@ -117,20 +117,36 @@ namespace Guarneri
 						{
 							material->set_float(roughness_multiplier_prop, roughness_multiplier);
 						}
+						else
+						{
+							roughness_multiplier = material->get_float(roughness_multiplier_prop);
+						}
 
 						if (ImGui::SliderFloat("roughness_offset", &roughness_offset, -1.0f, 1.0f))
 						{
 							material->set_float(roughness_offset_prop, roughness_offset);
+						}
+						else
+						{
+							roughness_offset = material->get_float(roughness_offset_prop);
 						}
 
 						if (ImGui::SliderFloat("metallic_multiplier", &metallic_multiplier, 0.0f, 2.0f))
 						{
 							material->set_float(metallic_multiplier_prop, metallic_multiplier);
 						}
+						else
+						{
+							metallic_multiplier = material->get_float(metallic_multiplier_prop);
+						}
 
 						if (ImGui::SliderFloat("metallic_offset", &metallic_offset, -1.0f, 1.0f))
 						{
 							material->set_float(metallic_offset_prop, metallic_offset);
+						}
+						else
+						{
+							metallic_offset = material->get_float(metallic_offset_prop);
 						}
 
 						if (ImGui::Button("Save"))
@@ -214,7 +230,7 @@ namespace Guarneri
 
 		if (ImGui::CollapsingHeader("IBL", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Checkbox("IBL_On", &INST(GlobalShaderParams).enable_skybox);
+			ImGui::Checkbox("IBL_On", &INST(GlobalShaderParams).enable_ibl);
 		}
 
 		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))

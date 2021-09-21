@@ -95,15 +95,16 @@ namespace Guarneri
 
 	inline void uv2pixel(const uint32_t& width, const uint32_t& height, const float& u, const float& v, uint32_t& row, uint32_t& col) 
 	{
-		// [0.0, 1.0) -> [0, width-1]
-		row = (uint32_t)(std::floor(v * (float)height + 0.5f));
-		col = (uint32_t)(std::floor(u * (float)width + 0.5f));
+		// [0.0, 1.0] -> [0, width/height - 1]
+		row = (uint32_t)(std::floor(v * (float)(height - 1)));
+		col = (uint32_t)(std::floor(u * (float)(width - 1)));
 	}
 
 	inline void pixel2uv(const uint32_t& width, const uint32_t& height, const uint32_t& row, const uint32_t& col, float& u, float& v)
 	{
-		u = ((float)col + 0.5f) / (float)width;
-		v = ((float)row + 0.5f) / (float)height;
+		//[0, width/height - 1] -> [0.0, 1.0]
+		u = (float)col / (float)(width - 1);
+		v = (float)row / (float)(height - 1);
 	}
 
 	template<typename T>

@@ -34,7 +34,7 @@
         "/models/stencil_backpack.model",
         "/models/plane.model"
     ],
-    "enable_skybox": false,
+    "enable_ibl": false,
     "enable_shadow": false,
     "pcf_on": false,
     "shadow_bias": 0.0012499999720603228,

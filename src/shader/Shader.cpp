@@ -177,7 +177,7 @@ namespace Guarneri
 			light_dir = tbn * light_dir;
 		}
 
-		auto half_dir = (light_dir + view_dir).normalized();
+		auto half_dir = (view_dir + light_dir).normalized();
 
 		// sample textures
 		Color metallic_color = Color::BLACK;
@@ -198,8 +198,6 @@ namespace Guarneri
 			roughness = 1.0f - spec.r;
 		}
 
-		roughness = std::max(roughness, EPSILON); // brdf lut bug (baking error)
-
 		if (name2float.count(roughness_multiplier_prop) > 0 && name2float.count(roughness_offset_prop) > 0 )
 		{
 			roughness = roughness * name2float.at(roughness_multiplier_prop) + name2float.at(roughness_offset_prop);
@@ -209,6 +207,8 @@ namespace Guarneri
 		{
 			metallic = metallic * name2float.at(metallic_multiplier_prop) + name2float.at(metallic_offset_prop);
 		}
+
+		roughness = std::max(roughness, EPSILON); // brdf lut bug (baking error)
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
 		{
@@ -227,7 +227,6 @@ namespace Guarneri
 
 		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
-			//todo
 			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness) * 32.0f);
 			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
 
@@ -245,7 +244,9 @@ namespace Guarneri
 			f0 = Vector3::lerp(f0, Vector3(albedo.r, albedo.g, albedo.b), metallic);
 			auto lo = metallic_workflow(f0, Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic, roughness, light_distance, half_dir, light_dir, view_dir, normal);
 
-			Vector3 fresnel = fresnel_schlick_roughness(std::max(Vector3::dot(normal, view_dir), 0.0f), f0, roughness);
+			float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
+
+			Vector3 fresnel = fresnel_schlick_roughness(ndv, f0, roughness);
 
 			Vector3 specular_term = fresnel;
 			Vector3 diffuse_term = 1.0f - specular_term;
@@ -253,27 +254,35 @@ namespace Guarneri
 
 			// IBL
 			Color irradiance;
-			if (INST(GlobalShaderParams).enable_skybox)
+			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
 			{
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance);
+				name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance);
 			}
 
 			Color prefiltered_color;
-			if (INST(GlobalShaderParams).enable_skybox)
+			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
 			{
 				auto reflect_dir = reflect(normal, view_dir);
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_prefilter_map(reflect_dir, prefiltered_color);
+				name2cubemap.at(cubemap_prop)->sample_prefilter_map_lod(reflect_dir, roughness, prefiltered_color);
 			}
 
 			Color brdf_lut;
-			if (INST(GlobalShaderParams).enable_skybox)
+			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
 			{
-				float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
-				name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_brdf(Vector2(ndv, roughness), brdf_lut);
+				name2cubemap.at(cubemap_prop)->sample_brdf(Vector2(ndv, roughness), brdf_lut);
+
+				if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.001f)
+				{
+					uint32_t row, col;
+					uv2pixel(512, 512, ndv, roughness, row, col);
+					printf("er, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
+				}
 			}
 
 			Vector3 indirect_diffuse = Vector3(irradiance.r, irradiance.g, irradiance.b) * Vector3(albedo.r, albedo.g, albedo.b) * diffuse_term;
-			Vector3 indirect_specular = Vector3(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * (specular_term * brdf_lut.r + brdf_lut.g);
+			Vector3 env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
+			
+			Vector3 indirect_specular = Vector3(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * env_brdf;
 
 			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_DIFFUSE) != RenderFlag::DISABLE)
 			{
