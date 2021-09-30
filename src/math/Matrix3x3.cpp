@@ -298,37 +298,6 @@ namespace Guarneri
 		return row * 3 + column;
 	}
 
-	rapidjson::Value Matrix3x3::serialize(rapidjson::Document& doc, const Matrix3x3& mat)
-	{
-		rapidjson::Value v;
-		v.SetObject();
-		v.AddMember("m00", mat.m00, doc.GetAllocator());
-		v.AddMember("m01", mat.m01, doc.GetAllocator());
-		v.AddMember("m02", mat.m02, doc.GetAllocator());
-		v.AddMember("m10", mat.m10, doc.GetAllocator());
-		v.AddMember("m11", mat.m11, doc.GetAllocator());
-		v.AddMember("m12", mat.m12, doc.GetAllocator());
-		v.AddMember("m20", mat.m20, doc.GetAllocator());
-		v.AddMember("m21", mat.m21, doc.GetAllocator());
-		v.AddMember("m22", mat.m22, doc.GetAllocator());
-		return v;
-	}
-
-	Matrix3x3 Matrix3x3::deserialize(const rapidjson::Value& v)
-	{
-		Matrix3x3 mat;
-		mat.m00 = v["m00"].GetFloat();
-		mat.m01 = v["m01"].GetFloat();
-		mat.m02 = v["m02"].GetFloat();
-		mat.m10 = v["m10"].GetFloat();
-		mat.m11 = v["m11"].GetFloat();
-		mat.m12 = v["m12"].GetFloat();
-		mat.m20 = v["m20"].GetFloat();
-		mat.m21 = v["m21"].GetFloat();
-		mat.m22 = v["m22"].GetFloat();
-		return mat;
-	}
-
 	const Matrix3x3 Matrix3x3::IDENTITY(Vector3(1.0f, 0.0f, 0.0f), Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, 0.0f, 1.0f));
 	const Matrix3x3 Matrix3x3::ZERO;
 }

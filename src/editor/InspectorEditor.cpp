@@ -11,6 +11,7 @@
 #include "Scene.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "Serialization.hpp"
 
 #undef near
 #undef far
@@ -156,8 +157,8 @@ namespace Guarneri
 							{
 								material->meta_path = "/materials/" + scene.selection->get_model()->name +".material";
 							}
-							Material::serialize(*material, material->meta_path);
-							Model::serialize(*scene.selection->get_model(), scene.selection->get_model()->meta_path);
+							Serializer::serialize(*material, material->meta_path);
+							Serializer::serialize(*scene.selection->get_model(), scene.selection->get_model()->meta_path);
 						}
 					}
 				}

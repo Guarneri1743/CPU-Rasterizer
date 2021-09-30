@@ -68,9 +68,6 @@ namespace Guarneri
 		static Vector3 pow(const Vector3& v, float power);
 		static void calculate_right_up(const Vector3& forward, Vector3& right, Vector3& up);
 
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector3& vec);
-		static Vector3 deserialize(const rapidjson::Value& v);
-
 		std::string str() const;
 
 		Vector3 xxx() const;

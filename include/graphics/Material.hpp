@@ -63,10 +63,6 @@ namespace Guarneri
 		Material& operator =(const Material& other);
 		void copy(const Material& other);
 		std::string str() const;
-
-		static std::shared_ptr<Material> load_asset(std::string path);
-		static void serialize(const Material& material, std::string path);
-		static void deserialize(std::string path, Material& material);
 	};
 }
 #endif

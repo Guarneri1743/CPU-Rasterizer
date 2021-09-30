@@ -3,14 +3,16 @@
 #include "SkyboxShader.hpp"
 #include "Material.hpp"
 #include "Singleton.hpp"
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
 	SkyboxRenderer::SkyboxRenderer() : Renderer()
 	{
 		gizmos = false;
-		auto mat = Material::load_asset("/materials/skybox.material");
-		target = PrimitiveFactory::skybox(mat);
+		Material* mat = new Material();
+		Serializer::deserialize("/materials/skybox.material", *mat);
+		target = PrimitiveFactory::skybox(std::shared_ptr<Material>(mat));
 	}
 
 	SkyboxRenderer::~SkyboxRenderer()

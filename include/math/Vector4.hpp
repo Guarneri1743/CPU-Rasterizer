@@ -57,9 +57,6 @@ namespace Guarneri
 		static Vector4 abs(const Vector4& v);
 		static Vector4 normalize(const Vector4& value);
 
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector4& vec);
-		static Vector4 deserialize(const rapidjson::Value& v);
-
 		std::string str() const;
 
 		Vector4 xxxx() const;

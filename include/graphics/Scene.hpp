@@ -44,8 +44,10 @@ namespace Guarneri
 		float debug_world_cam_distance;
 		std::unique_ptr<Camera> debug_cam;
 		std::unique_ptr<Camera> world_debug_cam;
+		std::string asset_path;
 
 	public:
+		Scene();
 		Scene(std::string name);
 		~Scene();
 		void initialize();
@@ -61,17 +63,12 @@ namespace Guarneri
 		void draw_gizmos();
 		std::string get_asset_path() { return asset_path; }
 
-		static std::unique_ptr<Scene>& current() { return current_scene; }
-		static void set_current(std::unique_ptr<Scene>&& scene) { current_scene = std::move(scene); }
+		static Scene* current() { return current_scene; }
 
 		static void open_scene(const char* path);
-		static std::unique_ptr<Scene> load_asset(const std::string& name);
-		static void serialize(const Scene& scene, const std::string& path);
-		static void deserialize(const std::string& path, Scene& scene);
 
 	private:
-		static std::unique_ptr<Scene> current_scene;
-		std::string asset_path;
+		static Scene* current_scene;
 	};
 }
 #endif

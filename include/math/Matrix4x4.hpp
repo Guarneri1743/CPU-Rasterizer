@@ -85,9 +85,6 @@ namespace Guarneri {
 
 		int rc2index(const int& row, const int& column) const;
 
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Matrix4x4& mat);
-		static Matrix4x4 deserialize(const rapidjson::Value& v);
-
 		std::string str() const;
 	};
 }

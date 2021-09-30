@@ -4,7 +4,6 @@
 #include <string>
 #include "Vector3.hpp"
 #include "Matrix4x4.hpp"
-#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -62,9 +61,6 @@ namespace Guarneri
 		Transform* access_child(const size_t& index) const { assert(index < children.size()); return children[index]; }
 		size_t child_count() const { return children.size(); }
 		Transform& operator =(const Transform& other);
-
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Transform& t);
-		static Transform* deserialize(const rapidjson::Value& v);
 	};
 }
 #endif

@@ -19,6 +19,7 @@
 #include <iostream>
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "Serialization.hpp"
 
 #undef near
 #undef far
@@ -26,12 +27,12 @@
 
 namespace Guarneri
 {
-	std::unique_ptr<Scene> Scene::current_scene ;
+	Scene* Scene::current_scene;
 
-	Scene::Scene(std::string name)
+	Scene::Scene()
 	{
+		this->name = "default_scene";
 		selection = nullptr;
-		this->name = name;
 		enable_skybox = false;
 		main_light.intensity = 1.0f;
 		main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
@@ -39,6 +40,11 @@ namespace Guarneri
 		main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
 		main_light.position = Vector3(1.0f, 1.0f, 1.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
+	}
+
+	Scene::Scene(std::string name) : Scene()
+	{
+		this->name = name;
 	}
 
 	Scene::~Scene()
@@ -297,156 +303,18 @@ namespace Guarneri
 		//draw_world_coords();
 	}
 
-	std::unique_ptr<Scene> Scene::load_asset(const std::string& path)
-	{
-		auto scene = std::make_unique<Scene>("");
-		deserialize(path, *scene);
-		return scene;
-	}
-
 	void Scene::open_scene(const char* path)
 	{
 		INST(InputManager).clear_evts();
-		auto scene = Scene::load_asset(path);
-		if (scene == nullptr) return;
-		INST(GlobalShaderParams).enable_shadow = scene->enable_shadow;
-		INST(GlobalShaderParams).pcf_on = scene->pcf_on;
-		INST(GlobalShaderParams).shadow_bias = scene->shadow_bias;
-		INST(GlobalShaderParams).color_space = scene->color_space;
-		INST(GlobalShaderParams).workflow = scene->work_flow;
-		Scene::set_current(std::move(scene));
+		Scene* deserialized_scene = new Scene();
+		Serializer::deserialize(path, *deserialized_scene);
+		if (deserialized_scene == nullptr) return;
+		INST(GlobalShaderParams).enable_shadow = deserialized_scene->enable_shadow;
+		INST(GlobalShaderParams).pcf_on = deserialized_scene->pcf_on;
+		INST(GlobalShaderParams).shadow_bias = deserialized_scene->shadow_bias;
+		INST(GlobalShaderParams).color_space = deserialized_scene->color_space;
+		INST(GlobalShaderParams).workflow = deserialized_scene->work_flow;
+		current_scene = deserialized_scene;
 		LOG("open scene: {}", path);
-	}
-
-	void Scene::serialize(const Scene& scene, const std::string& path)
-	{
-		rapidjson::Document doc;
-		doc.SetObject();
-
-		rapidjson::Value name;
-		name.SetString(scene.name.c_str(), doc.GetAllocator());
-		doc.AddMember("name", name, doc.GetAllocator());
-		doc.AddMember("main_light", DirectionalLight::serialize(doc, scene.main_light), doc.GetAllocator());
-
-		rapidjson::Value point_lights;
-		point_lights.SetArray();
-		for (auto& pl : scene.point_lights)
-		{
-			point_lights.PushBack(PointLight::serialize(doc, pl), doc.GetAllocator());
-		}
-		doc.AddMember("point_lights", point_lights, doc.GetAllocator());
-
-		rapidjson::Value models;
-		models.SetArray();
-		for (auto& obj : scene.objects)
-		{
-			rapidjson::Value meta_path;
-			meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
-			models.PushBack(meta_path, doc.GetAllocator());
-		}
-		for (auto& obj : scene.transparent_objects)
-		{
-			rapidjson::Value meta_path;
-			meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
-			models.PushBack(meta_path, doc.GetAllocator());
-		}
-		doc.AddMember("models", models, doc.GetAllocator()); 
-		doc.AddMember("enable_ibl", scene.enable_skybox, doc.GetAllocator());
-		doc.AddMember("enable_shadow", scene.enable_shadow, doc.GetAllocator());
-		doc.AddMember("pcf_on", scene.pcf_on, doc.GetAllocator());
-		doc.AddMember("shadow_bias", scene.shadow_bias, doc.GetAllocator());
-		doc.AddMember("color_space", (int32_t)scene.color_space, doc.GetAllocator());
-		doc.AddMember("work_flow", (int32_t)scene.work_flow, doc.GetAllocator());
-		
-		rapidjson::Value cubemap_path;
-		cubemap_path.SetString(scene.cubemap->meta_path.c_str(), doc.GetAllocator());
-		doc.AddMember("cubemap_path", cubemap_path, doc.GetAllocator());
-
-		rapidjson::Value main_cam = Camera::serialize(doc, *scene.main_cam).GetObject();
-		doc.AddMember("main_cam", main_cam, doc.GetAllocator());
-
-		rapidjson::StringBuffer sb;
-		sb.Clear();
-		rapidjson::PrettyWriter<rapidjson::StringBuffer> ww(sb);
-		doc.Accept(ww);
-
-		std::filesystem::path abs_path(ASSETS_PATH + path);
-		if (!std::filesystem::exists(abs_path.parent_path()))
-		{
-			std::filesystem::create_directories(abs_path.parent_path());
-		}
-		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
-		if (fd != nullptr)
-		{
-			char write_buffer[256];
-			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
-			doc.Accept(writer);
-			fclose(fd);
-			LOG("save scene: {}", path);
-		}
-		else
-		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
-		}
-	}
-
-	void Scene::deserialize(const std::string& path, Scene& scene)
-	{
-		scene.initialize();
-		scene.asset_path = path;
-		std::filesystem::path abs_path(ASSETS_PATH + path);
-		std::FILE* fd = fopen(abs_path.string().c_str(), "r");
-		if (fd != nullptr)
-		{
-			char read_buffer[256];
-			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
-			rapidjson::Document doc;
-			doc.ParseStream(fs);
-			
-			const char* name = doc["name"].GetString();
-			scene.name = name;
-			if (scene.name == "")
-			{
-				size_t last_slash = path.find_last_of("/\\");
-				std::string nice_name = path;
-				nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
-				scene.name = nice_name;
-			}
-			scene.main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
-			auto point_lights = doc["point_lights"].GetArray();
-			for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
-			{
-				scene.point_lights.push_back(PointLight::deserialize(point_lights[idx].GetObject()));
-			}
-
-			auto models = doc["models"].GetArray();
-			for (rapidjson::SizeType idx = 0; idx < models.Size(); idx++)
-			{
-				scene.add(Model::load_asset(models[idx].GetString()));
-			}
-
-			const char* cubemap_path = doc["cubemap_path"].GetString();
-			if (cubemap_path != nullptr)
-			{
-				scene.cubemap = std::shared_ptr<CubeMap>(new CubeMap(cubemap_path));
-			}
-
-			scene.enable_skybox = doc["enable_ibl"].GetBool();
-			scene.enable_shadow = doc["enable_shadow"].GetBool();
-			scene.pcf_on = doc["pcf_on"].GetBool();
-			scene.shadow_bias = doc["shadow_bias"].GetFloat();
-			scene.color_space = (ColorSpace)doc["color_space"].GetInt();
-			scene.work_flow = (PBRWorkFlow)doc["work_flow"].GetInt();
-
-			scene.main_cam = Camera::deserialize(doc["main_cam"].GetObject());
-			Camera::set_main_camera(scene.main_cam.get());
-
-			fclose(fd);
-		}
-		else
-		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
-		}
 	}
 }

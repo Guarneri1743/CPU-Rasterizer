@@ -75,7 +75,7 @@ namespace Guarneri
 			ImGuiTreeNodeFlags_OpenOnDoubleClick |
 			ImGuiTreeNodeFlags_SpanAvailWidth;
 
-		auto& scene = Scene::current();
+		auto scene = Scene::current();
 
 		if (ImGui::TreeNodeEx(scene->name.c_str(), flags))
 		{

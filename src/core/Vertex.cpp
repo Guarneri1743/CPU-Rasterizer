@@ -1,5 +1,6 @@
 #include "Vertex.hpp"
 #include <sstream>
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
@@ -159,22 +160,22 @@ namespace Guarneri
 	{
 		rapidjson::Value v;
 		v.SetObject();
-		v.AddMember("position",Vector4::serialize(doc, vertex.position), doc.GetAllocator());
-		v.AddMember("color", Vector4::serialize(doc, vertex.color), doc.GetAllocator());
-		v.AddMember("uv", Vector2::serialize(doc, vertex.uv), doc.GetAllocator());
-		v.AddMember("tangent", Vector4::serialize(doc, vertex.tangent), doc.GetAllocator());
-		v.AddMember("normal", Vector3::serialize(doc, vertex.normal), doc.GetAllocator());
+		v.AddMember("position",Serializer::serialize(doc, vertex.position), doc.GetAllocator());
+		v.AddMember("color", Serializer::serialize(doc, vertex.color), doc.GetAllocator());
+		v.AddMember("uv", Serializer::serialize(doc, vertex.uv), doc.GetAllocator());
+		v.AddMember("tangent", Serializer::serialize(doc, vertex.tangent), doc.GetAllocator());
+		v.AddMember("normal", Serializer::serialize(doc, vertex.normal), doc.GetAllocator());
 		return v;
 	}
 
 	Vertex Vertex::deserialize(const rapidjson::Value& v)
 	{
 		Vertex vertex;
-		vertex.position = Vector4::deserialize(v["position"]);
-		vertex.color = Vector4::deserialize(v["color"]);
-		vertex.uv = Vector2::deserialize(v["uv"]);
-		vertex.tangent = Vector3::deserialize(v["tangent"]);
-		vertex.normal = Vector3::deserialize(v["normal"]);
+		Serializer::deserialize(v["position"], vertex.position);
+		Serializer::deserialize(v["color"], vertex.color);
+		Serializer::deserialize(v["uv"], vertex.uv);
+		Serializer::deserialize(v["tangent"], vertex.tangent);
+		Serializer::deserialize(v["normal"], vertex.normal);
 		return vertex;
 	}
 

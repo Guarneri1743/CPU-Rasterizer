@@ -46,9 +46,6 @@ namespace Guarneri
 		static Vector2 normalize(const Vector2& value);
 		static Vector2 lerp(const Vector2& lhs, const Vector2& rhs, float t);
 
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector2& vec);
-		static Vector2 deserialize(const rapidjson::Value& v);
-
 		std::string str() const;
 
 		Vector2 xx() const;

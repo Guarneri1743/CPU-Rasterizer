@@ -1,12 +1,13 @@
 #include "ExplorerEditor.hpp"
 #include "Window.hpp"
 #include <filesystem>
+#include <iostream>
+#include <string>
 #include "Utility.hpp"
 #include "Scene.hpp"
 #include "Model.hpp"
 #include "Logger.hpp"
-#include <iostream>
-#include <string>
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
@@ -108,7 +109,9 @@ namespace Guarneri
 						ImGui::SameLine();
 						if (ImGui::SmallButton("Add"))
 						{
-							auto model = Model::load_asset(relative_path.c_str());
+							Model* deserialized_model = new Model();
+							Serializer::deserialize(relative_path.c_str(), *deserialized_model);
+							std::shared_ptr<Model> model = std::shared_ptr<Model>(deserialized_model);
 							Scene::current()->add(model);
 						}
 					}

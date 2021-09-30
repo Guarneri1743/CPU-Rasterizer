@@ -25,6 +25,7 @@ namespace Guarneri
 		bool enable_msaa;
 
 	public:
+		Camera();
 		~Camera();
 		static std::unique_ptr<Camera> create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far);
 		void initialize(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);
@@ -36,14 +37,11 @@ namespace Guarneri
 		void set_fov(const float& _fov);
 		void set_projection(const Projection& proj);
 		void update_proj_mode();
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Camera& cam);
-		static std::unique_ptr<Camera> deserialize(const rapidjson::Value& v);
 		std::string str() const;
 		static Camera* get_main_camera() { return main_cam; }
 		static void set_main_camera(Camera* cam) { main_cam = cam; }
 
 	private:
-		Camera();
 		static Camera* main_cam;
 	};
 }

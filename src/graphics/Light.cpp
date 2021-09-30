@@ -1,4 +1,5 @@
 #include "Light.hpp"
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
@@ -64,7 +65,7 @@ namespace Guarneri
 		rapidjson::Value intensity; intensity.SetFloat(light.intensity);
 		rapidjson::Value yaw; yaw.SetFloat(light.yaw);
 		rapidjson::Value pitch; pitch.SetFloat(light.pitch);
-		rapidjson::Value position = Vector3::serialize(doc, light.position);
+		rapidjson::Value position = Serializer::serialize(doc, light.position);
 		serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
 		serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
 		serialized_light.AddMember("specular", specular, doc.GetAllocator());
@@ -84,7 +85,7 @@ namespace Guarneri
 		light.intensity = v["intensity"].GetFloat();
 		light.yaw = v["yaw"].GetFloat();
 		light.pitch = v["pitch"].GetFloat();
-		light.position = Vector3::deserialize(v["position"].GetObject());
+		Serializer::deserialize(v["position"].GetObject(), light.position);
 		return light;
 	}
 
@@ -107,7 +108,7 @@ namespace Guarneri
 		rapidjson::Value constant; constant.SetFloat(light.constant);
 		rapidjson::Value linear; linear.SetFloat(light.linear);
 		rapidjson::Value quadratic; quadratic.SetFloat(light.quadratic);
-		rapidjson::Value position = Vector3::serialize(doc, light.position);
+		rapidjson::Value position = Serializer::serialize(doc, light.position);
 		serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
 		serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
 		serialized_light.AddMember("specular", specular, doc.GetAllocator());
@@ -129,7 +130,7 @@ namespace Guarneri
 		light.constant = v["constant"].GetFloat();
 		light.linear = v["linear"].GetFloat();
 		light.quadratic = v["quadratic"].GetFloat();
-		light.position = Vector3::deserialize(v["position"].GetObject());
+		Serializer::deserialize(v["position"].GetObject(), light.position);
 		return light;
 	}
 }

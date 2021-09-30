@@ -1,4 +1,5 @@
 #include "MainEditor.hpp"
+#include <filesystem>
 #include "imgui/imgui.h"
 #include "Marcos.h"
 #include "InputManager.hpp"
@@ -7,7 +8,7 @@
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
 #include "Utility.hpp"
-#include <filesystem>
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
@@ -33,7 +34,7 @@ namespace Guarneri
 
 		if (ImGui::MenuItem("Save", "Ctrl+S"))
 		{
-			Scene::serialize(*Scene::current(), Scene::current()->get_asset_path());
+			Serializer::serialize(*Scene::current(), Scene::current()->get_asset_path());
 		}
 
 		if (ImGui::MenuItem("Save As.."))

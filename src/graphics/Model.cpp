@@ -4,20 +4,11 @@
 #include <iostream>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
 #include "Logger.hpp"
 
 namespace Guarneri
 {
-	std::vector<int> Model::free_names;
-	int Model::current_name;
-
 	Model::Model()
 	{
 		transform = std::make_unique<Transform>();
@@ -35,35 +26,6 @@ namespace Guarneri
 		this->material = material;
 	}
 
-	Model::Model(std::string path, bool flip) : Model()
-	{
-		this->raw_path = path;
-		this->material = std::make_shared<Material>();
-		this->flip_uv = flip;
-		load_raw_internal(path);
-	}
-
-	void Model::load_raw_internal(std::string path)
-	{
-		std::string abs_path = RES_PATH + path;
-		Assimp::Importer importer;
-		auto flag = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
-		if (flip_uv)
-		{
-			flag |= aiProcess_FlipUVs;
-		}
-		const aiScene* Scene = importer.ReadFile(abs_path, flag);
-
-		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
-		{
-			std::cerr << "load Model failed, path: " << abs_path << " error code: " << importer.GetErrorString() << std::endl;
-			return;
-		}
-		meshes.clear();
-		reload_mesh(Scene->mRootNode, Scene);
-		LOG("load model: {}, mesh count: {}", abs_path, meshes.size());
-		importer.FreeScene();
-	}
 
 	Model::Model(const Model& other)
 	{
@@ -91,21 +53,37 @@ namespace Guarneri
 		return *this;
 	}
 
-	std::shared_ptr<Model> Model::load_asset(std::string path)
-	{
-		std::shared_ptr<Model> ret = std::shared_ptr<Model>(new Model());
-		Model::deserialize(path, *ret);
-		return ret;
-	}
-
 	std::shared_ptr<Model> Model::load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
 	{
 		return std::shared_ptr<Model>(new Model(vertices, indices, material));
 	}
 
-	std::shared_ptr<Model> Model::load_raw(std::string path, bool flip_uv)
+	std::shared_ptr<Model> Model::load_raw(std::string path, bool flip)
 	{
-		return std::shared_ptr<Model>(new Model(path, flip_uv));
+		std::string abs_path = RES_PATH + path;
+		Assimp::Importer importer;
+		auto flag = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace;
+		if (flip)
+		{
+			flag |= aiProcess_FlipUVs;
+		}
+		const aiScene* Scene = importer.ReadFile(abs_path, flag);
+
+		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
+		{
+			std::cerr << "load Model failed, path: " << abs_path << " error code: " << importer.GetErrorString() << std::endl;
+			return nullptr;
+		}
+
+		Model* model = new Model();
+		model->raw_path = path;
+		model->material = std::make_shared<Material>();
+		model->flip_uv = flip;
+		model->meshes.clear();
+		model->reload_mesh(Scene->mRootNode, Scene);
+		LOG("load model: {}, mesh count: {}", abs_path, model->meshes.size());
+		importer.FreeScene();
+		std::shared_ptr<Model>();
 	}
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
@@ -177,133 +155,6 @@ namespace Guarneri
 		}
 
 		meshes.emplace_back(Mesh(vertices, indices));
-	}
-
-	void Model::serialize(const Model& model, std::string path)
-	{
-		rapidjson::Document doc;
-		doc.SetObject();
-
-		rapidjson::Value name;
-		name.SetString(model.name.c_str(), doc.GetAllocator());
-		doc.AddMember("name", name, doc.GetAllocator());
-
-		rapidjson::Value raw_path;
-		raw_path.SetString(model.raw_path.c_str(), doc.GetAllocator());
-		doc.AddMember("raw_path", raw_path, doc.GetAllocator());
-
-		if (model.raw_path == "" && model.meshes.size() > 0)
-		{
-			rapidjson::Value meshes;
-			meshes.SetArray();
-			for (auto& m : model.meshes)
-			{
-				meshes.PushBack(Mesh::serialize(doc, m), doc.GetAllocator());
-			}
-			doc.AddMember("meshes", meshes, doc.GetAllocator());
-		}
-
-		rapidjson::Value meta_path;
-		meta_path.SetString(path.c_str(), doc.GetAllocator());
-		doc.AddMember("meta_path", meta_path, doc.GetAllocator());
-
-		rapidjson::Value material;
-		if (model.material != nullptr)
-		{
-			material.SetString(model.material->meta_path.c_str(), doc.GetAllocator());
-		}
-		else
-		{
-			material.SetString("", doc.GetAllocator());
-		}
-		doc.AddMember("material", material, doc.GetAllocator());
-
-		doc.AddMember("transform", Transform::serialize(doc, *model.transform), doc.GetAllocator());
-
-		doc.AddMember("flip_uv", model.flip_uv, doc.GetAllocator());
-
-		std::filesystem::path abs_path(ASSETS_PATH + path);
-		if (!std::filesystem::exists(abs_path.parent_path()))
-		{
-			std::filesystem::create_directories(abs_path.parent_path());
-		}
-		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
-		if (fd != nullptr)
-		{
-			char write_buffer[256];
-			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
-			doc.Accept(material_writer);
-			fclose(fd);
-			LOG("save model: {}", path);
-		}
-		else
-		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
-		}
-	}
-
-	void Model::deserialize(std::string path, Model & model)
-	{
-		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
-		if (fd != nullptr)
-		{
-			char read_buffer[256];
-			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
-			rapidjson::Document doc;
-			doc.ParseStream(fs);
-			fclose(fd);
-			
-			model.name = doc["name"].GetString();
-			if (model.name == "")
-			{
-				if (free_names.size() > 0)
-				{
-					int num = free_names.back();
-					free_names.pop_back();
-					model.name = "Model(" + std::to_string(num) + ")";
-				}
-				else
-				{
-					model.name = "Model(" + std::to_string(current_name++) + ")";
-				}
-			}
-			model.raw_path = doc["raw_path"].GetString();
-			model.meta_path = doc["meta_path"].GetString();
-			model.flip_uv = doc["flip_uv"].GetBool();
-			std::string material_path = doc["material"].GetString();
-
-			if (model.raw_path != "")
-			{
-				model.load_raw_internal(model.raw_path);
-			}
-			else
-			{
-				rapidjson::Value meshes = doc["meshes"].GetArray();
-				for (rapidjson::SizeType idx = 0; idx < meshes.Size(); idx++)
-				{
-					model.meshes.emplace_back(Mesh::deserialize(meshes[idx].GetObject()));
-				}
-			}
-
-			if (material_path != "")
-			{
-				model.material = Material::load_asset(material_path);
-			}
-			else
-			{
-				model.material = std::make_shared<Material>();
-			}
-
-			model.transform = std::unique_ptr<Transform>(Transform::deserialize(doc["transform"].GetObject()));
-			model.transform->name = model.name;
-
-			model.transform->set_model(&model);
-		}
-		else
-		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
-		}
 	}
 
 	std::string Model::str() const
