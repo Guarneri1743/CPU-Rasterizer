@@ -118,6 +118,7 @@ function setupProject()
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
+      include_dir .. "/utility/detail/*.*",
       include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
@@ -143,49 +144,6 @@ function setupProject()
       targetdir (solution_dir .. "/bin/release")
 end
 
-function setupGenerateScenesProj()
-   project "GenerateScenes"
-   kind "ConsoleApp"
-   language "C++"
-
-   files { 
-      src_dir .. "/*.*", 
-      src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
-      src_dir .. "/primitives/*.*",
-      src_dir .. "/core/*.*",
-      src_dir .. "/graphics/*.*",
-      src_dir .. "/shader/*.*",
-      src_dir .. "/editor/*.*",
-      include_dir .. "/*.*", 
-      include_dir .. "/detail/*.*", 
-      include_dir .. "/utility/*.*",
-      include_dir .. "/math/*.*",
-      include_dir .. "/primitives/*.*",
-      include_dir .. "/core/*.*",
-      include_dir .. "/graphics/*.*",
-      include_dir .. "/core/detail/*.*",
-      include_dir .. "/shader/*.*",
-      include_dir .. "/editor/*.*",
-      third_party_dir .. "/*.*",
-      third_party_dir .. "/assimp/*.*",
-      third_party_dir .. "/stb_image/*.*",
-      third_party_dir .. "/rapidjson/*.*",
-      third_party_dir .. "/imgui/*.*",
-      third_party_dir .. "/imgui/backends/*.*",
-      third_party_dir .. "/gl3w/GL/*.*",
-      third_party_dir .. "/glfw/GLFW/*.*",
-      sample_dir .. "/GenerateScenes.cpp"
-   }
-
-   filter { "configurations:Debug*" }
-      targetdir (solution_dir .. "/bin/debug")
-
-   filter { "configurations:Release*" }
-      targetdir (solution_dir .. "/bin/release")
-end
-
 setupIncludeDirs()
 setupSlotion()
 setupProject()
-setupGenerateScenesProj()
