@@ -83,7 +83,7 @@ namespace Guarneri
 		model->reload_mesh(Scene->mRootNode, Scene);
 		LOG("load model: {}, mesh count: {}", abs_path, model->meshes.size());
 		importer.FreeScene();
-		std::shared_ptr<Model>();
+		return std::shared_ptr<Model>(model);
 	}
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
