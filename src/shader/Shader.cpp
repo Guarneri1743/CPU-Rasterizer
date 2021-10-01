@@ -275,7 +275,7 @@ namespace Guarneri
 				{
 					uint32_t row, col;
 					uv2pixel(512, 512, ndv, roughness, row, col);
-					printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
+					//printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
 				}
 			}
 

@@ -6,6 +6,10 @@ overview
 
 <img src="/gallery/IBL.png" width = "800" height = "600" alt="overview" align=bottom /> 
 
+<img src="/gallery/IBL2.png" width = "800" height = "600" alt="overview" align=bottom /> 
+
+<img src="/gallery/IBL3.png" width = "800" height = "600" alt="overview" align=bottom /> 
+
 | tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
 | --- | --- | --- | --- |
 | <img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/> | <img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/perspective_correct_uv.jpg" width = "180" height = "180" alt="Perspective Correct Interpolation" align=bottom /> |
