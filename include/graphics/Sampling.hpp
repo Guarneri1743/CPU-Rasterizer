@@ -2,7 +2,7 @@
 #define _SAMPLING_
 
 #include "Define.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "PBR.hpp"
 
 #define USE_LOW_DISCREPANCY_SEQUENCE

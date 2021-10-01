@@ -1,7 +1,7 @@
 #ifndef _COLOR_
 #define _COLOR_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Define.hpp"
 #include "rapidjson/document.h"
 

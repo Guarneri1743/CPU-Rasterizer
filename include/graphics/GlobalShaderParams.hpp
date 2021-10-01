@@ -4,7 +4,7 @@
 #include "Define.hpp"
 #include "Light.hpp"
 #include "Traits.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri {
 	struct GlobalShaderParams {

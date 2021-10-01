@@ -2,7 +2,7 @@
 #define _CAMERA_
 #include "Define.hpp"
 #include "Object.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Transform.hpp"
 #include "rapidjson/document.h"
 

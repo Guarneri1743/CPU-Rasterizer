@@ -1,7 +1,7 @@
 #ifndef _LIGHT_
 #define _LIGHT_
 #include "Color.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "rapidjson/document.h"
 
 namespace Guarneri {

@@ -2,7 +2,7 @@
 #define _INPUT_MGR_
 #include <unordered_map>
 #include <unordered_set>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

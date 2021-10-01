@@ -1,7 +1,7 @@
 ﻿#ifndef _RAY_
 #define _RAY_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

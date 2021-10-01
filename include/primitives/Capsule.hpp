@@ -1,7 +1,7 @@
 ﻿#ifndef _CAPSULE_
 #define _CAPSULE_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Segment.hpp"
 
 namespace Guarneri

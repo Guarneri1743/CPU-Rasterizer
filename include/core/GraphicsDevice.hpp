@@ -7,7 +7,7 @@
 #include "Define.hpp"
 #include "RawBuffer.hpp"
 #include "GraphicsCommand.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Rect.hpp"
 #include "Color.hpp"
 #include "Triangle.hpp"

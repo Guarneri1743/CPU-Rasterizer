@@ -1,7 +1,7 @@
 ﻿#ifndef _BOUNDINGBOX_
 #define _BOUNDINGBOX_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

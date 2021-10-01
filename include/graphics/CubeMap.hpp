@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Color.hpp"
 #include "Texture.hpp"
 

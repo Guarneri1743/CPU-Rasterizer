@@ -5,7 +5,7 @@
 #include <memory>
 #include <stdint.h>
 #include "Object.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Triangle.hpp"
 #include "Model.hpp"
 

@@ -1,7 +1,7 @@
 ﻿#ifndef _SEGMENT_
 #define _SEGMENT_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

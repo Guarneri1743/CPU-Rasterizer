@@ -2,7 +2,7 @@
 #define _PRIMITIVE_FACTORY_
 #include <stdint.h>
 #include <memory>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Model.hpp"
 #include "Vertex.hpp"
 

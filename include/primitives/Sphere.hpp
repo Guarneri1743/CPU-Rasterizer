@@ -1,7 +1,7 @@
 ﻿#ifndef _SPHERE_
 #define _SPHERE_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

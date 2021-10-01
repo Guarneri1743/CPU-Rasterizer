@@ -1,5 +1,5 @@
 #include "LogHelper.h"
-#include "TinyMath.h"
+#include "tinymath.h"
 
 std::ostream& operator<<(std::ostream& stream, const tinymath::vec2f& v)
 {

@@ -1,6 +1,6 @@
 #ifndef _FRUSTUM_
 #define _FRUSTUM_
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Plane.hpp"
 
 namespace Guarneri

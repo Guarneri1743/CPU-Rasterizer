@@ -9,7 +9,7 @@
 #include "rapidjson/reader.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Transform.hpp"
 #include "Camera.hpp"
 #include "Material.hpp"

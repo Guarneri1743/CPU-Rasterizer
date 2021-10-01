@@ -1,7 +1,7 @@
 ﻿#ifndef _PLANE_
 #define _PLANE_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

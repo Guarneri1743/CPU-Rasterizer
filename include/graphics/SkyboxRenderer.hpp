@@ -2,7 +2,7 @@
 #define _SKYBOX_RENDERER_
 #include <memory>
 #include "Define.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Renderer.hpp"
 
 namespace Guarneri

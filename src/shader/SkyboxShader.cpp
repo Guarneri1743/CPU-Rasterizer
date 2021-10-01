@@ -1,5 +1,5 @@
 #include "SkyboxShader.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "GlobalShaderParams.hpp"
 #include "Singleton.hpp"
 #include "Sampling.hpp"

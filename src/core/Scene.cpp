@@ -4,7 +4,7 @@
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
 #include "InputManager.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Color.hpp"
 #include "Config.h"
 #include "rapidjson/document.h"

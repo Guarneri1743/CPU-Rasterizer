@@ -2,7 +2,7 @@
 #define _MATERIAL_
 #include <memory>
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Object.hpp"
 #include "Shader.hpp"
 #include "ShadowShader.hpp"

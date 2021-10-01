@@ -1,7 +1,7 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "rapidjson/document.h"
 
 namespace Guarneri

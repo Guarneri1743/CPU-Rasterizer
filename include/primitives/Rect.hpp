@@ -1,7 +1,7 @@
 #ifndef _Rect_
 #define _Rect_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

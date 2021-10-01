@@ -14,7 +14,7 @@
 #include "Traits.hpp"
 #include "Utility.hpp"
 
-#include "TinyMath.h"
+#include "tinymath.h"
 
 #include "BoundingBox.hpp"
 #include "Capsule.hpp"

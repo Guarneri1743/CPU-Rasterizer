@@ -2,7 +2,7 @@
 #define _TRANSFORM_
 #include <vector>
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

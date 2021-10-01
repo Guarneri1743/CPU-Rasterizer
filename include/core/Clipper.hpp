@@ -3,7 +3,7 @@
 #include <vector>
 #include <assert.h>
 #include "Vertex.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Triangle.hpp"
 #include "Plane.hpp"
 #include "Frustum.hpp"

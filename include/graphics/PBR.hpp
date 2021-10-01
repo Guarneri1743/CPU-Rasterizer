@@ -2,7 +2,7 @@
 #define _PBR_
 
 #include "Define.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

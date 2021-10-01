@@ -5,7 +5,7 @@
 #include "Light.hpp"
 #include "GlobalShaderParams.hpp"
 #include "Color.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Texture.hpp"
 #include "CubeMap.hpp"
 

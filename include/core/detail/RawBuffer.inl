@@ -1,5 +1,5 @@
 #include "..\RawBuffer.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

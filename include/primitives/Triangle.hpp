@@ -2,7 +2,7 @@
 #define _TRIANGLE_
 #include <vector>
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 #include "Vertex.hpp"
 
 namespace Guarneri

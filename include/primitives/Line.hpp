@@ -1,7 +1,7 @@
 ﻿#ifndef _PRIM_LINE_
 #define _PRIM_LINE_
 #include <string>
-#include "TinyMath.h"
+#include "tinymath.h"
 
 namespace Guarneri
 {

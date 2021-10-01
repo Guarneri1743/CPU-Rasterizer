@@ -1,5 +1,5 @@
 #include "LightShader.hpp"
-#include "TinyMath.h"
+#include "tinymath.h"
 #include <iostream>
 
 namespace Guarneri
