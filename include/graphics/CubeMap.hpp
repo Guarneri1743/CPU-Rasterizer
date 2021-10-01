@@ -1,5 +1,4 @@
-#ifndef _CUBEMAP_
-#define _CUBEMAP_
+#pragma once
 #include <memory>
 #include <vector>
 #include <string>
@@ -47,4 +46,3 @@ namespace Guarneri
 		CubeMap();
 	};
 }
-#endif

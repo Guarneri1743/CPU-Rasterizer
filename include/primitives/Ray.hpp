@@ -1,5 +1,4 @@
-﻿#ifndef _RAY_
-#define _RAY_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -18,4 +17,3 @@ namespace Guarneri
 		Ray(const Ray& other);
 	};
 }
-#endif

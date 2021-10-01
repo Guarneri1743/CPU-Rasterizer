@@ -1,5 +1,4 @@
-#ifndef _RES_MGR_
-#define _RES_MGR_
+#pragma once
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -29,4 +28,3 @@ namespace Guarneri
 }
 
 #include "detail/Cache.inl"
-#endif

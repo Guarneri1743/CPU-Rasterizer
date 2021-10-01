@@ -20,12 +20,12 @@ namespace Guarneri
 		{
 			return id;
 		}
-		return INVALID_ID;
+		return kInvalidID;
 	}
 
 	bool IdAllocator::alloc(uint32_t& id)
 	{
-		id = INVALID_ID;
+		id = kInvalidID;
 		if (cur < rhs)
 		{
 			id = cur++;

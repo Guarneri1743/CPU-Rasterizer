@@ -1,5 +1,4 @@
-﻿#ifndef _BOUNDINGBOX_
-#define _BOUNDINGBOX_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -34,4 +33,3 @@ namespace Guarneri
 		tinymath::vec3f inv_offset(const tinymath::vec3f& p) const;
 	};
 }
-#endif

@@ -1,5 +1,4 @@
-#ifndef _MESH_
-#define _MESH_
+#pragma once
 #include <string>
 #include <vector>
 #include "Object.hpp"
@@ -21,4 +20,3 @@ namespace Guarneri
 		Mesh& operator= (const Mesh& other);
 	};
 }
-#endif

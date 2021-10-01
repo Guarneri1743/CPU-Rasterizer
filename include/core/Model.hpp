@@ -1,5 +1,4 @@
-#ifndef _MODEL_
-#define _MODEL_
+#pragma once
 #include <string>
 #include <vector>
 #include <memory>
@@ -45,4 +44,3 @@ namespace Guarneri
 		void reload_mesh(aiNode* node, const aiScene* Scene);	
 	};
 }
-#endif

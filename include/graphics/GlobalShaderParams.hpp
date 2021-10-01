@@ -1,5 +1,4 @@
-#ifndef _GRAPHICS_UTILITY_
-#define _GRAPHICS_UTILITY_
+#pragma once
 #include <vector>
 #include "Define.hpp"
 #include "Light.hpp"
@@ -55,4 +54,3 @@ namespace Guarneri {
 		bool enable_msaa;
 	};
 }
-#endif

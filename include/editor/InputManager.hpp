@@ -1,5 +1,4 @@
-#ifndef _INPUT_MGR_
-#define _INPUT_MGR_
+#pragma once
 #include <unordered_map>
 #include <unordered_set>
 #include "tinymath.h"
@@ -119,4 +118,3 @@ namespace Guarneri
 		bool is_mouse_down(MouseButton btn);
 	};
 }
-#endif

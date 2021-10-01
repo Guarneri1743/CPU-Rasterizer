@@ -1,5 +1,4 @@
-#ifndef _TRIANGLE_
-#define _TRIANGLE_
+#pragma once
 #include <vector>
 #include <string>
 #include "tinymath.h"
@@ -30,4 +29,3 @@ namespace Guarneri
 		const Vertex& operator[](const uint32_t i) const;
 	};
 }
-#endif

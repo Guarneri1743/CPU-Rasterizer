@@ -1,5 +1,4 @@
-﻿#ifndef _CYLINDER_
-#define _CYLINDER_
+﻿#pragma once
 #include <string>
 #include "TinyMath/Vector3.h"
 #include "Line.hpp"
@@ -19,4 +18,3 @@ namespace Guarneri
 		Cylinder(const Cylinder& other);
 	};
 }
-#endif

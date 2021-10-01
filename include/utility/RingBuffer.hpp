@@ -1,5 +1,4 @@
-#ifndef _RING_BUFFER_
-#define _RING_BUFFER_
+#pragma once
 #include <mutex>
 
 namespace Guarneri
@@ -86,4 +85,3 @@ namespace Guarneri
 		consume_condition.notify_one();
 	}
 }
-#endif

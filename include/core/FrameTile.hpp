@@ -1,5 +1,4 @@
-#ifndef _FRAME_TILE_HPP_
-#define _FRAME_TILE_HPP_
+#pragma once
 #include <vector>
 #include "Triangle.hpp"
 #include "Shader.hpp"
@@ -10,7 +9,6 @@ namespace Guarneri
 	typedef struct
 	{
 		uint32_t tile_size;
-		uint32_t tile_task_size;
 		uint32_t row_tile_count;
 		uint32_t col_tile_count;
 		uint32_t tile_length;
@@ -61,4 +59,3 @@ namespace Guarneri
 			const int& tile_size);
 	};
 }
-#endif

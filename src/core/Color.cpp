@@ -44,7 +44,7 @@ namespace Guarneri
 
 	bool Color::operator == (const Color& other)
 	{
-		return EQUALS(r, other.r) && EQUALS(g, other.g) && EQUALS(b, other.b) && EQUALS(a, other.a);
+		return r == other.r && g == other.g && b == other.b && a == other.a;
 	}
 
 	bool Color::operator != (const Color& other)

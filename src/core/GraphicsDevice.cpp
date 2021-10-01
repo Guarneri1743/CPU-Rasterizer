@@ -6,7 +6,6 @@
 #include "Frustum.hpp"
 #include "Clipper.hpp"
 #include "SegmentDrawer.hpp"
-#include "Config.h"
 #include <execution>
 #include <algorithm>
 #include "Logger.hpp"
@@ -14,6 +13,10 @@
 
 namespace Guarneri
 {
+	constexpr float kFarZ = 1.0f;
+	constexpr uint8_t kDefaultStencil = 0x00;
+	constexpr uint32_t kTileSize = 16;
+
 	GraphicsDevice::GraphicsDevice()
 	{
 		width = 0;
@@ -46,13 +49,13 @@ namespace Guarneri
 		this->height = h;
 
 		// prepare tiles
-		int row_rest = h % Config::TILE_SIZE;
-		int col_rest = w % Config::TILE_SIZE;
-		row_tile_count = h / Config::TILE_SIZE + (row_rest > 0 ? 1 : 0);
-		col_tile_count = w / Config::TILE_SIZE + (col_rest > 0 ? 1 : 0);
+		int row_rest = h % kTileSize;
+		int col_rest = w % kTileSize;
+		row_tile_count = h / kTileSize + (row_rest > 0 ? 1 : 0);
+		col_tile_count = w / kTileSize + (col_rest > 0 ? 1 : 0);
 		tile_length = (int)((long)row_tile_count * (long)col_tile_count);
 		tiles = new FrameTile[tile_length];
-		FrameTile::build_tiles(tiles, Config::TILE_SIZE, row_tile_count, col_tile_count, row_rest, col_rest);
+		FrameTile::build_tiles(tiles, kTileSize, row_tile_count, col_tile_count, row_rest, col_rest);
 
 		// prepare buffers
 		zbuffer = std::make_unique<RawBuffer<float>>(w, h);
@@ -60,9 +63,9 @@ namespace Guarneri
 		framebuffer = std::make_unique<RawBuffer<color_rgba>>(w, h);
 
 		stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
-		zbuffer->clear(FAR_Z);
-		shadowmap->clear(FAR_Z);
-		stencilbuffer->clear(DEFAULT_STENCIL);
+		zbuffer->clear(kFarZ);
+		shadowmap->clear(kFarZ);
+		stencilbuffer->clear(kDefaultStencil);
 		framebuffer->clear(DEFAULT_COLOR);
 	}
 
@@ -82,7 +85,7 @@ namespace Guarneri
 
 	TileInfo GraphicsDevice::get_tile_info()
 	{
-		return { Config::TILE_SIZE , Config::TILE_TASK_SIZE , row_tile_count, col_tile_count, tile_length };
+		return { kTileSize, row_tile_count, col_tile_count, tile_length };
 	}
 
 	void GraphicsDevice::draw(DrawCommand task)
@@ -184,17 +187,17 @@ namespace Guarneri
 			}
 		}
 
-		shadowmap->clear(FAR_Z);
+		shadowmap->clear(kFarZ);
 
-		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) { zbuffer->clear(FAR_Z); }
-		if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) { stencilbuffer->clear(DEFAULT_STENCIL); }
+		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) { zbuffer->clear(kFarZ); }
+		if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) { stencilbuffer->clear(kDefaultStencil); }
 
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
 			msaa_colorbuffer->clear(DEFAULT_COLOR);
-			msaa_zbuffer->clear(FAR_Z);
+			msaa_zbuffer->clear(kFarZ);
 			msaa_coveragebuffer->clear(0);
-			msaa_stencilbuffer->clear(DEFAULT_STENCIL);
+			msaa_stencilbuffer->clear(kDefaultStencil);
 		}
 
 		statistics.culled_triangle_count = 0;
@@ -263,7 +266,7 @@ namespace Guarneri
 			if (this->tile_based)
 			{
 				// push tile based draw task
-				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, Config::TILE_SIZE);
+				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, kTileSize);
 			}
 			else
 			{
@@ -962,7 +965,7 @@ namespace Guarneri
 				pass = true;
 				break;
 			case CompareFunc::EQUAL:
-				pass = EQUALS(z, depth); // percision concern
+				pass = tinymath::approx(z, depth);
 				break;
 			case CompareFunc::GREATER:
 				pass = z > depth;

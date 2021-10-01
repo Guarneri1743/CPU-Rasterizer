@@ -1,5 +1,4 @@
-#ifndef _CLIPPER_
-#define _CLIPPER_
+#pragma once
 #include <vector>
 #include <assert.h>
 #include "Vertex.hpp"
@@ -23,4 +22,3 @@ namespace Guarneri
 		static bool conservative_frustum_culling(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 	};
 }
-#endif

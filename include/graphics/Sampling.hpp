@@ -1,6 +1,4 @@
-#ifndef _SAMPLING_
-#define _SAMPLING_
-
+#pragma once
 #include "Define.hpp"
 #include "tinymath.h"
 #include "PBR.hpp"
@@ -75,5 +73,3 @@ namespace Guarneri
         return tinymath::normalize(w_i.x * tangent + w_i.y * normal + w_i.z * bitangent);
     } 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef _GRAPHICS_DEVICE_
-#define _GRAPHICS_DEVICE_
+#pragma once
 #include <stdint.h>
 #include <queue>
 #include <memory>
@@ -117,4 +116,3 @@ namespace Guarneri
 		void process_commands();
 	};
 }
-#endif

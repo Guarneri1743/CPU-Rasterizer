@@ -13,6 +13,10 @@
 #include "Logger.hpp"
 #include "Serialization.hpp"
 
+#define CAMERA_ROTATE_SPEED 0.25f
+#define CAMERA_MOVE_SPEED 0.2f
+#define CAMERA_ZOOM_SPEED 2.0f
+
 #undef near
 #undef far
 #undef GetObject

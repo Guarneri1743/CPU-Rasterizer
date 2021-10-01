@@ -1,5 +1,4 @@
-﻿#ifndef _SEGMENT_
-#define _SEGMENT_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -21,4 +20,3 @@ namespace Guarneri
 		tinymath::vec3f dir() const;
 	};
 }
-#endif

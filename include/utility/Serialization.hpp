@@ -1,5 +1,4 @@
-#ifndef _SERIALIZATION_
-#define _SERIALIZATION_
+#pragma once
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -1059,5 +1058,3 @@ namespace Guarneri
 		//====================================================================================
 	};
 }
-
-#endif

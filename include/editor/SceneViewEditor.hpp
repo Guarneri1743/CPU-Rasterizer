@@ -1,6 +1,4 @@
-#ifndef _SCENE_VIEW_EDITOR_
-#define _SCENE_VIEW_EDITOR_
-
+#pragma once
 #include "BaseEditor.hpp"
 
 namespace Guarneri
@@ -12,5 +10,3 @@ namespace Guarneri
 		virtual void on_gui();
 	};
 }
-
-#endif

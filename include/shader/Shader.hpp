@@ -1,5 +1,4 @@
-#ifndef _SHADER_
-#define _SHADER_
+#pragma once
 #include <unordered_map>
 #include "Object.hpp"
 #include "Light.hpp"
@@ -101,4 +100,3 @@ namespace Guarneri
 		static Shader* error_shader;
 	};
 }
-#endif

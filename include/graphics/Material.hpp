@@ -1,5 +1,4 @@
-#ifndef _MATERIAL_
-#define _MATERIAL_
+#pragma once
 #include <memory>
 #include <string>
 #include "tinymath.h"
@@ -65,4 +64,3 @@ namespace Guarneri
 		void copy(const Material& other);
 	};
 }
-#endif

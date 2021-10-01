@@ -1,5 +1,4 @@
-#ifndef _SCENE_
-#define _SCENE_
+#pragma once
 #include <vector>
 #include <memory>
 #include "Define.hpp"
@@ -71,4 +70,3 @@ namespace Guarneri
 		static Scene* current_scene;
 	};
 }
-#endif

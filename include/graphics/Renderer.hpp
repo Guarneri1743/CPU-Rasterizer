@@ -1,5 +1,4 @@
-#ifndef _RENDERER_
-#define _RENDERER_
+#pragma once
 #include <string>
 #include <vector>
 #include <memory>
@@ -37,4 +36,3 @@ namespace Guarneri
 		bool gizmos;
 	};
 }
-#endif

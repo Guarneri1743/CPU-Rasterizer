@@ -12,6 +12,12 @@
 #include "stb_image/stb_image.h"
 #include "stb_image/stb_image_write.h"
 
+constexpr size_t kMaxTextureSize = 4096;
+constexpr uint8_t kChannelR = 1;
+constexpr uint8_t kChannelRG = 2;
+constexpr uint8_t kChannelRGB = 3;
+constexpr uint8_t kChannelRGBA = 4;
+
 namespace Guarneri
 {
 	constexpr int kMaxMip = 8;
@@ -204,9 +210,9 @@ namespace Guarneri
 			this->width = w;
 			this->height = h;
 			assert(channels > 0);
-			assert(w <= TEXTURE_MAX_SIZE);
-			assert(h <= TEXTURE_MAX_SIZE);
-			if (channels == RGB_CHANNEL)
+			assert(w <= kMaxTextureSize);
+			assert(h <= kMaxTextureSize);
+			if (channels == kChannelRGB)
 			{
 				if (hdr)
 				{
@@ -225,7 +231,7 @@ namespace Guarneri
 					this->format = TextureFormat::rgb;
 				}
 			}
-			else if (channels == RGBA_CHANNEL)
+			else if (channels == kChannelRGBA)
 			{
 				if (hdr)
 				{
@@ -244,7 +250,7 @@ namespace Guarneri
 					this->format = TextureFormat::rgba;
 				}
 			}
-			else if (channels == RG_CHANNEL)
+			else if (channels == kChannelRG)
 			{
 				rg_buffer = RawBuffer<color_rg>::create(tex, w, h, [](color_rg* ptr)
 				{
@@ -252,7 +258,7 @@ namespace Guarneri
 				});
 				this->format = TextureFormat::rg;
 			}
-			else if (channels == R_CHANNEL)
+			else if (channels == kChannelR)
 			{
 				gray_buffer = RawBuffer<color_gray>::create(tex, w, h, [](color_gray* ptr)
 				{
@@ -852,55 +858,27 @@ namespace Guarneri
 		switch (wrap_mode)
 		{
 		case WrapMode::CLAMP_TO_BORDER:
-			if (LESS_EQUAL(u, 0.0f))
-			{
-				u = 0.0f;
-			}
-			if (GREATAER_EQUAL(u, 1.0f))
-			{
-				u = 1.0f;
-			}
-			if (LESS_EQUAL(v, 0.0f))
-			{
-				v = 0.0f;
-			}
-			if (GREATAER_EQUAL(v, 1.0f))
-			{
-				v = 1.0f;
-			}
+			u = tinymath::clamp(u, 0.0f, 1.0f);
+			v = tinymath::clamp(v, 0.0f, 1.0f);
 			break;
 		case WrapMode::CLAMP_TO_EDGE:
-			if (LESS_EQUAL(u, 0.0f))
-			{
-				u = 0.0f;
-			}
-			if (GREATAER_EQUAL(u, 1.0f))
-			{
-				u = 1.0f;
-			}
-			if (LESS_EQUAL(v, 0.0f))
-			{
-				v = 0.0f;
-			}
-			if (GREATAER_EQUAL(v, 1.0f))
-			{
-				v = 1.0f;
-			}
+			u = tinymath::clamp(u, 0.0f, 1.0f);
+			v = tinymath::clamp(v, 0.0f, 1.0f);
 			break;
 		case WrapMode::REPEAT:
-			if (LESS_EQUAL(u, 0.0f))
+			if (u <= 0.0f)
 			{
 				u += 1.0f;
 			}
-			if (GREATAER_EQUAL(u, 1.0f))
+			if (u >= 1.0f)
 			{
 				u -= 1.0f;
 			}
-			if (LESS_EQUAL(v, 0.0f))
+			if (v <= 0.0f)
 			{
 				v += 1.0f;
 			}
-			if (GREATAER_EQUAL(v, 1.0f))
+			if (v >= 1.0f)
 			{
 				v -= 1.0f;
 			}

@@ -1,6 +1,4 @@
-#ifndef _SETTING_EDITOR_
-#define _SETTING_EDITOR_
-
+#pragma once
 #include "BaseEditor.hpp"
 
 namespace Guarneri
@@ -14,5 +12,3 @@ namespace Guarneri
 		void draw_settings();
 	};
 }
-
-#endif

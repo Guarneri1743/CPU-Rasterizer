@@ -1,5 +1,4 @@
-#ifndef _RAW_BUFFER_
-#define _RAW_BUFFER_
+#pragma once
 #include <stdint.h>
 #include <memory>
 
@@ -39,4 +38,3 @@ namespace Guarneri
 }
 
 #include "detail/RawBuffer.inl"
-#endif

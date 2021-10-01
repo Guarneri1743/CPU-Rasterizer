@@ -1,4 +1,3 @@
-#include "..\RawBuffer.hpp"
 #include "tinymath.h"
 
 namespace Guarneri
@@ -119,7 +118,7 @@ namespace Guarneri
 	template<typename T>
 	T* RawBuffer<T>::get_ptr(size_t& size)
 	{
-		size = width * height * sizeof(T);
+		size = (size_t)width * (size_t)height * sizeof(T);
 		return buffer;
 	}
 

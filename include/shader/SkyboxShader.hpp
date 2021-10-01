@@ -1,5 +1,4 @@
-#ifndef _SKYBOX_SHADER_
-#define _SKYBOX_SHADER_
+#pragma once
 #include <string>
 #include "Color.hpp"
 #include "Shader.hpp"
@@ -17,4 +16,3 @@ namespace Guarneri
 		Color fragment_shader(const v2f& input) const;
 	};
 }
-#endif

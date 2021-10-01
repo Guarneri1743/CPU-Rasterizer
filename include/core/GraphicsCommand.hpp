@@ -1,5 +1,4 @@
-#ifndef _GRAPHICS_CMD_
-#define _GRAPHICS_CMD_
+#pragma once
 #include <stdint.h>
 
 namespace Guarneri
@@ -19,5 +18,3 @@ namespace Guarneri
 		void execute(){}
 	};
 }
-
-#endif

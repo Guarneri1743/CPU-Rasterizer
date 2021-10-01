@@ -1,6 +1,4 @@
-#ifndef _EXPLORER_EDITOR_
-#define _EXPLORER_EDITOR_
-
+#pragma once
 #include "BaseEditor.hpp"
 #include <filesystem>
 
@@ -21,5 +19,3 @@ namespace Guarneri
 		size_t selected_log;
 	};
 }
-
-#endif

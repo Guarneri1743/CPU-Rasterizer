@@ -1,5 +1,4 @@
-﻿#ifndef _SPHERE_
-#define _SPHERE_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -17,4 +16,3 @@ namespace Guarneri
 		Sphere(const Sphere& other);
 	};
 }
-#endif

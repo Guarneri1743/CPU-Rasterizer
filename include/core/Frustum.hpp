@@ -1,5 +1,4 @@
-#ifndef _FRUSTUM_
-#define _FRUSTUM_
+#pragma once
 #include "tinymath.h"
 #include "Plane.hpp"
 
@@ -24,4 +23,3 @@ namespace Guarneri
 		Plane& operator[](const int& index);
 	};
 }
-#endif

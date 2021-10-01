@@ -1,5 +1,4 @@
-#ifndef _COLOR_
-#define _COLOR_
+#pragma once
 #include <string>
 #include "tinymath.h"
 #include "Define.hpp"
@@ -134,5 +133,7 @@ namespace Guarneri
 			return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 		}
 	};
+
+#define DEFAULT_COLOR Color::encode_rgba(Color::BLACK)
+#define DEFAULT_DEPTH_COLOR Color::encode_rgba(Color::WHITE)
 }
-#endif

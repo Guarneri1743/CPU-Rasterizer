@@ -1,5 +1,4 @@
-#ifndef _PRIMITIVE_FACTORY_
-#define _PRIMITIVE_FACTORY_
+#pragma once
 #include <stdint.h>
 #include <memory>
 #include "tinymath.h"
@@ -15,4 +14,3 @@ namespace Guarneri {
 		static std::shared_ptr<Model> skybox(std::shared_ptr<Material> material);
 	};
 }
-#endif

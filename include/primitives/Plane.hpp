@@ -1,5 +1,4 @@
-﻿#ifndef _PLANE_
-#define _PLANE_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -21,4 +20,3 @@ namespace Guarneri
 		float homo_distance(const tinymath::vec4f& pt) const;
 	};
 }
-#endif

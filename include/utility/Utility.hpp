@@ -1,5 +1,4 @@
-#ifndef _COMMON_UTILITY_
-#define _COMMON_UTILITY_
+#pragma once
 #include <filesystem>
 #include <string>
 #include "Marcos.h"
@@ -30,5 +29,3 @@ namespace Guarneri {
 #define RES_PATH (APP_PATH + "/res/raw")
 #define ASSETS_PATH (APP_PATH + "/res/assets")
 }
-
-#endif

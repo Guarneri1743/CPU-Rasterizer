@@ -1,5 +1,4 @@
-#ifndef _FPS_STATISTIC_
-#define _FPS_STATISTIC_
+#pragma once
 #include <chrono>
 
 namespace Guarneri
@@ -22,5 +21,3 @@ namespace Guarneri
 		static void frame_end();
 	};
 }
-
-#endif

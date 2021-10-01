@@ -1,5 +1,4 @@
-﻿#ifndef _CAPSULE_
-#define _CAPSULE_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 #include "Segment.hpp"
@@ -20,4 +19,3 @@ namespace Guarneri
 		Capsule(const Capsule& other);
 	};
 }
-#endif

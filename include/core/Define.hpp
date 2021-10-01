@@ -1,5 +1,4 @@
-#ifndef _DEFINE_
-#define _DEFINE_
+#pragma once
 #include <stdint.h>
 #include <ostream>
 #include <sstream>
@@ -243,5 +242,3 @@ namespace Guarneri{
 	template<>
 	struct support_bitwise_enum<ColorMask> : std::true_type {};
 }
-
-#endif

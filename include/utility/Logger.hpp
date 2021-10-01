@@ -1,6 +1,4 @@
-#ifndef _LOGGER_
-#define _LOGGER_
-
+#pragma once
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -160,5 +158,3 @@ namespace Guarneri
 #define FATAL(...) Guarneri::Logger::log_console(Guarneri::Logger::Severity::kFatalError, __VA_ARGS__)
 //=============================================================================
 }
-
-#endif

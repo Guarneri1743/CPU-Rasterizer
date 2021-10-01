@@ -1,5 +1,4 @@
-#ifndef _BITWISE_ENUM_
-#define _BITWISE_ENUM_
+#pragma once
 #include <type_traits>
 
 template<typename TEnumType>
@@ -63,4 +62,3 @@ operator^=(TEnumType& left, TEnumType right)
 	left = left ^ right;
 	return left;
 }
-#endif

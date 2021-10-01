@@ -1,5 +1,4 @@
-#ifndef _TEXTURE_
-#define _TEXTURE_
+#pragma once
 #include <stdint.h>
 #include <string>
 #include <memory>
@@ -105,4 +104,3 @@ namespace Guarneri
 		Texture();
 	};
 }
-#endif

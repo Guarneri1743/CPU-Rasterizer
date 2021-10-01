@@ -1,5 +1,4 @@
-﻿#ifndef _PRIM_LINE_
-#define _PRIM_LINE_
+﻿#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -17,4 +16,3 @@ namespace Guarneri
 		Line(const Line& other);
 	};
 }
-#endif

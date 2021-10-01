@@ -1,5 +1,4 @@
-#ifndef _SHADER_LAB_
-#define _SHADER_LAB_
+#pragma once
 #include <string>
 #include <memory>
 #include <unordered_map>
@@ -17,4 +16,3 @@ namespace Guarneri
 		static std::unordered_map<std::string, std::shared_ptr<Shader>> name2shaders;
 	};
 }
-#endif

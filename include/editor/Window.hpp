@@ -1,6 +1,4 @@
-#ifndef _WINDOW_
-#define _WINDOW_
-
+#pragma once
 #include <functional>
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
@@ -59,5 +57,3 @@ namespace Guarneri
 		static Window* main_window;
 	};
 }
-
-#endif

@@ -1,6 +1,4 @@
-#ifndef _PBR_
-#define _PBR_
-
+#pragma once
 #include "Define.hpp"
 #include "tinymath.h"
 
@@ -54,5 +52,3 @@ namespace Guarneri
         return f0 + (tinymath::max(tinymath::vec3f(1.0f - roughness), f0) - f0) * tinymath::pow(tinymath::clamp(1.0f - cos_theta, 0.0f, 1.0f) , 5.0f);
     }
 }
-
-#endif

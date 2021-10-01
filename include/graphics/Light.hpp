@@ -1,5 +1,4 @@
-#ifndef _LIGHT_
-#define _LIGHT_
+#pragma once
 #include "Color.hpp"
 #include "tinymath.h"
 
@@ -44,4 +43,3 @@ namespace Guarneri {
 		float theta;
 	};
 }
-#endif

@@ -1,5 +1,4 @@
-#ifndef _TRANSFORM_
-#define _TRANSFORM_
+#pragma once
 #include <vector>
 #include <string>
 #include "tinymath.h"
@@ -62,4 +61,3 @@ namespace Guarneri
 		Transform& operator =(const Transform& other);
 	};
 }
-#endif

@@ -1,6 +1,4 @@
-#ifndef _HIERARCHY_EDITOR_
-#define _HIERARCHY_EDITOR_
-
+#pragma once
 #include "BaseEditor.hpp"
 #include "Rect.hpp"
 #include "Transform.hpp"
@@ -16,5 +14,3 @@ namespace Guarneri
 		void draw_scene_hierarchy();
 	};
 }
-
-#endif

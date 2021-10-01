@@ -1,5 +1,4 @@
-#ifndef _CAMERA_
-#define _CAMERA_
+#pragma once
 #include "Define.hpp"
 #include "Object.hpp"
 #include "tinymath.h"
@@ -42,4 +41,3 @@ namespace Guarneri
 		static Camera* main_cam;
 	};
 }
-#endif

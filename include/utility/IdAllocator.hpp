@@ -1,9 +1,12 @@
-#ifndef _ID_ALLOC_
-#define _ID_ALLOC_
+#pragma once
 #include <stdint.h>
+#include <limits>
 
 namespace Guarneri
 {
+	constexpr uint32_t kInvalidID = 0;
+	constexpr uint32_t kMaxID = UINT_MAX;
+
 	class IdAllocator
 	{
 	private:
@@ -18,4 +21,3 @@ namespace Guarneri
 		void free(const uint32_t& id);
 	};
 }
-#endif

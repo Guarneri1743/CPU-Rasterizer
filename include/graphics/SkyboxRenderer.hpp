@@ -1,5 +1,4 @@
-#ifndef _SKYBOX_RENDERER_
-#define _SKYBOX_RENDERER_
+#pragma once
 #include <memory>
 #include "Define.hpp"
 #include "tinymath.h"
@@ -20,4 +19,3 @@ namespace Guarneri
 		void draw_gizmos() const;
 	};
 }
-#endif

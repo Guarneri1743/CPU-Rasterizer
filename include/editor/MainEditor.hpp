@@ -1,6 +1,4 @@
-#ifndef _MAIN_EDITOR_
-#define _MAIN_EDITOR_
-
+#pragma once
 #include "BaseEditor.hpp"
 
 namespace Guarneri
@@ -15,5 +13,3 @@ namespace Guarneri
 		void draw_file_menu();
 	};
 }
-
-#endif

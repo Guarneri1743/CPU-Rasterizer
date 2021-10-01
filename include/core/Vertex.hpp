@@ -1,5 +1,4 @@
-#ifndef _VERTEX_
-#define _VERTEX_
+#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -37,4 +36,3 @@ namespace Guarneri
 		static tinymath::vec4f ndc2screen(const int& width, const int& height, const tinymath::vec4f& v);
 	};
 }
-#endif

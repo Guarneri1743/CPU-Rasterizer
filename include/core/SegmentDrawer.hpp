@@ -1,5 +1,4 @@
-#ifndef _SEGMENT_DRAWER_
-#define _SEGMENT_DRAWER_
+#pragma once
 #include "RawBuffer.hpp"
 
 namespace Guarneri
@@ -65,4 +64,3 @@ namespace Guarneri
 		}
 	}
 }
-#endif

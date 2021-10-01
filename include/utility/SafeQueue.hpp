@@ -1,5 +1,4 @@
-#ifndef _SAFEQUEUE_HPP_
-#define _SAFEQUEUE_HPP_
+#pragma once
 #include <mutex>
 #include <queue>
 
@@ -85,4 +84,3 @@ bool SafeQueue<T>::empty()
 	}
 	return ret;
 }
-#endif

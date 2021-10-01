@@ -1,5 +1,4 @@
-#ifndef _BASE_EDITOR_
-#define _BASE_EDITOR_
+#pragma once
 #include "imgui/imgui.h"
 #include <string>
 #include <vector>
@@ -66,5 +65,3 @@ namespace Guarneri
 		bool no_bring_to_front = false;
 	};
 }
-
-#endif

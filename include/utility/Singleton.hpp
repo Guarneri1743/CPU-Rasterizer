@@ -1,5 +1,4 @@
-#ifndef _SINGLETON_
-#define _SINGLETON_
+#pragma once
 
 namespace Guarneri
 {
@@ -30,5 +29,6 @@ namespace Guarneri
 		static T _inst;
 		return _inst;
 	}
+
+#define INST(type) Singleton<type>::get()
 }
-#endif

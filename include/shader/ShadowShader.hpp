@@ -1,5 +1,4 @@
-#ifndef _SHADOW_SHADER_
-#define _SHADOW_SHADER_
+#pragma once
 #include <string>
 #include "Shader.hpp"
 #include "Color.hpp"
@@ -17,4 +16,3 @@ namespace Guarneri
 		Color fragment_shader(const v2f& input) const;
 	};
 }
-#endif

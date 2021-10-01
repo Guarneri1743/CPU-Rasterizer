@@ -6,17 +6,16 @@
 
 namespace Guarneri
 {
-	IdAllocator idalloc(INVALID_ID + 1, MAX_ID);
-	#define ALLOC_ID() idalloc.alloc();
-	#define FREE_ID(id) idalloc.free(id);
+	IdAllocator idalloc(kInvalidID + 1, kMaxID);
 
 	Object::Object()
 	{
-		id = ALLOC_ID();
+		id = idalloc.alloc();
 	}
+
 	Object::~Object()
 	{
-		FREE_ID(id);
+		idalloc.free(id);
 	}
 
 	uint32_t Object::get_id()

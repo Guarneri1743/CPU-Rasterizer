@@ -1,5 +1,4 @@
-#ifndef _OBJECT_
-#define _OBJECT_
+#pragma once
 #include <string>
 #include <stdint.h>
 
@@ -18,4 +17,3 @@ namespace Guarneri
 		uint32_t get_id();
 	};
 }
-#endif

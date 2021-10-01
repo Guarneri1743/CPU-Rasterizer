@@ -1,6 +1,4 @@
-#ifndef _APPLICATION_
-#define _APPLICATION_
-
+#pragma once
 #include <vector>
 #include <stdint.h>
 #include "Marcos.h"
@@ -67,6 +65,4 @@ namespace Guarneri
 		Application() = delete;
 	};
 }
-
-#endif
 

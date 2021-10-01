@@ -1,5 +1,4 @@
-#ifndef _Rect_
-#define _Rect_
+#pragma once
 #include <string>
 #include "tinymath.h"
 
@@ -37,4 +36,3 @@ namespace Guarneri
 		tinymath::vec2f inv_offset(const tinymath::vec2f& p) const;
 	};
 }
-#endif
