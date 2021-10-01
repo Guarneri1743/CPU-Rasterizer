@@ -2,8 +2,7 @@
 #define _CAMERA_
 #include "Define.hpp"
 #include "Object.hpp"
-#include "Vector3.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Transform.hpp"
 #include "rapidjson/document.h"
 
@@ -19,7 +18,7 @@ namespace Guarneri
 		float aspect;
 		float near;
 		float far;
-		Matrix4x4 proj_matrix;
+		tinymath::mat4x4 proj_matrix;
 		std::unique_ptr<Transform> transform;
 		Projection projection;
 		bool enable_msaa;
@@ -27,17 +26,16 @@ namespace Guarneri
 	public:
 		Camera();
 		~Camera();
-		static std::unique_ptr<Camera> create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far);
-		void initialize(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);
-		Matrix4x4 view_matrix() const;
-		const Matrix4x4 projection_matrix() const;
-		void focus(const Vector3& position);
+		static std::unique_ptr<Camera> create(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far);
+		void initialize(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);
+		tinymath::mat4x4 view_matrix() const;
+		const tinymath::mat4x4 projection_matrix() const;
+		void focus(const tinymath::vec3f& position);
 		void set_near(const float& _near);
 		void set_far(const float& _far);
 		void set_fov(const float& _fov);
 		void set_projection(const Projection& proj);
 		void update_proj_mode();
-		std::string str() const;
 		static Camera* get_main_camera() { return main_cam; }
 		static void set_main_camera(Camera* cam) { main_cam = cam; }
 

@@ -2,8 +2,7 @@
 #define _TRANSFORM_
 #include <vector>
 #include <string>
-#include "Vector3.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 
 namespace Guarneri
 {
@@ -12,11 +11,11 @@ namespace Guarneri
 	{
 	public:
 		std::string name;
-		Vector3 local_position;
-		Vector3 local_rotation;
-		Vector3 local_scale;
-		Matrix4x4 world_trs;
-		Vector3 rotation_axis;
+		tinymath::vec3f local_position;
+		tinymath::vec3f local_rotation;
+		tinymath::vec3f local_scale;
+		tinymath::mat4x4 world_trs;
+		tinymath::vec3f rotation_axis;
 		float rotation_angle;
 		bool selected;
 
@@ -28,26 +27,26 @@ namespace Guarneri
 	public:
 		Transform();
 		Transform(const Transform& other);
-		Vector3 forward() const;
-		Vector3 up() const;
-		Vector3 right()  const;
-		Vector3 world_position() const;
-		Vector3 world_euler_angles() const;
-		Vector3 world_scale() const;
-		Vector3 transform_pos(const Vector3& point);
-		Vector3 transform_dir(const Vector3& dir);
-		Vector3 inverse_transform_pos(const Vector3& point);
-		Vector3 inverse_transform_dir(const Vector3& dir);
+		tinymath::vec3f forward() const;
+		tinymath::vec3f up() const;
+		tinymath::vec3f right()  const;
+		tinymath::vec3f world_position() const;
+		tinymath::vec3f world_euler_angles() const;
+		tinymath::vec3f world_scale() const;
+		tinymath::vec3f transform_pos(const tinymath::vec3f& point);
+		tinymath::vec3f transform_dir(const tinymath::vec3f& dir);
+		tinymath::vec3f inverse_transform_pos(const tinymath::vec3f& point);
+		tinymath::vec3f inverse_transform_dir(const tinymath::vec3f& dir);
 		void set_model(Model* _model) { this->model = _model; }
 		Model* get_model() const { return this->model; }
-		void lookat(const Vector3& target);
+		void lookat(const tinymath::vec3f& target);
 		void set_parent(Transform* parent);
-		void set_world_position(const Vector3& world_position);
+		void set_world_position(const tinymath::vec3f& world_position);
 		void set_world_angle(const float& pitch, const float& yaw, const float& roll);
-		void set_world_rotation(const Vector3& world_rotation);
-		void set_local_position(const Vector3& position);
-		void set_local_rotation(const Vector3& rotation);
-		void set_local_scale(const Vector3& _scale);
+		void set_world_rotation(const tinymath::vec3f& world_rotation);
+		void set_local_position(const tinymath::vec3f& position);
+		void set_local_rotation(const tinymath::vec3f& rotation);
+		void set_local_scale(const tinymath::vec3f& _scale);
 		void move_forward(const float& distance);
 		void move_backward(const float& distance);
 		void move_left(const float& distance);
@@ -55,10 +54,10 @@ namespace Guarneri
 		void move_ascend(const float& distance);
 		void move_descend(const float& distance);
 		void rotate(const float& pitch_offset, const float& yaw_offset, const float& roll_offset);
-		void rotate(const Vector3& _axis, const float& angle);
+		void rotate(const tinymath::vec3f& _axis, const float& angle);
 		void rotate_self(const float& yaw_offset, const float& pitch_offset, const float& roll_offset);
 		void sync();
-		Transform* access_child(const size_t& index) const { assert(index < children.size()); return children[index]; }
+		Transform* access_child(const size_t& index) const { return children[index]; }
 		size_t child_count() const { return children.size(); }
 		Transform& operator =(const Transform& other);
 	};

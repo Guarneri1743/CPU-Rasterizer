@@ -3,8 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "Vector2.hpp"
-#include "Vector3.hpp"
+#include "TinyMath.h"
 #include "Color.hpp"
 #include "Texture.hpp"
 
@@ -22,16 +21,16 @@ namespace Guarneri
 	public:
 		CubeMap(const char* path);
 		void reload(const std::string& path);
-		bool sample(const Vector3& dir, Color& ret);
-		bool sample_irradiance_map(const Vector3& dir, Color& ret);
-		bool sample_prefilter_map(const Vector3& dir, Color& ret);
-		bool sample_prefilter_map_lod(const Vector3& dir, const float& lod, Color& ret);
-		bool sample_brdf(const Vector2& uv, Color& ret);
+		bool sample(const tinymath::vec3f& dir, Color& ret);
+		bool sample_irradiance_map(const tinymath::vec3f& dir, Color& ret);
+		bool sample_prefilter_map(const tinymath::vec3f& dir, Color& ret);
+		bool sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, Color& ret);
+		bool sample_brdf(const tinymath::vec2f& uv, Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
 		void precompute_prefilter_map(const uint32_t& roughness);
 		void precompute_brdf_lut();
-		//Vector2 sample(const Vector3& dir, int& index);
+		//tinymath::vec2f sample(const tinymath::vec3f& dir, int& index);
 		std::string meta_path;
 		std::string name;
 		WrapMode wrap_mode;

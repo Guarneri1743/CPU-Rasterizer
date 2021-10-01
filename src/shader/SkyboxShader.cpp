@@ -1,6 +1,5 @@
 #include "SkyboxShader.hpp"
-#include <sstream>
-#include "Vector4.hpp"
+#include "TinyMath.h"
 #include "GlobalShaderParams.hpp"
 #include "Singleton.hpp"
 #include "Sampling.hpp"
@@ -18,9 +17,9 @@ namespace Guarneri
 	v2f SkyboxShader::vertex_shader(const a2v& input) const
 	{
 		v2f o;
-		auto clip_pos = projection * view * Vector4(input.position.xyz(), 1.0f);
-		o.position = Vector4(clip_pos.xy(), clip_pos.ww());
-		o.world_pos = (model * Vector4(input.position.xyz(), 1.0f)).xyz();
+		auto clip_pos = projection * view * tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
+		o.position = tinymath::vec4f(clip_pos.x, clip_pos.y, clip_pos.w, clip_pos.w);
+		o.world_pos = (model * tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f)).xyz;
 		o.shadow_coord = input.position;
 		return o;
 	}
@@ -31,17 +30,18 @@ namespace Guarneri
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			return spherical_coord_to_uv(input.shadow_coord.xyz());
+			tinymath::vec2f uv = spherical_coord_to_uv(tinymath::vec3f(input.shadow_coord.xyz));
+			return Color(uv.x, uv.y, 0.0f, 1.0f);
 		}
 		else if ((INST(GlobalShaderParams).render_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
 		{
-			name2cubemap.at(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz(), ret);
+			name2cubemap.at(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz, ret);
 			ret = ret / (ret + Color::WHITE);
 			ret = Color::pow(ret, 1.0f / 2.2f);
 			return ret;
 		}
 
-		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz(), ret))
+		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz, ret))
 		{
 			ret = ret / (ret + Color::WHITE);
 			ret = Color::pow(ret, 1.0f / 2.2f);
@@ -49,12 +49,5 @@ namespace Guarneri
 		}
 
 		return Color::BLACK;
-	}
-
-	std::string SkyboxShader::str() const
-	{
-		std::stringstream ss;
-		ss << "SkyboxShader[" << this->id << "]" << std::endl;
-		return ss.str();
 	}
 }

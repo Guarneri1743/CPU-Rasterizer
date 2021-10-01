@@ -1,25 +1,24 @@
 ﻿#ifndef _SEGMENT_
 #define _SEGMENT_
 #include <string>
-#include "Vector3.hpp"
+#include "TinyMath.h"
 
 namespace Guarneri
 {
 	struct Segment
 	{
 	public:
-		Vector3 start;
-		Vector3 end;
+		tinymath::vec3f start;
+		tinymath::vec3f end;
 
 	public:
 		Segment();
-		Segment(const Vector3& center, const Vector3& dir, const float& extent);
-		Segment(const Vector3& start, const Vector3& end);
+		Segment(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent);
+		Segment(const tinymath::vec3f& start, const tinymath::vec3f& end);
 		Segment(const Segment& other);
-		Vector3 center() const;
+		tinymath::vec3f center() const;
 		float extent() const;
-		Vector3 dir() const;
-		std::string str() const;
+		tinymath::vec3f dir() const;
 	};
 }
 #endif

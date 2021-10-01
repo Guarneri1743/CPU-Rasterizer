@@ -1,5 +1,4 @@
 #include "Model.hpp"
-#include <sstream>
 #include <filesystem>
 #include <iostream>
 #include <assimp/Importer.hpp>
@@ -58,7 +57,7 @@ namespace Guarneri
 		return std::shared_ptr<Model>(new Model(vertices, indices, material));
 	}
 
-	std::shared_ptr<Model> Model::load_raw(std::string path, bool flip)
+	void Model::load_raw(std::string path, bool flip)
 	{
 		std::string abs_path = RES_PATH + path;
 		Assimp::Importer importer;
@@ -72,18 +71,16 @@ namespace Guarneri
 		if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode)
 		{
 			std::cerr << "load Model failed, path: " << abs_path << " error code: " << importer.GetErrorString() << std::endl;
-			return nullptr;
+			return;
 		}
 
-		Model* model = new Model();
-		model->raw_path = path;
-		model->material = std::make_shared<Material>();
-		model->flip_uv = flip;
-		model->meshes.clear();
-		model->reload_mesh(Scene->mRootNode, Scene);
-		LOG("load model: {}, mesh count: {}", abs_path, model->meshes.size());
+		raw_path = path;
+		material = std::make_shared<Material>();
+		flip_uv = flip;
+		meshes.clear();
+		reload_mesh(Scene->mRootNode, Scene);
+		LOG("load model: {}, mesh count: {}", abs_path, meshes.size());
 		importer.FreeScene();
-		return std::shared_ptr<Model>(model);
 	}
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
@@ -107,7 +104,7 @@ namespace Guarneri
 		for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
 		{
 			Vertex Vertex;
-			Vector3 vector;
+			tinymath::vec3f vector;
 
 			vector.x = ai_mesh->mVertices[i].x;
 			vector.y = ai_mesh->mVertices[i].y;
@@ -124,7 +121,7 @@ namespace Guarneri
 
 			if (ai_mesh->mTextureCoords[0])
 			{
-				Vector2 vec;
+				tinymath::vec2f vec;
 
 				vec.x = ai_mesh->mTextureCoords[0][i].x;
 				vec.y = ai_mesh->mTextureCoords[0][i].y;
@@ -141,7 +138,7 @@ namespace Guarneri
 				Vertex.bitangent = vector;
 			}
 			else
-				Vertex.uv = Vector2(0.0f, 0.0f);
+				Vertex.uv = tinymath::vec2f(0.0f, 0.0f);
 
 			Vertex.color = Vertex.tangent;
 			vertices.emplace_back(Vertex);
@@ -155,12 +152,5 @@ namespace Guarneri
 		}
 
 		meshes.emplace_back(Mesh(vertices, indices));
-	}
-
-	std::string Model::str() const
-	{
-		std::stringstream ss;
-		ss << "Model[" << this->id << " path: " << raw_path << " mesh count: " << meshes.size() << "]";
-		return ss.str();
 	}
 }

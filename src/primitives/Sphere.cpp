@@ -1,16 +1,16 @@
 ﻿#include "Sphere.hpp"
+#include "Marcos.h"
 #include <iomanip>
-#include <sstream>
 
 namespace Guarneri
 {
 	Sphere::Sphere()
 	{
-		center = Vector3();
+		center = tinymath::vec3f();
 		radius = 0;
 	}
 
-	Sphere::Sphere(const Vector3& _center, const float& _radius)
+	Sphere::Sphere(const tinymath::vec3f& _center, const float& _radius)
 	{
 		this->center = _center;
 		this->radius = _radius;
@@ -20,12 +20,5 @@ namespace Guarneri
 	{
 		this->center = other.center;
 		this->radius = other.radius;
-	}
-
-	std::string Sphere::str() const
-	{
-		std::stringstream ss;
-		ss << "Sphere: [origin: " << this->center.str() << ", radius: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
-		return ss.str();
 	}
 }

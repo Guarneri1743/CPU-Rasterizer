@@ -70,25 +70,25 @@ namespace Guarneri
 		return map;
 	}
 	 
-	bool CubeMap::sample(const Vector3& dir, Color& ret)
+	bool CubeMap::sample(const tinymath::vec3f& dir, Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return texture->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_irradiance_map(const Vector3& dir, Color& ret)
+	bool CubeMap::sample_irradiance_map(const tinymath::vec3f& dir, Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return irradiance_map->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_prefilter_map(const Vector3& dir, Color& ret)
+	bool CubeMap::sample_prefilter_map(const tinymath::vec3f& dir, Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return prefiltered_maps[0]->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_prefilter_map_lod(const Vector3& dir, const float& lod, Color& ret)
+	bool CubeMap::sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, Color& ret)
 	{
 		// todo: mipmap
 		auto uv = spherical_coord_to_uv(dir);
@@ -96,7 +96,7 @@ namespace Guarneri
 		return prefiltered_maps[mip]->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_brdf(const Vector2& uv, Color& ret)
+	bool CubeMap::sample_brdf(const tinymath::vec2f& uv, Color& ret)
 	{
 		return brdf_lut->sample(uv.x, uv.y, ret);
 	}
@@ -159,8 +159,8 @@ namespace Guarneri
 			uint32_t col = coord.second;
 			float u, v;
 			pixel2uv(texture->width, texture->height, row, col, u, v);
-			Vector2 uv = { u, v };
-			Vector3 normal = uv_to_spherical_coord(uv);
+			tinymath::vec2f uv = { u, v };
+			tinymath::vec3f normal = uv_to_spherical_coord(uv);
 
 			Color irradiance = Color(0.0f);
 			float step = kSampleStep;
@@ -171,8 +171,8 @@ namespace Guarneri
 			{
 				for (float theta = 0.0f; theta < PI; theta += step)
 				{
-					Vector3 w_i = radian_to_spherical_coord(theta, phi);
-					float ndl = Vector3::dot(w_i, normal);
+					tinymath::vec3f w_i = radian_to_spherical_coord(theta, phi);
+					float ndl = tinymath::dot(w_i, normal);
 					if (ndl > 0.0f)
 					{
 						Color color;
@@ -230,22 +230,22 @@ namespace Guarneri
 			uint32_t col = coord.second;
 			float u, v;
 			pixel2uv(texture->width, texture->height, row, col, u, v);
-			Vector2 uv = { u, v };
-			Vector3 normal = uv_to_spherical_coord(uv);
+			tinymath::vec2f uv = { u, v };
+			tinymath::vec3f normal = uv_to_spherical_coord(uv);
 
 			// Epic approximation
-			Vector3 reflect_dir = normal;
-			Vector3 view_dir = reflect_dir;
+			tinymath::vec3f reflect_dir = normal;
+			tinymath::vec3f view_dir = reflect_dir;
 
 			float total_weight = 0.0f;
 			Color prefilter_color = Color(0.0f);
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				Vector2 random_dir = random_vec2_01(kSampleCount);
-				Vector3 half_way = importance_sampling(random_dir, normal, r);
-				Vector3 w_i = Vector3::normalize(2.0f * std::max(Vector3::dot(view_dir, half_way), 0.0f) * half_way - view_dir);
-				float ndl = Vector3::dot(normal, w_i);
+				tinymath::vec2f random_dir = random_vec2_01(kSampleCount);
+				tinymath::vec3f half_way = importance_sampling(random_dir, normal, r);
+				tinymath::vec3f w_i = tinymath::normalize(2.0f * tinymath::max(tinymath::dot(view_dir, half_way), 0.0f) * half_way - view_dir);
+				float ndl = tinymath::dot(normal, w_i);
 				if (ndl > 0.0f)
 				{
 					Color color;
@@ -303,27 +303,27 @@ namespace Guarneri
 			float u, v;
 			pixel2uv(size, size, row, col, u, v);
 
-			float ndv = std::max(u, 1.0f / (float)brdf_size);
-			float roughness = std::max(v, 1.0f / (float)brdf_size);
+			float ndv = tinymath::max(u, 1.0f / (float)brdf_size);
+			float roughness = tinymath::max(v, 1.0f / (float)brdf_size);
 
-			Vector3 view_dir;
+			tinymath::vec3f view_dir;
 			view_dir.x = sqrt(1.0f - ndv * ndv);
 			view_dir.y = ndv;
 			view_dir.z = 0.0f;
 
-			Vector3 normal = Vector3::UP;
+			tinymath::vec3f normal = tinymath::kVec3fUp;
 
 			Color brdf = Color(0.0f);
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				Vector2 random_dir = hammersley(sample_index, kSampleCount);
-				Vector3 half_way = importance_sampling(random_dir, normal, roughness);
-				Vector3 w_i = Vector3::normalize(2.0f * Vector3::dot(view_dir, half_way) * half_way - view_dir);
+				tinymath::vec2f random_dir = hammersley(sample_index, kSampleCount);
+				tinymath::vec3f half_way = importance_sampling(random_dir, normal, roughness);
+				tinymath::vec3f w_i = tinymath::normalize(2.0f * tinymath::dot(view_dir, half_way) * half_way - view_dir);
 
-				float ndl = std::max(w_i.y, 0.0f);
-				float ndh = std::max(half_way.y, 0.0f);
-				float vdh = std::max(Vector3::dot(view_dir, half_way), 0.0f);
+				float ndl = tinymath::max(w_i.y, 0.0f);
+				float ndh = tinymath::max(half_way.y, 0.0f);
+				float vdh = tinymath::max(tinymath::dot(view_dir, half_way), 0.0f);
 
 				if (ndl > 0.0f)
 				{
@@ -343,22 +343,22 @@ namespace Guarneri
 		Texture::export_image(*brdf_lut, brdf_lut_path);
 	}
 
-	//Vector2 CubeMap::sample(const Vector3& dir, int& index)
+	//tinymath::vec2f CubeMap::sample(const tinymath::vec3f& dir, int& index)
 	//{
-	//	Vector3 abs_dir = Vector3::abs(dir);
-	//	float max_axis = std::max(std::max(abs_dir.x, abs_dir.y), abs_dir.z);
+	//	tinymath::vec3f abs_dir = tinymath::vec3f::abs(dir);
+	//	float max_axis = tinymath::max(tinymath::max(abs_dir.x, abs_dir.y), abs_dir.z);
 	//	if (abs_dir.x > abs_dir.y && abs_dir.x > abs_dir.z)
 	//	{
 	//		// x is the max axis 
 	//		if (dir.x > 0)
 	//		{
 	//			index = 0;
-	//			return Vector2(1.0f - (dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+	//			return tinymath::vec2f(1.0f - (dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
 	//		}
 	//		else 
 	//		{
 	//			index = 1;
-	//			return Vector2((dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+	//			return tinymath::vec2f((dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
 	//		}
 	//	}
 	//	else if (abs_dir.y > abs_dir.x && abs_dir.y > abs_dir.z)
@@ -367,12 +367,12 @@ namespace Guarneri
 	//		if (dir.y > 0)
 	//		{
 	//			index = 2;
-	//			return Vector2((dir.x + 1.0f) / 2.0f, 1.0f - (dir.z + 1.0f) / 2.0f);
+	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, 1.0f - (dir.z + 1.0f) / 2.0f);
 	//		}
 	//		else 
 	//		{
 	//			index = 3;
-	//			return Vector2((dir.x + 1.0f) / 2.0f, (dir.z + 1.0f) / 2.0f);
+	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.z + 1.0f) / 2.0f);
 	//		}
 	//	}
 	//	else 
@@ -381,12 +381,12 @@ namespace Guarneri
 	//		if (dir.z > 0)
 	//		{
 	//			index = 4;
-	//			return Vector2((dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
 	//		}
 	//		else 
 	//		{
 	//			index = 5;
-	//			return Vector2(1.0f - (dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+	//			return tinymath::vec2f(1.0f - (dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
 	//		}
 	//	}
 	//}

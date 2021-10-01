@@ -1,6 +1,6 @@
 #ifndef _FRUSTUM_
 #define _FRUSTUM_
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Plane.hpp"
 
 namespace Guarneri
@@ -18,7 +18,7 @@ namespace Guarneri
 	public:
 		Frustum(const Plane& l, const Plane& r, const Plane& t, const Plane& b, const Plane& n, const Plane& f);
 		~Frustum();
-		static Frustum create(const Matrix4x4& mat);
+		static Frustum create(const tinymath::mat4x4& mat);
 		static Frustum homogenous_volume();
 		const Plane& operator[](const int& index) const;
 		Plane& operator[](const int& index);

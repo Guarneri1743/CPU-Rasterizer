@@ -1,6 +1,5 @@
 #include "Triangle.hpp"
 #include <assert.h>
-#include <sstream>
 
 namespace Guarneri
 {
@@ -178,33 +177,37 @@ namespace Guarneri
 	{
 		auto e1 = vertices[1].position - vertices[0].position;
 		auto e2 = vertices[2].position - vertices[0].position;
-		return Vector3::cross(e1.xyz(), e2.xyz()).magnitude() / 2.0f;
+		tinymath::vec3f v1 = e1.xyz;
+		tinymath::vec3f v2 = e2.xyz;
+		return tinymath::magnitude(tinymath::cross(v1, v2)) / 2.0f;
 	}
 
 	float Triangle::area_double() const
 	{
 		auto e1 = vertices[1].position - vertices[0].position;
 		auto e2 = vertices[2].position - vertices[0].position;
-		return Vector3::cross(e1.xyz(), e2.xyz()).magnitude();
+		tinymath::vec3f v1 = e1.xyz;
+		tinymath::vec3f v2 = e2.xyz;
+		return tinymath::magnitude(tinymath::cross(v1, v2));
 	}
 
-	float Triangle::area_double(const Vector2& v1, const Vector2& v2, const Vector2& v3)
+	float Triangle::area_double(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3)
 	{
 		return (v3.x - v1.x) * (v2.y - v1.y) - (v3.y - v1.y) * (v2.x - v1.x);
 	}
 
-	float Triangle::area_double(const Vector3& v1, const Vector3& v2, const Vector3& v3)
+	float Triangle::area_double(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3)
 	{
 		auto e1 = v2 - v1;
 		auto e2 = v3 - v1;
-		return Vector3::cross(e1, e2).magnitude();
+		return  tinymath::magnitude(tinymath::cross(e1, e2));
 	}
 
-	float Triangle::area(const Vector3& v1, const Vector3& v2, const Vector3& v3)
+	float Triangle::area(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3)
 	{
 		auto e1 = v2 - v1;
 		auto e2 = v3 - v1;
-		return Vector3::cross(e1, e2).magnitude() / 2.0f;
+		return  tinymath::magnitude(tinymath::cross(e1, e2)) / 2.0f;
 	}
 
 	Vertex& Triangle::operator[](const uint32_t i)
@@ -215,12 +218,5 @@ namespace Guarneri
 	const Vertex& Triangle::operator[](const uint32_t i) const
 	{
 		return vertices[i];
-	}
-
-	std::string Triangle::str() const
-	{
-		std::stringstream ss;
-		ss << "Triangle: [v0: " << this->vertices[0].str() << ", v1: " << this->vertices[1].str() << ", v2: " << this->vertices[2].str() << "]";
-		return ss.str();
 	}
 }

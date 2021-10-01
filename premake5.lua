@@ -12,7 +12,6 @@ function setupIncludeDirs()
       include_dir .. "/core",
       include_dir .. "/editor",
       include_dir .. "/graphics",
-      include_dir .. "/math",
       include_dir .. "/primitives",
       include_dir .. "/shader",
       include_dir .. "/utility",
@@ -23,7 +22,8 @@ function setupIncludeDirs()
       third_party_dir .. "/rapidjson",
       third_party_dir .. "/imgui",
       third_party_dir .. "/glfw",
-      third_party_dir .. "/gl3w"
+      third_party_dir .. "/gl3w",
+      third_party_dir .. "/tinymath"
    }
 end
 
@@ -109,7 +109,6 @@ function setupProject()
    files { 
       src_dir .. "/*.*", 
       src_dir .. "/utility/*.*",
-      src_dir .. "/math/*.*",
       src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/graphics/*.*",
@@ -119,7 +118,6 @@ function setupProject()
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
       include_dir .. "/utility/detail/*.*",
-      include_dir .. "/math/*.*",
       include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
       include_dir .. "/graphics/*.*",
@@ -134,6 +132,8 @@ function setupProject()
       third_party_dir .. "/imgui/backends/*.*",
       third_party_dir .. "/gl3w/GL/*.*",
       third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/tinymath/*.*",
+      third_party_dir .. "/tinymath/detail/*.*",
       sample_dir .. "/Editor.cpp"
    }
 

@@ -18,26 +18,22 @@ namespace Guarneri
 	SkyboxRenderer::~SkyboxRenderer()
 	{}
 
-	Matrix4x4 SkyboxRenderer::view_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 SkyboxRenderer::view_matrix(const RenderPass& render_pass) const
 	{
 		UNUSED(render_pass);
 		auto view = INST(GlobalShaderParams).view_matrix;
-		auto view3x3 = Matrix3x3(view);
-		auto view4x4 = Matrix4x4(
-			Vector4(view3x3.row(0), 0),
-			Vector4(view3x3.row(1), 0),
-			Vector4(view3x3.row(2), 0),
-			Vector4(0, 0, 0, 1));
+		auto view3x3 = tinymath::mat4x4_to_mat3x3(view);
+		auto view4x4 = tinymath::mat3x3_to_mat4x4(view3x3);
 		return view4x4;
 	}
 
-	Matrix4x4 SkyboxRenderer::projection_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 SkyboxRenderer::projection_matrix(const RenderPass& render_pass) const
 	{
 		UNUSED(render_pass);
 		return INST(GlobalShaderParams).proj_matrix;
 	}
 
-	Matrix4x4 SkyboxRenderer::model_matrix() const
+	tinymath::mat4x4 SkyboxRenderer::model_matrix() const
 	{
 		return target->transform->world_trs;
 	}

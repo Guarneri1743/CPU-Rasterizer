@@ -7,22 +7,22 @@
 
 namespace Guarneri
 {	
-	Color::Color(const float& r, const float& g, const Vector2& zw)
+	Color::Color(const float& r, const float& g, const tinymath::vec2f& zw)
 	{
 		this->r = r; this->g = g; this->b = zw.x; this->a = zw.y;
 	}
 
-	Color::Color(const Vector2& v, const float& b, const float& w)
+	Color::Color(const tinymath::vec2f& v, const float& b, const float& w)
 	{
 		this->r = v.x; this->g = v.y; this->b = b; this->a = w;
 	}
 
-	Color::Color(const Vector2& v, const Vector2& zw)
+	Color::Color(const tinymath::vec2f& v, const tinymath::vec2f& zw)
 	{
 		this->r = v.x; this->g = v.y; this->b = zw.x; this->a = zw.y;
 	}
 
-	Color::Color(const Vector3& v, const float& w)
+	Color::Color(const tinymath::vec3f& v, const float& w)
 	{
 		this->r = v.x; this->g = v.y; this->b = v.z; this->a = w;
 	}
@@ -189,40 +189,40 @@ namespace Guarneri
 	Color Color::saturate(const Color& c)
 	{
 		Color ret = c;
-		ret.r = std::clamp(c.r, 0.0f, 1.0f);
-		ret.g = std::clamp(c.g, 0.0f, 1.0f);
-		ret.b = std::clamp(c.b, 0.0f, 1.0f);
-		ret.a = std::clamp(c.a, 0.0f, 1.0f);
+		ret.r = tinymath::clamp(c.r, 0.0f, 1.0f);
+		ret.g = tinymath::clamp(c.g, 0.0f, 1.0f);
+		ret.b = tinymath::clamp(c.b, 0.0f, 1.0f);
+		ret.a = tinymath::clamp(c.a, 0.0f, 1.0f);
 		return ret;
 	}
 
 	color_gray Color::encode_gray(const float& gray)
 	{
 		color_gray ret;
-		ret.gray = std::clamp((uint8_t)(gray * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.gray = tinymath::clamp((uint8_t)(gray * 255.0f), (uint8_t)0, (uint8_t)255);
 		return ret;
 	}
 
 	color_gray Color::encode_gray(const Color& c)
 	{
 		color_gray ret;
-		ret.gray = std::clamp((uint8_t)(c.r * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.gray = tinymath::clamp((uint8_t)(c.r * 255.0f), (uint8_t)0, (uint8_t)255);
 		return ret;
 	}
 
 	color_rg Color::encode_rg(const float& r)
 	{
 		color_rg ret;
-		ret.r = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
-		ret.g = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.r = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.g = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
 		return ret;
 	}
 
 	color_rg Color::encode_rg(const float& r, const float& g)
 	{
 		color_rg ret;
-		ret.r = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
-		ret.g = std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.r = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		ret.g = tinymath::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
 		return ret;
 	}
 
@@ -231,17 +231,17 @@ namespace Guarneri
 		return encode_rgb(c.r, c.g, c.b);
 	}
 
-	color_rgb Color::encode_rgb(const Vector4& c)
+	color_rgb Color::encode_rgb(const tinymath::vec4f& c)
 	{
 		return encode_rgb(c.x, c.y, c.z);
 	}
 
-	color_rgb Color::encode_rgb(const Vector3& c)
+	color_rgb Color::encode_rgb(const tinymath::vec3f& c)
 	{
 		return encode_rgb(c.x, c.y, c.z);
 	}
 
-	color_rgb Color::encode_rgb(const Vector2& c)
+	color_rgb Color::encode_rgb(const tinymath::vec2f& c)
 	{
 		return encode_rgb(c.x, c.y, 0.0f);
 	}
@@ -251,17 +251,17 @@ namespace Guarneri
 		return encode_bgra(c.r, c.g, c.b, c.a);
 	}
 
-	color_bgra Color::encode_bgra(const Vector4& c)
+	color_bgra Color::encode_bgra(const tinymath::vec4f& c)
 	{
 		return encode_bgra(c.x, c.y, c.z, c.w);
 	}
 
-	color_bgra Color::encode_bgra(const Vector3& c)
+	color_bgra Color::encode_bgra(const tinymath::vec3f& c)
 	{
 		return encode_bgra(c.x, c.y, c.z, 1.0f);
 	}
 
-	color_bgra Color::encode_bgra(const Vector2& c)
+	color_bgra Color::encode_bgra(const tinymath::vec2f& c)
 	{
 		return encode_bgra(c.x, c.y, 0.0f, 1.0f);
 	}
@@ -271,17 +271,17 @@ namespace Guarneri
 		return encode_rgba(c.r, c.g, c.b, c.a);
 	}
 
-	color_rgba Color::encode_rgba(const Vector4& c)
+	color_rgba Color::encode_rgba(const tinymath::vec4f& c)
 	{
 		return encode_rgba(c.x, c.y, c.z, c.w);
 	}
 
-	color_rgba Color::encode_rgba(const Vector3& c)
+	color_rgba Color::encode_rgba(const tinymath::vec3f& c)
 	{
 		return encode_rgba(c.x, c.y, c.z, 1.0f);
 	}
 
-	color_rgba Color::encode_rgba(const Vector2& c)
+	color_rgba Color::encode_rgba(const tinymath::vec2f& c)
 	{
 		return encode_rgba(c.x, c.y, 0.0f, 1.0f);
 	}
@@ -291,17 +291,17 @@ namespace Guarneri
 		return encode_rgb16f(c.r, c.g, c.b);
 	}
 
-	color_rgb16f Color::encode_rgb16f(const Vector4& c)
+	color_rgb16f Color::encode_rgb16f(const tinymath::vec4f& c)
 	{
 		return encode_rgb16f(c.x, c.y, c.z);
 	}
 
-	color_rgb16f Color::encode_rgb16f(const Vector3& c)
+	color_rgb16f Color::encode_rgb16f(const tinymath::vec3f& c)
 	{
 		return encode_rgb16f(c.x, c.y, c.z);
 	}
 
-	color_rgb16f Color::encode_rgb16f(const Vector2& c)
+	color_rgb16f Color::encode_rgb16f(const tinymath::vec2f& c)
 	{
 		return encode_rgb16f(c.x, c.y, 0.0f);
 	}
@@ -311,17 +311,17 @@ namespace Guarneri
 		return encode_rgba16f(c.r, c.g, c.b, c.a);
 	}
 
-	color_rgba16f Color::encode_rgba16f(const Vector4& c)
+	color_rgba16f Color::encode_rgba16f(const tinymath::vec4f& c)
 	{
 		return encode_rgba16f(c.x, c.y, c.z, c.w);
 	}
 
-	color_rgba16f Color::encode_rgba16f(const Vector3& c)
+	color_rgba16f Color::encode_rgba16f(const tinymath::vec3f& c)
 	{
 		return encode_rgba16f(c.x, c.y, c.z, 1.0f);
 	}
 
-	color_rgba16f Color::encode_rgba16f(const Vector2& c)
+	color_rgba16f Color::encode_rgba16f(const tinymath::vec2f& c)
 	{
 		return encode_rgba16f(c.x, c.y, 0.0f, 1.0f);
 	}
@@ -329,29 +329,29 @@ namespace Guarneri
 	int Color::encode(const float& r, const float& g, const float& b, const float& alpha)
 	{
 		int c = 0;
-		c |= (std::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255) << 24) & 0xff000000;
-		c |= (std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255) << 16) & 0xff0000;
-		c |= (std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255) << 8) & 0xff00;
-		c |= (std::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255)) & 0xff;
+		c |= (tinymath::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255) << 24) & 0xff000000;
+		c |= (tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255) << 16) & 0xff0000;
+		c |= (tinymath::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255) << 8) & 0xff00;
+		c |= (tinymath::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255)) & 0xff;
 		return c;
 	}
 
 	color_rgb Color::encode_rgb(const float& r, const float& g, const float& b)
 	{
 		color_rgb c;
-		c.r = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.g = std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.b = std::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.r = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.g = tinymath::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.b = tinymath::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
 		return c;
 	}
 
 	color_rgba Color::encode_rgba(const float& r, const float& g, const float& b, const float& alpha)
 	{
 		color_rgba c;
-		c.a = std::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.r = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.g = std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.b = std::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.a = tinymath::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.r = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.g = tinymath::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.b = tinymath::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
 		return c;
 	}
 
@@ -368,10 +368,10 @@ namespace Guarneri
 	color_bgra Color::encode_bgra(const float& r, const float& g, const float& b, const float& alpha)
 	{
 		color_bgra c;
-		c.a = std::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.r = std::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.g = std::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
-		c.b = std::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.a = tinymath::clamp((uint8_t)(alpha * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.r = tinymath::clamp((uint8_t)(r * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.g = tinymath::clamp((uint8_t)(g * 255.0f), (uint8_t)0, (uint8_t)255);
+		c.b = tinymath::clamp((uint8_t)(b * 255.0f), (uint8_t)0, (uint8_t)255);
 		return c;
 	}
 
@@ -447,12 +447,12 @@ namespace Guarneri
 
 	Color Color::abs(const Color& v)
 	{
-		return Color(std::abs(v.r), std::abs(v.g), std::abs(v.b), std::abs(v.a));
+		return Color(tinymath::abs(v.r), tinymath::abs(v.g), tinymath::abs(v.b), tinymath::abs(v.a));
 	}
 
 	Color Color::pow(const Color& c, float power)
 	{
-		return Color(std::pow(c.r, power), std::pow(c.g, power), std::pow(c.b, power), c.a);
+		return Color(tinymath::pow(c.r, power), tinymath::pow(c.g, power), tinymath::pow(c.b, power), c.a);
 	}
 
 	Color Color::normalize(const Color& value)
@@ -493,19 +493,12 @@ namespace Guarneri
 
 	Color Color::maximum(const Color& lhs, const Color& rhs)
 	{
-		return Color(std::max(lhs.r, rhs.r), std::max(lhs.g, rhs.g), std::max(lhs.b, rhs.b), std::max(lhs.a, rhs.a));
+		return Color(tinymath::max(lhs.r, rhs.r), tinymath::max(lhs.g, rhs.g), tinymath::max(lhs.b, rhs.b), tinymath::max(lhs.a, rhs.a));
 	}
 
 	Color Color::minimum(const Color& lhs, const Color& rhs)
 	{
-		return Color(std::min(lhs.r, rhs.r), std::min(lhs.g, rhs.g), std::min(lhs.b, rhs.b), std::min(lhs.a, rhs.a));
-	}
-
-	std::string Color::str() const
-	{
-		std::stringstream ss;
-		ss << "(" << std::setprecision(FLOAT_LOG_PRECISION) << this->r << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->g << ", " << std::setprecision(FLOAT_LOG_PRECISION) << this->b << ", " << this->a << ")";
-		return ss.str();
+		return Color(tinymath::min(lhs.r, rhs.r), tinymath::min(lhs.g, rhs.g), tinymath::min(lhs.b, rhs.b), tinymath::min(lhs.a, rhs.a));
 	}
 
 	const Color Color::BLACK = Color(0.0f, 0.0f, 0.0f, 1.0f);

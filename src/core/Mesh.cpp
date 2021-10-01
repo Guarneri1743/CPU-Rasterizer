@@ -1,5 +1,4 @@
 #include "Mesh.hpp"
-#include <sstream>
 
 namespace Guarneri
 {
@@ -17,13 +16,6 @@ namespace Guarneri
 
 	Mesh::~Mesh()
 	{}
-
-	std::string Mesh::str() const
-	{
-		std::stringstream ss;
-		ss << "Mesh[" << this->id << " vertices: " << vertices.size() << " indices: " << indices.size() << "]";
-		return ss.str();
-	}
 
 	Mesh& Mesh::operator=(const Mesh& other)
 	{

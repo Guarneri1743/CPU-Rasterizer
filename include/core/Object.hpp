@@ -16,7 +16,6 @@ namespace Guarneri
 
 	public:
 		uint32_t get_id();
-		virtual std::string str() const = 0;
 	};
 }
 #endif

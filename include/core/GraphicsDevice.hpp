@@ -7,9 +7,7 @@
 #include "Define.hpp"
 #include "RawBuffer.hpp"
 #include "GraphicsCommand.hpp"
-#include "Vector3.hpp"
-#include "Vector4.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Rect.hpp"
 #include "Color.hpp"
 #include "Triangle.hpp"
@@ -25,9 +23,9 @@ namespace Guarneri
 		Vertex v1;
 		Vertex v2;
 		Vertex v3;
-		Matrix4x4 m;
-		Matrix4x4 v;
-		Matrix4x4 p;
+		tinymath::mat4x4 m;
+		tinymath::mat4x4 v;
+		tinymath::mat4x4 p;
 	};
 
 	class GraphicsDevice
@@ -70,7 +68,7 @@ namespace Guarneri
 		~GraphicsDevice();
 		void resize(uint32_t w, uint32_t h);
 		void initialize(uint32_t w, uint32_t h);
-		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 		void fence_draw_commands();
 		void present();
 		void clear_buffer(const BufferFlag& flag);
@@ -80,14 +78,14 @@ namespace Guarneri
 		int get_height() { return height; }
 
 	public:
-		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation);
-		void draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col);
-		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
-		void draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p);
-		void draw_segment(const Vector4& clip_start, const Vector4& clip_end, const Color& col);
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset);
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p);
-		void draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p);
+		void draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation);
+		void draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const Color& col);
+		void draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
+		void draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
+		void draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const Color& col);
+		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset);
+		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
+		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 
 	public:
 		TileInfo get_tile_info();

@@ -2,8 +2,7 @@
 #define _TRIANGLE_
 #include <vector>
 #include <string>
-#include "Vector2.hpp"
-#include "Vector3.hpp"
+#include "TinyMath.h"
 #include "Vertex.hpp"
 
 namespace Guarneri
@@ -24,12 +23,11 @@ namespace Guarneri
 		std::vector<Triangle> horizontally_split() const;
 		float area() const;
 		float area_double() const;
-		static float area_double(const Vector2& v1, const Vector2& v2, const Vector2& v3);
-		static float area_double(const Vector3& v1, const Vector3& v2, const Vector3& v3);
-		static float area(const Vector3& v1, const Vector3& v2, const Vector3& v3);
+		static float area_double(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3);
+		static float area_double(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3);
+		static float area(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3);
 		Vertex& operator[](const uint32_t i);
 		const Vertex& operator[](const uint32_t i) const;
-		std::string str() const;
 	};
 }
 #endif

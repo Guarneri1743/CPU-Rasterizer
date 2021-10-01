@@ -1,24 +1,23 @@
 #include "Rect.hpp"
-#include <sstream>
 
 namespace Guarneri
 {
 	Rect::Rect()
 	{
-		center = Guarneri::Vector2();
-		extents = Guarneri::Vector2();
+		center = tinymath::vec2f();
+		extents = tinymath::vec2f();
 	}
 
 	Rect::Rect(float x, float y, float w, float h)
 	{
-		this->extents = Vector2(w, h) / 2;
-		this->center = Vector2(x, y) + extents;
+		this->extents = tinymath::vec2f(w, h) / 2.f;
+		this->center = tinymath::vec2f(x, y) + extents;
 	}
 
-	Rect::Rect(const Guarneri::Vector2& center, const Guarneri::Vector2& size)
+	Rect::Rect(const tinymath::vec2f& center, const tinymath::vec2f& size)
 	{
 		this->center = center;
-		this->extents = size / 2;
+		this->extents = size / 2.f;
 	}
 
 	Rect::Rect(const Rect& b)
@@ -27,122 +26,122 @@ namespace Guarneri
 		this->extents = b.extents;
 	}
 
-	void Rect::from_triangle(const Vector2& v1, const Vector2& v2, const Vector2& v3)
+	void Rect::from_triangle(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3)
 	{
 		float min_x = FLT_MAX;
 		float max_x = FLT_MIN;
 		float min_y = FLT_MAX;
 		float max_y = FLT_MIN;
 
-		if (LESS_THAN(v1.x, min_x))
+		if (v1.x < min_x)
 		{
 			min_x = v1.x;
 		}
-		if (LESS_THAN(v2.x, min_x))
+		if (v2.x < min_x)
 		{
 			min_x = v2.x;
 		}
-		if (LESS_THAN(v3.x, min_x))
+		if (v3.x < min_x)
 		{
 			min_x = v3.x;
 		}
 
-		if (LESS_THAN(v1.y, min_y))
+		if (v1.y < min_y)
 		{
 			min_y = v1.y;
 		}
-		if (LESS_THAN(v2.y, min_y))
+		if (v2.y < min_y)
 		{
 			min_y = v2.y;
 		}
-		if (LESS_THAN(v3.y, min_y))
+		if (v3.y < min_y)
 		{
 			min_y = v3.y;
 		}
 
-		if (GREATER_THAN(v1.x, max_x))
+		if (v1.x > max_x)
 		{
 			max_x = v1.x;
 		}
-		if (GREATER_THAN(v2.x, max_x))
+		if (v2.x > max_x)
 		{
 			max_x = v2.x;
 		}
-		if (GREATER_THAN(v3.x, max_x))
+		if (v3.x > max_x)
 		{
 			max_x = v3.x;
 		}
 
-		if (GREATER_THAN(v1.y, max_y))
+		if (v1.y > max_y)
 		{
 			max_y = v1.y;
 		}
-		if (GREATER_THAN(v2.y, max_y))
+		if (v2.y > max_y)
 		{
 			max_y = v2.y;
 		}
-		if (GREATER_THAN(v3.y, max_y))
+		if (v3.y > max_y)
 		{
 			max_y = v3.y;
 		}
 
-		this->set_min_max(Vector2(min_x, min_y), Vector2(max_x, max_y));
+		this->set_min_max(tinymath::vec2f(min_x, min_y), tinymath::vec2f(max_x, max_y));
 	}
 
-	Guarneri::Vector2 Rect::size() const
+	tinymath::vec2f Rect::size() const
 	{
-		return extents * 2;
+		return extents * 2.f;
 	}
 
-	Guarneri::Vector2 Rect::min() const
+	tinymath::vec2f Rect::min() const
 	{
 		return center - extents;
 	}
 
-	Guarneri::Vector2 Rect::max() const
+	tinymath::vec2f Rect::max() const
 	{
 		return center + extents;
 	}
 
-	void Rect::set_min_max(const Guarneri::Vector2& min, const Guarneri::Vector2& max)
+	void Rect::set_min_max(const tinymath::vec2f& min, const tinymath::vec2f& max)
 	{
 		this->extents = (max - min) * 0.5f;
 		this->center = min + this->extents;
 	}
 
-	void Rect::set_min(const Guarneri::Vector2& m)
+	void Rect::set_min(const tinymath::vec2f& m)
 	{
 		set_min_max(m, this->max());
 	}
 
-	void Rect::set_max(const Guarneri::Vector2& m)
+	void Rect::set_max(const tinymath::vec2f& m)
 	{
 		set_min_max(this->min(), m);
 	}
 
-	Guarneri::Vector2 Rect::corner(const int& n) const
+	tinymath::vec2f Rect::corner(const int& n) const
 	{
-		Guarneri::Vector2 p;
+		tinymath::vec2f p;
 		p.x = ((n & 1) ? max().x : min().x);
 		p.y = ((n & 1) ? max().y : min().y);
 		return p;
 	}
 
-	bool Rect::contains(const Guarneri::Vector2& pos) const
+	bool Rect::contains(const tinymath::vec2f& pos) const
 	{
-		if (LESS_THAN(pos.x, min().x))
+		if (pos.x < min().x)
 		{
 			return false;
 		}
-		if (GREATER_THAN(pos.x, max().x))
+		if (pos.x > max().x)
 		{
 			return false;
 		}
-		if (LESS_THAN(pos.y, min().y))
+		if (pos.y < min().y)
 		{
 			return false;
 		}
-		if (GREATER_THAN(pos.y, max().y))
+		if (pos.y > max().y)
 		{
 			return false;
 		}
@@ -151,18 +150,18 @@ namespace Guarneri
 
 	float Rect::approx(const float& a, const float& b) const
 	{
-		return std::abs(a - b) < 1e-5f;
+		return tinymath::abs(a - b) < 1e-5f;
 	}
 
-	void Rect::expand(const Guarneri::Vector2& p)
+	void Rect::expand(const tinymath::vec2f& p)
 	{
 		auto mi = min();
 		auto ma = max();
-		mi.x = std::min(mi.x, p.x);
-		mi.y = std::min(mi.y, p.y);
+		mi.x = tinymath::min(mi.x, p.x);
+		mi.y = tinymath::min(mi.y, p.y);
 
-		ma.x = std::max(ma.x, p.x);
-		ma.y = std::max(ma.y, p.y);
+		ma.x = tinymath::max(ma.x, p.x);
+		ma.y = tinymath::max(ma.y, p.y);
 
 		set_min_max(mi, ma);
 
@@ -176,11 +175,11 @@ namespace Guarneri
 		auto pma = p.max();
 		auto mi = min();
 		auto ma = max();
-		mi.x = std::min(mi.x, pmi.x);
-		mi.y = std::min(mi.y, pmi.y);
+		mi.x = tinymath::min(mi.x, pmi.x);
+		mi.y = tinymath::min(mi.y, pmi.y);
 
-		ma.x = std::max(ma.x, pma.x);
-		ma.y = std::max(ma.y, pma.y);
+		ma.x = tinymath::max(ma.x, pma.x);
+		ma.y = tinymath::max(ma.y, pma.y);
 
 		set_min_max(mi, ma);
 
@@ -188,28 +187,21 @@ namespace Guarneri
 		center.y = (mi.y + ma.y) / 2;
 	}
 
-	Guarneri::Vector2 Rect::offset(const Guarneri::Vector2& p) const
+	tinymath::vec2f Rect::offset(const tinymath::vec2f& p) const
 	{
 		auto mi = min();
 		auto ma = max();
-		Guarneri::Vector2 o = p - mi;
+		tinymath::vec2f o = p - mi;
 		if (ma.x > mi.x) o.x /= ma.x - mi.x;
 		if (ma.y > mi.y) o.y /= ma.y - mi.y;
 		return o;
 	}
 
-	Guarneri::Vector2 Rect::inv_offset(const Guarneri::Vector2& p) const
+	tinymath::vec2f Rect::inv_offset(const tinymath::vec2f& p) const
 	{
-		Guarneri::Vector2 o;
+		tinymath::vec2f o;
 		o.x = p.x * (max().x - min().x) + min().x;
 		o.y = p.y * (max().y - min().y) + min().y;
 		return o;
-	}
-
-	std::string Rect::str() const
-	{
-		std::stringstream ss;
-		ss << "Rect: [center: " << this->center.str() << ", size: " << this->size().str() << "]";
-		return ss.str();
 	}
 }

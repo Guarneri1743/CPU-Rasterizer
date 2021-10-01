@@ -8,12 +8,6 @@
 #define GREATER_THAN(a, b) (a - b > EPSILON)
 #define GREATAER_EQUAL(a, b) (a - b > EPSILON || EQUALS(a, b))
 #define LESS_EQUAL(a, b) (a - b < -EPSILON || EQUALS(a, b))
-#define DEGREE2RAD(degree) degree * 0.0174532925f
-#define RAD2DEGREE(rad) rad * 57.2957795786f
-#define PI 3.1415926f
-#define ONE_OVER_PI 0.31830989161357f
-#define TWO_PI 6.2831852f
-#define HALF_PI 1.5707963f
 #define FRAC(val) val - (long)val
 #define STEP(y, x) x >= y ? 1 : 0 
 #define UNUSED(...) ((void)##__VA_ARGS__)

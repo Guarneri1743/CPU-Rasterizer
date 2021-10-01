@@ -5,17 +5,17 @@ namespace Guarneri
 {
 	BoundingBox::BoundingBox()
 	{
-		center = Guarneri::Vector3();
-		extents = Guarneri::Vector3();
+		center = tinymath::vec3f();
+		extents = tinymath::vec3f();
 	}
 
-	BoundingBox::BoundingBox(const Guarneri::Vector3& _center, const Guarneri::Vector3& size)
+	BoundingBox::BoundingBox(const tinymath::vec3f& _center, const tinymath::vec3f& size)
 	{
 		this->center = _center;
 		this->extents = size / 2.0f;
 	}
 
-	BoundingBox::BoundingBox(const Guarneri::Vector3& p)
+	BoundingBox::BoundingBox(const tinymath::vec3f& p)
 	{
 		this->center = p;
 		this->extents = p;
@@ -27,47 +27,47 @@ namespace Guarneri
 		this->extents = b.extents;
 	}
 
-	Guarneri::Vector3 BoundingBox::size() const
+	tinymath::vec3f BoundingBox::size() const
 	{
-		return extents * 2;
+		return extents * 2.0f;
 	}
 
-	Guarneri::Vector3 BoundingBox::min() const
+	tinymath::vec3f BoundingBox::min() const
 	{
 		return center - extents;
 	}
 
-	Guarneri::Vector3 BoundingBox::max() const
+	tinymath::vec3f BoundingBox::max() const
 	{
 		return center + extents;
 	}
 
-	void BoundingBox::set_min_max(const Guarneri::Vector3& min, const Guarneri::Vector3& max)
+	void BoundingBox::set_min_max(const tinymath::vec3f& min, const tinymath::vec3f& max)
 	{
 		this->extents = (max - min) * 0.5f;
 		this->center = min + this->extents;
 	}
 
-	void BoundingBox::set_min(const Guarneri::Vector3& m)
+	void BoundingBox::set_min(const tinymath::vec3f& m)
 	{
 		set_min_max(m, this->max());
 	}
 
-	void BoundingBox::set_max(const Guarneri::Vector3& m)
+	void BoundingBox::set_max(const tinymath::vec3f& m)
 	{
 		set_min_max(this->min(), m);
 	}
 
-	Guarneri::Vector3 BoundingBox::corner(const int& n) const
+	tinymath::vec3f BoundingBox::corner(const int& n) const
 	{
-		Guarneri::Vector3 p;
+		tinymath::vec3f p;
 		p.x = ((n & 1) ? max().x : min().x);
 		p.y = ((n & 1) ? max().y : min().y);
 		p.z = ((n & 1) ? max().z : min().z);
 		return p;
 	}
 
-	bool BoundingBox::contains(const Guarneri::Vector3& pos) const
+	bool BoundingBox::contains(const tinymath::vec3f& pos) const
 	{
 		if (pos.x < min().x)
 		{
@@ -98,7 +98,7 @@ namespace Guarneri
 
 	int BoundingBox::maximum_extent() const
 	{
-		Guarneri::Vector3 d = size();
+		tinymath::vec3f d = size();
 		if (d.x > d.y && d.x > d.z)
 			return 0;
 		else if (d.y > d.z)
@@ -109,7 +109,7 @@ namespace Guarneri
 
 	float BoundingBox::surface() const
 	{
-		Guarneri::Vector3 d = size();
+		tinymath::vec3f d = size();
 		return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
 	}
 
@@ -118,22 +118,22 @@ namespace Guarneri
 		return std::abs(a - b) < 1e-5f;
 	}
 
-	Guarneri::Vector3 BoundingBox::get_normal(const Guarneri::Vector3& hit_position) const
+	tinymath::vec3f BoundingBox::get_normal(const tinymath::vec3f& hit_position) const
 	{
-		Guarneri::Vector3 v = hit_position - min();
+		tinymath::vec3f v = hit_position - min();
 		if (approx(v.x, 0.0f) || approx(v.y, 0.0f) || approx(v.z, 0.0f))
 		{
 			if (approx(v.x, 0.0f))
 			{
-				return Guarneri::Vector3::LEFT;
+				return tinymath::kVec3fLeft;
 			}
 			else if (approx(v.y, 0.0f))
 			{
-				return Guarneri::Vector3::DOWN;
+				return tinymath::kVec3fDown;
 			}
 			else if (approx(v.z, 0.0f))
 			{
-				return Guarneri::Vector3::BACK;
+				return tinymath::kVec3fBack;
 			}
 		}
 		else
@@ -141,21 +141,21 @@ namespace Guarneri
 			v = max() - hit_position;
 			if (approx(v.x, 0.0f))
 			{
-				return Guarneri::Vector3::RIGHT;
+				return tinymath::kVec3fRight;
 			}
 			else if (approx(v.y, 0.0f))
 			{
-				return Guarneri::Vector3::UP;
+				return tinymath::kVec3fUp;
 			}
 			else if (approx(v.z, 0.0f))
 			{
-				return Guarneri::Vector3::FORWARD;
+				return tinymath::kVec3fForward;
 			}
 		}
-		return Guarneri::Vector3::ZERO;
+		return tinymath::kVec3fZero;
 	}
 
-	void BoundingBox::expand(const Guarneri::Vector3& p)
+	void BoundingBox::expand(const tinymath::vec3f& p)
 	{
 		auto mi = min();
 		auto ma = max();
@@ -195,30 +195,23 @@ namespace Guarneri
 		center.z = (mi.z + ma.z) / 2;
 	}
 
-	Guarneri::Vector3 BoundingBox::offset(const Guarneri::Vector3& p) const
+	tinymath::vec3f BoundingBox::offset(const tinymath::vec3f& p) const
 	{
 		auto mi = min();
 		auto ma = max();
-		Guarneri::Vector3 o = p - mi;
+		tinymath::vec3f o = p - mi;
 		if (ma.x > mi.x) o.x /= ma.x - mi.x;
 		if (ma.y > mi.y) o.y /= ma.y - mi.y;
 		if (ma.z > mi.z) o.z /= ma.z - mi.z;
 		return o;
 	}
 
-	Guarneri::Vector3 BoundingBox::inv_offset(const Guarneri::Vector3& p) const
+	tinymath::vec3f BoundingBox::inv_offset(const tinymath::vec3f& p) const
 	{
-		Guarneri::Vector3 o;
+		tinymath::vec3f o;
 		o.x = p.x * (max().x - min().x) + min().x;
 		o.y = p.y * (max().y - min().y) + min().y;
 		o.z = p.z * (max().z - min().z) + min().z;
 		return o;
-	}
-
-	std::string BoundingBox::str() const
-	{
-		std::stringstream ss;
-		ss << "BoundingBox: [center: " << this->center.str() << ", size: " << this->size().str() << "]";
-		return ss.str();
 	}
 }

@@ -2,7 +2,7 @@
 #define _INPUT_MGR_
 #include <unordered_map>
 #include <unordered_set>
-#include "Vector2.hpp"
+#include "TinyMath.h"
 
 namespace Guarneri
 {
@@ -82,12 +82,12 @@ namespace Guarneri
 		std::unordered_set<MouseButton> active_mouse_btns;
 
 	public:
-		Vector2 mouse_position;
+		tinymath::vec2f mouse_position;
 		int mouse_x;
 		int mouse_y;
 
 	private:
-		std::unordered_map<void (*)(Vector2 prev, Vector2 pos, void* ud), void*> on_mouse_move_events;
+		std::unordered_map<void (*)(tinymath::vec2f prev, tinymath::vec2f pos, void* ud), void*> on_mouse_move_events;
 		std::unordered_map<void (*)(KeyCode code, void* ud), void*> on_key_down_events;
 		std::unordered_map<void (*)(KeyCode code, void* ud), void*> on_key_up_events;
 		std::unordered_map<void (*)(MouseButton code, void* ud), void*> on_mouse_down_events;
@@ -111,8 +111,8 @@ namespace Guarneri
 		void remove_on_mouse_down_evt(void (*on_mouse_down)(MouseButton code, void* ud));
 		void add_on_mouse_up_evt(void (*on_mouse_up)(MouseButton code, void* ud), void* user_data);
 		void remove_on_mouse_up_evt(void (*on_mouse_up)(MouseButton code, void* ud));
-		void add_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud), void* user_data);
-		void remove_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud));
+		void add_on_mouse_move_evt(void (*on_mouse_move)(tinymath::vec2f prev, tinymath::vec2f pos, void* ud), void* user_data);
+		void remove_on_mouse_move_evt(void (*on_mouse_move)(tinymath::vec2f prev, tinymath::vec2f pos, void* ud));
 		void add_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(MouseWheel rolling, void* ud), void* user_data);
 		void remove_on_mouse_wheel_rolling_evt(void (*on_mouse_wheel_rolling)(MouseWheel rolling, void* ud));
 		bool is_key_down(KeyCode code);

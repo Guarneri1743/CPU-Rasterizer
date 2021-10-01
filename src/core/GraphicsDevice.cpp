@@ -97,7 +97,7 @@ namespace Guarneri
 		input2raster(shader, v1, v2, v3);
 	}
 
-	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		DrawCommand task = { shader, v1, v2, v3, m, v, p };
 		draw_commands.emplace_back(task);
@@ -247,7 +247,7 @@ namespace Guarneri
 		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
 		if (!double_face && enable_backface_culling && !shader.skybox)
 		{
-			if (Clipper::backface_culling_ndc(ndc1.position.xyz(), ndc2.position.xyz(), ndc3.position.xyz())) { statistics.culled_backface_triangle_count++; return; }
+			if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
 		}
 
 		// ndc to screen space
@@ -379,7 +379,7 @@ namespace Guarneri
 
 	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy(), tri[1].position.xy(), tri[2].position.xy());
+		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
 		int row_end = (int)(bounds.max().y + 0.5f) + 1;
 		int col_start = (int)(bounds.min().x + 0.5f) - 1;
@@ -399,9 +399,9 @@ namespace Guarneri
 		auto& v1 = tri[ccw_idx1];
 		auto& v2 = tri[ccw_idx2];
 
-		auto p0 = v0.position.xy();
-		auto p1 = v1.position.xy();
-		auto p2 = v2.position.xy();
+		auto p0 = v0.position.xy;
+		auto p1 = v1.position.xy;
+		auto p2 = v2.position.xy;
 
 		float area = Triangle::area_double(p0, p1, p2);
 
@@ -421,7 +421,7 @@ namespace Guarneri
 			{
 				for (uint32_t col = (uint32_t)col_start; col < (uint32_t)col_end; col++)
 				{
-					Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+					tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
 					float w0 = Triangle::area_double(p1, p2, pixel);
 					float w1 = Triangle::area_double(p2, p0, pixel);
 					float w2 = Triangle::area_double(p0, p1, pixel);
@@ -459,7 +459,7 @@ namespace Guarneri
 
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy(), tri[1].position.xy(), tri[2].position.xy());
+		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y + 0.5f) - 1;
 		int row_end = (int)(bounds.max().y + 0.5f) + 1;
 		int col_start = (int)(bounds.min().x + 0.5f) - 1;
@@ -479,9 +479,9 @@ namespace Guarneri
 		auto& v1 = tri[ccw_idx1];
 		auto& v2 = tri[ccw_idx2];
 
-		auto p0 = v0.position.xy();
-		auto p1 = v1.position.xy();
-		auto p2 = v2.position.xy();
+		auto p0 = v0.position.xy;
+		auto p1 = v1.position.xy;
+		auto p2 = v2.position.xy;
 
 		float area = Triangle::area_double(p0, p1, p2);
 		float inv_area = 1.0f / area;
@@ -490,7 +490,7 @@ namespace Guarneri
 		{
 			for (uint32_t col = col_start; col < (uint32_t)col_end; col++)
 			{
-				Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+				tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
 				float w0 = Triangle::area_double(p1, p2, pixel);
 				float w1 = Triangle::area_double(p2, p0, pixel);
 				float w2 = Triangle::area_double(p0, p1, pixel);
@@ -545,13 +545,13 @@ namespace Guarneri
 
 	void GraphicsDevice::process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
 	{
-		auto p0 = v0.position.xy();
-		auto p1 = v1.position.xy();
-		auto p2 = v2.position.xy();
+		auto p0 = v0.position.xy;
+		auto p1 = v1.position.xy;
+		auto p2 = v2.position.xy;
 
 		float subsample_step = 1.0f / (float)subsamples_per_axis;
 		int sample_idx = 0;
-		Vector2 pixel((float)col + 0.5f, (float)row + 0.5f);
+		tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
 		bool coverage = false;
 		bool color_calculated = false;
 
@@ -561,7 +561,7 @@ namespace Guarneri
 		{
 			for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
 			{
-				Vector2 subsample((float)col + 0.25f + x_subsample_idx * subsample_step, (float)row + 0.25f + y_subsample_idx * subsample_step);
+				tinymath::vec2f subsample((float)col + 0.25f + x_subsample_idx * subsample_step, (float)row + 0.25f + y_subsample_idx * subsample_step);
 				float w0 = Triangle::area_double(p1, p2, subsample);
 				float w1 = Triangle::area_double(p2, p0, subsample);
 				float w2 = Triangle::area_double(p0, p1, subsample);
@@ -1089,18 +1089,18 @@ namespace Guarneri
 	#endif
 	}
 
-	void GraphicsDevice::draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p, const Vector2& screen_translation)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
-		Vector4 clip_start = p * v * Vector4(start);
-		Vector4 clip_end = p * v * Vector4(end);
+		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
+		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 
-		Vector4 n1 = Vertex::clip2ndc(clip_start);
-		Vector4 n2 = Vertex::clip2ndc(clip_end);
+		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
+		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
 
-		Vector4 s1 = Vertex::ndc2screen(this->width, this->height, n1);
-		Vector4 s2 = Vertex::ndc2screen(this->width, this->height, n2);
+		tinymath::vec4f s1 = Vertex::ndc2screen(this->width, this->height, n1);
+		tinymath::vec4f s2 = Vertex::ndc2screen(this->width, this->height, n2);
 
-		Matrix4x4 translation = Matrix4x4::translation(Vector3(screen_translation));
+		tinymath::mat4x4 translation = tinymath::translation(tinymath::vec3f(screen_translation));
 
 		s1 = translation * s1;
 		s2 = translation * s2;
@@ -1108,51 +1108,51 @@ namespace Guarneri
 		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
 	}
 
-	void GraphicsDevice::draw_screen_segment(const Vector4& start, const Vector4& end, const Color& col)
+	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const Color& col)
 	{
 		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_rgba(col));
 	}
 
-	void GraphicsDevice::draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		Vector4 clip_start = p * v * m * Vector4(start);
-		Vector4 clip_end = p * v * m * Vector4(end);
+		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start);
+		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end);
 		draw_segment(clip_start, clip_end, col);
 	}
 
-	void GraphicsDevice::draw_segment(const Vector3& start, const Vector3& end, const Color& col, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		Vector4 clip_start = p * v * Vector4(start);
-		Vector4 clip_end = p * v * Vector4(end);
+		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
+		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 		draw_segment(clip_start, clip_end, col);
 	}
 
-	void GraphicsDevice::draw_segment(const Vector4& clip_start, const Vector4& clip_end, const Color& col)
+	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const Color& col)
 	{
-		Vector4 n1 = Vertex::clip2ndc(clip_start);
-		Vector4 n2 = Vertex::clip2ndc(clip_end);
+		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
+		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
 
-		Vector4 s1 = Vertex::ndc2screen(this->width, this->height, n1);
-		Vector4 s2 = Vertex::ndc2screen(this->width, this->height, n2);
+		tinymath::vec4f s1 = Vertex::ndc2screen(this->width, this->height, n1);
+		tinymath::vec4f s2 = Vertex::ndc2screen(this->width, this->height, n2);
 
 		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
 	}
 
-	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p, const Vector2& offset)
+	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)
 	{
 		this->draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
 		this->draw_segment(pos, pos + right, Color::RED, v, p, offset);
 		this->draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
 	}
 
-	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		this->draw_segment(pos, pos + forward, Color::BLUE, v, p);
 		this->draw_segment(pos, pos + right, Color::RED, v, p);
 		this->draw_segment(pos, pos + up, Color::GREEN, v, p);
 	}
 
-	void GraphicsDevice::draw_coordinates(const Vector3& pos, const Vector3& forward, const Vector3& up, const Vector3& right, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		this->draw_segment(pos, pos + forward, Color::BLUE, m, v, p);
 		this->draw_segment(pos, pos + right, Color::RED, m, v, p);

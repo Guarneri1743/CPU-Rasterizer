@@ -1,4 +1,6 @@
 #include "..\RawBuffer.hpp"
+#include "TinyMath.h"
+
 namespace Guarneri
 {
 	template<typename T>
@@ -96,8 +98,8 @@ namespace Guarneri
 	inline void uv2pixel(const uint32_t& width, const uint32_t& height, const float& u, const float& v, uint32_t& row, uint32_t& col) 
 	{
 		// [0.0, 1.0] -> [0, width/height - 1]
-		row = (uint32_t)(std::floor(v * (float)(height - 1)));
-		col = (uint32_t)(std::floor(u * (float)(width - 1)));
+		row = (uint32_t)(tinymath::floor(v * (float)(height - 1)));
+		col = (uint32_t)(tinymath::floor(u * (float)(width - 1)));
 	}
 
 	inline void pixel2uv(const uint32_t& width, const uint32_t& height, const uint32_t& row, const uint32_t& col, float& u, float& v)

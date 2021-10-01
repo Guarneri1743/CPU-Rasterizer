@@ -1,9 +1,7 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 #include <string>
-#include "Vector2.hpp"
-#include "Vector3.hpp"
-#include "Vector4.hpp"
+#include "TinyMath.h"
 #include "rapidjson/document.h"
 
 namespace Guarneri
@@ -12,22 +10,22 @@ namespace Guarneri
 	{
 	public:
 		// serializable
-		Vector4 position;
-		Vector4 color;
-		Vector2 uv;
-		Vector3 tangent;
-		Vector3 normal;
+		tinymath::vec4f position;
+		tinymath::vec4f color;
+		tinymath::vec2f uv;
+		tinymath::vec3f tangent;
+		tinymath::vec3f normal;
 
 		// runtime
-		Vector3 world_pos;
-		Vector4 shadow_coord;
-		Vector3 bitangent;
+		tinymath::vec3f world_pos;
+		tinymath::vec4f shadow_coord;
+		tinymath::vec3f bitangent;
 		float rhw;
 
 	public:
 		Vertex();
-		Vertex(const Vector4& _position, const Vector3& _world_pos, Vector4& _shadow_coord, const Vector4& _color, const Vector3& _normal, const Vector2& _uv, const Vector3& _tangent, const Vector3& _bitangent);
-		Vertex(const Vector4& _position, const Vector3& _normal, const Vector2& _uv);
+		Vertex(const tinymath::vec4f& _position, const tinymath::vec3f& _world_pos, tinymath::vec4f& _shadow_coord, const tinymath::vec4f& _color, const tinymath::vec3f& _normal, const tinymath::vec2f& _uv, const tinymath::vec3f& _tangent, const tinymath::vec3f& _bitangent);
+		Vertex(const tinymath::vec4f& _position, const tinymath::vec3f& _normal, const tinymath::vec2f& _uv);
 		static Vertex barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& w0, const float& w1, const float& w2);
 		static Vertex interpolate_screen_space(const Vertex& left, const Vertex& right, const float& t);
 		static Vertex interpolate_attributes(const Vertex& left, const Vertex& right, const float& t);
@@ -35,12 +33,11 @@ namespace Guarneri
 		static Vertex differential(const Vertex& lhs, const Vertex& rhs);
 		static Vertex intagral(const Vertex& left, const Vertex& differential);
 		static Vertex clip2ndc(const Vertex& v);
-		static Vector4 clip2ndc(const Vector4& v);
+		static tinymath::vec4f clip2ndc(const tinymath::vec4f& v);
 		static Vertex ndc2screen(const int& width, const int& height, const Vertex& v);
-		static Vector4 ndc2screen(const int& width, const int& height, const Vector4& v);
+		static tinymath::vec4f ndc2screen(const int& width, const int& height, const tinymath::vec4f& v);
 		static rapidjson::Value serialize(rapidjson::Document& doc, const Vertex& v);
 		static Vertex deserialize(const rapidjson::Value& v);
-		std::string str() const;
 	};
 }
 #endif

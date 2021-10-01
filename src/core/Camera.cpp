@@ -14,14 +14,14 @@ namespace Guarneri
 	Camera::~Camera()
 	{}
 
-	std::unique_ptr<Camera> Camera::create(const Vector3& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far)
+	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far)
 	{
 		auto ret = std::unique_ptr<Camera>(new Camera());
 		ret->initialize(_position, _aspect, _fov, _near, _far, Projection::PERSPECTIVE);
 		return ret;
 	}
 
-	void Camera::initialize(const Vector3& position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type)
+	void Camera::initialize(const tinymath::vec3f& position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type)
 	{
 		this->aspect = _aspect > 0.0f ? _aspect : 1.0f;
 		this->fov = _fov;
@@ -29,22 +29,22 @@ namespace Guarneri
 		this->far = _far;
 		this->transform->set_world_position(position);
 		this->transform->set_world_angle(0.0f, 90.0f, 0.0f);
-		this->transform->set_local_scale(Vector3::ONE);
+		this->transform->set_local_scale(tinymath::kVec3fOne);
 		this->projection = _proj_type;
 		update_proj_mode();
 	}
 
-	Matrix4x4 Camera::view_matrix() const
+	tinymath::mat4x4 Camera::view_matrix() const
 	{		
-		return  Matrix4x4::lookat(transform->world_position(), transform->world_position() + transform->forward(), Vector3::UP);
+		return  tinymath::lookat(transform->world_position(), transform->world_position() + transform->forward(), tinymath::kVec3fUp);
 	}
 
-	const Matrix4x4 Camera::projection_matrix() const
+	const tinymath::mat4x4 Camera::projection_matrix() const
 	{
 		return proj_matrix;
 	}
 
-	void Camera::focus(const Vector3& position)
+	void Camera::focus(const tinymath::vec3f& position)
 	{
 		this->transform->lookat(position);
 	}
@@ -78,20 +78,13 @@ namespace Guarneri
 		switch (this->projection)
 		{
 		case Projection::PERSPECTIVE:
-			this->proj_matrix = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
+			this->proj_matrix = tinymath::perspective(this->fov, this->aspect, this->near, this->far);
 			break;
 		case Projection::ORTHO:
-			this->proj_matrix = Matrix4x4::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
+			this->proj_matrix = tinymath::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
 			break;
 		default:
-			this->proj_matrix = Matrix4x4::perspective(this->fov, this->aspect, this->near, this->far);
+			this->proj_matrix = tinymath::perspective(this->fov, this->aspect, this->near, this->far);
 		}
-	}
-
-	std::string Camera::str() const
-	{
-		std::stringstream ss;
-		ss << "Camera[" << this->id << "  pos: " << this->transform->world_position().str() << "]";
-		return ss.str();
 	}
 }

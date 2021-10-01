@@ -4,9 +4,7 @@
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
 #include "InputManager.hpp"
-#include "Vector2.hpp"
-#include "Vector3.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Color.hpp"
 #include "Config.h"
 #include "rapidjson/document.h"
@@ -38,7 +36,7 @@ namespace Guarneri
 		main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
 		main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
 		main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
-		main_light.position = Vector3(1.0f, 1.0f, 1.0f);
+		main_light.position = tinymath::vec3f(1.0f, 1.0f, 1.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
 	}
 
@@ -56,25 +54,25 @@ namespace Guarneri
 	void Scene::initialize()
 	{
 		float aspect = (float)INST(GraphicsDevice).get_width() / INST(GraphicsDevice).get_height();
-		main_cam = Camera::create(Vector3(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
+		main_cam = Camera::create(tinymath::vec3f(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
 		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
 		Camera::set_main_camera(main_cam.get());
 		debug_cam_distance = 6.0f;
 		debug_world_cam_distance = 8.0f;
-		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
-		world_debug_cam = std::move(Camera::create(Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
+		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
+		world_debug_cam = std::move(Camera::create(tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
 
-		INST(InputManager).add_on_mouse_move_evt([](Vector2 prev, Vector2 pos, void* data)
+		INST(InputManager).add_on_mouse_move_evt([](tinymath::vec2f prev, tinymath::vec2f pos, void* data)
 		{
 			if (INST(InputManager).is_mouse_down(MouseButton::RIGHT))
 			{
 				Scene* s = reinterpret_cast<Scene*>(data);
-				Vector2 offset = (pos - prev) * CAMERA_ROTATE_SPEED;
+				tinymath::vec2f offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				s->main_cam->transform->rotate(offset.y, offset.x, 0.0f);
 			}
 			if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
 			{
-				Vector2 offset = (pos - prev) * CAMERA_ROTATE_SPEED;
+				tinymath::vec2f offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
 				s->main_cam->transform->move_left(offset.x);
 				s->main_cam->transform->move_ascend(offset.y);
@@ -189,30 +187,30 @@ namespace Guarneri
 
 	void Scene::draw_camera_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GraphicsDevice).get_width() / 2.0f - 50.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 50.0f));
-		Vector3 pos = main_cam->transform->world_position();
-		Vector3 forward = main_cam->transform->forward();
-		Vector3 right = main_cam->transform->right();
-		Vector3 up = main_cam->transform->up();
+		tinymath::vec2f offset = tinymath::vec2f(-(INST(GraphicsDevice).get_width() / 2.0f - 50.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 50.0f));
+		tinymath::vec3f pos = main_cam->transform->world_position();
+		tinymath::vec3f forward = main_cam->transform->forward();
+		tinymath::vec3f right = main_cam->transform->right();
+		tinymath::vec3f up = main_cam->transform->up();
 		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-		debug_cam->transform->set_world_position((main_cam->transform->world_position() + Vector3(1.0f, 1.0f, -1.0f) * debug_cam_distance));
+		debug_cam->transform->set_world_position((main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance));
 		debug_cam->transform->lookat(main_cam->transform->world_position());
 	}
 
 	void Scene::draw_world_coords()
 	{
-		Vector2 offset = Vector2(-(INST(GraphicsDevice).get_width() / 2.0f - 150.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 150.0f));
-		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-		INST(GraphicsDevice).draw_coordinates(Vector3::ZERO, Vector3::FORWARD * 3.0f, Vector3::UP * 3.0f, Vector3::RIGHT * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
+		tinymath::vec2f offset = tinymath::vec2f(-(INST(GraphicsDevice).get_width() / 2.0f - 150.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 150.0f));
+		INST(GraphicsDevice).draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+		INST(GraphicsDevice).draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 
-		Vector3 pos = main_cam->transform->world_position();
-		Vector3 forward = main_cam->transform->forward();
-		Vector3 right = main_cam->transform->right();
-		Vector3 up = main_cam->transform->up();
+		tinymath::vec3f pos = main_cam->transform->world_position();
+		tinymath::vec3f forward = main_cam->transform->forward();
+		tinymath::vec3f right = main_cam->transform->right();
+		tinymath::vec3f up = main_cam->transform->up();
 		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
-		world_debug_cam->transform->set_world_position((Vector3(1.0f, 1.0f, -1.0f) * debug_world_cam_distance));
-		world_debug_cam->transform->lookat(Vector3::ZERO);
+		world_debug_cam->transform->set_world_position((tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance));
+		world_debug_cam->transform->lookat(tinymath::kVec3fZero);
 	}
 
 	void Scene::set_main_light(const DirectionalLight& light)

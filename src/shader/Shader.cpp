@@ -44,24 +44,24 @@ namespace Guarneri
 	v2f Shader::vertex_shader(const a2v& input) const
 	{
 		v2f o;
-		auto opos = Vector4(input.position.xyz(), 1.0f);
+		auto opos = tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
 		auto wpos = model * opos;
 		auto cpos = vp_matrix * wpos;
 		o.position = cpos;
-		o.world_pos = wpos.xyz();
+		o.world_pos = wpos.xyz;
 		if (!is_error_shader)
 		{
-			auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * Vector4(wpos.xyz(), 1.0f);
+			auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * tinymath::vec4f(wpos.x, wpos.y, wpos.z, 1.0f);
 			o.shadow_coord = light_space_pos;
 		}
 		o.color = input.color;
-		Matrix3x3 normal_matrix = Matrix3x3(model).inverse().transpose();
+		tinymath::mat3x3 normal_matrix = tinymath::transpose(tinymath::inverse(tinymath::mat4x4_to_mat3x3(model)));
 		if (normal_map && !is_error_shader)
 		{
-			Vector3 t = (normal_matrix * input.tangent).normalized();
-			Vector3 n = (normal_matrix * input.normal).normalized();
-			t = (t - Vector3::dot(t, n) * n).normalized();
-			Vector3 b = Vector3::cross(n, t);
+			tinymath::vec3f t = tinymath::normalize(normal_matrix * input.tangent);
+			tinymath::vec3f n = tinymath::normalize(normal_matrix * input.normal);
+			t = tinymath::normalize(t - tinymath::dot(t, n) * n);
+			tinymath::vec3f b = tinymath::cross(n, t);
 			o.tangent = t;
 			o.bitangent = b;
 			o.normal = n;
@@ -74,14 +74,14 @@ namespace Guarneri
 		return o;
 	}
 
-	float Shader::get_shadow_atten(const Vector4& light_space_pos) const
+	float Shader::get_shadow_atten(const tinymath::vec4f& light_space_pos) const
 	{
 		if (shadowmap == nullptr)
 		{
 			return 0.0f;
 		}
 
-		Vector3 proj_shadow_coord = light_space_pos.xyz();
+		tinymath::vec3f proj_shadow_coord = light_space_pos.xyz;
 		proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
 
 		if (proj_shadow_coord.z > 1.0f)
@@ -91,7 +91,7 @@ namespace Guarneri
 
 		float shadow_atten = 0.0f;
 
-		Vector2 texel_size = 1.0f / Vector2(shadowmap->height, shadowmap->width);
+		tinymath::vec2f texel_size = 1.0f / tinymath::vec2f((float)shadowmap->height, (float)shadowmap->width);
 
 		if (INST(GlobalShaderParams).pcf_on)
 		{
@@ -125,29 +125,29 @@ namespace Guarneri
 		return shadow_atten * 0.8f;
 	}
 
-	Vector3 Shader::reflect(const Vector3& n, const Vector3& light_out_dir) const
+	tinymath::vec3f Shader::reflect(const tinymath::vec3f& n, const tinymath::vec3f& light_out_dir) const
 	{
-		auto ndl = Vector3::dot(n, light_out_dir);
-		return (2.0f * n * ndl - light_out_dir).normalized();
+		auto ndl = tinymath::dot(n, light_out_dir);
+		return tinymath::normalize(2.0f * n * ndl - light_out_dir);
 	}
 
-	Vector3 metallic_workflow(const Vector3& f0, const Vector3& albedo, const float& intensity, const float& metallic, const float& roughness, const float& light_distance, const Vector3& halfway, const Vector3& light_dir, const Vector3& view_dir, const Vector3& normal)
+	tinymath::vec3f metallic_workflow(const tinymath::vec3f& f0, const tinymath::vec3f& albedo, const float& intensity, const float& metallic, const float& roughness, const float& light_distance, const tinymath::vec3f& halfway, const tinymath::vec3f& light_dir, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal)
 	{
 		float attenuation = 1.0f / (light_distance * light_distance);
-		Vector3 radiance = Vector3(attenuation * intensity);
+		tinymath::vec3f radiance = tinymath::vec3f(attenuation * intensity);
 
 		float ndf = distribution_ggx(normal, halfway, roughness);
 		float geo = geometry_smith(normal, view_dir, light_dir, roughness);
-		Vector3 fresnel = fresnel_schlick(std::max(Vector3::dot(halfway, view_dir), 0.0f), f0);
+		tinymath::vec3f fresnel = fresnel_schlick(tinymath::max(tinymath::dot(halfway, view_dir), 0.0f), f0);
 
-		Vector3 nominator = ndf * geo * fresnel;
-		float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
-		float ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+		tinymath::vec3f nominator = ndf * geo * fresnel;
+		float ndv = tinymath::max(tinymath::dot(normal, view_dir), 0.0f);
+		float ndl = tinymath::max(tinymath::dot(normal, light_dir), 0.0f);
 		float denominator = 4.0f * ndv * ndl;
-		Vector3 specular = nominator / std::max(denominator, 0.001f);
+		tinymath::vec3f specular = nominator / std::max(denominator, 0.001f);
 
-		Vector3 spec_term = fresnel;
-		Vector3 diffuse_term = Vector3(1.0f) - spec_term;
+		tinymath::vec3f spec_term = fresnel;
+		tinymath::vec3f diffuse_term = tinymath::vec3f(1.0f) - spec_term;
 		diffuse_term *= 1.0f - metallic;
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
@@ -158,7 +158,7 @@ namespace Guarneri
 		return ((diffuse_term * albedo) / PI + specular) * radiance * ndl;
 	}
 
-	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
+	Color Shader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal, Color albedo, Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const
 	{
 		UNUSED(wpos);
 		UNUSED(lighting_data);
@@ -171,13 +171,13 @@ namespace Guarneri
 		light_spec *= intensity;
 		float light_distance = 1.0f;
 
-		auto light_dir = -light.forward.normalized();
+		auto light_dir = -tinymath::normalize(light.forward);
 		if (this->normal_map)
 		{
 			light_dir = tbn * light_dir;
 		}
 
-		auto half_dir = (view_dir + light_dir).normalized();
+		auto half_dir = tinymath::normalize(view_dir + light_dir);
 
 		// sample textures
 		Color metallic_color = Color::BLACK;
@@ -208,7 +208,7 @@ namespace Guarneri
 			metallic = metallic * name2float.at(metallic_multiplier_prop) + name2float.at(metallic_offset_prop);
 		}
 
-		roughness = std::max(roughness, EPSILON); // brdf lut bug (baking error)
+		roughness = tinymath::max(roughness, EPSILON); // brdf lut bug (baking error)
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
 		{
@@ -227,8 +227,8 @@ namespace Guarneri
 
 		if (INST(GlobalShaderParams).workflow == PBRWorkFlow::Specular)
 		{
-			auto spec = std::pow(std::max(Vector3::dot(normal, half_dir), 0.0f), (roughness) * 32.0f);
-			auto ndl = std::max(Vector3::dot(normal, light_dir), 0.0f);
+			auto spec = tinymath::pow(tinymath::max(tinymath::dot(normal, half_dir), 0.0f), (roughness) * 32.0f);
+			auto ndl = tinymath::max(tinymath::dot(normal, light_dir), 0.0f);
 
 			auto diffuse = Color::saturate(light_diffuse * ndl * albedo);
 			Color spec_tex = Color::WHITE;
@@ -240,16 +240,16 @@ namespace Guarneri
 		}
 		else
 		{
-			Vector3 f0 = 0.04f;
-			f0 = Vector3::lerp(f0, Vector3(albedo.r, albedo.g, albedo.b), metallic);
-			auto lo = metallic_workflow(f0, Vector3(albedo.r, albedo.g, albedo.b), intensity, metallic, roughness, light_distance, half_dir, light_dir, view_dir, normal);
+			tinymath::vec3f f0 = 0.04f;
+			f0 = tinymath::lerp(f0, tinymath::vec3f(albedo.r, albedo.g, albedo.b), metallic);
+			auto lo = metallic_workflow(f0, tinymath::vec3f(albedo.r, albedo.g, albedo.b), intensity, metallic, roughness, light_distance, half_dir, light_dir, view_dir, normal);
 
-			float ndv = std::max(Vector3::dot(normal, view_dir), 0.0f);
+			float ndv = tinymath::max(tinymath::dot(normal, view_dir), 0.0f);
 
-			Vector3 fresnel = fresnel_schlick_roughness(ndv, f0, roughness);
+			tinymath::vec3f fresnel = fresnel_schlick_roughness(ndv, f0, roughness);
 
-			Vector3 specular_term = fresnel;
-			Vector3 diffuse_term = 1.0f - specular_term;
+			tinymath::vec3f specular_term = fresnel;
+			tinymath::vec3f diffuse_term = 1.0f - specular_term;
 			diffuse_term *= 1.0f - metallic;
 
 			// IBL
@@ -269,20 +269,20 @@ namespace Guarneri
 			Color brdf_lut;
 			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
 			{
-				name2cubemap.at(cubemap_prop)->sample_brdf(Vector2(ndv, roughness), brdf_lut);
+				name2cubemap.at(cubemap_prop)->sample_brdf(tinymath::vec2f(ndv, roughness), brdf_lut);
 
-				if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.001f)
+				if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.0f)
 				{
 					uint32_t row, col;
 					uv2pixel(512, 512, ndv, roughness, row, col);
-					printf("er, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
+					printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
 				}
 			}
 
-			Vector3 indirect_diffuse = Vector3(irradiance.r, irradiance.g, irradiance.b) * Vector3(albedo.r, albedo.g, albedo.b) * diffuse_term;
-			Vector3 env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
+			tinymath::vec3f indirect_diffuse = tinymath::vec3f(irradiance.r, irradiance.g, irradiance.b) * tinymath::vec3f(albedo.r, albedo.g, albedo.b) * diffuse_term;
+			tinymath::vec3f env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
 			
-			Vector3 indirect_specular = Vector3(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * env_brdf;
+			tinymath::vec3f indirect_specular = tinymath::vec3f(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * env_brdf;
 
 			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_DIFFUSE) != RenderFlag::DISABLE)
 			{
@@ -301,7 +301,7 @@ namespace Guarneri
 		}
 	}
 
-	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const Vector3& wpos, const Vector3& view_dir, const Vector3& normal, Color albedo, Color ao, const Vector2& uv, const Matrix3x3& tbn) const
+	Color Shader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal, Color albedo, Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const
 	{
 		// TODO
 		return Color::BLACK;
@@ -314,21 +314,21 @@ namespace Guarneri
 		auto main_light = INST(GlobalShaderParams).main_light;
 		auto point_lights = INST(GlobalShaderParams).point_lights;
 
-		Vector3 cam_pos = INST(GlobalShaderParams).camera_pos;
-		Vector3 wpos = input.world_pos;
-		Vector4 screen_pos = input.position;
+		tinymath::vec3f cam_pos = INST(GlobalShaderParams).camera_pos;
+		tinymath::vec3f wpos = input.world_pos;
+		tinymath::vec4f screen_pos = input.position;
 
-		Vector3 normal = input.normal.normalized();
-		Vector3 view_dir = (cam_pos - wpos).normalized();
+		tinymath::vec3f normal = tinymath::normalize(input.normal);
+		tinymath::vec3f view_dir = tinymath::normalize(cam_pos - wpos);
 
 		Color normal_tex;
-		Matrix3x3 tbn;
+		tinymath::mat3x3 tbn;
 		if (name2tex.count(normal_prop) > 0 && name2tex.at(normal_prop)->sample(input.uv.x, input.uv.y, normal_tex))
 		{
-			tbn = Matrix3x3(input.tangent, input.bitangent, input.normal);
-			view_dir = tbn * view_dir;
-			auto packed_normal = Vector3(normal_tex.r, normal_tex.g, normal_tex.b);
-			normal = (packed_normal * 2.0f - 1.0f).normalized();
+			tbn = tinymath::mat3x3(input.tangent, input.bitangent, input.normal);
+			view_dir = tinymath::normalize(tbn * view_dir);
+			auto packed_normal = tinymath::vec3f(normal_tex.r, normal_tex.g, normal_tex.b);
+			normal = tinymath::normalize(packed_normal * 2.0f - 1.0f);
 		}
 
 		//shadow
@@ -372,7 +372,7 @@ namespace Guarneri
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
-			return input.uv;
+			return Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 		}
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
@@ -394,12 +394,5 @@ namespace Guarneri
 		ret = Color::saturate(ret);
 
 		return Color(ret.r, ret.g, ret.b, 1.0f);
-	}
-
-	std::string Shader::str() const
-	{
-		std::stringstream ss;
-		ss << "Shader[" << this->id << "]" << std::endl;
-		return ss.str();
 	}
 }

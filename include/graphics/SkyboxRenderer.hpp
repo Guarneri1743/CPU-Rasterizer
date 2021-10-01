@@ -2,7 +2,7 @@
 #define _SKYBOX_RENDERER_
 #include <memory>
 #include "Define.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Renderer.hpp"
 
 namespace Guarneri
@@ -14,9 +14,9 @@ namespace Guarneri
 		~SkyboxRenderer();
 
 	public:
-		Matrix4x4 view_matrix(const RenderPass& render_pass) const;
-		Matrix4x4 projection_matrix(const RenderPass& render_pass) const;
-		Matrix4x4 model_matrix() const;
+		tinymath::mat4x4 view_matrix(const RenderPass& render_pass) const;
+		tinymath::mat4x4 projection_matrix(const RenderPass& render_pass) const;
+		tinymath::mat4x4 model_matrix() const;
 		void draw_gizmos() const;
 	};
 }

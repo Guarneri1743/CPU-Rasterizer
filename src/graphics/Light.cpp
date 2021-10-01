@@ -15,25 +15,25 @@ namespace Guarneri
 	{
 		this->yaw = 0.0f;
 		this->pitch = -45.0f;
-		//this->p = Matrix4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
-		this->p = Matrix4x4::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.01f, 200.0f);
-		this->position = Vector3(10.0f, 10.0f, 10.0f);
+		//this->p = tinymath::mat4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
+		this->p = tinymath::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.01f, 200.0f);
+		this->position = tinymath::vec3f(10.0f, 10.0f, 10.0f);
 		update_rotation();
 	}
 
-	Matrix4x4 DirectionalLight::light_space() const
+	tinymath::mat4x4 DirectionalLight::light_space() const
 	{
-		auto v = Matrix4x4::lookat(position, position + forward, Vector3::UP);
+		auto v = tinymath::lookat(position, position + forward, tinymath::kVec3fUp);
 		auto ret = p * v;
 		return ret;
 	}
 
-	Matrix4x4 DirectionalLight::view_matrix() const
+	tinymath::mat4x4 DirectionalLight::view_matrix() const
 	{
-		return Matrix4x4::lookat(position, position + forward, Vector3::UP);
+		return tinymath::lookat(position, position + forward, tinymath::kVec3fUp);
 	}
 
-	Matrix4x4 DirectionalLight::projection_matrix() const
+	tinymath::mat4x4 DirectionalLight::projection_matrix() const
 	{
 		return p;
 	}
@@ -51,8 +51,8 @@ namespace Guarneri
 		forward.x = cos(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 		forward.y = sin(DEGREE2RAD(this->pitch));
 		forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
-		forward = Vector3::normalize(forward);
-		Vector3::calculate_right_up(forward, right, up);
+		forward = tinymath::normalize(forward);
+		tinymath::calculate_right_up(forward, right, up);
 	}
 
 	rapidjson::Value DirectionalLight::serialize(rapidjson::Document& doc, const DirectionalLight& light)
@@ -94,7 +94,7 @@ namespace Guarneri
 		constant = 1.0f;
 		linear = 0.1f;
 		quadratic = 0.03f;
-		position = Vector3();
+		position = tinymath::kVec3fZero;
 	}
 
 	rapidjson::Value PointLight::serialize(rapidjson::Document& doc, const PointLight& light)

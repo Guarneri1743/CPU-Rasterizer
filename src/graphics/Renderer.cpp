@@ -1,5 +1,4 @@
 #include "Renderer.hpp"
-#include <sstream>
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "GlobalShaderParams.hpp"
@@ -34,7 +33,7 @@ namespace Guarneri
 		return std::make_unique<Renderer>(other);
 	}
 
-	Matrix4x4 Renderer::view_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 Renderer::view_matrix(const RenderPass& render_pass) const
 	{
 		if (render_pass == RenderPass::SHADOW)
 		{
@@ -43,7 +42,7 @@ namespace Guarneri
 		return INST(GlobalShaderParams).view_matrix;
 	}
 
-	Matrix4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
 	{
 		if (render_pass == RenderPass::SHADOW)
 		{
@@ -52,7 +51,7 @@ namespace Guarneri
 		return INST(GlobalShaderParams).proj_matrix;
 	}
 
-	Matrix4x4 Renderer::model_matrix() const
+	tinymath::mat4x4 Renderer::model_matrix() const
 	{
 		return target->transform->world_trs;
 	}
@@ -103,8 +102,8 @@ namespace Guarneri
 		auto up = Vector3::UP;
 		auto forward = Vector3::FORWARD;
 		auto right = Vector3::RIGHT;
-		auto scale = Matrix4x4::scale(model_matrix().get_scale());
-		Matrix4x4 mat = scale.inverse() * model_matrix();
+		auto scale = tinymath::mat4x4::scale(model_matrix().get_scale());
+		tinymath::mat4x4 mat = scale.inverse() * model_matrix();
 		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, mat, view, proj);*/
 	}
 
@@ -117,12 +116,5 @@ namespace Guarneri
 	void Renderer::copy(const Renderer& other)
 	{
 		this->target = other.target;
-	}
-
-	std::string Renderer::str() const
-	{
-		std::stringstream ss;
-		ss << "Renderer[" << this->id << " Model: " << target->str() << "]";
-		return ss.str();
 	}
 }

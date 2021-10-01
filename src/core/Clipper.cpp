@@ -126,7 +126,7 @@ namespace Guarneri
 	/// <param name="c2">vertex in clip space</param>
 	/// <param name="c3">vertex in clip space</param>
 	/// <returns></returns>
-	bool Clipper::inside_cvv(const Vector4& c1, const Vector4& c2, const Vector4& c3)
+	bool Clipper::inside_cvv(const tinymath::vec4f& c1, const tinymath::vec4f& c2, const tinymath::vec4f& c3)
 	{
 		return inside_cvv(c1) && inside_cvv(c2) && inside_cvv(c3);
 	}
@@ -136,7 +136,7 @@ namespace Guarneri
 	/// </summary>
 	/// <param name="v">vertex in clip space</param>
 	/// <returns></returns>
-	bool Clipper::inside_cvv(const Vector4& v)
+	bool Clipper::inside_cvv(const tinymath::vec4f& v)
 	{
 		// z: [-w, w](GL) [0, w](DX)
 		// x: [-w, w]
@@ -152,13 +152,13 @@ namespace Guarneri
 		return true;
 	}
 
-	bool Clipper::backface_culling_ndc(const Vector3& c1, const Vector3& c2, const Vector3& c3)
+	bool Clipper::backface_culling_ndc(const tinymath::vec3f& c1, const tinymath::vec3f& c2, const tinymath::vec3f& c3)
 	{
 		// front face: ndv >= 0
 		// back face: ndv < 0
 		auto seg1 = c2 - c1;
 		auto seg2 = c3 - c1;
-		float ndv = Vector3::dot(Vector3::cross(seg1, seg2), Vector3::BACK);
+		float ndv = tinymath::dot(tinymath::cross(seg1, seg2), tinymath::kVec3fBack);
 		return ndv < 0.0f;
 	}
 
@@ -183,9 +183,9 @@ namespace Guarneri
 		for (int i = 0; i < 6; i++)
 		{
 			auto plane = frustum[i];
-			auto d1 = plane.distance(v1.position.xyz());
-			auto d2 = plane.distance(v2.position.xyz());
-			auto d3 = plane.distance(v3.position.xyz());
+			auto d1 = plane.distance(v1.position.xyz);
+			auto d2 = plane.distance(v2.position.xyz);
+			auto d3 = plane.distance(v3.position.xyz);
 			if (d1 < 0 && d2 < 0 && d3 < 0)
 			{
 				return true;

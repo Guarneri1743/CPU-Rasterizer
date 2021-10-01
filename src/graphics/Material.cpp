@@ -1,5 +1,4 @@
 #include "Material.hpp"
-#include <sstream>
 #include <fstream>
 #include <iostream>
 #include "rapidjson/document.h"
@@ -71,7 +70,7 @@ namespace Guarneri
 		this->target_shader->shadowmap = shadowmap;
 	}
 
-	void Material::sync(Shader* shader, const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void Material::sync(Shader* shader, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		shader->model = m;
 		shader->view = v;
@@ -109,7 +108,7 @@ namespace Guarneri
 		}
 	}
 
-	void Material::sync(const Matrix4x4& m, const Matrix4x4& v, const Matrix4x4& p)
+	void Material::sync(const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		sync(target_shader.get(), m, v, p);
 		if (shadow_caster != nullptr)
@@ -123,7 +122,7 @@ namespace Guarneri
 		name2int[name] = val;
 	}
 
-	void Material::set_float4(const property_name& name, const Vector4& val)
+	void Material::set_float4(const property_name& name, const tinymath::vec4f& val)
 	{
 		name2float4[name] = val;
 	}
@@ -160,7 +159,7 @@ namespace Guarneri
 		return 0;
 	}
 
-	Vector4 Material::get_float4(const property_name& name) const
+	tinymath::vec4f Material::get_float4(const property_name& name) const
 	{
 		if (name2float4.count(name) > 0)
 		{
@@ -225,12 +224,5 @@ namespace Guarneri
 		this->name2int = other.name2int;
 		this->name2tex = other.name2tex;
 		this->name2cubemap = other.name2cubemap;
-	}
-
-	std::string Material::str() const
-	{
-		std::stringstream ss;
-		ss << "Material[" << this->id << " Shader: " << this->target_shader << "]";
-		return ss.str();
 	}
 }

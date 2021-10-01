@@ -2,30 +2,29 @@
 #define _SAMPLING_
 
 #include "Define.hpp"
-#include "Vector2.hpp"
-#include "Vector3.hpp"
+#include "TinyMath.h"
 #include "PBR.hpp"
 
 #define USE_LOW_DISCREPANCY_SEQUENCE
 
 namespace Guarneri
 {
-    inline Vector2 spherical_coord_to_uv(const Vector3& coord)
+    inline tinymath::vec2f spherical_coord_to_uv(const tinymath::vec3f& coord)
     {
-        auto direction = Vector3::normalize(coord);
-        Vector2 radian = Vector2(atan2(direction.z, direction.x), asin(direction.y));
-        Vector2 uv = Vector2(radian.x / TWO_PI, radian.y / PI) + 0.5f;
+        auto direction = tinymath::normalize(coord);
+        tinymath::vec2f radian = tinymath::vec2f(tinymath::atan2(direction.z, direction.x), tinymath::asin(direction.y));
+        tinymath::vec2f uv = tinymath::vec2f(radian.x / TWO_PI, radian.y / PI) + 0.5f;
         return uv;
     }
 
-    inline Vector3 uv_to_spherical_coord(const Vector2& uv)
+    inline tinymath::vec3f uv_to_spherical_coord(const tinymath::vec2f& uv)
     {
         float phi = (uv.x - 0.5f) * TWO_PI;
         float theta = (uv.y - 0.5f) * PI;
         float x = cos(theta) * cos(phi);
         float y = sin(theta);
         float z = cos(theta) * sin(phi);
-        return Vector3(x, y, z).normalized();
+        return tinymath::normalize(tinymath::vec3f(x, y, z));
     }
 
     inline float radical_inverse_vdc(uint32_t bits)
@@ -38,25 +37,25 @@ namespace Guarneri
         return float(bits) * 2.3283064365386963e-10f;
     }
 
-    inline Vector2 hammersley(const uint32_t& i, const uint32_t& N)
+    inline tinymath::vec2f hammersley(const uint32_t& i, const uint32_t& N)
     {
-        return Vector2(float(i) / float(N), radical_inverse_vdc(i));
+        return tinymath::vec2f(float(i) / float(N), radical_inverse_vdc(i));
     }
 
-    inline Vector2 random_vec2_01(const uint32_t& N)
+    inline tinymath::vec2f random_vec2_01(const uint32_t& N)
     {
-        return Vector2((float)(rand() % N) / (float)N, (float)(rand() % N) / (float)N);
+        return tinymath::vec2f((float)(rand() % N) / (float)N, (float)(rand() % N) / (float)N);
     }
 
-    inline Vector3 radian_to_spherical_coord(const float& theta, const float& phi)
+    inline tinymath::vec3f radian_to_spherical_coord(const float& theta, const float& phi)
     {
         float x = cos(theta) * cos(phi);
         float y = sin(theta);
         float z = cos(theta) * sin(phi);
-        return Vector3(x, y, z).normalized();
+        return tinymath::normalize(tinymath::vec3f(x, y, z));
     }
 
-    inline Vector3 importance_sampling(const Vector2& random_01, const Vector3& normal, const float& roughness)
+    inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, const tinymath::vec3f& normal, const float& roughness)
     {
         float a = roughness * roughness;
         float phi = TWO_PI * random_01.x;
@@ -67,13 +66,13 @@ namespace Guarneri
         float y = cos_theta; 
         float z = sin_theta * sin(phi);
 
-        Vector3 w_i = Vector3(x, y, z).normalized();
+        tinymath::vec3f w_i = tinymath::normalize(tinymath::vec3f(x, y, z));
 
-        Vector3 bitangent = normal.y < 0.999f ? Vector3::LEFT : Vector3::RIGHT;
-        Vector3 tangent = Vector3::normalize(Vector3::cross(bitangent, normal));
-        bitangent = Vector3::cross(normal, tangent);
+        tinymath::vec3f bitangent = normal.y < 0.999f ? tinymath::kVec3fLeft : tinymath::kVec3fRight;
+        tinymath::vec3f tangent = tinymath::normalize(tinymath::cross(bitangent, normal));
+        bitangent = tinymath::cross(normal, tangent);
 
-        return (w_i.x * tangent + w_i.y * normal + w_i.z * bitangent).normalized();
+        return tinymath::normalize(w_i.x * tangent + w_i.y * normal + w_i.z * bitangent);
     } 
 }
 

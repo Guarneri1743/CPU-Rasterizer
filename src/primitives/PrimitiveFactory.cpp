@@ -3,47 +3,47 @@
 
 namespace Guarneri {
 	Vertex cube_vertices[36] = {
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(-0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f,  0.0f, -1.0f), Vector2(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(0.0f,  0.0f)),
 
-		Vertex(Vector4(-0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(0.5f,  0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(0.5f,  0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(1.0f, 1.0f)),
-		Vertex(Vector4(-0.5f,  0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(0.0f, 1.0f)),
-		Vertex(Vector4(-0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f,  0.0f, 1.0f), Vector2(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(1.0f, 1.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(0.0f, 1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, 1.0f), tinymath::vec2f(0.0f,  0.0f)),
 
-		Vertex(Vector4(-0.5f,  0.5f,  0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(-0.5f,  0.5f, -0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(-0.5f, -0.5f,  0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(-0.5f,  0.5f,  0.5f, 1.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector2(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(-1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
 
-		Vertex(Vector4(0.5f,  0.5f,  0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(0.5f,  0.5f, -0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(0.5f, -0.5f,  0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(0.5f,  0.5f,  0.5f, 1.0f), Vector3(1.0f,  0.0f,  0.0f), Vector2(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(1.0f,  0.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
 
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(-0.5f, -0.5f,  0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(-0.5f, -0.5f, -0.5f, 1.0f), Vector3(0.0f, -1.0f,  0.0f), Vector2(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, -1.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
 
-		Vertex(Vector4(-0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(0.0f,  1.0f)),
-		Vertex(Vector4(0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(1.0f,  1.0f)),
-		Vertex(Vector4(0.5f,  0.5f,  0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(0.5f, 0.5f,  0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(1.0f,  0.0f)),
-		Vertex(Vector4(-0.5f,  0.5f,  0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(0.0f,  0.0f)),
-		Vertex(Vector4(-0.5f,  0.5f, -0.5f, 1.0f), Vector3(0.0f, 1.0f,  0.0f), Vector2(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(1.0f,  1.0f)),
+		Vertex(tinymath::vec4f(0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(0.5f, 0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(1.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f,  0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(0.0f,  0.0f)),
+		Vertex(tinymath::vec4f(-0.5f,  0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f, 1.0f,  0.0f), tinymath::vec2f(0.0f,  1.0f)),
 	};
 
 	uint32_t cube_indices[36] = {
@@ -56,12 +56,12 @@ namespace Guarneri {
 	};
 
 	Vertex plane_vertices[8] = {
-		Vertex(Vector4(1, 0, 1, 1), Vector3::UP,  Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1, 0, -1, 1), Vector3::UP,  Vector2(0.0f, 1.0f)),
-		Vertex(Vector4(-1, 0, -1, 1), Vector3::UP, Vector2(1.0f, 1.0f)),
-		Vertex(Vector4(-1, 0, -1, 1), Vector3::UP, Vector2(1.0f, 1.0f)),
-		Vertex(Vector4(-1, 0, 1, 1), Vector3::UP, Vector2(1.0f, 0.0f)),
-		Vertex(Vector4(1, 0, 1, 1), Vector3::UP,  Vector2(0.0f, 0.0f))
+		Vertex(tinymath::vec4f(1, 0, 1, 1), tinymath::kVec3fUp,  tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1, 0, -1, 1), tinymath::kVec3fUp,  tinymath::vec2f(0.0f, 1.0f)),
+		Vertex(tinymath::vec4f(-1, 0, -1, 1), tinymath::kVec3fUp, tinymath::vec2f(1.0f, 1.0f)),
+		Vertex(tinymath::vec4f(-1, 0, -1, 1), tinymath::kVec3fUp, tinymath::vec2f(1.0f, 1.0f)),
+		Vertex(tinymath::vec4f(-1, 0, 1, 1), tinymath::kVec3fUp, tinymath::vec2f(1.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1, 0, 1, 1), tinymath::kVec3fUp,  tinymath::vec2f(0.0f, 0.0f))
 	};
 
 	uint32_t plane_indices[6] = {
@@ -69,70 +69,70 @@ namespace Guarneri {
 	};
 
 	Vertex sky_box_vertices[] = {
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
 
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
 
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
 
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
 
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f,  1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f,  1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
 
-		Vertex(Vector4(-1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f, -1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(-1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f)),
-		Vertex(Vector4(1.0f, -1.0f,  1.0f, 1.0f), Vector3::UP, Vector2(0.0f, 0.0f))
+		Vertex(tinymath::vec4f(-1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f, -1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(-1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f)),
+		Vertex(tinymath::vec4f(1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f))
 	};
 
-	Vector3 sphere_parametric_equation(const float& radius, const float& alpha, const float& phi)
+	tinymath::vec3f sphere_parametric_equation(const float& radius, const float& alpha, const float& phi)
 	{
-		Vector3 p;
+		tinymath::vec3f p;
 		p.x = radius * std::sin(alpha * PI / 180.0f) * std::cos(phi * PI / 180.0f);
 		p.y = radius * std::sin(alpha * PI / 180.0f) * std::sin(phi * PI / 180.0f);
 		p.z = radius * std::cos(alpha * PI / 180.0f);
 		return p;
 	}
 
-	Vector3 PrimitiveFactory::cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	tinymath::vec3f PrimitiveFactory::cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		auto edge1 = v2.position - v1.position;
 		auto edge2 = v3.position - v1.position;
 		auto duv1 = v2.uv - v1.uv;
 		auto duv2 = v3.uv - v1.uv;
 		float f = 1.0f / (duv1.x * duv2.y - duv2.x * duv1.y);
-		Vector3 tangent;
+		tinymath::vec3f tangent;
 		tangent.x = f * (duv2.y * edge1.x - duv1.y * edge2.x);
 		tangent.y = f * (duv2.y * edge1.y - duv1.y * edge2.y);
 		tangent.z = f * (duv2.y * edge1.z - duv1.y * edge2.z);
-		return tangent.normalized();
+		return tinymath::normalize(tangent);
 	}
 
 	std::shared_ptr<Model> PrimitiveFactory::plane(std::shared_ptr<Material> material)

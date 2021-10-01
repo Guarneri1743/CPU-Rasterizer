@@ -1,5 +1,4 @@
 #include "Texture.hpp"
-#include <sstream>
 #include <iostream>
 #include <filesystem>
 #include "Singleton.hpp"
@@ -276,7 +275,7 @@ namespace Guarneri
 			generate_mipmap(kMaxMip, Filtering::POINT);
 		}
 
-		LOG("raw texture loaded: {}", str().c_str());
+		LOG("raw texture loaded: {}", abs_path.c_str());
 	}
 
 	bool Texture::bilinear(const float& u, const float& v, const uint32_t& mip, Color& ret) const
@@ -1035,12 +1034,5 @@ namespace Guarneri
 		this->rg_mipmaps = other.rg_mipmaps;
 		this->rgba_mipmaps = other.rgba_mipmaps;
 		this->rgb_mipmaps = other.rgb_mipmaps;
-	}
-
-	std::string Texture::str() const
-	{
-		std::stringstream ss;
-		ss << "Texture[" << this->id << "], w[" << this->width << "], h[" << this->height << "]" << raw_path << "]";
-		return ss.str();
 	}
 }

@@ -9,11 +9,7 @@
 #include "rapidjson/reader.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
-#include "Vector2.hpp"
-#include "Vector3.hpp"
-#include "Vector4.hpp"
-#include "Matrix3x3.hpp"
-#include "Matrix4x4.hpp"
+#include "TinyMath.h"
 #include "Transform.hpp"
 #include "Camera.hpp"
 #include "Material.hpp"
@@ -31,8 +27,8 @@ namespace Guarneri
 	{
 	public:
 		//====================================================================================
-		// Vector2
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector2& vec)
+		// TMath::vec2f
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::vec2f& vec)
 		{
 			rapidjson::Value v;
 			v.SetObject();
@@ -41,18 +37,18 @@ namespace Guarneri
 			return v;
 		}
 
-		static void deserialize(const rapidjson::Value& v, Vector2& vec)
+		static void deserialize(const rapidjson::Value& v, tinymath::vec2f& vec)
 		{
 			vec.x = v["x"].GetFloat();
 			vec.y = v["y"].GetFloat();
 		}
-		// Vector2
+		// TMath::vec2f
 		//====================================================================================
 
 
 		//====================================================================================
-		// Vector3
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector3& vec)
+		// TMath::vec3f
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::vec3f& vec)
 		{
 			rapidjson::Value v;
 			v.SetObject();
@@ -62,19 +58,19 @@ namespace Guarneri
 			return v;
 		}
 
-		static void deserialize(const rapidjson::Value& v, Vector3& vec)
+		static void deserialize(const rapidjson::Value& v, tinymath::vec3f& vec)
 		{
 			vec.x = v["x"].GetFloat();
 			vec.y = v["y"].GetFloat();
 			vec.z = v["z"].GetFloat();
 		}
-		// Vector3
+		// TMath::vec3f
 		//====================================================================================
 
 
 		//====================================================================================
-		// Vector4
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vector4& vec)
+		// TMath::vec4f
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::vec4f& vec)
 		{
 			rapidjson::Value v;
 			v.SetObject();
@@ -85,20 +81,20 @@ namespace Guarneri
 			return v;
 		}
 
-		static void deserialize(const rapidjson::Value& v, Vector4& vec)
+		static void deserialize(const rapidjson::Value& v, tinymath::vec4f& vec)
 		{
 			vec.x = v["x"].GetFloat();
 			vec.y = v["y"].GetFloat();
 			vec.z = v["z"].GetFloat();
 			vec.w = v["w"].GetFloat();
 		}
-		// Vector4
+		// TMath::vec4f
 		//====================================================================================
 
 
 		//====================================================================================
-		// Matrix3x3
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Matrix3x3& mat)
+		// TMath::mat3x3
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::mat3x3& mat)
 		{
 			rapidjson::Value v;
 			v.SetObject();
@@ -114,7 +110,7 @@ namespace Guarneri
 			return v;
 		}
 
-		static void deserialize(const rapidjson::Value& v, Matrix3x3& mat)
+		static void deserialize(const rapidjson::Value& v, tinymath::mat3x3& mat)
 		{
 			mat.m00 = v["m00"].GetFloat();
 			mat.m01 = v["m01"].GetFloat();
@@ -126,13 +122,13 @@ namespace Guarneri
 			mat.m21 = v["m21"].GetFloat();
 			mat.m22 = v["m22"].GetFloat();
 		}		
-		// Matrix3x3
+		// TMath::mat3x3
 		//====================================================================================
 
 
 		//====================================================================================
-		// Matrix4x4
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Matrix4x4& mat)
+		// TMath::mat4x4
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::mat4x4& mat)
 		{
 			rapidjson::Value v;
 			v.SetObject();
@@ -155,7 +151,7 @@ namespace Guarneri
 			return v;
 		}
 
-		static void deserialize(const rapidjson::Value& v, Matrix4x4& mat)
+		static void deserialize(const rapidjson::Value& v, tinymath::mat4x4& mat)
 		{
 			mat.m00 = v["m00"].GetFloat();
 			mat.m01 = v["m01"].GetFloat();
@@ -174,7 +170,7 @@ namespace Guarneri
 			mat.m32 = v["m32"].GetFloat();
 			mat.m33 = v["m33"].GetFloat();
 		}
-		// Matrix4x4
+		// TMath::mat4x4
 		//====================================================================================
 
 
@@ -414,19 +410,19 @@ namespace Guarneri
 
 				for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
 				{
-					const rapidjson::Value& pair = name2int[idx].PopBack();
+					const rapidjson::Value& pair = name2int[idx].GetArray();
 					material.name2int[pair[0].GetUint()] = pair[1].GetInt();
 				}
 
 				for (rapidjson::SizeType idx = 0; idx < name2float.Size(); idx++)
 				{
-					const rapidjson::Value& pair = name2float[idx].PopBack();
+					const rapidjson::Value& pair = name2float[idx].GetArray();
 					material.name2float[pair[0].GetUint()] = pair[1].GetFloat();
 				}
 
 				for (rapidjson::SizeType idx = 0; idx < name2float4.Size(); idx++)
 				{
-					const rapidjson::Value& pair = name2float4[idx].PopBack();
+					const rapidjson::Value& pair = name2float4[idx].GetArray();
 					Serializer::deserialize(pair[1].GetObject(), material.name2float4[pair[0].GetUint()]);
 				}
 
@@ -434,7 +430,7 @@ namespace Guarneri
 				{
 					const rapidjson::Value& pair = name2tex[idx].GetArray();
 					const char* tex_path = pair[1].GetString();
-					material.name2tex[pair.GetArray()[0].GetUint()] = Texture::load_asset(tex_path);
+					material.name2tex[pair[0].GetUint()] = Texture::load_asset(tex_path);
 				}
 
 				fclose(fd);

@@ -1,7 +1,6 @@
 ﻿#include "Cylinder.hpp"
 #include "Marcos.h"
 #include <iomanip>
-#include <sstream>
 
 namespace Guarneri
 {
@@ -24,12 +23,5 @@ namespace Guarneri
 		this->axis = other.axis;
 		this->radius = other.radius;
 		this->height = other.height;
-	}
-
-	std::string Cylinder::str() const
-	{
-		std::stringstream ss;
-		ss << "Cylinder: [axis: " << this->axis.str() << ", radius: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << ", height" << std::setprecision(FLOAT_LOG_PRECISION) << this->height << "]";
-		return ss.str();
 	}
 }

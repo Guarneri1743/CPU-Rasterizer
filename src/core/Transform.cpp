@@ -1,5 +1,6 @@
 #include "Transform.hpp"
 #include <iostream>
+#include "Marcos.h"
 
 namespace Guarneri
 {
@@ -7,11 +8,11 @@ namespace Guarneri
 	{
 		parent = nullptr;
 		rotation_angle = 0.0f;
-		rotation_axis = Vector3::UP;
-		local_rotation = Vector3::ZERO;
-		local_position = Vector3::ZERO;
-		local_scale = Vector3::ONE;
-		world_trs = Matrix4x4::IDENTITY;
+		rotation_axis = tinymath::kVec3fUp;
+		local_rotation = tinymath::kVec3fZero;
+		local_position = tinymath::kVec3fZero;
+		local_scale = tinymath::kVec3fOne;
+		world_trs = tinymath::kMat4x4Identity;
 		selected = false;
 	}
 
@@ -27,24 +28,24 @@ namespace Guarneri
 		selected = other.selected;
 	}
 
-	Vector3 Transform::forward() const
+	tinymath::vec3f Transform::forward() const
 	{
 		return world_trs.forward();
 	}
 
-	Vector3 Transform::up() const
+	tinymath::vec3f Transform::up() const
 	{
 		return world_trs.up();
 	}
 
-	Vector3 Transform::right()  const
+	tinymath::vec3f Transform::right()  const
 	{
 		return world_trs.right();
 	}
 
-	Vector3 Transform::world_position() const
+	tinymath::vec3f Transform::world_position() const
 	{
-		Vector3 ret = local_position;
+		tinymath::vec3f ret = local_position;
 		Transform* t = parent;
 		while (t != nullptr)
 		{
@@ -54,9 +55,9 @@ namespace Guarneri
 		return ret;
 	}
 
-	Vector3 Transform::world_euler_angles() const
+	tinymath::vec3f Transform::world_euler_angles() const
 	{
-		Vector3 ret = local_rotation;
+		tinymath::vec3f ret = local_rotation;
 		Transform* t = parent;
 		while (t != nullptr)
 		{
@@ -66,9 +67,9 @@ namespace Guarneri
 		return ret;
 	}
 
-	Vector3 Transform::world_scale() const
+	tinymath::vec3f Transform::world_scale() const
 	{
-		Vector3 lossy = local_scale;
+		tinymath::vec3f lossy = local_scale;
 		Transform* t = parent;
 		while (t != nullptr)
 		{
@@ -78,33 +79,33 @@ namespace Guarneri
 		return lossy;
 	}
 
-	Vector3 Transform::transform_pos(const Vector3& point)
+	tinymath::vec3f Transform::transform_pos(const tinymath::vec3f& point)
 	{
-		Vector4 ret = this->world_trs * Vector4(point.x, point.y, point.z, 1.0f);
-		return Vector3(ret.x, ret.y, ret.z);
+		tinymath::vec4f ret = this->world_trs * tinymath::vec4f(point.x, point.y, point.z, 1.0f);
+		return tinymath::vec3f(ret.x, ret.y, ret.z);
 	}
 
-	Vector3 Transform::transform_dir(const Vector3 & dir)
+	tinymath::vec3f Transform::transform_dir(const tinymath::vec3f & dir)
 	{
-		Matrix4x4 rot = this->world_trs * Matrix4x4::from_euler(dir);
-		return rot.to_euler().normalized();
+		tinymath::mat4x4 rot = this->world_trs * tinymath::from_euler(dir);
+		return tinymath::normalize(rot.to_euler());
 	}
 
-	Vector3 Transform::inverse_transform_pos(const Vector3& point)
+	tinymath::vec3f Transform::inverse_transform_pos(const tinymath::vec3f& point)
 	{
-		Vector4 ret = this->world_trs.inverse() * Vector4(point.x, point.y, point.z, 1.0f);
-		return Vector3(ret.x, ret.y, ret.z);
+		tinymath::vec4f ret = tinymath::inverse(this->world_trs) * tinymath::vec4f(point.x, point.y, point.z, 1.0f);
+		return tinymath::vec3f(ret.x, ret.y, ret.z);
 	}
 
-	Vector3 Transform::inverse_transform_dir(const Vector3& dir)
+	tinymath::vec3f Transform::inverse_transform_dir(const tinymath::vec3f& dir)
 	{
-		Matrix4x4 rot = this->world_trs.inverse() * Matrix4x4::from_euler(dir);
-		return rot.to_euler().normalized();
+		tinymath::mat4x4 rot = tinymath::inverse(this->world_trs) * tinymath::from_euler(dir);
+		return tinymath::normalize(rot.to_euler());
 	}
 
-	void Transform::lookat(const Vector3& target)
+	void Transform::lookat(const tinymath::vec3f& target)
 	{
-		this->world_trs = Matrix4x4::lookat(this->world_position(), target, Vector3::UP);
+		this->world_trs = tinymath::lookat(this->world_position(), target, tinymath::kVec3fUp);
 	}
 
 	void Transform::set_parent(Transform* p)
@@ -117,9 +118,9 @@ namespace Guarneri
 		}
 	}
 
-	void Transform::set_world_position(const Vector3& world_position)
+	void Transform::set_world_position(const tinymath::vec3f& world_position)
 	{
-		Vector3 local_pos = world_position;
+		tinymath::vec3f local_pos = world_position;
 		Transform* t = parent;
 		while (t != nullptr)
 		{
@@ -134,9 +135,9 @@ namespace Guarneri
 		set_world_rotation({ DEGREE2RAD(pitch), DEGREE2RAD(yaw), DEGREE2RAD(roll) });
 	}
 
-	void Transform::set_world_rotation(const Vector3 & world_rotation)
+	void Transform::set_world_rotation(const tinymath::vec3f & world_rotation)
 	{
-		Vector3 local_euler = world_rotation;
+		tinymath::vec3f local_euler = world_rotation;
 		Transform* t = parent;
 		while (t != nullptr)
 		{
@@ -147,19 +148,19 @@ namespace Guarneri
 		sync();
 	}
 
-	void Transform::set_local_position(const Vector3& position)
+	void Transform::set_local_position(const tinymath::vec3f& position)
 	{
 		this->local_position = position;
 		sync();
 	}
 
-	void Transform::set_local_rotation(const Vector3 & rotation)
+	void Transform::set_local_rotation(const tinymath::vec3f & rotation)
 	{
 		this->local_rotation = rotation;
 		sync();
 	}
 
-	void Transform::set_local_scale(const Vector3& scale)
+	void Transform::set_local_scale(const tinymath::vec3f& scale)
 	{
 		this->local_scale = scale;
 		sync();
@@ -167,42 +168,42 @@ namespace Guarneri
 
 	void Transform::move_forward(const float& distance)
 	{
-		Vector3 delta = distance * this->forward();
+		tinymath::vec3f delta = distance * this->forward();
 		this->local_position += delta;
 		sync();
 	}
 
 	void Transform::move_backward(const float& distance)
 	{
-		Vector3 delta = -distance * this->forward();
+		tinymath::vec3f delta = -distance * this->forward();
 		this->local_position += delta;
 		sync();
 	}
 
 	void Transform::move_left(const float& distance)
 	{
-		Vector3 delta = -distance * this->right();
+		tinymath::vec3f delta = -distance * this->right();
 		this->local_position += delta;
 		sync();
 	}
 
 	void Transform::move_right(const float& distance)
 	{
-		Vector3 delta = distance * this->right();
+		tinymath::vec3f delta = distance * this->right();
 		this->local_position += delta;
 		sync();
 	}
 
 	void Transform::move_ascend(const float& distance)
 	{
-		Vector3 delta = distance * this->up();
+		tinymath::vec3f delta = distance * this->up();
 		this->local_position += delta;
 		sync();
 	}
 
 	void Transform::move_descend(const float& distance)
 	{
-		Vector3 delta = -distance * this->up();
+		tinymath::vec3f delta = -distance * this->up();
 		this->local_position += delta;
 		sync();
 	}
@@ -215,7 +216,7 @@ namespace Guarneri
 		sync();
 	}
 
-	void Transform::rotate(const Vector3& axis, const float& angle)
+	void Transform::rotate(const tinymath::vec3f& axis, const float& angle)
 	{
 		//todo
 		UNUSED(axis);
@@ -229,25 +230,25 @@ namespace Guarneri
 		this->local_rotation.x = std::clamp(this->local_rotation.x, -89.0f, 89.0f);
 		this->local_rotation.z -= roll_offset;
 		this->local_rotation.z = std::clamp(this->local_rotation.z, -89.0f, 89.0f);
-		Vector3 forward;
-		Vector3 pos = world_position();
-		Vector3 world_euler = world_euler_angles();
+		tinymath::vec3f forward;
+		tinymath::vec3f pos = world_position();
+		tinymath::vec3f world_euler = world_euler_angles();
 		forward.x = cos(world_euler.y) * cos(world_euler.x);
 		forward.y = sin(world_euler.x);
 		forward.z = sin(world_euler.y) * cos(world_euler.x);
-		forward = Vector3::normalize(forward);
-		Vector3 right, up;
-		Vector3::calculate_right_up(forward, right, up);
-		auto tr = Matrix4x4::lookat(pos, pos + forward, up);
-		auto s = Matrix4x4::scale(world_scale());
+		forward = tinymath::normalize(forward);
+		tinymath::vec3f right, up;
+		tinymath::calculate_right_up(forward, right, up);
+		auto tr = tinymath::lookat(pos, pos + forward, up);
+		auto s = tinymath::scale(world_scale());
 		this->world_trs = tr * s;
 	}
 
 	void Transform::sync()
 	{
-		auto t = Matrix4x4::translation(world_position());
-		auto r = Matrix4x4::from_euler(world_euler_angles());
-		auto s = Matrix4x4::scale(world_scale());
+		auto t = tinymath::translation(world_position());
+		auto r = tinymath::from_euler(world_euler_angles());
+		auto s = tinymath::scale(world_scale());
 		this->world_trs = t * r * s;
 	}
 

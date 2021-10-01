@@ -32,14 +32,12 @@ namespace Guarneri
 		Model(const Model& other);
 		~Model();
 
+		void load_raw(std::string path, bool flip_uv);
 		const Transform* get_transform() const { return transform.get(); }
 
 		Model& operator= (const Model& other);
-		std::string str() const;
-
 		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
-		static std::shared_ptr<Model> load_raw(std::string path, bool flip_uv);
-
+	
 	private:
 		static std::unordered_map<uint32_t, std::shared_ptr<Model>> texture_cache;
 		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);

@@ -1,6 +1,6 @@
 ﻿#include "Capsule.hpp"
+#include "Marcos.h"
 #include <iomanip>
-#include <sstream>
 
 namespace Guarneri
 {
@@ -10,13 +10,13 @@ namespace Guarneri
 		radius = 0;
 	}
 
-	Capsule::Capsule(const Guarneri::Vector3& center, const Guarneri::Vector3& dir, const float& extent, const float& radius_t)
+	Capsule::Capsule(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent, const float& radius_t)
 	{
 		this->segment = Segment::Segment(center, dir, extent);
 		this->radius = radius_t;
 	}
 
-	Capsule::Capsule(const Guarneri::Vector3& start, const Guarneri::Vector3& end, const float& radius)
+	Capsule::Capsule(const tinymath::vec3f& start, const tinymath::vec3f& end, const float& radius)
 	{
 		this->segment = Segment::Segment(start, end);
 		this->radius = radius;
@@ -32,12 +32,5 @@ namespace Guarneri
 	{
 		this->segment = other.segment;
 		this->radius = other.radius;
-	}
-
-	std::string Capsule::str() const
-	{
-		std::stringstream ss;
-		ss << "Capsule: [center: " << this->segment.str() << ", size: " << std::setprecision(FLOAT_LOG_PRECISION) << this->radius << "]";
-		return ss.str();
 	}
 }

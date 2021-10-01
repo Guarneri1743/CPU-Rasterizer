@@ -6,18 +6,18 @@ namespace Guarneri
 {
 	Vertex::Vertex()
 	{
-		position = Vector4();
-		world_pos = Vector3();
-		shadow_coord = Vector4();
-		color = Vector4();
-		uv = Vector2();
-		normal = Vector3();
-		tangent = Vector3();
-		bitangent = Vector3();
+		position = tinymath::vec4f();
+		world_pos = tinymath::vec3f();
+		shadow_coord = tinymath::vec4f();
+		color = tinymath::vec4f();
+		uv = tinymath::vec2f();
+		normal = tinymath::vec3f();
+		tangent = tinymath::vec3f();
+		bitangent = tinymath::vec3f();
 		this->rhw = 1.0f;
 	}
 
-	Vertex::Vertex(const Vector4& _position, const Vector3& _world_pos, Vector4& _shadow_coord, const Vector4& _color, const Vector3& _normal, const Vector2& _uv, const Vector3& _tangent, const Vector3& _bitangent)
+	Vertex::Vertex(const tinymath::vec4f& _position, const tinymath::vec3f& _world_pos, tinymath::vec4f& _shadow_coord, const tinymath::vec4f& _color, const tinymath::vec3f& _normal, const tinymath::vec2f& _uv, const tinymath::vec3f& _tangent, const tinymath::vec3f& _bitangent)
 	{
 		this->position = _position;
 		this->world_pos = _world_pos;
@@ -30,16 +30,16 @@ namespace Guarneri
 		this->rhw = 1.0f / this->position.w;
 	}
 
-	Vertex::Vertex(const Vector4& _position, const Vector3& _normal, const Vector2& _uv)
+	Vertex::Vertex(const tinymath::vec4f& _position, const tinymath::vec3f& _normal, const tinymath::vec2f& _uv)
 	{
 		this->position = _position;
-		this->world_pos = _position.xyz();
-		this->shadow_coord = Vector4::ZERO;
-		this->color = Vector4::ONE;
+		this->world_pos = _position.xyz;
+		this->shadow_coord = tinymath::kVec4fZero;
+		this->color = tinymath::kVec4fOne;
 		this->normal = _normal;
 		this->uv = _uv;
-		this->tangent = Vector3::ZERO;
-		this->bitangent = Vector3::ZERO;
+		this->tangent = tinymath::kVec3fZero;
+		this->bitangent = tinymath::kVec3fZero;
 		this->rhw = 1.0f / this->position.w;
 	}
 
@@ -139,16 +139,16 @@ namespace Guarneri
 		return screen;
 	}
 
-	Vector4 Vertex::clip2ndc(const Vector4& clip)
+	tinymath::vec4f Vertex::clip2ndc(const tinymath::vec4f& clip)
 	{
-		Vector4 ndc = clip;
+		tinymath::vec4f ndc = clip;
 		ndc *= 1.0f / clip.w;
 		return ndc;
 	}
 
-	Vector4 Vertex::ndc2screen(const int& width, const int& height, const Vector4& ndc)
+	tinymath::vec4f Vertex::ndc2screen(const int& width, const int& height, const tinymath::vec4f& ndc)
 	{
-		Vector4 screen = ndc;
+		tinymath::vec4f screen = ndc;
 		screen.x = (ndc.x + 1.0f) * width * 0.5f;
 		screen.y = (ndc.y + 1.0f) * height * 0.5f;
 		screen.z = ndc.z * 0.5f + 0.5f;
@@ -177,12 +177,5 @@ namespace Guarneri
 		Serializer::deserialize(v["tangent"], vertex.tangent);
 		Serializer::deserialize(v["normal"], vertex.normal);
 		return vertex;
-	}
-
-	std::string Vertex::str() const
-	{
-		std::stringstream ss;
-		ss << "Vertex: [pos: " << this->position.str() << ", Color: " << this->color.str() << ", uv: " << uv.str() << "]";
-		return ss.str();
 	}
 }

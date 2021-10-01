@@ -1,15 +1,14 @@
 ﻿#include "Line.hpp"
-#include <sstream>
 
 namespace Guarneri
 {
 	Line::Line()
 	{
-		origin = Guarneri::Vector3();
-		direction = Guarneri::Vector3();
+		origin = tinymath::vec3f();
+		direction = tinymath::vec3f();
 	}
 
-	Line::Line(const Guarneri::Vector3& origin_t, const Guarneri::Vector3& direction_t)
+	Line::Line(const tinymath::vec3f& origin_t, const tinymath::vec3f& direction_t)
 	{
 		this->origin = origin_t;
 		this->direction = direction_t;
@@ -19,12 +18,5 @@ namespace Guarneri
 	{
 		this->origin = other.origin;
 		this->direction = other.direction;
-	}
-
-	std::string Line::str() const
-	{
-		std::stringstream ss;
-		ss << "Line: [origin: " << this->origin.str() << ", direction: " << this->direction.str() << "]";
-		return ss.str();
 	}
 }

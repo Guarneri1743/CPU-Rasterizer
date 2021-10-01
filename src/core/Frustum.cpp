@@ -18,7 +18,7 @@ namespace Guarneri
 
 	// http://www8.cs.umu.se/kurser/5DV180/VT18/lab/plane_extraction.pdf
 	// represent cvv clipping equation by this combination of vp matrix elements
-	Frustum Frustum::create(const Matrix4x4& mat)
+	Frustum Frustum::create(const tinymath::mat4x4& mat)
 	{
 		float a, b, c, d;
 

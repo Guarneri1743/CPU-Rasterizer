@@ -70,8 +70,8 @@ namespace Guarneri
 	void InputManager::on_mouse_move(double x, double y)
 	{
 		auto prev = mouse_position;
-		mouse_position = Vector2((float)x, (float)y);
-		if (Vector2::magnitude(prev - mouse_position) > EPSILON)
+		mouse_position = tinymath::vec2f((float)x, (float)y);
+		if (tinymath::magnitude(prev - mouse_position) > EPSILON)
 		{
 			for (auto& kv : on_mouse_move_events)
 			{
@@ -231,7 +231,7 @@ namespace Guarneri
 		on_mouse_up_events.erase(on_mouse_up);
 	}
 
-	void InputManager::add_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud), void* user_data)
+	void InputManager::add_on_mouse_move_evt(void (*on_mouse_move)(tinymath::vec2f prev, tinymath::vec2f pos, void* ud), void* user_data)
 	{
 		if (on_mouse_move_events.count(on_mouse_move) > 0)
 		{
@@ -240,7 +240,7 @@ namespace Guarneri
 		on_mouse_move_events.insert(std::pair(on_mouse_move, user_data));
 	}
 
-	void InputManager::remove_on_mouse_move_evt(void (*on_mouse_move)(Vector2 prev, Vector2 pos, void* ud))
+	void InputManager::remove_on_mouse_move_evt(void (*on_mouse_move)(tinymath::vec2f prev, tinymath::vec2f pos, void* ud))
 	{
 		on_mouse_move_events.erase(on_mouse_move);
 	}

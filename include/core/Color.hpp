@@ -1,8 +1,7 @@
 #ifndef _COLOR_
 #define _COLOR_
 #include <string>
-#include "Vector3.hpp"
-#include "Vector4.hpp"
+#include "TinyMath.h"
 #include "Define.hpp"
 #include "rapidjson/document.h"
 
@@ -25,13 +24,13 @@ namespace Guarneri
 		constexpr Color(const float& v) : r(v), g(v), b(v), a(v) {}
 		constexpr Color(const float& x, const float& y, const float& z) : r(x), g(y), b(z), a(1.0f) {}
 		constexpr Color(const float& x, const float& y, const float& z, const float& w) : r(x), g(y), b(z), a(w) {}
-		constexpr Color(const Vector4& v) : r(v.x), g(v.y), b(v.z), a(v.w) {}
-		constexpr Color(const Vector3& v) : r(v.x), g(v.y), b(v.z), a(1.0f) {}
-		constexpr Color(const float& x, const Vector3& yzw) : r(x), g(yzw.x), b(yzw.y), a(yzw.z) {}
-		Color(const float& r, const float& g, const Vector2& zw);
-		Color(const Vector2& v, const float& b, const float& w);
-		Color(const Vector2& v, const Vector2& zw);
-		Color(const Vector3& v, const float& w);
+		constexpr Color(const tinymath::vec4f& v) : r(v.x), g(v.y), b(v.z), a(v.w) {}
+		constexpr Color(const tinymath::vec3f& v) : r(v.x), g(v.y), b(v.z), a(1.0f) {}
+		constexpr Color(const float& x, const tinymath::vec3f& yzw) : r(x), g(yzw.x), b(yzw.y), a(yzw.z) {}
+		Color(const float& r, const float& g, const tinymath::vec2f& zw);
+		Color(const tinymath::vec2f& v, const float& b, const float& w);
+		Color(const tinymath::vec2f& v, const tinymath::vec2f& zw);
+		Color(const tinymath::vec3f& v, const float& w);
 		Color normalized();
 		float& operator[](const uint32_t& i);
 		const float& operator[](const uint32_t& i) const;
@@ -58,25 +57,25 @@ namespace Guarneri
 		static color_rg encode_rg(const float& r);
 		static color_rg encode_rg(const float& r, const float& g);
 		static color_rgb encode_rgb(const Color& c);
-		static color_rgb encode_rgb(const Vector4& c);
-		static color_rgb encode_rgb(const Vector3& c);
-		static color_rgb encode_rgb(const Vector2& c);
+		static color_rgb encode_rgb(const tinymath::vec4f& c);
+		static color_rgb encode_rgb(const tinymath::vec3f& c);
+		static color_rgb encode_rgb(const tinymath::vec2f& c);
 		static color_bgra encode_bgra(const Color& c);
-		static color_bgra encode_bgra(const Vector4& c);
-		static color_bgra encode_bgra(const Vector3& c);
-		static color_bgra encode_bgra(const Vector2& c);
+		static color_bgra encode_bgra(const tinymath::vec4f& c);
+		static color_bgra encode_bgra(const tinymath::vec3f& c);
+		static color_bgra encode_bgra(const tinymath::vec2f& c);
 		static color_rgba encode_rgba(const Color& c);
-		static color_rgba encode_rgba(const Vector4& c);
-		static color_rgba encode_rgba(const Vector3& c);
-		static color_rgba encode_rgba(const Vector2& c);
+		static color_rgba encode_rgba(const tinymath::vec4f& c);
+		static color_rgba encode_rgba(const tinymath::vec3f& c);
+		static color_rgba encode_rgba(const tinymath::vec2f& c);
 		static color_rgb16f encode_rgb16f(const Color& c);
-		static color_rgb16f encode_rgb16f(const Vector4& c);
-		static color_rgb16f encode_rgb16f(const Vector3& c);
-		static color_rgb16f encode_rgb16f(const Vector2& c);
+		static color_rgb16f encode_rgb16f(const tinymath::vec4f& c);
+		static color_rgb16f encode_rgb16f(const tinymath::vec3f& c);
+		static color_rgb16f encode_rgb16f(const tinymath::vec2f& c);
 		static color_rgba16f encode_rgba16f(const Color& c);
-		static color_rgba16f encode_rgba16f(const Vector4& c);
-		static color_rgba16f encode_rgba16f(const Vector3& c);
-		static color_rgba16f encode_rgba16f(const Vector2& c);
+		static color_rgba16f encode_rgba16f(const tinymath::vec4f& c);
+		static color_rgba16f encode_rgba16f(const tinymath::vec3f& c);
+		static color_rgba16f encode_rgba16f(const tinymath::vec2f& c);
 		static int encode(const float& r, const float& g, const float& b, const float& alpha);
 		static color_rgb encode_rgb(const float& r, const float& g, const float& b);
 		static color_rgba encode_rgba(const float& r, const float& g, const float& b, const float& alpha);
@@ -102,7 +101,6 @@ namespace Guarneri
 		static Color normalize(const Color& value);
 		static rapidjson::Value serialize(rapidjson::Document& doc, const Color& color);
 		static Color deserialize(const rapidjson::Value& v);
-		std::string str() const;
 
 		friend static Color operator +(const float& other, const Color& c)
 		{
@@ -119,22 +117,22 @@ namespace Guarneri
 			return c * other;
 		}
 
-		friend static Color operator *(const Vector4& other, const Color& c)
+		friend static Color operator *(const tinymath::vec4f& other, const Color& c)
 		{
 			return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 		}
 
-		friend static Color operator *(const Color& c, const Vector4& other)
+		friend static Color operator *(const Color& c, const tinymath::vec4f& other)
 		{
 			return Color(other.x * c.r, other.y * c.g, other.z * c.b, other.w * c.a);
 		}
 
-		friend static Color operator *(const Vector3& other, const Color& c)
+		friend static Color operator *(const tinymath::vec3f& other, const Color& c)
 		{
 			return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 		}
 
-		friend static Color operator *(const Color& c, const Vector3& other)
+		friend static Color operator *(const Color& c, const tinymath::vec3f& other)
 		{
 			return Color(other.x * c.r, other.y * c.g, other.z * c.b, c.a);
 		}

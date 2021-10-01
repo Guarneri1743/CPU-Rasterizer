@@ -104,7 +104,7 @@ namespace Guarneri
 					{
 						if (ImGui::ColorEdit3("TintColor", tint_color))
 						{
-							material->set_float4(tint_color_prop, Vector4(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
+							material->set_float4(tint_color_prop, tinymath::vec4f(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
 						}
 						else
 						{
@@ -169,7 +169,7 @@ namespace Guarneri
 	void InspectorEditor::draw_settings()
 	{
 		{
-			ImGui::Text(("Window Size: " + Vector2((float)Window::main()->get_width(), (float)Window::main()->get_height()).str()).c_str());
+			ImGui::Text("Window Size: %f, %f", tinymath::vec2f((float)Window::main()->get_width(), (float)Window::main()->get_height()));
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
 				INST(GraphicsDevice).resize(rt_size[0], rt_size[1]);
@@ -186,8 +186,8 @@ namespace Guarneri
 
 		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Text(("Position: " + scene.main_cam->transform->world_position().str()).c_str());
-			ImGui::Text(("Direction: " + scene.main_cam->transform->world_euler_angles().str()).c_str());
+			ImGui::Text("Position: %f, %f, %f", scene.main_cam->transform->world_position().x , scene.main_cam->transform->world_position().y, scene.main_cam->transform->world_position().z);
+			ImGui::Text("Direction: %f, %f, %f", scene.main_cam->transform->world_euler_angles().x, scene.main_cam->transform->world_euler_angles().y, scene.main_cam->transform->world_euler_angles().z);
 
 			bool cam_update = false;
 			cam_update = ImGui::SliderFloat("Near", &scene.main_cam->near, 0.0f, 5.0f);
