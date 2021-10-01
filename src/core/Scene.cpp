@@ -7,12 +7,6 @@
 #include "tinymath.h"
 #include "Color.hpp"
 #include "Config.h"
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/filereadstream.h"
 #include <filesystem>
 #include <iostream>
 #include "Utility.hpp"

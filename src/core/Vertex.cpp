@@ -155,27 +155,4 @@ namespace Guarneri
 		screen.w = ndc.w;
 		return screen;
 	}
-
-	rapidjson::Value Vertex::serialize(rapidjson::Document& doc, const Vertex& vertex)
-	{
-		rapidjson::Value v;
-		v.SetObject();
-		v.AddMember("position",Serializer::serialize(doc, vertex.position), doc.GetAllocator());
-		v.AddMember("color", Serializer::serialize(doc, vertex.color), doc.GetAllocator());
-		v.AddMember("uv", Serializer::serialize(doc, vertex.uv), doc.GetAllocator());
-		v.AddMember("tangent", Serializer::serialize(doc, vertex.tangent), doc.GetAllocator());
-		v.AddMember("normal", Serializer::serialize(doc, vertex.normal), doc.GetAllocator());
-		return v;
-	}
-
-	Vertex Vertex::deserialize(const rapidjson::Value& v)
-	{
-		Vertex vertex;
-		Serializer::deserialize(v["position"], vertex.position);
-		Serializer::deserialize(v["color"], vertex.color);
-		Serializer::deserialize(v["uv"], vertex.uv);
-		Serializer::deserialize(v["tangent"], vertex.tangent);
-		Serializer::deserialize(v["normal"], vertex.normal);
-		return vertex;
-	}
 }

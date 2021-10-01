@@ -10,9 +10,11 @@
 namespace Guarneri
 {
 	class CubeMap {
+	public:
+		std::string texture_path;
+
 	private:
 		std::shared_ptr<Texture> texture;
-		std::string texture_path;
 
 		std::shared_ptr<Texture> irradiance_map;
 		std::vector<std::shared_ptr<Texture>> prefiltered_maps;
@@ -39,8 +41,6 @@ namespace Guarneri
 
 		static std::shared_ptr<CubeMap> load_asset(const char* path);
 		static std::shared_ptr<CubeMap> load_asset(std::string path);
-		static void serialize(const CubeMap& cube_map, std::string path);
-		static void deserialize(std::string path, CubeMap& cubemap);
 		static void spawn(std::string path, std::shared_ptr<CubeMap>& cubemap);
 
 	private:

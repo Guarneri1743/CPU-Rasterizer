@@ -9,7 +9,6 @@
 #include "Object.hpp"
 #include "Color.hpp"
 #include "RawBuffer.hpp"
-#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -95,8 +94,6 @@ namespace Guarneri
 		void save2file();
 		void resize();
 		void release();
-		static void serialize(const Texture& tex, const std::string& path);
-		static void deserialize(std::string path, Texture& tex);
 		static void export_image(const Texture& tex, const std::string& path);
 
 	private:

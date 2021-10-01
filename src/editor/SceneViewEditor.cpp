@@ -27,8 +27,10 @@ namespace Guarneri
 		{
 			if (ImGui::BeginTabItem("SceneView"))
 			{
-				ImTextureID fbo = reinterpret_cast<ImTextureID>(Window::main()->get_fbo());
-				ImGui::Image(fbo, ImVec2(this->rect.w(), this->rect.h()), ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(push)
+#pragma warning(disable : 4312)
+				ImGui::Image((ImTextureID)Window::main()->get_fbo(), ImVec2(this->rect.w(), this->rect.h()), ImVec2(0, 1), ImVec2(1, 0));
+#pragma warning(pop)
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();

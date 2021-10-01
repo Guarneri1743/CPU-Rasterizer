@@ -4,7 +4,6 @@
 #include "Object.hpp"
 #include "tinymath.h"
 #include "Transform.hpp"
-#include "rapidjson/document.h"
 
 #undef near
 #undef far

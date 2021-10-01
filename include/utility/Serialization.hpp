@@ -10,8 +10,10 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "tinymath.h"
+#include "Color.hpp"
 #include "Transform.hpp"
 #include "Camera.hpp"
+#include "CubeMap.hpp"
 #include "Material.hpp"
 #include "ShaderLab.hpp"
 #include "Model.hpp"
@@ -173,6 +175,29 @@ namespace Guarneri
 		// TMath::mat4x4
 		//====================================================================================
 
+		//====================================================================================
+		// Color
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Color& color)
+		{
+			rapidjson::Value v;
+			v.SetObject();
+			v.AddMember("r", color.r, doc.GetAllocator());
+			v.AddMember("g", color.g, doc.GetAllocator());
+			v.AddMember("b", color.b, doc.GetAllocator());
+			v.AddMember("a", color.a, doc.GetAllocator());
+			return v;
+		}
+
+		static void deserialize(const rapidjson::Value& v, Color& color)
+		{
+			color.r = v["r"].GetFloat();
+			color.g = v["g"].GetFloat();
+			color.b = v["b"].GetFloat();
+			color.a = v["a"].GetFloat();
+		}
+		// Color
+		//====================================================================================
+
 
 		//====================================================================================
 		// Transform
@@ -265,6 +290,160 @@ namespace Guarneri
 			cam.projection = (Projection)v["projection"].GetInt();
 		}
 		// Camera
+		//====================================================================================
+
+
+		//====================================================================================
+		// Texture
+		static void serialize(const Texture& tex, const std::string& path)
+		{
+			rapidjson::Document doc;
+			doc.SetObject();
+
+			rapidjson::Value raw_path;
+			raw_path.SetString(tex.raw_path.c_str(), doc.GetAllocator());
+			rapidjson::Value meta_path;
+			meta_path.SetString(path.c_str(), doc.GetAllocator());
+			doc.AddMember("raw_path", raw_path, doc.GetAllocator());
+			doc.AddMember("meta_path", meta_path, doc.GetAllocator());
+			doc.AddMember("filtering", (int32_t)tex.filtering, doc.GetAllocator());
+			doc.AddMember("wrap_mode", (int32_t)tex.wrap_mode, doc.GetAllocator());
+			doc.AddMember("format", (int32_t)tex.format, doc.GetAllocator());
+			doc.AddMember("width", (uint32_t)tex.width, doc.GetAllocator());
+			doc.AddMember("height", (uint32_t)tex.height, doc.GetAllocator());
+			doc.AddMember("mip_count", (uint32_t)tex.mip_count, doc.GetAllocator());
+			doc.AddMember("mip_filtering", (int32_t)tex.mip_filtering, doc.GetAllocator());
+			doc.AddMember("enable_mip", (int32_t)tex.enable_mip, doc.GetAllocator());
+
+			std::filesystem::path abs_path(ASSETS_PATH + path);
+			if (!std::filesystem::exists(abs_path.parent_path()))
+			{
+				std::filesystem::create_directories(abs_path.parent_path());
+			}
+			std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
+			if (fd != nullptr)
+			{
+				char write_buffer[256];
+				rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+				rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
+				doc.Accept(writer);
+				fclose(fd);
+
+				LOG("save texture: {}", path.c_str());
+			}
+			else
+			{
+				ERROR("path does not exist: {}", abs_path.string().c_str());
+			}
+		}
+
+		static void deserialize(std::string path, Texture& tex)
+		{
+			std::string abs_path = ASSETS_PATH + path;
+			std::FILE* fd = fopen(abs_path.c_str(), "r");
+			if (fd != nullptr)
+			{
+				LOG("deserialize: {}", abs_path.c_str());
+				char read_buffer[256];
+				rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+				rapidjson::Document doc;
+				doc.ParseStream(fs);
+				fclose(fd);
+
+				const char* raw_path = doc["raw_path"].GetString();
+				tex.raw_path = raw_path;
+				tex.meta_path = doc["meta_path"].GetString();
+				tex.filtering = (Filtering)doc["filtering"].GetInt();
+				tex.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
+				tex.format = (TextureFormat)doc["format"].GetInt();
+				tex.width = doc["width"].GetUint();
+				tex.height = doc["height"].GetUint();
+				tex.mip_count = doc["mip_count"].GetUint();
+				tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
+				//tex.enable_mip = doc["enable_mip"].GetBool();
+				tex.enable_mip = true; // force enable mip, todo: serialize it
+				tex.reload(tex.raw_path.c_str());
+			
+				LOG("read textures: {}", path.c_str());
+			}
+			else
+			{
+				ERROR("path does not exist: {}", abs_path.c_str());
+			}
+		}
+		// Texture
+		//====================================================================================
+
+
+		//====================================================================================
+		// CubeMap
+		static void serialize(const CubeMap& cube_map, std::string path)
+		{
+			rapidjson::Document doc;
+			doc.SetObject();
+
+			rapidjson::Value name;
+			name.SetString(cube_map.name.c_str(), doc.GetAllocator());
+			doc.AddMember("name", name, doc.GetAllocator());
+
+			rapidjson::Value cube_map_path;
+			cube_map_path.SetString(path.c_str(), doc.GetAllocator());
+			doc.AddMember("meta_path", cube_map_path, doc.GetAllocator());
+
+			rapidjson::Value right;
+			right.SetString(cube_map.texture_path.c_str(), doc.GetAllocator());
+			doc.AddMember("hdr_texture", right, doc.GetAllocator());
+
+			doc.AddMember("wrap_mode", (int32_t)cube_map.wrap_mode, doc.GetAllocator());
+
+			doc.AddMember("filtering", (int32_t)cube_map.filtering, doc.GetAllocator());
+
+			std::filesystem::path abs_path(ASSETS_PATH + path);
+			if (!std::filesystem::exists(abs_path.parent_path()))
+			{
+				std::filesystem::create_directories(abs_path.parent_path());
+			}
+			std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
+			if (fd != nullptr)
+			{
+				char write_buffer[256];
+				rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
+				rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
+				doc.Accept(material_writer);
+				fclose(fd);
+				LOG("save cubemap: {}", path.c_str());
+			}
+			else
+			{
+				ERROR("path does not exist: {}", (ASSETS_PATH + path).c_str());
+			}
+		}
+
+
+		static void deserialize(std::string path, CubeMap& cubemap)
+		{
+			std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
+			if (fd != nullptr)
+			{
+				LOG("deserialize: {}", (ASSETS_PATH + path).c_str());
+				char read_buffer[256];
+				rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
+				rapidjson::Document doc;
+				doc.ParseStream(fs);
+				const char* texture_path = doc["texture_path"].GetString();
+				fclose(fd);
+				cubemap.name = doc["name"].GetString();
+				cubemap.meta_path = doc["meta_path"].GetString();
+				cubemap.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
+				cubemap.filtering = (Filtering)doc["filtering"].GetInt();
+				cubemap.reload(texture_path);
+			}
+			else
+			{
+				ERROR("path does not exist: {}", ASSETS_PATH + path);
+			}
+		}
+		// CubeMap
 		//====================================================================================
 
 
@@ -444,6 +623,84 @@ namespace Guarneri
 		//====================================================================================
 
 
+		//====================================================================================
+		// Vertex
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Vertex& vertex)
+		{
+			rapidjson::Value v;
+			v.SetObject();
+			v.AddMember("position", Serializer::serialize(doc, vertex.position), doc.GetAllocator());
+			v.AddMember("color", Serializer::serialize(doc, vertex.color), doc.GetAllocator());
+			v.AddMember("uv", Serializer::serialize(doc, vertex.uv), doc.GetAllocator());
+			v.AddMember("tangent", Serializer::serialize(doc, vertex.tangent), doc.GetAllocator());
+			v.AddMember("normal", Serializer::serialize(doc, vertex.normal), doc.GetAllocator());
+			return v;
+		}
+
+		static void deserialize(const rapidjson::Value& v, Vertex& vertex)
+		{
+			Serializer::deserialize(v["position"], vertex.position);
+			Serializer::deserialize(v["color"], vertex.color);
+			Serializer::deserialize(v["uv"], vertex.uv);
+			Serializer::deserialize(v["tangent"], vertex.tangent);
+			Serializer::deserialize(v["normal"], vertex.normal);
+		}
+		// Vertex
+		//====================================================================================
+	
+
+		//====================================================================================
+		// Mesh
+		static rapidjson::Value serialize(rapidjson::Document& doc, const Mesh& mesh)
+		{
+			rapidjson::Value v;
+			v.SetObject();
+
+			rapidjson::Value indices;
+			indices.SetArray();
+			for (auto& i : mesh.indices)
+			{
+				indices.PushBack(i, doc.GetAllocator());
+			}
+
+			rapidjson::Value vertices;
+			vertices.SetArray();
+			for (auto& vert : mesh.vertices)
+			{
+				vertices.PushBack(Serializer::serialize(doc, vert), doc.GetAllocator());
+			}
+
+			v.AddMember("indices", indices, doc.GetAllocator());
+			v.AddMember("vertices", vertices, doc.GetAllocator());
+
+			return v;
+		}
+
+		static void deserialize(const rapidjson::Value& v, Mesh& mesh)
+		{
+			auto indices_array = v["indices"].GetArray();
+			auto vertices_array = v["vertices"].GetArray();
+
+			mesh.indices.clear();
+			mesh.vertices.clear();
+			mesh.indices.reserve(indices_array.Size());
+			mesh.vertices.reserve(vertices_array.Size());
+
+			for (rapidjson::SizeType idx = 0; idx < indices_array.Size(); idx++)
+			{
+				mesh.indices.emplace_back(indices_array[idx].GetUint());
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < vertices_array.Size(); idx++)
+			{
+				Vertex vertex;
+				Serializer::deserialize(vertices_array[idx].GetObject(), vertex);
+				mesh.vertices.emplace_back(vertex);
+			}
+		}
+		// Mesh
+		//====================================================================================
+
 
 		//====================================================================================
 		// Model
@@ -466,7 +723,7 @@ namespace Guarneri
 				meshes.SetArray();
 				for (auto& m : model.meshes)
 				{
-					meshes.PushBack(Mesh::serialize(doc, m), doc.GetAllocator());
+					meshes.PushBack(Serializer::serialize(doc, m), doc.GetAllocator());
 				}
 				doc.AddMember("meshes", meshes, doc.GetAllocator());
 			}
@@ -552,7 +809,9 @@ namespace Guarneri
 					rapidjson::Value meshes = doc["meshes"].GetArray();
 					for (rapidjson::SizeType idx = 0; idx < meshes.Size(); idx++)
 					{
-						model.meshes.emplace_back(Mesh::deserialize(meshes[idx].GetObject()));
+						Mesh mesh;
+						Serializer::deserialize(meshes[idx].GetObject(), mesh);
+						model.meshes.emplace_back(mesh);
 					}
 				}
 
@@ -583,6 +842,78 @@ namespace Guarneri
 		//====================================================================================
 
 
+		//====================================================================================
+		// Light
+		static rapidjson::Value serialize(rapidjson::Document& doc, const DirectionalLight& light)
+		{
+			rapidjson::Value serialized_light;
+			serialized_light.SetObject();
+			rapidjson::Value ambient = Serializer::serialize(doc, light.ambient);
+			rapidjson::Value diffuse = Serializer::serialize(doc, light.diffuse);
+			rapidjson::Value specular = Serializer::serialize(doc, light.specular);
+			rapidjson::Value intensity; intensity.SetFloat(light.intensity);
+			rapidjson::Value yaw; yaw.SetFloat(light.yaw);
+			rapidjson::Value pitch; pitch.SetFloat(light.pitch);
+			rapidjson::Value position = Serializer::serialize(doc, light.position);
+			serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
+			serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
+			serialized_light.AddMember("specular", specular, doc.GetAllocator());
+			serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
+			serialized_light.AddMember("yaw", yaw, doc.GetAllocator());
+			serialized_light.AddMember("pitch", pitch, doc.GetAllocator());
+			serialized_light.AddMember("position", position, doc.GetAllocator());
+			return serialized_light;
+		}
+
+		static void deserialize(const rapidjson::Value& v, DirectionalLight& light)
+		{
+			Serializer::deserialize(v["ambient"].GetObject(), light.ambient);
+			Serializer::deserialize(v["diffuse"].GetObject(), light.diffuse);
+			Serializer::deserialize(v["specular"].GetObject(), light.specular);
+			light.intensity = v["intensity"].GetFloat();
+			light.yaw = v["yaw"].GetFloat();
+			light.pitch = v["pitch"].GetFloat();
+			Serializer::deserialize(v["position"].GetObject(), light.position);
+		}
+
+		static rapidjson::Value serialize(rapidjson::Document& doc, const PointLight& light)
+		{
+			rapidjson::Value serialized_light;
+			serialized_light.SetObject();
+			rapidjson::Value ambient = Serializer::serialize(doc, light.ambient);
+			rapidjson::Value diffuse = Serializer::serialize(doc, light.diffuse);
+			rapidjson::Value specular = Serializer::serialize(doc, light.specular);
+			rapidjson::Value intensity; intensity.SetFloat(light.intensity);
+			rapidjson::Value constant; constant.SetFloat(light.constant);
+			rapidjson::Value linear; linear.SetFloat(light.linear);
+			rapidjson::Value quadratic; quadratic.SetFloat(light.quadratic);
+			rapidjson::Value position = Serializer::serialize(doc, light.position);
+			serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
+			serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
+			serialized_light.AddMember("specular", specular, doc.GetAllocator());
+			serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
+			serialized_light.AddMember("constant", constant, doc.GetAllocator());
+			serialized_light.AddMember("linear", linear, doc.GetAllocator());
+			serialized_light.AddMember("quadratic", quadratic, doc.GetAllocator());
+			serialized_light.AddMember("position", position, doc.GetAllocator());
+			return serialized_light;
+		}
+
+		static void deserialize(const rapidjson::Value& v, PointLight& light)
+		{
+			Serializer::deserialize(v["ambient"].GetObject(), light.ambient);
+			Serializer::deserialize(v["diffuse"].GetObject(), light.diffuse);
+			Serializer::deserialize(v["specular"].GetObject(), light.specular);
+			light.intensity = v["intensity"].GetFloat();
+			light.constant = v["constant"].GetFloat();
+			light.linear = v["linear"].GetFloat();
+			light.quadratic = v["quadratic"].GetFloat();
+			Serializer::deserialize(v["position"].GetObject(), light.position);
+		}
+		// Light
+		//====================================================================================
+
+
 
 		//====================================================================================
 		// Scene
@@ -594,13 +925,13 @@ namespace Guarneri
 			rapidjson::Value name;
 			name.SetString(scene.name.c_str(), doc.GetAllocator());
 			doc.AddMember("name", name, doc.GetAllocator());
-			doc.AddMember("main_light", DirectionalLight::serialize(doc, scene.main_light), doc.GetAllocator());
+			doc.AddMember("main_light", Serializer::serialize(doc, scene.main_light), doc.GetAllocator());
 
 			rapidjson::Value point_lights;
 			point_lights.SetArray();
 			for (auto& pl : scene.point_lights)
 			{
-				point_lights.PushBack(PointLight::serialize(doc, pl), doc.GetAllocator());
+				point_lights.PushBack(Serializer::serialize(doc, pl), doc.GetAllocator());
 			}
 			doc.AddMember("point_lights", point_lights, doc.GetAllocator());
 
@@ -681,11 +1012,13 @@ namespace Guarneri
 					nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
 					scene.name = nice_name;
 				}
-				scene.main_light = DirectionalLight::deserialize(doc["main_light"].GetObject());
+				Serializer::deserialize(doc["main_light"].GetObject(), scene.main_light);
 				auto point_lights = doc["point_lights"].GetArray();
 				for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
 				{
-					scene.point_lights.push_back(PointLight::deserialize(point_lights[idx].GetObject()));
+					PointLight pl;
+					Serializer::deserialize(point_lights[idx].GetObject(), pl);
+					scene.point_lights.push_back(pl);
 				}
 
 				auto models = doc["models"].GetArray();

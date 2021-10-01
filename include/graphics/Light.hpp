@@ -2,7 +2,6 @@
 #define _LIGHT_
 #include "Color.hpp"
 #include "tinymath.h"
-#include "rapidjson/document.h"
 
 namespace Guarneri {
 	struct Light {
@@ -28,9 +27,6 @@ namespace Guarneri {
 		tinymath::mat4x4 projection_matrix() const;
 		void rotate(const float& yaw_offset, const float& pitch_offset);
 		void update_rotation();
-
-		static rapidjson::Value serialize(rapidjson::Document& doc, const DirectionalLight& light);
-		static DirectionalLight deserialize(const rapidjson::Value& v);
 	};
 
 	struct PointLight : Light {
@@ -39,9 +35,6 @@ namespace Guarneri {
 		float quadratic;
 		tinymath::vec3f position;
 		PointLight();
-
-		static rapidjson::Value serialize(rapidjson::Document& doc, const PointLight& light);
-		static PointLight deserialize(const rapidjson::Value& v);
 	};
 
 	struct SpotLight : Light {

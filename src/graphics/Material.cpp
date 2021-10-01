@@ -1,12 +1,4 @@
 #include "Material.hpp"
-#include <fstream>
-#include <iostream>
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/filereadstream.h"
 #include "Marcos.h"
 #include "ShaderLab.hpp"
 #include "Singleton.hpp"

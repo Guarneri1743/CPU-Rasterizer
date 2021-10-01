@@ -55,82 +55,11 @@ namespace Guarneri
 		tinymath::calculate_right_up(forward, right, up);
 	}
 
-	rapidjson::Value DirectionalLight::serialize(rapidjson::Document& doc, const DirectionalLight& light)
-	{
-		rapidjson::Value serialized_light;
-		serialized_light.SetObject();
-		rapidjson::Value ambient = Color::serialize(doc, light.ambient);
-		rapidjson::Value diffuse = Color::serialize(doc, light.diffuse);
-		rapidjson::Value specular = Color::serialize(doc, light.specular);
-		rapidjson::Value intensity; intensity.SetFloat(light.intensity);
-		rapidjson::Value yaw; yaw.SetFloat(light.yaw);
-		rapidjson::Value pitch; pitch.SetFloat(light.pitch);
-		rapidjson::Value position = Serializer::serialize(doc, light.position);
-		serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
-		serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
-		serialized_light.AddMember("specular", specular, doc.GetAllocator());
-		serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
-		serialized_light.AddMember("yaw", yaw, doc.GetAllocator());
-		serialized_light.AddMember("pitch", pitch, doc.GetAllocator());
-		serialized_light.AddMember("position", position, doc.GetAllocator());
-		return serialized_light;
-	}
-
-	DirectionalLight DirectionalLight::deserialize(const rapidjson::Value& v)
-	{
-		DirectionalLight light; 
-		light.ambient = Color::deserialize(v["ambient"].GetObject());
-		light.diffuse = Color::deserialize(v["diffuse"].GetObject());
-		light.specular = Color::deserialize(v["specular"].GetObject());
-		light.intensity = v["intensity"].GetFloat();
-		light.yaw = v["yaw"].GetFloat();
-		light.pitch = v["pitch"].GetFloat();
-		Serializer::deserialize(v["position"].GetObject(), light.position);
-		return light;
-	}
-
 	PointLight::PointLight() : Light()
 	{
 		constant = 1.0f;
 		linear = 0.1f;
 		quadratic = 0.03f;
 		position = tinymath::kVec3fZero;
-	}
-
-	rapidjson::Value PointLight::serialize(rapidjson::Document& doc, const PointLight& light)
-	{
-		rapidjson::Value serialized_light;
-		serialized_light.SetObject();
-		rapidjson::Value ambient = Color::serialize(doc, light.ambient);
-		rapidjson::Value diffuse = Color::serialize(doc, light.diffuse);
-		rapidjson::Value specular = Color::serialize(doc, light.specular);
-		rapidjson::Value intensity; intensity.SetFloat(light.intensity);
-		rapidjson::Value constant; constant.SetFloat(light.constant);
-		rapidjson::Value linear; linear.SetFloat(light.linear);
-		rapidjson::Value quadratic; quadratic.SetFloat(light.quadratic);
-		rapidjson::Value position = Serializer::serialize(doc, light.position);
-		serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
-		serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
-		serialized_light.AddMember("specular", specular, doc.GetAllocator());
-		serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
-		serialized_light.AddMember("constant", constant, doc.GetAllocator());
-		serialized_light.AddMember("linear", linear, doc.GetAllocator());
-		serialized_light.AddMember("quadratic", quadratic, doc.GetAllocator());
-		serialized_light.AddMember("position", position, doc.GetAllocator());
-		return serialized_light;
-	}
-
-	PointLight PointLight::deserialize(const rapidjson::Value& v)
-	{
-		PointLight light;
-		light.ambient = Color::deserialize(v["ambient"].GetObject());
-		light.diffuse = Color::deserialize(v["diffuse"].GetObject());
-		light.specular = Color::deserialize(v["specular"].GetObject());
-		light.intensity = v["intensity"].GetFloat();
-		light.constant = v["constant"].GetFloat();
-		light.linear = v["linear"].GetFloat();
-		light.quadratic = v["quadratic"].GetFloat();
-		Serializer::deserialize(v["position"].GetObject(), light.position);
-		return light;
 	}
 }

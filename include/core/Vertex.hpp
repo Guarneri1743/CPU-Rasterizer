@@ -2,7 +2,6 @@
 #define _VERTEX_
 #include <string>
 #include "tinymath.h"
-#include "rapidjson/document.h"
 
 namespace Guarneri
 {
@@ -36,8 +35,6 @@ namespace Guarneri
 		static tinymath::vec4f clip2ndc(const tinymath::vec4f& v);
 		static Vertex ndc2screen(const int& width, const int& height, const Vertex& v);
 		static tinymath::vec4f ndc2screen(const int& width, const int& height, const tinymath::vec4f& v);
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Vertex& v);
-		static Vertex deserialize(const rapidjson::Value& v);
 	};
 }
 #endif

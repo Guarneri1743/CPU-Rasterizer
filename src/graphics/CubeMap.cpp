@@ -5,17 +5,12 @@
 #include <algorithm>
 #include <execution>
 #include "Define.hpp"
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Cache.hpp"
 #include "stb_image.h"
 #include "Sampling.hpp"
+#include "Serialization.hpp"
 
 namespace Guarneri
 {
@@ -391,76 +386,9 @@ namespace Guarneri
 	//	}
 	//}
 
-	void CubeMap::serialize(const CubeMap& cube_map, std::string path)
-	{
-		rapidjson::Document doc;
-		doc.SetObject();
-
-		rapidjson::Value name;
-		name.SetString(cube_map.name.c_str(), doc.GetAllocator());
-		doc.AddMember("name", name, doc.GetAllocator());
-
-		rapidjson::Value cube_map_path;
-		cube_map_path.SetString(path.c_str(), doc.GetAllocator());
-		doc.AddMember("meta_path", cube_map_path, doc.GetAllocator());
-
-		rapidjson::Value right;
-		right.SetString(cube_map.texture_path.c_str(), doc.GetAllocator());
-		doc.AddMember("hdr_texture", right, doc.GetAllocator());
-
-		doc.AddMember("wrap_mode", (int32_t)cube_map.wrap_mode, doc.GetAllocator());
-
-		doc.AddMember("filtering", (int32_t)cube_map.filtering, doc.GetAllocator());
-
-		std::filesystem::path abs_path(ASSETS_PATH + path);
-		if (!std::filesystem::exists(abs_path.parent_path()))
-		{
-			std::filesystem::create_directories(abs_path.parent_path());
-		}
-		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
-		if (fd != nullptr)
-		{
-			char write_buffer[256];
-			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::PrettyWriter<rapidjson::FileWriteStream> material_writer(fs);
-			doc.Accept(material_writer);
-			fclose(fd);
-			LOG("save cubemap: {}", path.c_str());
-		}
-		else
-		{
-			ERROR("path does not exist: {}", (ASSETS_PATH + path).c_str());
-		}
-	}
-
 	void CubeMap::spawn(std::string path, std::shared_ptr<CubeMap>& cubemap)
 	{
 		cubemap = std::shared_ptr<CubeMap>(new CubeMap());
-		CubeMap::deserialize(path, *cubemap);
-	}
-
-
-	void CubeMap::deserialize(std::string path, CubeMap& cubemap)
-	{
-		std::FILE* fd = fopen((ASSETS_PATH + path).c_str(), "r");
-		if (fd != nullptr)
-		{
-			LOG("deserialize: {}", (ASSETS_PATH + path).c_str());
-			char read_buffer[256];
-			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
-			rapidjson::Document doc;
-			doc.ParseStream(fs);
-			const char* texture_path = doc["texture_path"].GetString();
-			fclose(fd);
-			cubemap.name = doc["name"].GetString();
-			cubemap.meta_path = doc["meta_path"].GetString();
-			cubemap.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
-			cubemap.filtering = (Filtering)doc["filtering"].GetInt();
-			cubemap.reload(texture_path);
-		}
-		else
-		{
-			ERROR("path does not exist: {}", ASSETS_PATH + path);
-		}
+		Serializer::deserialize(path, *cubemap);
 	}
 }

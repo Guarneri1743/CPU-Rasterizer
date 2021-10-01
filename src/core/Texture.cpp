@@ -3,14 +3,9 @@
 #include <filesystem>
 #include "Singleton.hpp"
 #include "Cache.hpp"
-#include "rapidjson/document.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/filereadstream.h"
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "Serialization.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -149,8 +144,9 @@ namespace Guarneri
 		{
 			return ret;
 		}
-		ret = std::shared_ptr<Texture>(new Texture());
-		Texture::deserialize(path, *ret);
+		Texture* tex = new Texture();
+		Serializer::deserialize(path, *tex);
+		ret = std::shared_ptr<Texture>(tex);
 		INST(Cache<Texture>).put(path, ret);
 		return ret;
 	}
@@ -794,80 +790,6 @@ namespace Guarneri
 				this->gray_mipmaps[i].reset();
 				break;
 			}
-		}
-	}
-
-	void Texture::serialize(const Texture& tex, const std::string& path)
-	{
-		rapidjson::Document doc;
-		doc.SetObject();
-
-		rapidjson::Value raw_path;
-		raw_path.SetString(tex.raw_path.c_str(), doc.GetAllocator());
-		rapidjson::Value meta_path;
-		meta_path.SetString(path.c_str(), doc.GetAllocator());
-		doc.AddMember("raw_path", raw_path, doc.GetAllocator());
-		doc.AddMember("meta_path", meta_path, doc.GetAllocator());
-		doc.AddMember("filtering", (int32_t)tex.filtering, doc.GetAllocator());
-		doc.AddMember("wrap_mode", (int32_t)tex.wrap_mode, doc.GetAllocator());
-		doc.AddMember("format", (int32_t)tex.format, doc.GetAllocator());
-		doc.AddMember("width", (uint32_t)tex.width, doc.GetAllocator());
-		doc.AddMember("height", (uint32_t)tex.height, doc.GetAllocator());
-		doc.AddMember("mip_count", (uint32_t)tex.mip_count, doc.GetAllocator());
-		doc.AddMember("mip_filtering", (int32_t)tex.mip_filtering, doc.GetAllocator());
-		doc.AddMember("enable_mip", (int32_t)tex.enable_mip, doc.GetAllocator());
-
-		std::filesystem::path abs_path(ASSETS_PATH + path);
-		if (!std::filesystem::exists(abs_path.parent_path()))
-		{
-			std::filesystem::create_directories(abs_path.parent_path());
-		}
-		std::FILE* fd = fopen(abs_path.string().c_str(), "w+");
-		if (fd != nullptr)
-		{
-			char write_buffer[256];
-			rapidjson::FileWriteStream fs(fd, write_buffer, sizeof(write_buffer));
-			rapidjson::PrettyWriter<rapidjson::FileWriteStream> writer(fs);
-			doc.Accept(writer);
-			fclose(fd);
-
-			LOG("save texture: {}", path.c_str());
-		}
-		else
-		{
-			ERROR("path does not exist: {}", abs_path.string().c_str());
-		}
-	}
-
-	void Texture::deserialize(std::string path, Texture & tex)
-	{
-		std::string abs_path = ASSETS_PATH + path;
-		std::FILE* fd = fopen(abs_path.c_str(), "r");
-		if (fd != nullptr)
-		{
-			LOG("deserialize: {}", abs_path.c_str());
-			char read_buffer[256];
-			rapidjson::FileReadStream fs(fd, read_buffer, sizeof(read_buffer));
-			rapidjson::Document doc;
-			doc.ParseStream(fs);
-			tex.raw_path = doc["raw_path"].GetString();
-			tex.meta_path = doc["meta_path"].GetString();
-			tex.filtering = (Filtering)doc["filtering"].GetInt();
-			tex.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
-			tex.format = (TextureFormat)doc["format"].GetInt();
-			tex.width = doc["width"].GetUint();
-			tex.height = doc["height"].GetUint();
-			tex.mip_count = doc["mip_count"].GetUint();
-			tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
-			//tex.enable_mip = doc["enable_mip"].GetBool();
-			tex.enable_mip = true; // force enable mip, todo: serialize it
-			tex.reload(tex.raw_path.c_str());
-			fclose(fd);
-			LOG("read textures: {}", path.c_str());
-		}
-		else
-		{
-			ERROR("path does not exist: {}", abs_path.c_str());
 		}
 	}
 
