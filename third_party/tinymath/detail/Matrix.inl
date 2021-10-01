@@ -538,189 +538,42 @@ Matrix<Component, 3, 3> inverse(const Matrix<Component, 3, 3>& m)
 template<typename Component>
 Matrix<Component, 4, 4> inverse(const Matrix<Component, 4, 4>& m)
 {
-	Matrix<Component, 4, 4> out = Matrix<Component, 4, 4>();
+	Component s0 = ((m[0] * m[5]) - (m[1] * m[4]));
+	Component s1 = ((m[0] * m[6]) - (m[2] * m[4]));
+	Component s2 = ((m[0] * m[7]) - (m[3] * m[4]));
+	Component s3 = ((m[1] * m[6]) - (m[2] * m[5]));
+	Component s4 = ((m[1] * m[7]) - (m[3] * m[5]));
+	Component s5 = ((m[2] * m[7]) - (m[3] * m[6]));
 
-	Component r0[8];
-	Component r1[8];
-	Component r2[8];
-	Component r3[8];
-	Component m0, m1, m2, m3, s;
+	Component c5 = ((m[10] * m[15]) - (m[11] * m[14]));
+	Component c4 = ((m[9] * m[15]) - (m[11] * m[13]));
+	Component c3 = ((m[9] * m[14]) - (m[10] * m[13]));
+	Component c2 = ((m[8] * m[15]) - (m[11] * m[12]));
+	Component c1 = ((m[8] * m[14]) - (m[10] * m[12]));
+	Component c0 = ((m[8] * m[13]) - (m[9] * m[12]));
 
-	r0[0] = m.at(0, 0);
-	r0[1] = m.at(0, 1);
-	r0[2] = m.at(0, 2);
-	r0[3] = m.at(0, 3);
-	r0[4] = (Component)1;
-	r0[5] = r0[6] = r0[7] = (Component)0;
+	Component det = (s0 * c5) - (s1 * c4) + (s2 * c3) + (s3 * c2) - (s4 * c1) + (s5 * c0);
 
-	r1[0] = m.at(1, 0);
-	r1[1] = m.at(1, 1);
-	r1[2] = m.at(1, 2);
-	r1[3] = m.at(1, 3);
-	r1[5] = (Component)1;
-	r1[4] = r1[6] = r1[7] = (Component)0;
+	Component one_over_det = (Component)1 / det;
+	Matrix<Component, 4, 4> ret = kMat4x4Identity;
 
-	r2[0] = m.at(2, 0);
-	r2[1] = m.at(2, 1);
-	r2[2] = m.at(2, 2);
-	r2[3] = m.at(2, 3);
-	r2[6] = (Component)1;
-	r2[4] = r2[5] = r2[7] = (Component)0;
-
-	r3[0] = m.at(3, 0);
-	r3[1] = m.at(3, 1);
-	r3[2] = m.at(3, 2);
-	r3[3] = m.at(3, 3);
-	r3[7] = (Component)1;
-	r3[4] = r3[5] = r3[6] = (Component)0;
-
-	if (tinymath::abs(r3[0]) > tinymath::abs(r2[0]))
-		tinymath::swap(r3, r2);
-	if (tinymath::abs(r2[0]) > tinymath::abs(r1[0]))
-		tinymath::swap(r2, r1);
-	if (tinymath::abs(r1[0]) > tinymath::abs(r0[0]))
-		tinymath::swap(r1, r0);
-
-	if ((Component)0 == r0[0])
-		return out;
-
-	m1 = r1[0] / r0[0]; m2 = r2[0] / r0[0]; m3 = r3[0] / r0[0];
-
-	s = r0[1];
-	r1[1] -= m1 * s;
-	r2[1] -= m2 * s;
-	r3[1] -= m3 * s;
-
-	s = r0[2];
-	r1[2] -= m1 * s;
-	r2[2] -= m2 * s;
-	r3[2] -= m3 * s;
-
-	s = r0[3];
-	r1[3] -= m1 * s;
-	r2[3] -= m2 * s;
-	r3[3] -= m3 * s;
-	s = r0[4];
-
-	if (s != (Component)0)
-	{
-		r1[4] -= m1 * s; r2[4] -= m2 * s; r3[4] -= m3 * s;
-	}
-	s = r0[5];
-	if (s != (Component)0)
-	{
-		r1[5] -= m1 * s; r2[5] -= m2 * s; r3[5] -= m3 * s;
-	}
-	s = r0[6];
-	if (s != (Component)0)
-	{
-		r1[6] -= m1 * s; r2[6] -= m2 * s; r3[6] -= m3 * s;
-	}
-	s = r0[7];
-	if (s != (Component)0)
-	{
-		r1[7] -= m1 * s; r2[7] -= m2 * s; r3[7] -= m3 * s;
-	}
-
-	if (tinymath::abs(r3[1]) > tinymath::abs(r2[1]))
-		tinymath::swap(r3, r2);
-	if (tinymath::abs(r2[1]) > tinymath::abs(r1[1]))
-		tinymath::swap(r2, r1);
-
-	if ((Component)0 == r1[1])
-		return out;
-
-	m2 = r2[1] / r1[1];
-	m3 = r3[1] / r1[1];
-
-	r2[2] -= m2 * r1[2];
-	r3[2] -= m3 * r1[2];
-	r2[3] -= m2 * r1[3];
-	r3[3] -= m3 * r1[3];
-
-	s = r1[4];
-
-	if ((Component)0 != s)
-	{
-		r2[4] -= m2 * s;
-		r3[4] -= m3 * s;
-	}
-
-	s = r1[5];
-
-	if ((Component)0 != s)
-	{
-		r2[5] -= m2 * s;
-		r3[5] -= m3 * s;
-	}
-
-	s = r1[6];
-
-	if ((Component)0 != s)
-	{
-		r2[6] -= m2 * s;
-		r3[6] -= m3 * s;
-	}
-
-	s = r1[7];
-
-	if ((Component)0 != s)
-	{
-		r2[7] -= m2 * s;
-		r3[7] -= m3 * s;
-	}
-
-	if (tinymath::abs(r3[2]) > tinymath::abs(r2[2]))
-		tinymath::swap(r3, r2);
-
-	if ((Component)0 == r2[2])
-		return out;
-
-	m3 = r3[2] / r2[2];
-	r3[3] -= m3 * r2[3];
-	r3[4] -= m3 * r2[4];
-	r3[5] -= m3 * r2[5];
-	r3[6] -= m3 * r2[6];
-	r3[7] -= m3 * r2[7];
-
-	if ((Component)0 == r3[3])
-		return out;
-
-	s = (Component)1 / r3[3];
-	r3[4] *= s;
-	r3[5] *= s;
-	r3[6] *= s;
-	r3[7] *= s;
-
-	m2 = r2[3];
-	s = (Component)1 / r2[2];
-	r2[4] = s * (r2[4] - r3[4] * m2), r2[5] = s * (r2[5] - r3[5] * m2),
-		r2[6] = s * (r2[6] - r3[6] * m2), r2[7] = s * (r2[7] - r3[7] * m2);
-	m1 = r1[3];
-	r1[4] -= r3[4] * m1; r1[5] -= r3[5] * m1,
-		r1[6] -= r3[6] * m1; r1[7] -= r3[7] * m1;
-	m0 = r0[3];
-	r0[4] -= r3[4] * m0; r0[5] -= r3[5] * m0,
-		r0[6] -= r3[6] * m0; r0[7] -= r3[7] * m0;
-
-	m1 = r1[2];
-	s = (Component)1 / r1[1];
-	r1[4] = s * (r1[4] - r2[4] * m1); r1[5] = s * (r1[5] - r2[5] * m1),
-		r1[6] = s * (r1[6] - r2[6] * m1); r1[7] = s * (r1[7] - r2[7] * m1);
-	m0 = r0[2];
-	r0[4] -= r2[4] * m0; r0[5] -= r2[5] * m0,
-		r0[6] -= r2[6] * m0; r0[7] -= r2[7] * m0;
-
-	m0 = r0[1];
-	s = (Component)1 / r0[0];
-	r0[4] = s * (r0[4] - r1[4] * m0); r0[5] = s * (r0[5] - r1[5] * m0),
-		r0[6] = s * (r0[6] - r1[6] * m0); r0[7] = s * (r0[7] - r1[7] * m0);
-
-	out.at(0, 0) = r0[4]; out.at(0, 1) = r0[5], out.at(0, 2) = r0[6]; out.at(0, 3) = r0[7];
-	out.at(1, 0) = r1[4]; out.at(1, 1) = r1[5], out.at(1, 2) = r1[6]; out.at(1, 3) = r1[7];
-	out.at(2, 0) = r2[4]; out.at(2, 1) = r2[5], out.at(2, 2) = r2[6]; out.at(2, 3) = r2[7];
-	out.at(3, 0) = r3[4]; out.at(3, 1) = r3[5], out.at(3, 2) = r3[6]; out.at(3, 3) = r3[7];
-	return out;
+	ret[0] = +(m[5] * c5 - m[6] * c4 + m[7] * c3) * one_over_det;
+	ret[1] = -(m[1] * c5 - m[2] * c4 + m[3] * c3) * one_over_det;
+	ret[2] = +(m[13] * s5 - m[14] * s4 + m[15] * s3) * one_over_det;
+	ret[3] = -(m[9] * s5 - m[10] * s4 + m[11] * s3) * one_over_det;
+	ret[4] = -(m[4] * c5 - m[6] * c2 + m[7] * c1) * one_over_det;
+	ret[5] = +(m[0] * c5 - m[2] * c2 + m[3] * c1) * one_over_det;
+	ret[6] = -(m[12] * s5 - m[14] * s2 + m[15] * s1) * one_over_det;
+	ret[7] = +(m[8] * s5 - m[10] * s2 + m[11] * s1) * one_over_det;
+	ret[8] = +(m[4] * c4 - m[5] * c2 + m[7] * c0) * one_over_det;
+	ret[9] = -(m[0] * c4 - m[1] * c2 + m[3] * c0) * one_over_det;
+	ret[10] = +(m[12] * s4 - m[13] * s2 + m[15] * s0) * one_over_det;
+	ret[11] = -(m[8] * s4 - m[9] * s2 + m[11] * s0) * one_over_det;
+	ret[12] = -(m[4] * c3 - m[5] * c1 + m[6] * c0) * one_over_det;
+	ret[13] = +(m[0] * c3 - m[1] * c1 + m[2] * c0) * one_over_det;
+	ret[14] = -(m[12] * s3 - m[13] * s1 + m[14] * s0) * one_over_det;
+	ret[15] = +(m[8] * s3 - m[9] * s1 + m[10] * s0) * one_over_det;
+	return ret;
 }
 
 template <typename Component>
