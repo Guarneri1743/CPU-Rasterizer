@@ -271,12 +271,12 @@ namespace Guarneri
 			{
 				name2cubemap.at(cubemap_prop)->sample_brdf(tinymath::vec2f(ndv, roughness), brdf_lut);
 
-				if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.0f)
+				/*if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.0f)
 				{
 					uint32_t row, col;
 					uv2pixel(512, 512, ndv, roughness, row, col);
-					//printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
-				}
+					printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
+				}*/
 			}
 
 			tinymath::vec3f indirect_diffuse = tinymath::vec3f(irradiance.r, irradiance.g, irradiance.b) * tinymath::vec3f(albedo.r, albedo.g, albedo.b) * diffuse_term;
