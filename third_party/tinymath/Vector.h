@@ -15,6 +15,10 @@ Vector<Component, N> func(const Vector<Component, N>& v);
 template<typename Component, size_t N>\
 Vector<Component, N> func(const Vector<Component, N>& lhs, const Vector<Component, N>& rhs);
 
+#define COMPONENT_WWISE_FUNC_COMP_DECLARE(func)\
+template<typename Component, size_t N>\
+Vector<Component, N> func(const Vector<Component, N>& lhs, const Component& rhs);
+
 COMPONENT_WWISE_FUNC_DECLARE(sgn);
 COMPONENT_WWISE_FUNC_DECLARE(sin);
 COMPONENT_WWISE_FUNC_DECLARE(asin);
@@ -31,7 +35,8 @@ COMPONENT_WWISE_FUNC_DECLARE(sqrt);
 COMPONENT_WWISE_FUNC_DECLARE(log);
 COMPONENT_WWISE_FUNC_DECLARE(log10);
 COMPONENT_WWISE_FUNC_DECLARE(log2);
-COMPONENT_WWISE_FUNC_2_DECLARE(pow);
+COMPONENT_WWISE_FUNC_2_DECLARE(pow); 
+COMPONENT_WWISE_FUNC_COMP_DECLARE(pow);
 
 template<typename Component, size_t N>
 TMATH_INLINE bool operator!=(const Vector<Component, N>& lhs, const Vector<Component, N>& rhs);

@@ -13,7 +13,7 @@ namespace Guarneri
 	/// <param name="c2">vertex in clip space</param>
 	/// <param name="c3">vertex in clip space</param>
 	/// <returns></returns>
-	std::vector<Triangle> Clipper::cvv_clipping(const float& near_plane, const Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	std::vector<Triangle> Clipper::cvv_clipping(const float& near_plane, const tinymath::Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		std::vector<Vertex> polygon = { c1, c2, c3 };
 
@@ -163,7 +163,7 @@ namespace Guarneri
 	}
 
 	// todo: frustum & aabb, frustum & obb, etc.
-	bool Clipper::frustum_culling_sphere(const Frustum& frustum, const Sphere& bounding_sphere)
+	bool Clipper::frustum_culling_sphere(const tinymath::Frustum& frustum, const tinymath::Sphere& bounding_sphere)
 	{
 		for (int i = 0; i < 6; i++)
 		{
@@ -178,7 +178,7 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Clipper::conservative_frustum_culling(const Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	bool Clipper::conservative_frustum_culling(const tinymath::Frustum& frustum, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		for (int i = 0; i < 6; i++)
 		{

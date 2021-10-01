@@ -188,6 +188,16 @@ Vector<Component, N> func(const Vector<Component, N>& lhs, const Vector<Componen
     return ret;\
 }
 
+#define COMPONENT_WWISE_FUNC_COMP(func)\
+template<typename Component, size_t N>\
+Vector<Component, N> func(const Vector<Component, N>& lhs, const Component& rhs)\
+{\
+    Vector<Component, N> ret = Vector<Component, N>();\
+    for(size_t i = 0; i < N; ++i)\
+        ret[i] = (Component)func(lhs[i], rhs);\
+    return ret;\
+}
+
 COMPONENT_WWISE_FUNC(sgn);
 COMPONENT_WWISE_FUNC(sin);
 COMPONENT_WWISE_FUNC(asin);
@@ -205,6 +215,7 @@ COMPONENT_WWISE_FUNC(log);
 COMPONENT_WWISE_FUNC(log10);
 COMPONENT_WWISE_FUNC(log2);
 COMPONENT_WWISE_FUNC_2(pow);
+COMPONENT_WWISE_FUNC_COMP(pow);
 
 
 template<typename Component, size_t N>
@@ -361,8 +372,10 @@ struct Vector<Component, 2>
 	{
 		Component data[2];
 		struct { Component x, y; };
+		struct { Component r, g; };
 
 		SWIZZLE_2;
+		SWIZZLE_COLOR_2;
 	};
 
 	Vector<Component, 2>() {}
@@ -381,8 +394,10 @@ struct Vector<Component, 3>
 	{
 		Component data[3];
 		struct { Component x, y, z; };
+		struct { Component r, g, b; };
 
 		SWIZZLE_3;
+		SWIZZLE_COLOR_3;
 	};
 
 	Vector<Component, 3>() {}
@@ -402,8 +417,10 @@ struct Vector<Component, 4>
 	{
 		Component data[4];
 		struct { Component x, y, z, w; };
+		struct { Component r, g, b, a; };
 
 		SWIZZLE_4;
+		SWIZZLE_COLOR_4;
 	};
 
 	Vector<Component, 4>() {}
@@ -441,6 +458,13 @@ constexpr Vector<float, 4> kVec4fZero = Vector<float, 4>(0.f);
 constexpr Vector<float, 4> kVec4fOne = Vector<float, 4>(1.f);
 constexpr Vector<int, 4> kVec4iZero = Vector<int, 4>(0);
 constexpr Vector<int, 4> kVec4iOne = Vector<int, 4>(1);
+
+constexpr Vector<float, 4> kColorRed = Vector<float, 4>(1.0f, 0.0f, 0.0f, 1.0f);
+constexpr Vector<float, 4> kColorGreen = Vector<float, 4>(0.0f, 1.0f, 0.0f, 1.0f);
+constexpr Vector<float, 4> kColorBlue = Vector<float, 4>(0.0f, 0.0f, 1.0f, 1.0f);
+constexpr Vector<float, 4> kColorWhite = Vector<float, 4>(1.0f);
+constexpr Vector<float, 4> kColorBlack = Vector<float, 4>(0.0f);
+constexpr Vector<float, 4> kVec4fGray = Vector<float, 4>(0.5f);
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

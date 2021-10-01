@@ -1,12 +1,11 @@
 #pragma once
-#include "Color.hpp"
 #include "tinymath.h"
 
 namespace Guarneri {
 	struct Light {
-		Color ambient;
-		Color diffuse;
-		Color specular;
+		tinymath::Color ambient;
+		tinymath::Color diffuse;
+		tinymath::Color specular;
 		float intensity;
 		Light();
 	};

@@ -19,11 +19,11 @@ namespace Guarneri
 		return o;
 	}
 
-	Color ShadowShader::fragment_shader(const v2f& input) const
+	tinymath::Color ShadowShader::fragment_shader(const v2f& input) const
 	{
 		//auto shadow_coord = input.shadow_coord * 0.5f + 0.5f;
 		//printf("shadow: %f, %f, %f %f\npos: %f, %f, %f %f\n", shadow_coord.x, shadow_coord.y, shadow_coord.z, shadow_coord.w, input.position.x, input.position.y, input.position.z, input.position.w);
 		UNUSED(input);
-		return Color::BLACK;
+		return tinymath::kColorBlack;
 	}
 }

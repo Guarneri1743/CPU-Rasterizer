@@ -12,7 +12,6 @@ function setupIncludeDirs()
       include_dir .. "/core",
       include_dir .. "/editor",
       include_dir .. "/graphics",
-      include_dir .. "/primitives",
       include_dir .. "/shader",
       include_dir .. "/utility",
       third_party_dir,
@@ -109,7 +108,6 @@ function setupProject()
    files { 
       src_dir .. "/*.*", 
       src_dir .. "/utility/*.*",
-      src_dir .. "/primitives/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/graphics/*.*",
       src_dir .. "/shader/*.*",
@@ -118,7 +116,6 @@ function setupProject()
       include_dir .. "/detail/*.*", 
       include_dir .. "/utility/*.*",
       include_dir .. "/utility/detail/*.*",
-      include_dir .. "/primitives/*.*",
       include_dir .. "/core/*.*",
       include_dir .. "/graphics/*.*",
       include_dir .. "/core/detail/*.*",
@@ -134,6 +131,8 @@ function setupProject()
       third_party_dir .. "/glfw/GLFW/*.*",
       third_party_dir .. "/tinymath/*.*",
       third_party_dir .. "/tinymath/detail/*.*",
+      third_party_dir .. "/tinymath/primitives/*.*",
+      third_party_dir .. "/tinymath/color/*.*",
       sample_dir .. "/Editor.cpp"
    }
 

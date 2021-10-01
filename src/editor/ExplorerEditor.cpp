@@ -27,7 +27,7 @@ namespace Guarneri
 
 	void ExplorerEditor::on_gui()
 	{
-		rect = Rect(0.0f, (float)Window::main()->get_height() - (float)kBottomHeight, (float)Window::main()->get_width(), (float)kBottomHeight);
+		rect = tinymath::Rect(0.0f, (float)Window::main()->get_height() - (float)kBottomHeight, (float)Window::main()->get_width(), (float)kBottomHeight);
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("ExplorerBar", tab_bar_flags))
 		{

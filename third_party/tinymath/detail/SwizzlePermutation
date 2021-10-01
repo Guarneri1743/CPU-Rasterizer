@@ -1,6 +1,8 @@
 #pragma once
 // todo: can we use meta programming to generate all permutations at compile time?
 
+// Vector Swizzling
+
 #define SWIZZLE_2      \
 Swizzle<SwizzleContainer, Component, 0, 0> xx; \
 Swizzle<SwizzleContainer, Component, 0, 1> xy; \
@@ -494,3 +496,499 @@ Swizzle<SwizzleContainer, Component, 3, 3, 3, 0> wwwx; \
 Swizzle<SwizzleContainer, Component, 3, 3, 3, 1> wwwy; \
 Swizzle<SwizzleContainer, Component, 3, 3, 3, 2> wwwz; \
 Swizzle<SwizzleContainer, Component, 3, 3, 3, 3> wwww; 
+
+
+// Color Swizzling
+#define SWIZZLE_COLOR_2      \
+Swizzle<SwizzleContainer, Component, 0, 0> rr; \
+Swizzle<SwizzleContainer, Component, 0, 1> rg; \
+Swizzle<SwizzleContainer, Component, 1, 0> gr; \
+Swizzle<SwizzleContainer, Component, 1, 1> gg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0> rrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1> rrg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0> rgr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1> rgg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0> grr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1> grg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0> ggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1> ggg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 0> rrrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 1> rrrg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 0> rrgr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 1> rrgg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 0> rgrr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 1> rgrg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 0> rggr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 1> rggg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 0> grrr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 1> grrg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 0> grgr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 1> grgg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 0> ggrr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 1> ggrg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 0> gggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 1> gggg;
+
+#define SWIZZLE_COLOR_3      \
+Swizzle<SwizzleContainer, Component, 0, 0> rr; \
+Swizzle<SwizzleContainer, Component, 0, 1> rg; \
+Swizzle<SwizzleContainer, Component, 0, 2> rb; \
+Swizzle<SwizzleContainer, Component, 0, 3> ra; \
+Swizzle<SwizzleContainer, Component, 1, 0> gr; \
+Swizzle<SwizzleContainer, Component, 1, 1> gg; \
+Swizzle<SwizzleContainer, Component, 1, 2> gb; \
+Swizzle<SwizzleContainer, Component, 1, 3> ga; \
+Swizzle<SwizzleContainer, Component, 2, 0> br; \
+Swizzle<SwizzleContainer, Component, 2, 1> bg; \
+Swizzle<SwizzleContainer, Component, 2, 2> bb; \
+Swizzle<SwizzleContainer, Component, 2, 3> ba; \
+Swizzle<SwizzleContainer, Component, 3, 0> ar; \
+Swizzle<SwizzleContainer, Component, 3, 1> ag; \
+Swizzle<SwizzleContainer, Component, 3, 2> ab; \
+Swizzle<SwizzleContainer, Component, 3, 3> aa; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0> rrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1> rrg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2> rrb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0> rgr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1> rgg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2> rgb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0> rbr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1> rbg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2> rbb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0> grr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1> grg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2> grb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0> ggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1> ggg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2> ggb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0> gbr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1> gbg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2> gbb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0> brr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1> brg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2> brb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0> bgr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1> bgg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2> bgb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0> bbr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1> bbg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2> bbb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 0> rrrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 1> rrrg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 2> rrrb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 0> rrgr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 1> rrgg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 2> rrgb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 0> rrbr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 1> rrbg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 2> rrbb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 0> rgrr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 1> rgrg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 2> rgrb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 0> rggr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 1> rggg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 2> rggb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 0> rgbr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 1> rgbg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 2> rgbb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 0> rbrr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 1> rbrg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 2> rbrb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 0> rbgr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 1> rbgg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 2> rbgb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 0> rbbr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 1> rbbg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 2> rbbb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 0> grrr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 1> grrg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 2> grrb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 0> grgr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 1> grgg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 2> grgb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 0> grbr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 1> grbg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 2> grbb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 0> ggrr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 1> ggrg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 2> ggrb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 0> gggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 1> gggg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 2> gggb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 0> ggbr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 1> ggbg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 2> ggbb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 0> gbrr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 1> gbrg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 2> gbrb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 0> gbgr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 1> gbgg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 2> gbgb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 0> gbbr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 1> gbbg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 2> gbbb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 0> brrr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 1> brrg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 2> brrb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 0> brgr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 1> brgg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 2> brgb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 0> brbr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 1> brbg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 2> brbb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 0> bgrr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 1> bgrg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 2> bgrb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 0> bggr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 1> bggg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 2> bggb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 0> bgbr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 1> bgbg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 2> bgbb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 0> bbrr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 1> bbrg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 2> bbrb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 0> bbgr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 1> bbgg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 2> bbgb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 0> bbbr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 1> bbbg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 2> bbbb; 
+
+#define SWIZZLE_COLOR_4      \
+Swizzle<SwizzleContainer, Component, 0, 0> rr; \
+Swizzle<SwizzleContainer, Component, 0, 1> rg; \
+Swizzle<SwizzleContainer, Component, 0, 2> rb; \
+Swizzle<SwizzleContainer, Component, 0, 3> ra; \
+Swizzle<SwizzleContainer, Component, 1, 0> gr; \
+Swizzle<SwizzleContainer, Component, 1, 1> gg; \
+Swizzle<SwizzleContainer, Component, 1, 2> gb; \
+Swizzle<SwizzleContainer, Component, 1, 3> ga; \
+Swizzle<SwizzleContainer, Component, 2, 0> br; \
+Swizzle<SwizzleContainer, Component, 2, 1> bg; \
+Swizzle<SwizzleContainer, Component, 2, 2> bb; \
+Swizzle<SwizzleContainer, Component, 2, 3> ba; \
+Swizzle<SwizzleContainer, Component, 3, 0> ar; \
+Swizzle<SwizzleContainer, Component, 3, 1> ag; \
+Swizzle<SwizzleContainer, Component, 3, 2> ab; \
+Swizzle<SwizzleContainer, Component, 3, 3> aa; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0> rrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1> rrg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2> rrb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 3> rra; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0> rgr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1> rgg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2> rgb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 3> rga; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0> rbr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1> rbg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2> rbb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 3> rba; \
+Swizzle<SwizzleContainer, Component, 0, 3, 0> rar; \
+Swizzle<SwizzleContainer, Component, 0, 3, 1> rag; \
+Swizzle<SwizzleContainer, Component, 0, 3, 2> rab; \
+Swizzle<SwizzleContainer, Component, 0, 3, 3> raa; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0> grr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1> grg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2> grb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 3> gra; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0> ggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1> ggg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2> ggb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 3> gga; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0> gbr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1> gbg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2> gbb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 3> gba; \
+Swizzle<SwizzleContainer, Component, 1, 3, 0> gar; \
+Swizzle<SwizzleContainer, Component, 1, 3, 1> gag; \
+Swizzle<SwizzleContainer, Component, 1, 3, 2> gab; \
+Swizzle<SwizzleContainer, Component, 1, 3, 3> gaa; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0> brr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1> brg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2> brb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 3> bra; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0> bgr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1> bgg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2> bgb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 3> bga; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0> bbr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1> bbg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2> bbb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 3> bba; \
+Swizzle<SwizzleContainer, Component, 2, 3, 0> bar; \
+Swizzle<SwizzleContainer, Component, 2, 3, 1> bag; \
+Swizzle<SwizzleContainer, Component, 2, 3, 2> bab; \
+Swizzle<SwizzleContainer, Component, 2, 3, 3> baa; \
+Swizzle<SwizzleContainer, Component, 3, 0, 0> arr; \
+Swizzle<SwizzleContainer, Component, 3, 0, 1> arg; \
+Swizzle<SwizzleContainer, Component, 3, 0, 2> arb; \
+Swizzle<SwizzleContainer, Component, 3, 0, 3> ara; \
+Swizzle<SwizzleContainer, Component, 3, 1, 0> agr; \
+Swizzle<SwizzleContainer, Component, 3, 1, 1> agg; \
+Swizzle<SwizzleContainer, Component, 3, 1, 2> agb; \
+Swizzle<SwizzleContainer, Component, 3, 1, 3> aga; \
+Swizzle<SwizzleContainer, Component, 3, 2, 0> abr; \
+Swizzle<SwizzleContainer, Component, 3, 2, 1> abg; \
+Swizzle<SwizzleContainer, Component, 3, 2, 2> abb; \
+Swizzle<SwizzleContainer, Component, 3, 2, 3> aba; \
+Swizzle<SwizzleContainer, Component, 3, 3, 0> aar; \
+Swizzle<SwizzleContainer, Component, 3, 3, 1> aag; \
+Swizzle<SwizzleContainer, Component, 3, 3, 2> aab; \
+Swizzle<SwizzleContainer, Component, 3, 3, 3> aaa; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 0> rrrr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 1> rrrg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 2> rrrb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 0, 3> rrra; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 0> rrgr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 1> rrgg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 2> rrgb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 1, 3> rrga; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 0> rrbr; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 1> rrbg; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 2> rrbb; \
+Swizzle<SwizzleContainer, Component, 0, 0, 2, 3> rrba; \
+Swizzle<SwizzleContainer, Component, 0, 0, 3, 0> rrar; \
+Swizzle<SwizzleContainer, Component, 0, 0, 3, 1> rrag; \
+Swizzle<SwizzleContainer, Component, 0, 0, 3, 2> rrab; \
+Swizzle<SwizzleContainer, Component, 0, 0, 3, 3> rraa; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 0> rgrr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 1> rgrg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 2> rgrb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 0, 3> rgra; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 0> rggr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 1> rggg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 2> rggb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 1, 3> rgga; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 0> rgbr; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 1> rgbg; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 2> rgbb; \
+Swizzle<SwizzleContainer, Component, 0, 1, 2, 3> rgba; \
+Swizzle<SwizzleContainer, Component, 0, 1, 3, 0> rgar; \
+Swizzle<SwizzleContainer, Component, 0, 1, 3, 1> rgag; \
+Swizzle<SwizzleContainer, Component, 0, 1, 3, 2> rgab; \
+Swizzle<SwizzleContainer, Component, 0, 1, 3, 3> rgaa; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 0> rbrr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 1> rbrg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 2> rbrb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 0, 3> rbra; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 0> rbgr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 1> rbgg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 2> rbgb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 1, 3> rbga; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 0> rbbr; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 1> rbbg; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 2> rbbb; \
+Swizzle<SwizzleContainer, Component, 0, 2, 2, 3> rbba; \
+Swizzle<SwizzleContainer, Component, 0, 2, 3, 0> rbar; \
+Swizzle<SwizzleContainer, Component, 0, 2, 3, 1> rbag; \
+Swizzle<SwizzleContainer, Component, 0, 2, 3, 2> rbab; \
+Swizzle<SwizzleContainer, Component, 0, 2, 3, 3> rbaa; \
+Swizzle<SwizzleContainer, Component, 0, 3, 0, 0> rarr; \
+Swizzle<SwizzleContainer, Component, 0, 3, 0, 1> rarg; \
+Swizzle<SwizzleContainer, Component, 0, 3, 0, 2> rarb; \
+Swizzle<SwizzleContainer, Component, 0, 3, 0, 3> rara; \
+Swizzle<SwizzleContainer, Component, 0, 3, 1, 0> ragr; \
+Swizzle<SwizzleContainer, Component, 0, 3, 1, 1> ragg; \
+Swizzle<SwizzleContainer, Component, 0, 3, 1, 2> ragb; \
+Swizzle<SwizzleContainer, Component, 0, 3, 1, 3> raga; \
+Swizzle<SwizzleContainer, Component, 0, 3, 2, 0> rabr; \
+Swizzle<SwizzleContainer, Component, 0, 3, 2, 1> rabg; \
+Swizzle<SwizzleContainer, Component, 0, 3, 2, 2> rabb; \
+Swizzle<SwizzleContainer, Component, 0, 3, 2, 3> raba; \
+Swizzle<SwizzleContainer, Component, 0, 3, 3, 0> raar; \
+Swizzle<SwizzleContainer, Component, 0, 3, 3, 1> raag; \
+Swizzle<SwizzleContainer, Component, 0, 3, 3, 2> raab; \
+Swizzle<SwizzleContainer, Component, 0, 3, 3, 3> raaa; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 0> grrr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 1> grrg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 2> grrb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 0, 3> grra; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 0> grgr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 1> grgg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 2> grgb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 1, 3> grga; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 0> grbr; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 1> grbg; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 2> grbb; \
+Swizzle<SwizzleContainer, Component, 1, 0, 2, 3> grba; \
+Swizzle<SwizzleContainer, Component, 1, 0, 3, 0> grar; \
+Swizzle<SwizzleContainer, Component, 1, 0, 3, 1> grag; \
+Swizzle<SwizzleContainer, Component, 1, 0, 3, 2> grab; \
+Swizzle<SwizzleContainer, Component, 1, 0, 3, 3> graa; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 0> ggrr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 1> ggrg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 2> ggrb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 0, 3> ggra; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 0> gggr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 1> gggg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 2> gggb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 1, 3> ggga; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 0> ggbr; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 1> ggbg; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 2> ggbb; \
+Swizzle<SwizzleContainer, Component, 1, 1, 2, 3> ggba; \
+Swizzle<SwizzleContainer, Component, 1, 1, 3, 0> ggar; \
+Swizzle<SwizzleContainer, Component, 1, 1, 3, 1> ggag; \
+Swizzle<SwizzleContainer, Component, 1, 1, 3, 2> ggab; \
+Swizzle<SwizzleContainer, Component, 1, 1, 3, 3> ggaa; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 0> gbrr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 1> gbrg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 2> gbrb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 0, 3> gbra; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 0> gbgr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 1> gbgg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 2> gbgb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 1, 3> gbga; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 0> gbbr; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 1> gbbg; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 2> gbbb; \
+Swizzle<SwizzleContainer, Component, 1, 2, 2, 3> gbba; \
+Swizzle<SwizzleContainer, Component, 1, 2, 3, 0> gbar; \
+Swizzle<SwizzleContainer, Component, 1, 2, 3, 1> gbag; \
+Swizzle<SwizzleContainer, Component, 1, 2, 3, 2> gbab; \
+Swizzle<SwizzleContainer, Component, 1, 2, 3, 3> gbaa; \
+Swizzle<SwizzleContainer, Component, 1, 3, 0, 0> garr; \
+Swizzle<SwizzleContainer, Component, 1, 3, 0, 1> garg; \
+Swizzle<SwizzleContainer, Component, 1, 3, 0, 2> garb; \
+Swizzle<SwizzleContainer, Component, 1, 3, 0, 3> gara; \
+Swizzle<SwizzleContainer, Component, 1, 3, 1, 0> gagr; \
+Swizzle<SwizzleContainer, Component, 1, 3, 1, 1> gagg; \
+Swizzle<SwizzleContainer, Component, 1, 3, 1, 2> gagb; \
+Swizzle<SwizzleContainer, Component, 1, 3, 1, 3> gaga; \
+Swizzle<SwizzleContainer, Component, 1, 3, 2, 0> gabr; \
+Swizzle<SwizzleContainer, Component, 1, 3, 2, 1> gabg; \
+Swizzle<SwizzleContainer, Component, 1, 3, 2, 2> gabb; \
+Swizzle<SwizzleContainer, Component, 1, 3, 2, 3> gaba; \
+Swizzle<SwizzleContainer, Component, 1, 3, 3, 0> gaar; \
+Swizzle<SwizzleContainer, Component, 1, 3, 3, 1> gaag; \
+Swizzle<SwizzleContainer, Component, 1, 3, 3, 2> gaab; \
+Swizzle<SwizzleContainer, Component, 1, 3, 3, 3> gaaa; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 0> brrr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 1> brrg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 2> brrb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 0, 3> brra; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 0> brgr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 1> brgg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 2> brgb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 1, 3> brga; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 0> brbr; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 1> brbg; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 2> brbb; \
+Swizzle<SwizzleContainer, Component, 2, 0, 2, 3> brba; \
+Swizzle<SwizzleContainer, Component, 2, 0, 3, 0> brar; \
+Swizzle<SwizzleContainer, Component, 2, 0, 3, 1> brag; \
+Swizzle<SwizzleContainer, Component, 2, 0, 3, 2> brab; \
+Swizzle<SwizzleContainer, Component, 2, 0, 3, 3> braa; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 0> bgrr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 1> bgrg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 2> bgrb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 0, 3> bgra; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 0> bggr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 1> bggg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 2> bggb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 1, 3> bgga; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 0> bgbr; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 1> bgbg; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 2> bgbb; \
+Swizzle<SwizzleContainer, Component, 2, 1, 2, 3> bgba; \
+Swizzle<SwizzleContainer, Component, 2, 1, 3, 0> bgar; \
+Swizzle<SwizzleContainer, Component, 2, 1, 3, 1> bgag; \
+Swizzle<SwizzleContainer, Component, 2, 1, 3, 2> bgab; \
+Swizzle<SwizzleContainer, Component, 2, 1, 3, 3> bgaa; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 0> bbrr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 1> bbrg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 2> bbrb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 0, 3> bbra; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 0> bbgr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 1> bbgg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 2> bbgb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 1, 3> bbga; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 0> bbbr; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 1> bbbg; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 2> bbbb; \
+Swizzle<SwizzleContainer, Component, 2, 2, 2, 3> bbba; \
+Swizzle<SwizzleContainer, Component, 2, 2, 3, 0> bbar; \
+Swizzle<SwizzleContainer, Component, 2, 2, 3, 1> bbag; \
+Swizzle<SwizzleContainer, Component, 2, 2, 3, 2> bbab; \
+Swizzle<SwizzleContainer, Component, 2, 2, 3, 3> bbaa; \
+Swizzle<SwizzleContainer, Component, 2, 3, 0, 0> barr; \
+Swizzle<SwizzleContainer, Component, 2, 3, 0, 1> barg; \
+Swizzle<SwizzleContainer, Component, 2, 3, 0, 2> barb; \
+Swizzle<SwizzleContainer, Component, 2, 3, 0, 3> bara; \
+Swizzle<SwizzleContainer, Component, 2, 3, 1, 0> bagr; \
+Swizzle<SwizzleContainer, Component, 2, 3, 1, 1> bagg; \
+Swizzle<SwizzleContainer, Component, 2, 3, 1, 2> bagb; \
+Swizzle<SwizzleContainer, Component, 2, 3, 1, 3> baga; \
+Swizzle<SwizzleContainer, Component, 2, 3, 2, 0> babr; \
+Swizzle<SwizzleContainer, Component, 2, 3, 2, 1> babg; \
+Swizzle<SwizzleContainer, Component, 2, 3, 2, 2> babb; \
+Swizzle<SwizzleContainer, Component, 2, 3, 2, 3> baba; \
+Swizzle<SwizzleContainer, Component, 2, 3, 3, 0> baar; \
+Swizzle<SwizzleContainer, Component, 2, 3, 3, 1> baag; \
+Swizzle<SwizzleContainer, Component, 2, 3, 3, 2> baab; \
+Swizzle<SwizzleContainer, Component, 2, 3, 3, 3> baaa; \
+Swizzle<SwizzleContainer, Component, 3, 0, 0, 0> arrr; \
+Swizzle<SwizzleContainer, Component, 3, 0, 0, 1> arrg; \
+Swizzle<SwizzleContainer, Component, 3, 0, 0, 2> arrb; \
+Swizzle<SwizzleContainer, Component, 3, 0, 0, 3> arra; \
+Swizzle<SwizzleContainer, Component, 3, 0, 1, 0> argr; \
+Swizzle<SwizzleContainer, Component, 3, 0, 1, 1> argg; \
+Swizzle<SwizzleContainer, Component, 3, 0, 1, 2> argb; \
+Swizzle<SwizzleContainer, Component, 3, 0, 1, 3> arga; \
+Swizzle<SwizzleContainer, Component, 3, 0, 2, 0> arbr; \
+Swizzle<SwizzleContainer, Component, 3, 0, 2, 1> arbg; \
+Swizzle<SwizzleContainer, Component, 3, 0, 2, 2> arbb; \
+Swizzle<SwizzleContainer, Component, 3, 0, 2, 3> arba; \
+Swizzle<SwizzleContainer, Component, 3, 0, 3, 0> arar; \
+Swizzle<SwizzleContainer, Component, 3, 0, 3, 1> arag; \
+Swizzle<SwizzleContainer, Component, 3, 0, 3, 2> arab; \
+Swizzle<SwizzleContainer, Component, 3, 0, 3, 3> araa; \
+Swizzle<SwizzleContainer, Component, 3, 1, 0, 0> agrr; \
+Swizzle<SwizzleContainer, Component, 3, 1, 0, 1> agrg; \
+Swizzle<SwizzleContainer, Component, 3, 1, 0, 2> agrb; \
+Swizzle<SwizzleContainer, Component, 3, 1, 0, 3> agra; \
+Swizzle<SwizzleContainer, Component, 3, 1, 1, 0> aggr; \
+Swizzle<SwizzleContainer, Component, 3, 1, 1, 1> aggg; \
+Swizzle<SwizzleContainer, Component, 3, 1, 1, 2> aggb; \
+Swizzle<SwizzleContainer, Component, 3, 1, 1, 3> agga; \
+Swizzle<SwizzleContainer, Component, 3, 1, 2, 0> agbr; \
+Swizzle<SwizzleContainer, Component, 3, 1, 2, 1> agbg; \
+Swizzle<SwizzleContainer, Component, 3, 1, 2, 2> agbb; \
+Swizzle<SwizzleContainer, Component, 3, 1, 2, 3> agba; \
+Swizzle<SwizzleContainer, Component, 3, 1, 3, 0> agar; \
+Swizzle<SwizzleContainer, Component, 3, 1, 3, 1> agag; \
+Swizzle<SwizzleContainer, Component, 3, 1, 3, 2> agab; \
+Swizzle<SwizzleContainer, Component, 3, 1, 3, 3> agaa; \
+Swizzle<SwizzleContainer, Component, 3, 2, 0, 0> abrr; \
+Swizzle<SwizzleContainer, Component, 3, 2, 0, 1> abrg; \
+Swizzle<SwizzleContainer, Component, 3, 2, 0, 2> abrb; \
+Swizzle<SwizzleContainer, Component, 3, 2, 0, 3> abra; \
+Swizzle<SwizzleContainer, Component, 3, 2, 1, 0> abgr; \
+Swizzle<SwizzleContainer, Component, 3, 2, 1, 1> abgg; \
+Swizzle<SwizzleContainer, Component, 3, 2, 1, 2> abgb; \
+Swizzle<SwizzleContainer, Component, 3, 2, 1, 3> abga; \
+Swizzle<SwizzleContainer, Component, 3, 2, 2, 0> abbr; \
+Swizzle<SwizzleContainer, Component, 3, 2, 2, 1> abbg; \
+Swizzle<SwizzleContainer, Component, 3, 2, 2, 2> abbb; \
+Swizzle<SwizzleContainer, Component, 3, 2, 2, 3> abba; \
+Swizzle<SwizzleContainer, Component, 3, 2, 3, 0> abar; \
+Swizzle<SwizzleContainer, Component, 3, 2, 3, 1> abag; \
+Swizzle<SwizzleContainer, Component, 3, 2, 3, 2> abab; \
+Swizzle<SwizzleContainer, Component, 3, 2, 3, 3> abaa; \
+Swizzle<SwizzleContainer, Component, 3, 3, 0, 0> aarr; \
+Swizzle<SwizzleContainer, Component, 3, 3, 0, 1> aarg; \
+Swizzle<SwizzleContainer, Component, 3, 3, 0, 2> aarb; \
+Swizzle<SwizzleContainer, Component, 3, 3, 0, 3> aara; \
+Swizzle<SwizzleContainer, Component, 3, 3, 1, 0> aagr; \
+Swizzle<SwizzleContainer, Component, 3, 3, 1, 1> aagg; \
+Swizzle<SwizzleContainer, Component, 3, 3, 1, 2> aagb; \
+Swizzle<SwizzleContainer, Component, 3, 3, 1, 3> aaga; \
+Swizzle<SwizzleContainer, Component, 3, 3, 2, 0> aabr; \
+Swizzle<SwizzleContainer, Component, 3, 3, 2, 1> aabg; \
+Swizzle<SwizzleContainer, Component, 3, 3, 2, 2> aabb; \
+Swizzle<SwizzleContainer, Component, 3, 3, 2, 3> aaba; \
+Swizzle<SwizzleContainer, Component, 3, 3, 3, 0> aaar; \
+Swizzle<SwizzleContainer, Component, 3, 3, 3, 1> aaag; \
+Swizzle<SwizzleContainer, Component, 3, 3, 3, 2> aaab; \
+Swizzle<SwizzleContainer, Component, 3, 3, 3, 3> aaaa; 

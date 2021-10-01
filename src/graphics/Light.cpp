@@ -5,9 +5,9 @@ namespace Guarneri
 {
 	Light::Light()
 	{
-		ambient = Color::BLACK;
-		diffuse = Color::WHITE;
-		specular = Color::WHITE;
+		ambient = tinymath::kColorBlack;
+		diffuse = tinymath::kColorWhite;
+		specular = tinymath::kColorWhite;
 		intensity = 1.0f;
 	}
 

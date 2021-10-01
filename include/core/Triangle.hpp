@@ -1,7 +1,9 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "tinymath.h"
+#include "tinymath/MathDefine.h"
+#include "tinymath/Vector2.h"
+#include "tinymath/Vector3.h"
 #include "Vertex.hpp"
 
 namespace Guarneri

@@ -3,7 +3,6 @@
 #include "Object.hpp"
 #include "Light.hpp"
 #include "GlobalShaderParams.hpp"
-#include "Color.hpp"
 #include "tinymath.h"
 #include "Texture.hpp"
 #include "CubeMap.hpp"
@@ -88,9 +87,9 @@ namespace Guarneri
 		virtual v2f vertex_shader(const a2v& input) const;
 		float get_shadow_atten(const tinymath::vec4f& light_space_pos) const;
 		tinymath::vec3f reflect(const tinymath::vec3f& n, const tinymath::vec3f& light_out_dir) const;
-		Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, Color albedo, Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
-		Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, Color albedo, Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
-		virtual Color fragment_shader(const v2f& input) const;
+		tinymath::Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
+		tinymath::Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
+		virtual tinymath::Color fragment_shader(const v2f& input) const;
 
 		static Shader*  get_error_shader() { return error_shader; }
 

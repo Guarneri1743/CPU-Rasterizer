@@ -5,7 +5,6 @@
 #include "GlobalShaderParams.hpp"
 #include "InputManager.hpp"
 #include "tinymath.h"
-#include "Color.hpp"
 #include "Config.h"
 #include <filesystem>
 #include <iostream>
@@ -31,9 +30,9 @@ namespace Guarneri
 		selection = nullptr;
 		enable_skybox = false;
 		main_light.intensity = 1.0f;
-		main_light.diffuse = Color(1.0f, 0.8f, 0.8f, 1.0f);
-		main_light.ambient = Color(0.1f, 0.05f, 0.2f, 1.0f);
-		main_light.specular = Color(1.0f, 1.0f, 1.0f, 1.0f);
+		main_light.diffuse = tinymath::Color(1.0f, 0.8f, 0.8f, 1.0f);
+		main_light.ambient = tinymath::Color(0.1f, 0.05f, 0.2f, 1.0f);
+		main_light.specular = tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f);
 		main_light.position = tinymath::vec3f(1.0f, 1.0f, 1.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
 	}

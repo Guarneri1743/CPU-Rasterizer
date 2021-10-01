@@ -2,8 +2,7 @@
 #include <iostream>
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
-#include "Plane.hpp"
-#include "Frustum.hpp"
+#include "tinymath/primitives/Rect.h"
 #include "Clipper.hpp"
 #include "SegmentDrawer.hpp"
 #include <execution>
@@ -60,13 +59,13 @@ namespace Guarneri
 		// prepare buffers
 		zbuffer = std::make_unique<RawBuffer<float>>(w, h);
 		shadowmap = std::make_unique<RawBuffer<float>>(w, h);
-		framebuffer = std::make_unique<RawBuffer<color_rgba>>(w, h);
+		framebuffer = std::make_unique<RawBuffer<tinymath::color_rgba>>(w, h);
 
 		stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
 		zbuffer->clear(kFarZ);
 		shadowmap->clear(kFarZ);
 		stencilbuffer->clear(kDefaultStencil);
-		framebuffer->clear(DEFAULT_COLOR);
+		framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
 	}
 
 	void GraphicsDevice::set_subsample_count(const uint8_t& count)
@@ -161,7 +160,7 @@ namespace Guarneri
 					const int h = this->height;
 					msaa_subsample_count = count;
 					subsamples_per_axis = (uint8_t)(std::sqrt((double)count));
-					msaa_colorbuffer = std::make_unique<RawBuffer<color_rgba>>(w * subsamples_per_axis, h * subsamples_per_axis);
+					msaa_colorbuffer = std::make_unique<RawBuffer<tinymath::color_rgba>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_zbuffer = std::make_unique<RawBuffer<float>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_coveragebuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
 					msaa_stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
@@ -179,11 +178,11 @@ namespace Guarneri
 		{
 			if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 			{
-				framebuffer->clear(DEFAULT_DEPTH_COLOR);
+				framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorWhite));
 			}
 			else
 			{
-				framebuffer->clear(DEFAULT_COLOR);
+				framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
 			}
 		}
 
@@ -194,7 +193,7 @@ namespace Guarneri
 
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
-			msaa_colorbuffer->clear(DEFAULT_COLOR);
+			msaa_colorbuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
 			msaa_zbuffer->clear(kFarZ);
 			msaa_coveragebuffer->clear(0);
 			msaa_stencilbuffer->clear(kDefaultStencil);
@@ -225,7 +224,7 @@ namespace Guarneri
 		else
 		{
 			// clip in homogenous space
-			auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, Frustum::homogenous_volume(), c1, c2, c3);
+			auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
 
 			if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
@@ -308,9 +307,9 @@ namespace Guarneri
 				// wireframe
 				if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 				{
-					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
-					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
-					draw_screen_segment(task.triangle[2].position, task.triangle[1].position, Color(0.5f, 0.5f, 1.0f, 1.0f));
+					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
+					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
+					draw_screen_segment(task.triangle[2].position, task.triangle[1].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
 				}
 			}
 		}
@@ -323,13 +322,13 @@ namespace Guarneri
 				{
 					float r = (float)row / tile.row_end;
 					float g = (float)col / tile.col_end;
-					color_rgba dst;
+					tinymath::color_rgba dst;
 					if (framebuffer->read(row, col, dst))
 					{
-						Color dst_color = Color::decode(dst);
-						Color src_color = Color(r, g, 0.0f, 0.5f);
-						Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
-						auto pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+						tinymath::Color dst_color = ColorEncoding::decode(dst);
+						tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
+						tinymath::Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
+						auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 						framebuffer->write(row, col, pixel_color);
 					}
 				}
@@ -353,7 +352,7 @@ namespace Guarneri
 			for (uint32_t col = (uint32_t)tile.col_start; col < (uint32_t)tile.col_end; col++)
 			{
 				uint8_t coverage_count = 0;
-				Color pixel_color = {0.0f, 0.0f, 0.0f, 1.0f};
+				tinymath::Color pixel_color = {0.0f, 0.0f, 0.0f, 1.0f};
 				for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
 				{
 					for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
@@ -364,9 +363,9 @@ namespace Guarneri
 						if (msaa_coveragebuffer->read(sub_row, sub_col, coverage) && coverage > 0)
 						{
 							coverage_count++;
-							color_rgba msaa_color;
+							tinymath::color_rgba msaa_color;
 							msaa_colorbuffer->read(sub_row, sub_col, msaa_color);
-							pixel_color += Color::decode(msaa_color);
+							pixel_color += ColorEncoding::decode(msaa_color);
 						}
 					}
 				}
@@ -375,7 +374,7 @@ namespace Guarneri
 				{
 					pixel_color *= 1.0f / msaa_subsample_count;
 					pixel_color.a = 1.0f;
-					framebuffer->write(row, col, Color::encode_rgba(pixel_color));
+					framebuffer->write(row, col, ColorEncoding::encode_rgba(pixel_color));
 				}
 			}
 		}
@@ -383,7 +382,7 @@ namespace Guarneri
 
 	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
+		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y) - 1;
 		int row_end = (int)(bounds.max().y) + 1;
 		int col_start = (int)(bounds.min().x) - 1;
@@ -455,15 +454,15 @@ namespace Guarneri
 		// wireframe
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 		{
-			draw_screen_segment(tri[0].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			draw_screen_segment(tri[0].position, tri[2].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
-			draw_screen_segment(tri[2].position, tri[1].position, Color(1.0f, 1.0f, 1.0f, 1.0f));
+			draw_screen_segment(tri[0].position, tri[1].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
+			draw_screen_segment(tri[0].position, tri[2].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
+			draw_screen_segment(tri[2].position, tri[1].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
 		}
 	}
 
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
-		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
+		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y) - 1;
 		int row_end = (int)(bounds.max().y) + 1;
 		int col_start = (int)(bounds.min().x) - 1;
@@ -547,7 +546,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::process_subsamples(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
+	void GraphicsDevice::process_subsamples(RawBuffer<tinymath::color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const uint32_t& row, const uint32_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
 	{
 		auto p0 = v0.position.xy;
 		auto p1 = v1.position.xy;
@@ -606,8 +605,8 @@ namespace Guarneri
 					msaa_coveragebuffer->write(subsample_row, subsample_col, 1);
 
 
-					color_rgba pixel_color; 
-					Color fragment_result;
+					tinymath::color_rgba pixel_color; 
+					tinymath::Color fragment_result;
 					if (!color_calculated)
 					{
 						// pixel frequent msaa
@@ -628,7 +627,7 @@ namespace Guarneri
 						v_out.tangent = v.tangent * w;
 						v_out.bitangent = v.bitangent * w;
 						fragment_result = shader.fragment_shader(v_out);
-						pixel_color = Color::encode_rgba(fragment_result);
+						pixel_color = ColorEncoding::encode_rgba(fragment_result);
 						color_calculated = true;
 					}
 
@@ -660,13 +659,13 @@ namespace Guarneri
 					// blending
 					if (enable_blending && shader.transparent)
 					{
-						color_rgba dst;
+						tinymath::color_rgba dst;
 						if (fbuf->read(subsample_row, subsample_col, dst))
 						{
-							Color dst_color = Color::decode(dst);
-							Color src_color = fragment_result;
-							Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-							pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+							tinymath::Color dst_color = ColorEncoding::decode(dst);
+							tinymath::Color src_color = fragment_result;
+							tinymath::Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+							pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 						}
 					}
 
@@ -679,7 +678,7 @@ namespace Guarneri
 		}
 	}
 
-	void GraphicsDevice::process_fragment(RawBuffer<color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, const Shader& shader)
+	void GraphicsDevice::process_fragment(RawBuffer<tinymath::color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const uint32_t& row, const uint32_t& col, const Shader& shader)
 	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
@@ -718,10 +717,10 @@ namespace Guarneri
 			}
 		}
 
-		color_rgba pixel_color;
+		tinymath::color_rgba pixel_color;
 
 		// fragment shader
-		Color fragment_result;
+		tinymath::Color fragment_result;
 		v2f v_out;
 		float w = 1.0f / v.rhw;
 		v_out.position = v.position * w;
@@ -735,7 +734,7 @@ namespace Guarneri
 
 		// todo: ddx ddy
 		fragment_result = shader.fragment_shader(v_out);
-		pixel_color = Color::encode_rgba(fragment_result);
+		pixel_color = ColorEncoding::encode_rgba(fragment_result);
 
 		// todo: scissor test
 		if (enable_scissor_test)
@@ -780,13 +779,13 @@ namespace Guarneri
 		// blending
 		if (enable_blending && shader.transparent)
 		{
-			color_rgba dst;
+			tinymath::color_rgba dst;
 			if (fbuf->read(row, col, dst))
 			{
-				Color dst_color = Color::decode(dst);
-				Color src_color = fragment_result;
-				Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-				pixel_color = Color::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+				tinymath::Color dst_color = ColorEncoding::decode(dst);
+				tinymath::Color src_color = fragment_result;
+				tinymath::Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+				pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 			}
 		}
 
@@ -799,7 +798,7 @@ namespace Guarneri
 			}
 			else
 			{
-				color_rgba cur;
+				tinymath::color_rgba cur;
 				if (fbuf->read(row, col, cur))
 				{
 					if ((color_mask & ColorMask::R) == ColorMask::ZERO)
@@ -829,7 +828,7 @@ namespace Guarneri
 			uint8_t stencil;
 			if (stencilbuf->read(row, col, stencil))
 			{
-				color_rgba c = Color::encode_rgba(stencil, stencil, stencil, 255);
+				tinymath::color_rgba c = ColorEncoding::encode_rgba(stencil, stencil, stencil, 255);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -841,8 +840,8 @@ namespace Guarneri
 			if (this->zbuffer->read(row, col, cur_depth))
 			{
 				float linear_depth = linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
-				Color depth_color = Color::WHITE * linear_depth;
-				color_rgba c = Color::encode_rgba(depth_color);
+				tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
+				tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -853,8 +852,8 @@ namespace Guarneri
 			float cur_depth;
 			if (this->get_shadowmap()->read(row, col, cur_depth))
 			{
-				Color depth_color = Color::WHITE * cur_depth;
-				color_rgba c = Color::encode_rgba(depth_color);
+				tinymath::Color depth_color = tinymath::kColorWhite * cur_depth;
+				tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
 				fbuf->write(row, col, c);
 			}
 		}
@@ -988,9 +987,9 @@ namespace Guarneri
 	}
 
 	// todo: alpha factor
-	Color GraphicsDevice::blend(const Color& src_color, const Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op)
+	tinymath::Color GraphicsDevice::blend(const tinymath::Color& src_color, const tinymath::Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op)
 	{
-		Color lhs, rhs;
+		tinymath::Color lhs, rhs;
 		switch (src_factor)
 		{
 		case BlendFactor::ONE:
@@ -1091,7 +1090,7 @@ namespace Guarneri
 	#endif
 	}
 
-	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
@@ -1107,29 +1106,29 @@ namespace Guarneri
 		s1 = translation * s1;
 		s2 = translation * s2;
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
-	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const Color& col)
+	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
 	{
-		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, Color::encode_rgba(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
 	}
 
-	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end);
 		draw_segment(clip_start, clip_end, col);
 	}
 
-	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 		draw_segment(clip_start, clip_end, col);
 	}
 
-	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const Color& col)
+	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const tinymath::Color& col)
 	{
 		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
 		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
@@ -1137,27 +1136,27 @@ namespace Guarneri
 		tinymath::vec4f s1 = Vertex::ndc2screen(this->width, this->height, n1);
 		tinymath::vec4f s2 = Vertex::ndc2screen(this->width, this->height, n2);
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, Color::encode_rgba(col));
+		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)
 	{
-		this->draw_segment(pos, pos + forward, Color::BLUE, v, p, offset);
-		this->draw_segment(pos, pos + right, Color::RED, v, p, offset);
-		this->draw_segment(pos, pos + up, Color::GREEN, v, p, offset);
+		this->draw_segment(pos, pos + forward, tinymath::kColorBlue, v, p, offset);
+		this->draw_segment(pos, pos + right, tinymath::kColorRed, v, p, offset);
+		this->draw_segment(pos, pos + up, tinymath::kColorGreen, v, p, offset);
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		this->draw_segment(pos, pos + forward, Color::BLUE, v, p);
-		this->draw_segment(pos, pos + right, Color::RED, v, p);
-		this->draw_segment(pos, pos + up, Color::GREEN, v, p);
+		this->draw_segment(pos, pos + forward, tinymath::kColorBlue, v, p);
+		this->draw_segment(pos, pos + right, tinymath::kColorRed, v, p);
+		this->draw_segment(pos, pos + up, tinymath::kColorGreen, v, p);
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		this->draw_segment(pos, pos + forward, Color::BLUE, m, v, p);
-		this->draw_segment(pos, pos + right, Color::RED, m, v, p);
-		this->draw_segment(pos, pos + up, Color::GREEN, m, v, p);
+		this->draw_segment(pos, pos + forward, tinymath::kColorBlue, m, v, p);
+		this->draw_segment(pos, pos + right, tinymath::kColorRed, m, v, p);
+		this->draw_segment(pos, pos + up, tinymath::kColorGreen, m, v, p);
 	}
 }

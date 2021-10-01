@@ -1,5 +1,4 @@
 #include "LightShader.hpp"
-#include "tinymath.h"
 #include <iostream>
 
 namespace Guarneri
@@ -20,9 +19,9 @@ namespace Guarneri
 		return o;
 	}
 
-	Color LightShader::fragment_shader(const v2f& input) const
+	tinymath::Color LightShader::fragment_shader(const v2f& input) const
 	{
 		UNUSED(input);
-		return Color::WHITE;
+		return tinymath::kColorWhite;
 	}
 }

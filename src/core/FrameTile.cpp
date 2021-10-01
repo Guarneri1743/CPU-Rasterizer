@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include "Marcos.h"
-#include "Rect.hpp"
+#include "tinymath/primitives/Rect.h"
 
 namespace Guarneri
 {
@@ -104,7 +104,7 @@ namespace Guarneri
 		const int& w, const int& h,
 		const int& tile_size)
 	{
-		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
+		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y) - 1;
 		int row_end = (int)(bounds.max().y) + 1;
 		int col_start = (int)(bounds.min().x) - 1;

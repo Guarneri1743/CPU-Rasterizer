@@ -18,3 +18,16 @@
 #include "Matrix3x3.h"
 #include "Matrix4x4.h"
 #include "Computation.h"
+
+#include "primitives/AxisAlignedBoundingBox.h"
+#include "primitives/Capsule.h"
+#include "primitives/Cylinder.h"
+#include "primitives/Line.h"
+#include "primitives/Plane.h"
+#include "primitives/Ray.h"
+#include "primitives/Rect.h"
+#include "primitives/Segment.h"
+#include "primitives/Sphere.h"
+
+#include "color/Color.h"
+#include "color/ColorEncoding.h"

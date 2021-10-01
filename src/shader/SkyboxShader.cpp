@@ -25,14 +25,14 @@ namespace Guarneri
 		return o;
 	}
 
-	Color SkyboxShader::fragment_shader(const v2f& input) const
+	tinymath::Color SkyboxShader::fragment_shader(const v2f& input) const
 	{
-		Color ret;
+		tinymath::Color ret;
 
 		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			tinymath::vec2f uv = spherical_coord_to_uv(tinymath::vec3f(input.shadow_coord.xyz));
-			return Color(uv.x, uv.y, 0.0f, 1.0f);
+			return tinymath::Color(uv.x, uv.y, 0.0f, 1.0f);
 		}
 		else if ((INST(GlobalShaderParams).render_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
 		{
@@ -40,8 +40,8 @@ namespace Guarneri
 			{
 				if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 				{
-					ret = ret / (ret + Color::WHITE);
-					ret = Color::pow(ret, 1.0f / 2.2f);
+					ret = ret / (ret + tinymath::kColorWhite);
+					ret = tinymath::pow(ret, 1.0f / 2.2f);
 				}
 				return ret;
 			}
@@ -51,8 +51,8 @@ namespace Guarneri
 		{
 			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 			{
-				ret = ret / (ret + Color::WHITE);
-				ret = Color::pow(ret, 1.0f / 2.2f);
+				ret = ret / (ret + tinymath::kColorWhite);
+				ret = tinymath::pow(ret, 1.0f / 2.2f);
 			}
 
 			ret.a = 1.0f;
@@ -60,6 +60,6 @@ namespace Guarneri
 			return ret;
 		}
 
-		return Color::BLACK;
+		return tinymath::kColorBlack;
 	}
 }

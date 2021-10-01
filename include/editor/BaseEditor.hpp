@@ -2,7 +2,7 @@
 #include "imgui/imgui.h"
 #include <string>
 #include <vector>
-#include "Rect.hpp"
+#include "tinymath/primitives/Rect.h"
 
 namespace Guarneri
 {
@@ -33,7 +33,7 @@ namespace Guarneri
 		void add_right(BaseEditor* editor);
 		void add_top(BaseEditor* editor);
 		void add_bottom(BaseEditor* editor);
-		void on_pos_size_change(Rect prev, Rect cur);
+		void on_pos_size_change(tinymath::Rect prev, tinymath::Rect cur);
 		void set_rect(float x, float y, float w, float h);
 
 	protected:
@@ -49,7 +49,7 @@ namespace Guarneri
 		std::vector<BaseEditor*> top;
 		std::vector<BaseEditor*> bottom;
 
-		Rect rect;
+		tinymath::Rect rect;
 		const char* title;
 
 		bool no_titlebar = false;

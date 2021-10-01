@@ -249,7 +249,7 @@ namespace Guarneri
 			ImGui::SliderFloat("Intensity", &scene.main_light.intensity, 0.0f, 10.0f);
 			if (ImGui::ColorEdit3("Ambient", main_light_ambient))
 			{
-				scene.main_light.ambient = Color(main_light_ambient[0], main_light_ambient[1], main_light_ambient[2], main_light_ambient[3]);
+				scene.main_light.ambient = tinymath::Color(main_light_ambient[0], main_light_ambient[1], main_light_ambient[2], main_light_ambient[3]);
 			}
 			else
 			{
@@ -260,7 +260,7 @@ namespace Guarneri
 			}
 			if (ImGui::ColorEdit3("Diffuse", main_light_diffuse))
 			{
-				scene.main_light.diffuse = Color(main_light_diffuse[0], main_light_diffuse[1], main_light_diffuse[2], main_light_diffuse[3]);
+				scene.main_light.diffuse = tinymath::Color(main_light_diffuse[0], main_light_diffuse[1], main_light_diffuse[2], main_light_diffuse[3]);
 			}
 			else
 			{
@@ -271,7 +271,7 @@ namespace Guarneri
 			}
 			if (ImGui::ColorEdit3("Specular", main_light_specular))
 			{
-				scene.main_light.specular = Color(main_light_specular[0], main_light_specular[1], main_light_specular[2], main_light_specular[3]);
+				scene.main_light.specular = tinymath::Color(main_light_specular[0], main_light_specular[1], main_light_specular[2], main_light_specular[3]);
 			}
 			else
 			{
@@ -382,7 +382,7 @@ namespace Guarneri
 
 	void InspectorEditor::on_gui()
 	{
-		rect = Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		rect = tinymath::Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("Inspector", tab_bar_flags))

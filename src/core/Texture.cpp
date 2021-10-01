@@ -54,22 +54,22 @@ namespace Guarneri
 		switch (format)
 		{
 		case TextureFormat::rgb:
-			rgb_buffer = RawBuffer<color_rgb>::create(width, height);
+			rgb_buffer = RawBuffer<tinymath::color_rgb>::create(width, height);
 			break;
 		case TextureFormat::rgba:
-			rgba_buffer = RawBuffer<color_rgba>::create(width, height);
+			rgba_buffer = RawBuffer<tinymath::color_rgba>::create(width, height);
 			break;
 		case TextureFormat::rg:
-			rg_buffer = RawBuffer<color_rg>::create(width, height);
+			rg_buffer = RawBuffer<tinymath::color_rg>::create(width, height);
 			break;
 		case TextureFormat::r32:
-			gray_buffer = RawBuffer<color_gray>::create(width, height);
+			gray_buffer = RawBuffer<tinymath::color_gray>::create(width, height);
 			break;
 		case TextureFormat::rgb16f:
-			rgb16f_buffer = RawBuffer<color_rgb16f>::create(width, height);
+			rgb16f_buffer = RawBuffer<tinymath::color_rgb16f>::create(width, height);
 			break; 
 		case TextureFormat::rgba16f:
-			rgba16f_buffer = RawBuffer<color_rgba16f>::create(width, height);
+			rgba16f_buffer = RawBuffer<tinymath::color_rgba16f>::create(width, height);
 			break;
 		}
 
@@ -89,7 +89,7 @@ namespace Guarneri
 		{
 		case TextureFormat::rgb:
 		{
-			rgb_buffer = RawBuffer<color_rgb>::create(tex_buffer, width, height, [](color_rgb* ptr)
+			rgb_buffer = RawBuffer<tinymath::color_rgb>::create(tex_buffer, width, height, [](tinymath::color_rgb* ptr)
 			{
 				delete[] ptr;
 			});
@@ -97,7 +97,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rgba:
 		{
-			rgba_buffer = RawBuffer<color_rgba>::create(tex_buffer, width, height, [](color_rgba* ptr)
+			rgba_buffer = RawBuffer<tinymath::color_rgba>::create(tex_buffer, width, height, [](tinymath::color_rgba* ptr)
 			{
 				delete[] ptr;
 			});
@@ -105,7 +105,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rg:
 		{
-			rg_buffer = RawBuffer<color_rg>::create(tex_buffer, width, height, [](color_rg* ptr)
+			rg_buffer = RawBuffer<tinymath::color_rg>::create(tex_buffer, width, height, [](tinymath::color_rg* ptr)
 			{
 				delete[] ptr;
 			});
@@ -113,7 +113,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::r32:
 		{
-			gray_buffer = RawBuffer<color_gray>::create(tex_buffer, width, height, [](color_gray* ptr)
+			gray_buffer = RawBuffer<tinymath::color_gray>::create(tex_buffer, width, height, [](tinymath::color_gray* ptr)
 			{
 				delete[] ptr;
 			});
@@ -121,7 +121,7 @@ namespace Guarneri
 		break; 
 		case TextureFormat::rgb16f:
 		{
-			rgb16f_buffer = RawBuffer<color_rgb16f>::create(tex_buffer, width, height, [](color_rgb16f* ptr)
+			rgb16f_buffer = RawBuffer<tinymath::color_rgb16f>::create(tex_buffer, width, height, [](tinymath::color_rgb16f* ptr)
 			{
 				delete[] ptr;
 			});
@@ -129,7 +129,7 @@ namespace Guarneri
 		break;
 		case TextureFormat::rgba16f:
 		{
-			rgba16f_buffer = RawBuffer<color_rgba16f>::create(tex_buffer, width, height, [](color_rgba16f* ptr)
+			rgba16f_buffer = RawBuffer<tinymath::color_rgba16f>::create(tex_buffer, width, height, [](tinymath::color_rgba16f* ptr)
 			{
 				delete[] ptr;
 			});
@@ -216,7 +216,7 @@ namespace Guarneri
 			{
 				if (hdr)
 				{
-					rgb16f_buffer = RawBuffer<color_rgb16f>::create(tex, w, h, [](color_rgb16f* ptr)
+					rgb16f_buffer = RawBuffer<tinymath::color_rgb16f>::create(tex, w, h, [](tinymath::color_rgb16f* ptr)
 					{
 						stbi_image_free((void*)ptr);
 					});
@@ -224,7 +224,7 @@ namespace Guarneri
 				}
 				else
 				{
-					rgb_buffer = RawBuffer<color_rgb>::create(tex, w, h, [](color_rgb* ptr)
+					rgb_buffer = RawBuffer<tinymath::color_rgb>::create(tex, w, h, [](tinymath::color_rgb* ptr)
 					{
 						stbi_image_free((void*)ptr);
 					});
@@ -235,7 +235,7 @@ namespace Guarneri
 			{
 				if (hdr)
 				{
-					rgba16f_buffer = RawBuffer<color_rgba16f>::create(tex, w, h, [](color_rgba16f* ptr)
+					rgba16f_buffer = RawBuffer<tinymath::color_rgba16f>::create(tex, w, h, [](tinymath::color_rgba16f* ptr)
 					{
 						stbi_image_free((void*)ptr);
 					});
@@ -243,7 +243,7 @@ namespace Guarneri
 				}
 				else
 				{
-					rgba_buffer = RawBuffer<color_rgba>::create(tex, w, h, [](color_rgba* ptr)
+					rgba_buffer = RawBuffer<tinymath::color_rgba>::create(tex, w, h, [](tinymath::color_rgba* ptr)
 					{
 						stbi_image_free((void*)ptr);
 					});
@@ -252,7 +252,7 @@ namespace Guarneri
 			}
 			else if (channels == kChannelRG)
 			{
-				rg_buffer = RawBuffer<color_rg>::create(tex, w, h, [](color_rg* ptr)
+				rg_buffer = RawBuffer<tinymath::color_rg>::create(tex, w, h, [](tinymath::color_rg* ptr)
 				{
 					stbi_image_free((void*)ptr);
 				});
@@ -260,7 +260,7 @@ namespace Guarneri
 			}
 			else if (channels == kChannelR)
 			{
-				gray_buffer = RawBuffer<color_gray>::create(tex, w, h, [](color_gray* ptr)
+				gray_buffer = RawBuffer<tinymath::color_gray>::create(tex, w, h, [](tinymath::color_gray* ptr)
 				{
 					stbi_image_free((void*)ptr);
 				});
@@ -280,7 +280,7 @@ namespace Guarneri
 		LOG("raw texture loaded: {}", abs_path.c_str());
 	}
 
-	bool Texture::bilinear(const float& u, const float& v, const uint32_t& mip, Color& ret) const
+	bool Texture::bilinear(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
 	{
 		float rf = v * (float)this->width + 0.5f;
 		float cf = u * (float)this->height + 0.5f;
@@ -291,19 +291,19 @@ namespace Guarneri
 		float frac_row = rf - (float)row;
 		float frac_col = cf - (float)col;
 
-		Color c00, c01, c11, c10;
+		tinymath::Color c00, c01, c11, c10;
 		read(row, col, mip, c00);
 		read(row + 1, col, mip, c01);
 		read(row + 1, col + 1, mip, c11);
 		read(row, col + 1, mip, c10);
 
-		Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
-		Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
+		tinymath::Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
+		tinymath::Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
 		ret = a * (1.0f - frac_col) + b * frac_col;
 		return true;
 	}
 
-	bool Texture::point(const float& u, const float& v, const uint32_t& mip, Color& ret) const
+	bool Texture::point(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
 	{
 		read(u, v, mip, ret);
 		return true;
@@ -327,7 +327,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_rgb>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgb>>(w, h);
 			
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -335,7 +335,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_rgb color;
+						tinymath::color_rgb color;
 						rgb_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -360,7 +360,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_rgba>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgba>>(w, h);
 
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -368,7 +368,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_rgba color;
+						tinymath::color_rgba color;
 						rgba_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -393,7 +393,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_rg>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rg>>(w, h);
 
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -401,7 +401,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_rg color;
+						tinymath::color_rg color;
 						rg_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -425,7 +425,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_gray>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_gray>>(w, h);
 
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -433,7 +433,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_gray color;
+						tinymath::color_gray color;
 						gray_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -457,7 +457,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_rgb16f>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgb16f>>(w, h);
 
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -465,7 +465,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_rgb16f color;
+						tinymath::color_rgb16f color;
 						rgb16f_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -489,7 +489,7 @@ namespace Guarneri
 			{
 				uint32_t w = this->width >> i;
 				uint32_t h = this->height >> i;
-				auto mipmap = std::make_shared<RawBuffer<color_rgba16f>>(w, h);
+				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgba16f>>(w, h);
 
 				for (uint32_t row = 0; row < h; row++)
 				{
@@ -497,7 +497,7 @@ namespace Guarneri
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
-						color_rgba16f color;
+						tinymath::color_rgba16f color;
 						rgba16f_buffer->read(u, v, color);
 						mipmap->write(row, col, color);
 					}
@@ -513,12 +513,12 @@ namespace Guarneri
 		this->mip_filtering = mip_filter;
 	}
 
-	bool Texture::sample(const float& u, const float& v, Color& ret) const
+	bool Texture::sample(const float& u, const float& v, tinymath::Color& ret) const
 	{
 		return sample(u, v, 0u, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const uint32_t& mip, Color& ret) const
+	bool Texture::sample(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
 	{
 		switch (this->filtering)
 		{
@@ -530,22 +530,22 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Texture::sample(const float& u, const float& v, const float& lod, Color& ret) const
+	bool Texture::sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const
 	{
 		return sample(u, v, (uint32_t)std::floor(lod * kMaxMip), ret);
 	}
 
-	bool Texture::read(const float& u, const float& v, Color& ret) const
+	bool Texture::read(const float& u, const float& v, tinymath::Color& ret) const
 	{
 		return read(u, v, 0, ret);
 	}
 
-	bool Texture::read(const uint32_t& row, const uint32_t& col, Color& ret) const
+	bool Texture::read(const uint32_t& row, const uint32_t& col, tinymath::Color& ret) const
 	{
 		return read(row, col, 0, ret);
 	}
 
-	bool Texture::read(const float& u, const float& v, const uint32_t& mip, Color& ret) const
+	bool Texture::read(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
 	{
 		float wu = u;
 		float wv = v;
@@ -557,61 +557,61 @@ namespace Guarneri
 		{
 			auto buffer = use_mip ? rgb_mipmaps[mip] : rgb_buffer;
 			if (buffer == nullptr) return false;
-			color_rgb pixel;
+			tinymath::color_rgb pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba:
 		{
 			auto buffer = use_mip ? rgba_mipmaps[mip] : rgba_buffer;
 			if (buffer == nullptr) return false;
-			color_rgba pixel;
+			tinymath::color_rgba pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rg:
 		{
 			auto buffer = use_mip ? rg_mipmaps[mip] : rg_buffer;
 			if (buffer == nullptr) return false;
-			color_rg pixel;
+			tinymath::color_rg pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::r32:
 		{
 			auto buffer = use_mip ? gray_mipmaps[mip] : gray_buffer;
 			if (buffer == nullptr) return false;
-			color_gray pixel;
+			tinymath::color_gray pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgb16f:
 		{
 			auto buffer = use_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
 			if (buffer == nullptr) return false;
-			color_rgb16f pixel;
+			tinymath::color_rgb16f pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba16f:
 		{
 			auto buffer = use_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
 			if (buffer == nullptr) return false;
-			color_rgba16f pixel;
+			tinymath::color_rgba16f pixel;
 			bool ok = buffer->read(u, v, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		}
 		return false;
 	}
 
-	bool Texture::read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, Color& ret) const
+	bool Texture::read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, tinymath::Color& ret) const
 	{
 		switch (format)
 		{
@@ -619,99 +619,99 @@ namespace Guarneri
 		{
 			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
 			if (buffer == nullptr) return false;
-			color_rgb pixel;
+			tinymath::color_rgb pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba:
 		{
 			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
 			if (buffer == nullptr) return false;
-			color_rgba pixel;
+			tinymath::color_rgba pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rg:
 		{
 			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
 			if (buffer == nullptr) return false;
-			color_rg pixel;
+			tinymath::color_rg pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::r32:
 		{
 			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
 			if (buffer == nullptr) return false;
-			color_gray pixel;
+			tinymath::color_gray pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgb16f:
 		{
 			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
 			if (buffer == nullptr) return false;
-			color_rgb16f pixel;
+			tinymath::color_rgb16f pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		case TextureFormat::rgba16f:
 		{
 			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
 			if (buffer == nullptr) return false;
-			color_rgba16f pixel;
+			tinymath::color_rgba16f pixel;
 			bool ok = buffer->read(row, col, pixel);
-			ret = Color::decode(pixel);
+			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
 		}
 		return false;
 	}
 
-	bool Texture::write(const uint32_t& x, const uint32_t& y, const Color& data)
+	bool Texture::write(const uint32_t& x, const uint32_t& y, const tinymath::Color& data)
 	{
 		switch (format)
 		{
 		case TextureFormat::rgb:
 		{
 			if (rgb_buffer == nullptr) return false;
-			return rgb_buffer->write(x, y, Color::encode_rgb(data));
+			return rgb_buffer->write(x, y, ColorEncoding::encode_rgb(data));
 		}
 		case TextureFormat::rgba:
 		{
 			if (rgba_buffer == nullptr) return false;
-			return rgba_buffer->write(x, y, Color::encode_rgba(data));
+			return rgba_buffer->write(x, y, ColorEncoding::encode_rgba(data));
 		}
 		case TextureFormat::rg:
 		{
 			if (rg_buffer == nullptr) return false;
-			return rg_buffer->write(x, y, Color::encode_rg(data.r, data.g));
+			return rg_buffer->write(x, y, ColorEncoding::encode_rg(data.r, data.g));
 		}
 		case TextureFormat::r32:
 		{
 			if (gray_buffer == nullptr) return false;
-			return gray_buffer->write(x, y, Color::encode_gray(data));
+			return gray_buffer->write(x, y, ColorEncoding::encode_gray(data));
 		}
 		case TextureFormat::rgb16f:
 		{
 			if (rgb16f_buffer == nullptr) return false;
-			return rgb16f_buffer->write(x, y, Color::encode_rgb16f(data));
+			return rgb16f_buffer->write(x, y, ColorEncoding::encode_rgb16f(data));
 		}
 		case TextureFormat::rgba16f:
 		{
 			if (rgba16f_buffer == nullptr) return false;
-			return rgba16f_buffer->write(x, y, Color::encode_rgba16f(data));
+			return rgba16f_buffer->write(x, y, ColorEncoding::encode_rgba16f(data));
 		}
 		}
 		return false;
 	}
 
-	bool Texture::write(const float& u, const float& v, const Color& data)
+	bool Texture::write(const float& u, const float& v, const tinymath::Color& data)
 	{
 		float wu = u;
 		float wv = v;
@@ -721,32 +721,32 @@ namespace Guarneri
 		case TextureFormat::rgb:
 		{
 			if (rgb_buffer == nullptr) return false;
-			return rgb_buffer->write(wu, wv, Color::encode_rgb(data));
+			return rgb_buffer->write(wu, wv, ColorEncoding::encode_rgb(data));
 		}
 		case TextureFormat::rgba:
 		{
 			if (rgba_buffer == nullptr) return false;
-			return rgba_buffer->write(wu, wv, Color::encode_rgba(data));
+			return rgba_buffer->write(wu, wv, ColorEncoding::encode_rgba(data));
 		}
 		case TextureFormat::rg:
 		{
 			if (rg_buffer == nullptr) return false;
-			return rg_buffer->write(wu, wv, Color::encode_rg(data.r, data.g));
+			return rg_buffer->write(wu, wv, ColorEncoding::encode_rg(data.r, data.g));
 		}
 		case TextureFormat::r32:
 		{
 			if (gray_buffer == nullptr) return false;
-			return gray_buffer->write(wu, wv, Color::encode_gray(data));
+			return gray_buffer->write(wu, wv, ColorEncoding::encode_gray(data));
 		}
 		case TextureFormat::rgb16f:
 		{
 			if (rgb16f_buffer == nullptr) return false;
-			return rgb16f_buffer->write(wu, wv, Color::encode_rgb16f(data));
+			return rgb16f_buffer->write(wu, wv, ColorEncoding::encode_rgb16f(data));
 		}
 		case TextureFormat::rgba16f:
 		{
 			if (rgba16f_buffer == nullptr) return false;
-			return rgba16f_buffer->write(wu, wv, Color::encode_rgba16f(data));
+			return rgba16f_buffer->write(wu, wv, ColorEncoding::encode_rgba16f(data));
 		}
 		}
 		return false;
@@ -891,22 +891,22 @@ namespace Guarneri
 		switch (format)
 		{
 		case TextureFormat::rgb:
-			rgb_buffer->clear(color_rgb());
+			rgb_buffer->clear(tinymath::color_rgb());
 			break;
 		case TextureFormat::rgba:
-			rgba_buffer->clear(color_rgba());
+			rgba_buffer->clear(tinymath::color_rgba());
 			break;
 		case TextureFormat::rg:
-			rg_buffer->clear(color_rg());
+			rg_buffer->clear(tinymath::color_rg());
 			break;
 		case TextureFormat::r32:
-			gray_buffer->clear(color_gray());
+			gray_buffer->clear(tinymath::color_gray());
 			break;
 		case TextureFormat::rgb16f:
-			rgb16f_buffer->clear(color_rgb16f());
+			rgb16f_buffer->clear(tinymath::color_rgb16f());
 			break;
 		case TextureFormat::rgba16f:
-			rgba16f_buffer->clear(color_rgba16f());
+			rgba16f_buffer->clear(tinymath::color_rgba16f());
 			break;
 		}
 	}

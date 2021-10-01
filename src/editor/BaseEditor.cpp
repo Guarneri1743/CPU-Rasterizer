@@ -79,11 +79,11 @@ namespace Guarneri
 				if (left.size() > 0)
 				{
 					left.back()->add_right(editor);
-					editor->rect = Rect(left.back()->rect.x() + left.back()->rect.w(), rect.y(), rect.x() - left.back()->rect.x(), rect.h());
+					editor->rect = tinymath::Rect(left.back()->rect.x() + left.back()->rect.w(), rect.y(), rect.x() - left.back()->rect.x(), rect.h());
 				}
 				else
 				{
-					editor->rect = Rect(0, rect.y(), rect.x(), rect.h());
+					editor->rect = tinymath::Rect(0, rect.y(), rect.x(), rect.h());
 					left.push_back(editor);
 				}
 			}
@@ -99,11 +99,11 @@ namespace Guarneri
 				if (right.size() > 0)
 				{
 					right.front()->add_left(editor);
-					editor->rect = Rect(rect.x() + rect.w(), rect.y(), right.front()->rect.x() - rect.x() - rect.w(), rect.h());
+					editor->rect = tinymath::Rect(rect.x() + rect.w(), rect.y(), right.front()->rect.x() - rect.x() - rect.w(), rect.h());
 				}
 				else
 				{
-					editor->rect = Rect(rect.x() + rect.w(), rect.y(), Window::main()->get_width() - rect.x(), rect.h());
+					editor->rect = tinymath::Rect(rect.x() + rect.w(), rect.y(), Window::main()->get_width() - rect.x(), rect.h());
 					right.push_back(editor);
 				}
 			}
@@ -116,7 +116,7 @@ namespace Guarneri
 		{
 			if (rect.y() > 0)
 			{
-				editor->rect = Rect(rect.x(), 0, rect.w(), rect.y());
+				editor->rect = tinymath::Rect(rect.x(), 0, rect.w(), rect.y());
 				top.push_back(editor);
 			}
 		}
@@ -128,7 +128,7 @@ namespace Guarneri
 		{
 			if (rect.y() < Window::main()->get_height())
 			{
-				editor->rect = Rect(rect.x(), rect.y(), rect.w(), Window::main()->get_height() - rect.y());
+				editor->rect = tinymath::Rect(rect.x(), rect.y(), rect.w(), Window::main()->get_height() - rect.y());
 				bottom.push_back(editor);
 			}
 		}
@@ -175,7 +175,7 @@ namespace Guarneri
 		imgui_initialized = true;
 	}
 
-	void BaseEditor::on_pos_size_change(Rect prev, Rect cur)
+	void BaseEditor::on_pos_size_change(tinymath::Rect prev, tinymath::Rect cur)
 	{
 		float l = cur.x() - prev.x();
 		float r = cur.x() + cur.w() - prev.x() - prev.w();
@@ -221,7 +221,7 @@ namespace Guarneri
 
 	void BaseEditor::set_rect(float x, float y, float w, float h)
 	{
-		Rect new_rect = Rect(x, y, w, h);
+		tinymath::Rect new_rect = tinymath::Rect(x, y, w, h);
 		on_pos_size_change(rect, new_rect);
 		rect = new_rect;
 	}

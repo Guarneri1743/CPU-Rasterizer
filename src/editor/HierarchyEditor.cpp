@@ -1,4 +1,5 @@
 #include "HierarchyEditor.hpp"
+#include <iostream>
 #include "imgui/imgui.h"
 #include "Marcos.h"
 #include "InputManager.hpp"
@@ -6,7 +7,8 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
-#include <iostream>
+#include "tinymath/primitives/Rect.h"
+
 
 namespace Guarneri
 {
@@ -99,7 +101,7 @@ namespace Guarneri
 
 	void HierarchyEditor::on_gui()
 	{
-		rect = Rect(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		rect = tinymath::Rect(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("Hierarchy", tab_bar_flags))

@@ -1,6 +1,5 @@
 #pragma once
 #include "BaseEditor.hpp"
-#include "Rect.hpp"
 #include "Transform.hpp"
 
 namespace Guarneri

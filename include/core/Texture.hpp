@@ -6,7 +6,7 @@
 #include <vector>
 #include "Define.hpp"
 #include "Object.hpp"
-#include "Color.hpp"
+#include "tinymath/color/Color.h"
 #include "RawBuffer.hpp"
 
 namespace Guarneri
@@ -53,18 +53,18 @@ namespace Guarneri
 
 	private:
 		static std::unordered_map<uint32_t, std::shared_ptr<Texture>> texture_cache;
-		std::shared_ptr<RawBuffer<color_rgb16f>> rgb16f_buffer;
-		std::shared_ptr<RawBuffer<color_rgba16f>> rgba16f_buffer;
-		std::shared_ptr<RawBuffer<color_rgb>> rgb_buffer;
-		std::shared_ptr<RawBuffer<color_rgba>> rgba_buffer;
-		std::shared_ptr<RawBuffer<color_gray>> gray_buffer;
-		std::shared_ptr<RawBuffer<color_rg>> rg_buffer;
-		std::vector< std::shared_ptr<RawBuffer<color_gray>>> gray_mipmaps;
-		std::vector< std::shared_ptr<RawBuffer<color_rgb>>> rgb_mipmaps;
-		std::vector< std::shared_ptr<RawBuffer<color_rgba>>> rgba_mipmaps;
-		std::vector< std::shared_ptr<RawBuffer<color_rg>>> rg_mipmaps;
-		std::vector< std::shared_ptr<RawBuffer<color_rgb16f>>> rgb16f_mipmaps;
-		std::vector< std::shared_ptr<RawBuffer<color_rgba16f>>> rgba16f_mipmaps;
+		std::shared_ptr<RawBuffer<tinymath::color_rgb16f>> rgb16f_buffer;
+		std::shared_ptr<RawBuffer<tinymath::color_rgba16f>> rgba16f_buffer;
+		std::shared_ptr<RawBuffer<tinymath::color_rgb>> rgb_buffer;
+		std::shared_ptr<RawBuffer<tinymath::color_rgba>> rgba_buffer;
+		std::shared_ptr<RawBuffer<tinymath::color_gray>> gray_buffer;
+		std::shared_ptr<RawBuffer<tinymath::color_rg>> rg_buffer;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_gray>>> gray_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rgb>>> rgb_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rgba>>> rgba_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rg>>> rg_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rgb16f>>> rgb16f_mipmaps;
+		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rgba16f>>> rgba16f_mipmaps;
 
 	public:
 		Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt);
@@ -78,18 +78,18 @@ namespace Guarneri
 		static std::shared_ptr<Texture> load_raw(const char* path);
 
 		void reload(const char* texture_path);
-		bool bilinear(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
-		bool point(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
+		bool bilinear(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const;
+		bool point(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const;
 		void generate_mipmap(const int& mip_count, const Filtering& filtering);
-		bool sample(const float& u, const float& v, Color& ret) const;
-		bool sample(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
-		bool sample(const float& u, const float& v, const float& lod, Color& ret) const;
-		bool read(const float& u, const float& v, const uint32_t& mip, Color& ret) const;
-		bool read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, Color& ret) const;
-		bool read(const float& u, const float& v, Color& ret) const;
-		bool read(const uint32_t& row, const uint32_t& col, Color& ret) const;
-		bool write(const uint32_t& x, const uint32_t& y, const Color& data);
-		bool write(const float& u, const float& v, const Color& data);
+		bool sample(const float& u, const float& v, tinymath::Color& ret) const;
+		bool sample(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const;
+		bool sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const;
+		bool read(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const;
+		bool read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, tinymath::Color& ret) const;
+		bool read(const float& u, const float& v, tinymath::Color& ret) const;
+		bool read(const uint32_t& row, const uint32_t& col, tinymath::Color& ret) const;
+		bool write(const uint32_t& x, const uint32_t& y, const tinymath::Color& data);
+		bool write(const float& u, const float& v, const tinymath::Color& data);
 		void save2file();
 		void resize();
 		void release();

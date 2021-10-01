@@ -13,19 +13,8 @@
 #include "Utility.hpp"
 
 #include "tinymath.h"
-
-#include "BoundingBox.hpp"
-#include "Capsule.hpp"
-#include "Cylinder.hpp"
-#include "Line.hpp"
-#include "Plane.hpp"
-#include "Ray.hpp"
-#include "Rect.hpp"
-#include "Segment.hpp"
-#include "Sphere.hpp"
 #include "Triangle.hpp"
 
-#include "Color.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
 #include "InputManager.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "Color.hpp"
+#include "tinymath.h"
 #include "Shader.hpp"
 
 namespace Guarneri
@@ -13,6 +13,6 @@ namespace Guarneri
 
 	public:
 		v2f vertex_shader(const a2v& input) const;
-		Color fragment_shader(const v2f& input) const;
+		tinymath::Color fragment_shader(const v2f& input) const;
 	};
 }

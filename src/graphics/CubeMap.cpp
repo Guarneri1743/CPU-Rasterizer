@@ -65,25 +65,25 @@ namespace Guarneri
 		return map;
 	}
 	 
-	bool CubeMap::sample(const tinymath::vec3f& dir, Color& ret)
+	bool CubeMap::sample(const tinymath::vec3f& dir, tinymath::Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return texture->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_irradiance_map(const tinymath::vec3f& dir, Color& ret)
+	bool CubeMap::sample_irradiance_map(const tinymath::vec3f& dir, tinymath::Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return irradiance_map->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_prefilter_map(const tinymath::vec3f& dir, Color& ret)
+	bool CubeMap::sample_prefilter_map(const tinymath::vec3f& dir, tinymath::Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		return prefiltered_maps[0]->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, Color& ret)
+	bool CubeMap::sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, tinymath::Color& ret)
 	{
 		// todo: mipmap
 		auto uv = spherical_coord_to_uv(dir);
@@ -91,7 +91,7 @@ namespace Guarneri
 		return prefiltered_maps[mip]->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_brdf(const tinymath::vec2f& uv, Color& ret)
+	bool CubeMap::sample_brdf(const tinymath::vec2f& uv, tinymath::Color& ret)
 	{
 		return brdf_lut->sample(uv.x, uv.y, ret);
 	}
@@ -157,7 +157,7 @@ namespace Guarneri
 			tinymath::vec2f uv = { u, v };
 			tinymath::vec3f normal = uv_to_spherical_coord(uv);
 
-			Color irradiance = Color(0.0f);
+			tinymath::Color irradiance = tinymath::Color(0.0f);
 			float step = kSampleStep;
 			float samples = 0.0f;
 
@@ -170,7 +170,7 @@ namespace Guarneri
 					float ndl = tinymath::dot(w_i, normal);
 					if (ndl > 0.0f)
 					{
-						Color color;
+						tinymath::Color color;
 						sample(w_i, color);
 						irradiance += color * ndl;
 					}
@@ -233,7 +233,7 @@ namespace Guarneri
 			tinymath::vec3f view_dir = reflect_dir;
 
 			float total_weight = 0.0f;
-			Color prefilter_color = Color(0.0f);
+			tinymath::Color prefilter_color = tinymath::Color(0.0f);
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
@@ -243,7 +243,7 @@ namespace Guarneri
 				float ndl = tinymath::dot(normal, w_i);
 				if (ndl > 0.0f)
 				{
-					Color color;
+					tinymath::Color color;
 					sample(w_i, color);
 					prefilter_color += color * ndl;
 					total_weight += ndl;
@@ -308,7 +308,7 @@ namespace Guarneri
 
 			tinymath::vec3f normal = tinymath::kVec3fUp;
 
-			Color brdf = Color(0.0f);
+			tinymath::Color brdf = tinymath::Color(0.0f);
 
 			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{

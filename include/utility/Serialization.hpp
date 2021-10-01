@@ -9,7 +9,6 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "tinymath.h"
-#include "Color.hpp"
 #include "Transform.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
@@ -172,29 +171,6 @@ namespace Guarneri
 			mat.m33 = v["m33"].GetFloat();
 		}
 		// TMath::mat4x4
-		//====================================================================================
-
-		//====================================================================================
-		// Color
-		static rapidjson::Value serialize(rapidjson::Document& doc, const Color& color)
-		{
-			rapidjson::Value v;
-			v.SetObject();
-			v.AddMember("r", color.r, doc.GetAllocator());
-			v.AddMember("g", color.g, doc.GetAllocator());
-			v.AddMember("b", color.b, doc.GetAllocator());
-			v.AddMember("a", color.a, doc.GetAllocator());
-			return v;
-		}
-
-		static void deserialize(const rapidjson::Value& v, Color& color)
-		{
-			color.r = v["r"].GetFloat();
-			color.g = v["g"].GetFloat();
-			color.b = v["b"].GetFloat();
-			color.a = v["a"].GetFloat();
-		}
-		// Color
 		//====================================================================================
 
 
