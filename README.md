@@ -104,6 +104,7 @@ overview
 ---
 
 #### Third Parties
+- [tinymath](https://github.com/Guarneri1743/tinymath) 
 - assimp 
 - stb_image 
 - [rapidjson](https://github.com/Tencent/rapidjson) 
