@@ -259,17 +259,14 @@ namespace Guarneri
 			// todo: CPU Frustum Culling
 		}
 
+		if (enable_skybox && INST(GlobalShaderParams).enable_ibl)
+		{
+			skybox->render();
+		}
+
 		for (auto& obj : objects)
 		{
 			obj->render();
-		}
-
-		if (enable_skybox && INST(GlobalShaderParams).enable_ibl)
-		{
-			// todo: fix tile based skybox 
-			INST(GraphicsDevice).tile_based = false;
-			skybox->render();
-			INST(GraphicsDevice).tile_based = true;
 		}
 
 		// todo: OIT

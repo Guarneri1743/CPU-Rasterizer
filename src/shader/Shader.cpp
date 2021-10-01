@@ -391,8 +391,6 @@ namespace Guarneri
 			ret = Color::pow(ret, 1.0f / 2.2f);
 		}
 
-		ret = Color::saturate(ret);
-
 		return Color(ret.r, ret.g, ret.b, 1.0f);
 	}
 }

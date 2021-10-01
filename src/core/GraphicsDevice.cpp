@@ -10,6 +10,7 @@
 #include <execution>
 #include <algorithm>
 #include "Logger.hpp"
+#include "Sampling.hpp"
 
 namespace Guarneri
 {
@@ -349,7 +350,7 @@ namespace Guarneri
 			for (uint32_t col = (uint32_t)tile.col_start; col < (uint32_t)tile.col_end; col++)
 			{
 				uint8_t coverage_count = 0;
-				Color pixel_color;
+				Color pixel_color = {0.0f, 0.0f, 0.0f, 1.0f};
 				for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
 				{
 					for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
@@ -357,7 +358,7 @@ namespace Guarneri
 						uint32_t sub_row = (uint32_t)(row * subsamples_per_axis + x_subsample_idx);
 						uint32_t sub_col = (uint32_t)(col * subsamples_per_axis + y_subsample_idx);
 						uint8_t coverage = 0;
-						if (msaa_coveragebuffer->read(sub_row, sub_col, coverage) && coverage)
+						if (msaa_coveragebuffer->read(sub_row, sub_col, coverage) && coverage > 0)
 						{
 							coverage_count++;
 							color_rgba msaa_color;
@@ -380,10 +381,10 @@ namespace Guarneri
 	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
-		int row_start = (int)(bounds.min().y + 0.5f) - 1;
-		int row_end = (int)(bounds.max().y + 0.5f) + 1;
-		int col_start = (int)(bounds.min().x + 0.5f) - 1;
-		int col_end = (int)(bounds.max().x + 0.5f) + 1;
+		int row_start = (int)(bounds.min().y) - 1;
+		int row_end = (int)(bounds.max().y) + 1;
+		int col_start = (int)(bounds.min().x) - 1;
+		int col_end = (int)(bounds.max().x) + 1;
 
 		row_start = std::clamp(row_start, tile.row_start, tile.row_end);
 		row_end = std::clamp(row_end, tile.row_start, tile.row_end);
@@ -460,10 +461,10 @@ namespace Guarneri
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
-		int row_start = (int)(bounds.min().y + 0.5f) - 1;
-		int row_end = (int)(bounds.max().y + 0.5f) + 1;
-		int col_start = (int)(bounds.min().x + 0.5f) - 1;
-		int col_end = (int)(bounds.max().x + 0.5f) + 1;
+		int row_start = (int)(bounds.min().y) - 1;
+		int row_end = (int)(bounds.max().y) + 1;
+		int col_start = (int)(bounds.min().x) - 1;
+		int col_end = (int)(bounds.max().x) + 1;
 
 		row_start = std::clamp(row_start, 0, this->height);
 		row_end = std::clamp(row_end, 0, this->height);
@@ -484,7 +485,6 @@ namespace Guarneri
 		auto p2 = v2.position.xy;
 
 		float area = Triangle::area_double(p0, p1, p2);
-		float inv_area = 1.0f / area;
 
 		for (uint32_t row = row_start; row < (uint32_t)row_end; row++)
 		{
@@ -494,9 +494,9 @@ namespace Guarneri
 				float w0 = Triangle::area_double(p1, p2, pixel);
 				float w1 = Triangle::area_double(p2, p0, pixel);
 				float w2 = Triangle::area_double(p0, p1, pixel);
-				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+				if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
 				{
-					w0 *= inv_area; w1 *= inv_area; w2 *= inv_area;
+					w0 /= area; w1 /= area; w2 /= area;
 					Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
 					RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
 					process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
@@ -527,6 +527,7 @@ namespace Guarneri
 			{
 				Clipper::screen_clipping(lhs, rhs, this->width);
 			}
+
 			int left = (int)(lhs.position.x + 0.5f);
 			left = std::clamp(left, 0, this->width);
 			int right = (int)(rhs.position.x + 0.5f);
@@ -549,35 +550,33 @@ namespace Guarneri
 		auto p1 = v1.position.xy;
 		auto p2 = v2.position.xy;
 
-		float subsample_step = 1.0f / (float)subsamples_per_axis;
-		int sample_idx = 0;
 		tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
-		bool coverage = false;
 		bool color_calculated = false;
 
-		Color fragment_result;
-		color_rgba pixel_color;
+		uint8_t total = msaa_subsample_count;
+
 		for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
 		{
 			for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
 			{
-				tinymath::vec2f subsample((float)col + 0.25f + x_subsample_idx * subsample_step, (float)row + 0.25f + y_subsample_idx * subsample_step);
+				int i = x_subsample_idx * subsamples_per_axis + y_subsample_idx;
+				auto vec = hammersley(i, total);
+				tinymath::vec2f subsample((float)col + vec.x, (float)row + vec.y);
 				float w0 = Triangle::area_double(p1, p2, subsample);
 				float w1 = Triangle::area_double(p2, p0, subsample);
 				float w2 = Triangle::area_double(p0, p1, subsample);
 				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 				{
-					coverage = true;
 					w0 /= area; w1 /= area; w2 /= area;
 					Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
 					uint32_t subsample_row = (uint32_t)(row * subsamples_per_axis + x_subsample_idx);
 					uint32_t subsample_col = (uint32_t)(col * subsamples_per_axis + y_subsample_idx);
 
-
 					bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 					bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 					bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
 					bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+
 					ColorMask color_mask = shader.color_mask;
 					CompareFunc stencil_func = shader.stencil_func;
 					StencilOp stencil_pass_op = shader.stencil_pass_op;
@@ -603,6 +602,9 @@ namespace Guarneri
 
 					msaa_coveragebuffer->write(subsample_row, subsample_col, 1);
 
+
+					color_rgba pixel_color; 
+					Color fragment_result;
 					if (!color_calculated)
 					{
 						// pixel frequent msaa
@@ -624,7 +626,6 @@ namespace Guarneri
 						v_out.bitangent = v.bitangent * w;
 						fragment_result = shader.fragment_shader(v_out);
 						pixel_color = Color::encode_rgba(fragment_result);
-
 						color_calculated = true;
 					}
 
@@ -671,8 +672,6 @@ namespace Guarneri
 						fbuf->write(subsample_row, subsample_col, pixel_color);
 					}
 				}
-
-				sample_idx++;
 			}
 		}
 	}
