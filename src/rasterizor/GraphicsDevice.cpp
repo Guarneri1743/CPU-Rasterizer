@@ -9,17 +9,16 @@
 #include <algorithm>
 #include "Logger.hpp"
 #include "Sampling.hpp"
+#include "IdAllocator.hpp"
 
 namespace Guarneri
 {
-	constexpr float kFarZ = 1.0f;
-	constexpr uint8_t kDefaultStencil = 0x00;
 	constexpr size_t kTileSize = 16;
+	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
 
 	GraphicsDevice::GraphicsDevice()
 	{
-		width = 0;
-		height = 0;
+		active_frame_buffer_id = kInvalidID;
 		row_tile_count = 0;
 		col_tile_count = 0;
 		tile_length = 0;
@@ -39,33 +38,42 @@ namespace Guarneri
 
 	void GraphicsDevice::resize(size_t w, size_t h)
 	{
-		initialize(w, h);
+		resize_tiles(w, h);
+
+		if (frame_buffer == nullptr)
+		{
+			frame_buffer = std::make_unique<FrameBuffer>(w, h, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil);
+		}
+		else
+		{
+			frame_buffer->resize(w, h);
+		}
+
+		if (msaa_buffer != nullptr)
+		{
+			msaa_buffer->resize(w * subsamples_per_axis, h * subsamples_per_axis);
+		}
+	}
+
+	void GraphicsDevice::resize_tiles(size_t w, size_t h)
+	{
+		if (tiles != nullptr)
+		{
+			delete[] tiles;
+		}
+
+		size_t row_rest = h % kTileSize;
+		size_t col_rest = w % kTileSize;
+		row_tile_count = h / kTileSize + (row_rest > 0 ? 1 : 0);
+		col_tile_count = w / kTileSize + (col_rest > 0 ? 1 : 0);
+		tile_length = row_tile_count * col_tile_count;
+		tiles = new FrameTile[tile_length];
+		FrameTile::build_tiles(tiles, kTileSize, row_tile_count, col_tile_count, row_rest, col_rest);
 	}
 
 	void GraphicsDevice::initialize(size_t w, size_t h)
 	{
-		this->width = w;
-		this->height = h;
-
-		// prepare tiles
-		int row_rest = h % kTileSize;
-		int col_rest = w % kTileSize;
-		row_tile_count = h / kTileSize + (row_rest > 0 ? 1 : 0);
-		col_tile_count = w / kTileSize + (col_rest > 0 ? 1 : 0);
-		tile_length = (int)((long)row_tile_count * (long)col_tile_count);
-		tiles = new FrameTile[tile_length];
-		FrameTile::build_tiles(tiles, kTileSize, row_tile_count, col_tile_count, row_rest, col_rest);
-
-		// prepare buffers
-		zbuffer = std::make_unique<RawBuffer<float>>(w, h);
-		shadowmap = std::make_unique<RawBuffer<float>>(w, h);
-		framebuffer = std::make_unique<RawBuffer<tinymath::color_rgba>>(w, h);
-
-		stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
-		zbuffer->clear(kFarZ);
-		shadowmap->clear(kFarZ);
-		stencilbuffer->clear(kDefaultStencil);
-		framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
+		resize(w, h);
 	}
 
 	void GraphicsDevice::set_subsample_count(const uint8_t& count)
@@ -76,10 +84,76 @@ namespace Guarneri
 		commands.push(cmd);
 	}
 
-	// todo: ugly impl, fix it
-	RawBuffer<float>* GraphicsDevice::get_shadowmap()
+	FrameBuffer* GraphicsDevice::get_active_framebuffer() const noexcept
 	{
-		return shadowmap.get();
+		if (kInvalidID == active_frame_buffer_id)
+		{
+			return frame_buffer.get();
+		}
+
+		if (frame_buffer_map.count(active_frame_buffer_id) > 0)
+		{
+			return frame_buffer_map.at(active_frame_buffer_id).get();
+		}
+
+		return frame_buffer.get();
+	}
+
+	uint32_t GraphicsDevice::create_buffer(const size_t& w, const size_t& h, const FrameContent& content) noexcept
+	{
+		auto buffer = std::make_shared<FrameBuffer>(w, h, content);
+
+		uint32_t id;
+		if (buffer_id_allocator.alloc(id))
+		{
+			frame_buffer_map.insert(std::make_pair(id, buffer));
+			return id;
+		}
+
+		return kInvalidID;
+	}
+
+	void GraphicsDevice::set_active_frame_buffer(uint32_t& id)
+	{
+		if (frame_buffer_map.count(id) > 0)
+		{
+			auto fb = frame_buffer_map[id];
+			size_t current_w, current_h;
+			frame_buffer->get_size(current_w, current_h);
+			if (current_w != fb->get_width() || current_h != fb->get_height())
+			{
+				resize_tiles(fb->get_width(), fb->get_height());
+			}
+			active_frame_buffer_id = id;
+		}
+	}
+
+	void GraphicsDevice::reset_active_frame_buffer() noexcept
+	{
+		if (frame_buffer_map.count(active_frame_buffer_id) > 0)
+		{
+			auto fb = frame_buffer_map[active_frame_buffer_id];
+			size_t current_w, current_h;
+			fb->get_size(current_w, current_h);
+			if (current_w != frame_buffer->get_width() || current_h != frame_buffer->get_height())
+			{
+				resize_tiles(frame_buffer->get_width(), frame_buffer->get_height());
+			}
+		}
+
+		active_frame_buffer_id = kInvalidID;
+	}
+
+	bool GraphicsDevice::get_buffer(const uint32_t& id, std::shared_ptr<FrameBuffer>& buffer) const noexcept
+	{
+		buffer = nullptr;
+		if (frame_buffer_map.count(id) > 0)
+		{
+			buffer = frame_buffer_map.at(id);
+			return true;
+		}
+
+		return false;
 	}
 
 	TileInfo GraphicsDevice::get_tile_info()
@@ -156,47 +230,31 @@ namespace Guarneri
 				uint8_t count = msaa->msaa_subsample_count;
 				if (count > 0)
 				{
-					const size_t w = this->width;
-					const size_t h = this->height;
+					size_t w, h;
+					get_active_framebuffer()->get_size(w, h);
 					msaa_subsample_count = count;
 					subsamples_per_axis = (uint8_t)(std::sqrt((double)count));
-					msaa_colorbuffer = std::make_unique<RawBuffer<tinymath::color_rgba>>(w * subsamples_per_axis, h * subsamples_per_axis);
-					msaa_zbuffer = std::make_unique<RawBuffer<float>>(w * subsamples_per_axis, h * subsamples_per_axis);
-					msaa_coveragebuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
-					msaa_stencilbuffer = std::make_unique<RawBuffer<uint8_t>>(w * subsamples_per_axis, h * subsamples_per_axis);
+					msaa_buffer = std::make_unique<FrameBuffer>(w * subsamples_per_axis, h * subsamples_per_axis, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil | FrameContent::Coverage);
 				}
 				delete msaa;
 			}
 		}
 	}
 
-	void GraphicsDevice::clear_buffer(const BufferFlag& flag)
+	void GraphicsDevice::clear_buffer(const FrameContent& flag)
 	{
 		process_commands();
 
-		if ((flag & BufferFlag::COLOR) != BufferFlag::NONE)
+		get_active_framebuffer()->clear(flag);
+
+		for (auto& kv : frame_buffer_map)
 		{
-			if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE || (INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
-			{
-				framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorWhite));
-			}
-			else
-			{
-				framebuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
-			}
+			kv.second->clear(flag);
 		}
-
-		shadowmap->clear(kFarZ);
-
-		if ((flag & BufferFlag::DEPTH) != BufferFlag::NONE) { zbuffer->clear(kFarZ); }
-		if ((flag & BufferFlag::STENCIL) != BufferFlag::NONE) { stencilbuffer->clear(kDefaultStencil); }
 
 		if (INST(GlobalShaderParams).enable_msaa)
 		{
-			msaa_colorbuffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
-			msaa_zbuffer->clear(kFarZ);
-			msaa_coveragebuffer->clear(0);
-			msaa_stencilbuffer->clear(kDefaultStencil);
+			msaa_buffer->clear(flag);
 		}
 
 		statistics.culled_triangle_count = 0;
@@ -253,10 +311,13 @@ namespace Guarneri
 			if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
 		}
 
+		size_t w, h;
+		get_active_framebuffer()->get_size(w, h);
+
 		// ndc to screen space
-		Vertex s1 = Vertex::ndc2screen(this->width, this->height, ndc1);
-		Vertex s2 = Vertex::ndc2screen(this->width, this->height, ndc2);
-		Vertex s3 = Vertex::ndc2screen(this->width, this->height, ndc3);
+		Vertex s1 = Vertex::ndc2screen(w, h, ndc1);
+		Vertex s2 = Vertex::ndc2screen(w, h, ndc2);
+		Vertex s3 = Vertex::ndc2screen(w, h, ndc3);
 
 		// triangle assembly
 		std::vector<Triangle> assembled_triangles = Triangle(s1, s2, s3).horizontally_split();
@@ -265,7 +326,7 @@ namespace Guarneri
 			if (this->tile_based)
 			{
 				// push tile based draw task
-				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, this->width, this->height, kTileSize);
+				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, w, h, kTileSize);
 			}
 			else
 			{
@@ -305,7 +366,7 @@ namespace Guarneri
 				rasterize(tile, task.triangle, *task.shader);
 
 				// wireframe
-				if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 				{
 					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
@@ -314,7 +375,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
 		{
 			for (size_t row = (size_t)tile.row_start; row < (size_t)tile.row_end; row++)
 			{
@@ -323,13 +384,13 @@ namespace Guarneri
 					float r = (float)row / tile.row_end;
 					float g = (float)col / tile.col_end;
 					tinymath::color_rgba dst;
-					if (framebuffer->read(row, col, dst))
+					if (get_active_framebuffer()->read_color(row, col, dst))
 					{
 						tinymath::Color dst_color = ColorEncoding::decode(dst);
 						tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
 						tinymath::Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
 						auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
-						framebuffer->write(row, col, pixel_color);
+						get_active_framebuffer()->write_color(row, col, pixel_color);
 					}
 				}
 			}
@@ -360,11 +421,11 @@ namespace Guarneri
 						size_t sub_row = (size_t)(row * subsamples_per_axis + x_subsample_idx);
 						size_t sub_col = (size_t)(col * subsamples_per_axis + y_subsample_idx);
 						uint8_t coverage = 0;
-						if (msaa_coveragebuffer->read(sub_row, sub_col, coverage) && coverage > 0)
+						if (msaa_buffer->read_coverage(sub_row, sub_col, coverage) && coverage > 0)
 						{
 							coverage_count++;
 							tinymath::color_rgba msaa_color;
-							msaa_colorbuffer->read(sub_row, sub_col, msaa_color);
+							msaa_buffer->read_color(sub_row, sub_col, msaa_color);
 							pixel_color += ColorEncoding::decode(msaa_color);
 						}
 					}
@@ -374,7 +435,7 @@ namespace Guarneri
 				{
 					pixel_color *= 1.0f / msaa_subsample_count;
 					pixel_color.a = 1.0f;
-					framebuffer->write(row, col, ColorEncoding::encode_rgba(pixel_color));
+					frame_buffer->write_color(row, col, ColorEncoding::encode_rgba(pixel_color));
 				}
 			}
 		}
@@ -414,7 +475,7 @@ namespace Guarneri
 			{
 				for (size_t col = (size_t)col_start; col < (size_t)col_end; col++)
 				{
-					process_subsamples(msaa_colorbuffer.get(), msaa_zbuffer.get(), msaa_stencilbuffer.get(), row, col, shader, v0, v1, v2, area);
+					process_subsamples(*msaa_buffer, row, col, shader, v0, v1, v2, area);
 				}
 			}
 		}
@@ -432,8 +493,7 @@ namespace Guarneri
 					{
 						w0 /= area; w1 /= area; w2 /= area;
 						Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-						RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
-						process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
+						process_fragment(*get_active_framebuffer(), vert, row, col, shader);
 					}
 				}
 			}
@@ -452,7 +512,7 @@ namespace Guarneri
 		}
 
 		// wireframe
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
 		{
 			draw_screen_segment(tri[0].position, tri[1].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
 			draw_screen_segment(tri[0].position, tri[2].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -462,16 +522,19 @@ namespace Guarneri
 
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
+		size_t w, h;
+		get_active_framebuffer()->get_size(w, h);
+
 		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
 		int row_start = (int)(bounds.min().y) - 1;
 		int row_end = (int)(bounds.max().y) + 1;
 		int col_start = (int)(bounds.min().x) - 1;
 		int col_end = (int)(bounds.max().x) + 1;
 
-		row_start = std::clamp(row_start, 0, (int)this->height);
-		row_end = std::clamp(row_end, 0, (int)this->height);
-		col_start = std::clamp(col_start, 0, (int)this->width);
-		col_end = std::clamp(col_end, 0, (int)this->width);
+		row_start = std::clamp(row_start, 0, (int)h);
+		row_end = std::clamp(row_end, 0, (int)h);
+		col_start = std::clamp(col_start, 0, (int)w);
+		col_end = std::clamp(col_end, 0, (int)w);
 
 		bool flip = tri.flip;
 		int ccw_idx0 = 0;
@@ -500,8 +563,7 @@ namespace Guarneri
 				{
 					w0 /= area; w1 /= area; w2 /= area;
 					Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-					RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
-					process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), vert, row, col, shader);
+					process_fragment(*get_active_framebuffer(), vert, row, col, shader);
 				}
 			}
 		}
@@ -509,13 +571,16 @@ namespace Guarneri
 
 	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader)
 	{
+		size_t w, h;
+		get_active_framebuffer()->get_size(w, h);
+
 		bool flip = tri.flip;
 		int top_idx = flip ? 2 : 0;
 		int bottom_idx = flip ? 0 : 2;
 		int top = (int)(tri[top_idx].position.y + 0.5f);
 		int bottom = (int)(tri[bottom_idx].position.y + 0.5f);
-		top = std::clamp(top, 0, (int)this->height);
-		bottom = std::clamp(bottom, 0, (int)this->height);
+		top = std::clamp(top, 0, (int)h);
+		bottom = std::clamp(bottom, 0, (int)h);
 		assert(bottom >= top);
 
 		for (size_t row = (size_t)top; row < (size_t)bottom; row++)
@@ -527,26 +592,25 @@ namespace Guarneri
 			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
 			if (enable_screen_clipping)
 			{
-				Clipper::screen_clipping(lhs, rhs, this->width);
+				Clipper::screen_clipping(lhs, rhs,w);
 			}
 
 			int left = (int)(lhs.position.x + 0.5f);
-			left = std::clamp(left, 0, (int)this->width);
+			left = std::clamp(left, 0, (int)w);
 			int right = (int)(rhs.position.x + 0.5f);
-			right = std::clamp(right, 0, (int)this->width);
+			right = std::clamp(right, 0, (int)w);
 			assert(right >= left);
 
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				RawBuffer<float>* zbuf = shader.shadow ? shadowmap.get() : zbuffer.get();
-				process_fragment(framebuffer.get(), zbuf, stencilbuffer.get(), lhs, row, col, shader);
+				process_fragment(*get_active_framebuffer(), lhs, row, col, shader);
 				auto dx = Vertex::differential(lhs, rhs);
 				lhs = Vertex::intagral(lhs, dx);
 			}
 		}
 	}
 
-	void GraphicsDevice::process_subsamples(RawBuffer<tinymath::color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const size_t& row, const size_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
+	void GraphicsDevice::process_subsamples(FrameBuffer& buffer, const size_t& row, const size_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
 	{
 		auto p0 = v0.position.xy;
 		auto p1 = v1.position.xy;
@@ -602,7 +666,7 @@ namespace Guarneri
 
 					PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
-					msaa_coveragebuffer->write(subsample_row, subsample_col, 1);
+					buffer.write_coverage(subsample_row, subsample_col, 1);
 
 
 					tinymath::color_rgba pixel_color; 
@@ -634,18 +698,18 @@ namespace Guarneri
 					// stencil test
 					if (enable_stencil_test)
 					{
-						if (!perform_stencil_test(stencilbuf, stencil_ref_val, stencil_read_mask, stencil_func, subsample_row, subsample_col))
+						if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, subsample_row, subsample_col))
 						{
 							op_pass &= ~PerSampleOperation::STENCIL_TEST;
 						}
 					}
 
-					update_stencil_buffer(stencilbuf, subsample_row, subsample_col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
+					buffer.update_stencil_buffer(subsample_row, subsample_col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 
 					// z test
 					if (enable_depth_test)
 					{
-						if (!perform_depth_test(zbuf, ztest_func, subsample_row, subsample_col, vert.position.z))
+						if (!buffer.perform_depth_test(ztest_func, subsample_row, subsample_col, vert.position.z))
 						{
 							op_pass &= ~PerSampleOperation::DEPTH_TEST;
 						}
@@ -653,14 +717,14 @@ namespace Guarneri
 
 					if (zwrite_mode == ZWrite::ON && (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
 					{
-						zbuf->write(subsample_row, subsample_col, vert.position.z);
+						buffer.write_depth(subsample_row, subsample_col, vert.position.z);
 					}
 
 					// blending
 					if (enable_blending && shader.transparent)
 					{
 						tinymath::color_rgba dst;
-						if (fbuf->read(subsample_row, subsample_col, dst))
+						if (buffer.read_color(subsample_row, subsample_col, dst))
 						{
 							tinymath::Color dst_color = ColorEncoding::decode(dst);
 							tinymath::Color src_color = fragment_result;
@@ -671,14 +735,14 @@ namespace Guarneri
 
 					if (validate_fragment(op_pass))
 					{
-						fbuf->write(subsample_row, subsample_col, pixel_color);
+						buffer.write_color(subsample_row, subsample_col, pixel_color);
 					}
 				}
 			}
 		}
 	}
 
-	void GraphicsDevice::process_fragment(RawBuffer<tinymath::color_rgba>* fbuf, RawBuffer<float>* zbuf, RawBuffer<uint8_t>* stencilbuf, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader)
+	void GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader)
 	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
@@ -710,7 +774,7 @@ namespace Guarneri
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
 		{
-			if (!perform_depth_test(zbuf, ztest_func, row, col, z))
+			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
 				op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				statistics.earlyz_optimized++;
@@ -754,17 +818,17 @@ namespace Guarneri
 		// stencil test
 		if (enable_stencil_test)
 		{
-			if (!perform_stencil_test(stencilbuf, stencil_ref_val, stencil_read_mask, stencil_func, row, col))
+			if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col))
 			{
 				op_pass &= ~PerSampleOperation::STENCIL_TEST;
 			}
-			update_stencil_buffer(stencilbuf, row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
+			buffer.update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 		}
 
 		// depth test
 		if (enable_depth_test)
 		{
-			if (!perform_depth_test(zbuf, ztest_func, row, col, z))
+			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
 				op_pass &= ~PerSampleOperation::DEPTH_TEST;
 			}
@@ -773,14 +837,14 @@ namespace Guarneri
 		// write depth
 		if (zwrite_mode == ZWrite::ON && (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
 		{
-			zbuf->write(row, col, z);
+			buffer.write_depth(row, col, z);
 		}
 
 		// blending
 		if (enable_blending && shader.transparent)
 		{
 			tinymath::color_rgba dst;
-			if (fbuf->read(row, col, dst))
+			if (buffer.read_color(row, col, dst))
 			{
 				tinymath::Color dst_color = ColorEncoding::decode(dst);
 				tinymath::Color src_color = fragment_result;
@@ -794,12 +858,12 @@ namespace Guarneri
 		{
 			if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
 			{
-				fbuf->write(row, col, pixel_color);
+				buffer.write_color(row, col, pixel_color);
 			}
 			else
 			{
 				tinymath::color_rgba cur;
-				if (fbuf->read(row, col, cur))
+				if (buffer.read_color(row, col, cur))
 				{
 					if ((color_mask & ColorMask::R) == ColorMask::ZERO)
 					{
@@ -817,44 +881,8 @@ namespace Guarneri
 					{
 						pixel_color.a = cur.a;
 					}
-					fbuf->write(row, col, pixel_color);
+					buffer.write_color(row, col, pixel_color);
 				}
-			}
-		}
-
-		// stencil visualization
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
-		{
-			uint8_t stencil;
-			if (stencilbuf->read(row, col, stencil))
-			{
-				tinymath::color_rgba c = ColorEncoding::encode_rgba(stencil, stencil, stencil, 255);
-				fbuf->write(row, col, c);
-			}
-		}
-
-		// depth buffer visualization
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
-		{
-			float cur_depth;
-			if (this->zbuffer->read(row, col, cur_depth))
-			{
-				float linear_depth = linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
-				tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
-				tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
-				fbuf->write(row, col, c);
-			}
-		}
-
-		// shadowmap visualization
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
-		{
-			float cur_depth;
-			if (this->get_shadowmap()->read(row, col, cur_depth))
-			{
-				tinymath::Color depth_color = tinymath::kColorWhite * cur_depth;
-				tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
-				fbuf->write(row, col, c);
 			}
 		}
 	}
@@ -866,124 +894,6 @@ namespace Guarneri
 		if ((op_pass & PerSampleOperation::STENCIL_TEST) == PerSampleOperation::DISABLE) return false;
 		if ((op_pass & PerSampleOperation::DEPTH_TEST) == PerSampleOperation::DISABLE) return false;
 		return true;
-	}
-
-	bool GraphicsDevice::perform_stencil_test(RawBuffer<uint8_t>* stencilbuf, const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const size_t& row, const size_t& col) const
-	{
-		bool pass = false;
-		uint8_t stencil;
-		if (stencilbuf->read(row, col, stencil))
-		{
-			switch (func)
-			{
-			case CompareFunc::NEVER:
-				pass = false;
-				break;
-			case CompareFunc::ALWAYS:
-				pass = true;
-				break;
-			case CompareFunc::EQUAL:
-				pass = (ref_val & read_mask) == (stencil & read_mask);
-				break;
-			case CompareFunc::GREATER:
-				pass = (ref_val & read_mask) > (stencil & read_mask);
-				break;
-			case CompareFunc::LEQUAL:
-				pass = (ref_val & read_mask) <= (stencil & read_mask);
-				break;
-			case CompareFunc::NOT_EQUAL:
-				pass = (ref_val & read_mask) != (stencil & read_mask);
-				break;
-			case CompareFunc::GEQUAL:
-				pass = (ref_val & read_mask) > (stencil & read_mask);
-				break;
-			case CompareFunc::LESS:
-				pass = (ref_val & read_mask) < (stencil & read_mask);
-				break;
-			}
-		}
-		return pass;
-	}
-
-	void GraphicsDevice::update_stencil_buffer(RawBuffer<uint8_t>* stencilbuf, const size_t& row, const size_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const
-	{
-		bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-		bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
-		uint8_t stencil;
-		stencilbuf->read(row, col, stencil);
-		StencilOp stencil_op;
-		if (stencil_pass)
-		{
-			stencil_op = z_pass ? stencil_pass_op : stencil_zfail_op;
-		}
-		else
-		{
-			stencil_op = stencil_fail_op;
-		}
-		switch (stencil_op)
-		{
-		case StencilOp::KEEP:
-			break;
-		case StencilOp::ZERO:
-			stencilbuf->write(row, col, 0);
-			break;
-		case StencilOp::REPLACE:
-			stencilbuf->write(row, col, ref_val);
-			break;
-		case StencilOp::INCR:
-			stencilbuf->write(row, col, std::clamp((uint8_t)(stencil + 1), (uint8_t)0, (uint8_t)255));
-			break;
-		case StencilOp::DECR:
-			stencilbuf->write(row, col, std::clamp((uint8_t)(stencil - 1), (uint8_t)0, (uint8_t)255));
-			break;
-		case StencilOp::INCR_WRAP:
-			stencilbuf->write(row, col, stencil + 1);
-			break;
-		case StencilOp::DECR_WRAP:
-			stencilbuf->write(row, col, stencil - 1);
-			break;
-		case StencilOp::INVERT:
-			stencilbuf->write(row, col, ~stencil);
-			break;
-		}
-	}
-
-	bool GraphicsDevice::perform_depth_test(RawBuffer<float>* zbuf, const CompareFunc& func, const size_t& row, const size_t& col, const float& z) const
-	{
-		float depth;
-		bool pass = false;
-		if (zbuf->read(row, col, depth))
-		{
-			pass = z <= depth;
-			switch (func)
-			{
-			case CompareFunc::NEVER:
-				pass = false;
-				break;
-			case CompareFunc::ALWAYS:
-				pass = true;
-				break;
-			case CompareFunc::EQUAL:
-				pass = tinymath::approx(z, depth);
-				break;
-			case CompareFunc::GREATER:
-				pass = z > depth;
-				break;
-			case CompareFunc::LEQUAL:
-				pass = z <= depth;
-				break;
-			case CompareFunc::NOT_EQUAL:
-				pass = z != depth;
-				break;
-			case CompareFunc::GEQUAL:
-				pass = z >= depth;
-				break;
-			case CompareFunc::LESS:
-				pass = z < depth;
-				break;
-			}
-		}
-		return pass;
 	}
 
 	// todo: alpha factor
@@ -1062,56 +972,31 @@ namespace Guarneri
 		return lhs + rhs;
 	}
 
-	float GraphicsDevice::linearize_01depth(const float& depth, const float& near, const float& far) const
-	{
-		return (linearize_depth(depth, near, far) - near) / (far - near);
-	}
-
-	float GraphicsDevice::linearize_depth(const float& depth, const float& near, const float& far) const
-	{
-	#ifdef GL_LIKE
-		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
-	#else
-		float ndc_z = depth; // [0, 1] (DX)
-	#endif
-
-	#ifdef LEFT_HANDED 
-	#ifdef GL_LIKE
-		return (2.0f * near * far) / (far + near - ndc_z * (far - near));
-	#else
-		return (far * near) / (far - (far - near) * ndc_z);
-	#endif
-	#else
-	#ifdef GL_LIKE
-		return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
-	#else
-		return (far * near) / (-far - (far - near) * ndc_z);
-	#endif
-	#endif
-	}
-
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
+		size_t w, h;
+		get_active_framebuffer()->get_size(w, h);
+
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 
 		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
 		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
 
-		tinymath::vec4f s1 = Vertex::ndc2screen(this->width, this->height, n1);
-		tinymath::vec4f s2 = Vertex::ndc2screen(this->width, this->height, n2);
+		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
+		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
 
 		tinymath::mat4x4 translation = tinymath::translation(tinymath::vec3f(screen_translation));
 
 		s1 = translation * s1;
 		s2 = translation * s2;
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
 	{
-		SegmentDrawer::bresenham(framebuffer.get(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
@@ -1130,13 +1015,16 @@ namespace Guarneri
 
 	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const tinymath::Color& col)
 	{
+		size_t w, h;
+		get_active_framebuffer()->get_size(w, h);
+
 		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
 		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
 
-		tinymath::vec4f s1 = Vertex::ndc2screen(this->width, this->height, n1);
-		tinymath::vec4f s2 = Vertex::ndc2screen(this->width, this->height, n2);
+		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
+		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
 
-		SegmentDrawer::bresenham(framebuffer.get(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)

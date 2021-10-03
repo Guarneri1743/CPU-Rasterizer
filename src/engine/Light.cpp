@@ -15,27 +15,33 @@ namespace Guarneri
 	{
 		this->yaw = 0.0f;
 		this->pitch = -45.0f;
-		//this->p = tinymath::mat4x4::perspective(45.0f, 800.0f/600.0f, 0.5f, 500.0f);
-		this->p = tinymath::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.01f, 200.0f);
-		this->position = tinymath::vec3f(10.0f, 10.0f, 10.0f);
+
+		l = -20.0f;
+		r = 20.0f;
+		b = -20.0f;
+		t = 20.0f;
+		n = 0.01f;
+		f = 200.0f;
+
+		update_projection();
 		update_rotation();
 	}
 
 	tinymath::mat4x4 DirectionalLight::light_space() const
 	{
-		auto v = tinymath::lookat(position, position + forward, tinymath::kVec3fUp);
-		auto ret = p * v;
+		auto view = view_matrix();
+		auto ret = projection * view;
 		return ret;
 	}
 
 	tinymath::mat4x4 DirectionalLight::view_matrix() const
 	{
-		return tinymath::lookat(position, position + forward, tinymath::kVec3fUp);
+		return tinymath::lookat(-forward * distance, tinymath::kVec3fZero, tinymath::kVec3fUp);
 	}
 
 	tinymath::mat4x4 DirectionalLight::projection_matrix() const
 	{
-		return p;
+		return projection;
 	}
 
 	void DirectionalLight::rotate(const float& yaw_offset, const float& pitch_offset)
@@ -53,6 +59,11 @@ namespace Guarneri
 		forward.z = sin(DEGREE2RAD(this->yaw)) * cos(DEGREE2RAD(this->pitch));
 		forward = tinymath::normalize(forward);
 		tinymath::calculate_right_up(forward, right, up);
+	}
+
+	void DirectionalLight::update_projection()
+	{
+		this->projection = tinymath::ortho(l, r, b, t, n, f);
 	}
 
 	PointLight::PointLight() : Light()

@@ -6,6 +6,7 @@
 #include "Shader.hpp"
 #include "ShadowShader.hpp"
 #include "SkyboxShader.hpp"
+#include "FrameBuffer.hpp"
 
 namespace Guarneri
 {
@@ -30,14 +31,10 @@ namespace Guarneri
 		bool double_face;
 		bool transparent;
 		bool cast_shadow;
-		std::unordered_map<property_name, float> name2float;
-		std::unordered_map<property_name, tinymath::vec4f> name2float4;
-		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
-		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		LightingData lighting_param;
 		std::shared_ptr<Shader> target_shader;
 		std::shared_ptr<Shader> shadow_caster;
+		ShaderPropertyMap local_properties;
 
 	public:
 		Material();
@@ -47,19 +44,9 @@ namespace Guarneri
 		~Material();
 
 		Shader* get_shader(const RenderPass& pass) const;
-		void set_shadowmap(RawBuffer<float>* shadowmap);
 		void sync(Shader* shader, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 		void sync(const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
-		void set_int(const property_name& name, const int& val);
-		void set_float4(const property_name& name, const tinymath::vec4f& val);
-		void set_float(const property_name& name, const float& val);
-		void set_texture(const property_name& name, std::shared_ptr<Texture> tex);
-		void set_cubemap(const property_name& name, std::shared_ptr<CubeMap> cubemap);
-		int get_int(const property_name& name) const;
-		tinymath::vec4f get_float4(const property_name& name) const;
-		float get_float(const property_name& name) const;
-		std::shared_ptr<Texture> get_texture(const property_name& name) const;
-		std::shared_ptr<CubeMap> get_cubemap(const property_name& name) const;
+		
 		Material& operator =(const Material& other);
 		void copy(const Material& other);
 	};

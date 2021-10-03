@@ -57,11 +57,6 @@ namespace Guarneri
 		return target_shader.get();
 	}
 
-	void Material::set_shadowmap(RawBuffer<float>* shadowmap)
-	{
-		this->target_shader->shadowmap = shadowmap;
-	}
-
 	void Material::sync(Shader* shader, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
 		shader->model = m;
@@ -85,19 +80,7 @@ namespace Guarneri
 		shader->color_mask = color_mask;
 		shader->lighting_param = lighting_param;
 		shader->double_face = double_face;
-		shader->name2float = name2float;
-		shader->name2float4 = name2float4;
-		shader->name2tex = name2tex;
-		shader->name2int = name2int;
-		shader->name2cubemap = name2cubemap;
-		if (name2tex.count(normal_prop) > 0)
-		{
-			shader->normal_map = true;
-		}
-		else
-		{
-			shader->normal_map = false;
-		}
+		shader->local_properties = local_properties;
 	}
 
 	void Material::sync(const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
@@ -107,84 +90,6 @@ namespace Guarneri
 		{
 			sync(shadow_caster.get(), m, v, p);
 		}
-	}
-
-	void Material::set_int(const property_name& name, const int& val)
-	{
-		name2int[name] = val;
-	}
-
-	void Material::set_float4(const property_name& name, const tinymath::vec4f& val)
-	{
-		name2float4[name] = val;
-	}
-
-	void Material::set_float(const property_name& name, const float& val)
-	{
-		name2float[name] = val;
-	}
-
-	void Material::set_texture(const property_name& name, std::shared_ptr<Texture> tex)
-	{
-		if (tex == nullptr)
-		{
-			return;
-		}
-		name2tex[name] = tex;
-	}
-
-	void Material::set_cubemap(const property_name& name, std::shared_ptr<CubeMap> cubemap)
-	{
-		if (cubemap == nullptr)
-		{
-			return;
-		}
-		name2cubemap[name] = cubemap;
-	}
-
-	int Material::get_int(const property_name& name) const
-	{
-		if (name2int.count(name) > 0)
-		{
-			return name2int.at(name);
-		}
-		return 0;
-	}
-
-	tinymath::vec4f Material::get_float4(const property_name& name) const
-	{
-		if (name2float4.count(name) > 0)
-		{
-			return name2float4.at(name);
-		}
-		return 0;
-	}
-
-	float Material::get_float(const property_name& name) const
-	{
-		if (name2float.count(name) > 0)
-		{
-			return name2float.at(name);
-		}
-		return 0;
-	}
-
-	std::shared_ptr<Texture> Material::get_texture(const property_name& name) const
-	{
-		if (name2tex.count(name) > 0)
-		{
-			return name2tex.at(name);
-		}
-		return nullptr;
-	}
-
-	std::shared_ptr<CubeMap> Material::get_cubemap(const property_name& name) const
-	{
-		if (name2cubemap.count(name) > 0)
-		{
-			return name2cubemap.at(name);
-		}
-		return nullptr;
 	}
 
 	Material& Material::operator =(const Material& other)
@@ -211,10 +116,6 @@ namespace Guarneri
 		this->blend_op = other.blend_op;
 		this->double_face = other.double_face;
 		this->transparent = other.transparent;
-		this->name2float = other.name2float;
-		this->name2float4 = other.name2float4;
-		this->name2int = other.name2int;
-		this->name2tex = other.name2tex;
-		this->name2cubemap = other.name2cubemap;
+		this->local_properties = other.local_properties;
 	}
 }

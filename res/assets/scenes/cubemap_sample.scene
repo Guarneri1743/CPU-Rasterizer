@@ -22,11 +22,7 @@
         "intensity": 1.2999999523162842,
         "yaw": 0.0,
         "pitch": -45.0,
-        "position": {
-            "x": 0.0,
-            "y": 8.0,
-            "z": 0.0
-        }
+        "distance": 10.0
     },
     "point_lights": [
         {

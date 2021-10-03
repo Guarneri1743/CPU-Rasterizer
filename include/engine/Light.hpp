@@ -17,8 +17,14 @@ namespace Guarneri {
 		tinymath::vec3f forward;
 		tinymath::vec3f right;
 		tinymath::vec3f up;
-		tinymath::vec3f position;
-		tinymath::mat4x4 p;
+		float distance;
+		float n;
+		float f;
+		float t;
+		float b;
+		float l;
+		float r;
+		tinymath::mat4x4 projection;
 
 		DirectionalLight();
 		tinymath::mat4x4 light_space() const;
@@ -26,6 +32,7 @@ namespace Guarneri {
 		tinymath::mat4x4 projection_matrix() const;
 		void rotate(const float& yaw_offset, const float& pitch_offset);
 		void update_rotation();
+		void update_projection();
 	};
 
 	struct PointLight : Light {

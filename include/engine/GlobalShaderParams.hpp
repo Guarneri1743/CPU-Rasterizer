@@ -14,7 +14,7 @@ namespace Guarneri {
 			view_matrix = tinymath::kMat4x4Identity;
 			proj_matrix = tinymath::kMat4x4Identity;
 			main_light = DirectionalLight();
-			render_flag = RenderFlag::DISABLE;
+			debug_flag = RenderFlag::DISABLE;
 			workflow = PBRWorkFlow::Metallic;
 			shadow_bias = 0.02f;
 			enable_shadow = true;
@@ -43,7 +43,7 @@ namespace Guarneri {
 		PBRWorkFlow workflow;
 		ColorSpace color_space;
 		std::vector<PointLight> point_lights;
-		RenderFlag render_flag;
+		RenderFlag debug_flag;
 		PerSampleOperation persample_op_flag;
 		CullingAndClippingFlag culling_clipping_flag;
 

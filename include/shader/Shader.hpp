@@ -4,8 +4,7 @@
 #include "Light.hpp"
 #include "GlobalShaderParams.hpp"
 #include "tinymath.h"
-#include "Texture.hpp"
-#include "CubeMap.hpp"
+#include "ShaderPropertyMap.hpp"
 
 namespace Guarneri
 {
@@ -54,13 +53,6 @@ namespace Guarneri
 		tinymath::mat4x4 model, view, projection;
 		tinymath::mat4x4 vp_matrix;
 		tinymath::mat4x4 mvp_matrix;
-		std::unordered_map<property_name, float> name2float;
-		std::unordered_map<property_name, tinymath::vec4f> name2float4;
-		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
-		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
-		std::unordered_map<property_name, std::string> keywords;
-		RawBuffer<float>* shadowmap;
 		ColorMask color_mask;
 		CompareFunc stencil_func;
 		StencilOp stencil_pass_op;
@@ -80,15 +72,17 @@ namespace Guarneri
 		bool shadow;
 		LightingData lighting_param;
 		bool discarded = false;
-		bool normal_map = false;
 		std::string name;
+		ShaderPropertyMap local_properties;
+		static ShaderPropertyMap global_shader_properties;
 
 	public:
 		Shader(std::string name);
 		virtual ~Shader();
 		virtual v2f vertex_shader(const a2v& input) const;
 		virtual tinymath::Color fragment_shader(const v2f& input) const;
-
+		static float linearize_depth(const float& depth, const float& near, const float& far);
+		static float linearize_01depth(const float& depth, const float& near, const float& far);
 		static Shader*  get_error_shader() { return error_shader; }
 
 	protected:

@@ -20,6 +20,7 @@ namespace Guarneri
 {
 	bool show = true;	
 	int rt_size[2];
+	int shadowmap_size[2];
 	int sub_samples = 4;
 
 	InspectorEditor::InspectorEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
@@ -118,6 +119,17 @@ namespace Guarneri
 			ImGui::Checkbox("ShadowOn", &INST(GlobalShaderParams).enable_shadow);
 			if (INST(GlobalShaderParams).enable_shadow)
 			{
+				if (ImGui::InputInt2("ShadowMap Resolution", shadowmap_size))
+				{
+					Scene::current()->resize_shadowmap(shadowmap_size[0], shadowmap_size[1]);
+				}
+				else
+				{
+					size_t sw, sh;
+					Scene::current()->get_shadowmap_size(sw, sh);
+					shadowmap_size[0] = (int)sw;
+					shadowmap_size[1] = (int)sh;
+				}
 				ImGui::Checkbox("PCF", &INST(GlobalShaderParams).pcf_on);
 				ImGui::SliderFloat("Bias", &INST(GlobalShaderParams).shadow_bias, 0.0f, 0.01f);
 			}
@@ -179,8 +191,8 @@ namespace Guarneri
 					if (ImGui::Selectable(debug_views[i]))
 					{
 						selected_view = i;
-						INST(GlobalShaderParams).render_flag = RenderFlag::DISABLE;
-						INST(GlobalShaderParams).render_flag = view_flags[i];
+						INST(GlobalShaderParams).debug_flag = RenderFlag::DISABLE;
+						INST(GlobalShaderParams).debug_flag = view_flags[i];
 					}
 				ImGui::EndPopup();
 			}

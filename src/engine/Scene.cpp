@@ -33,7 +33,6 @@ namespace Guarneri
 		main_light.diffuse = tinymath::Color(1.0f, 0.8f, 0.8f, 1.0f);
 		main_light.ambient = tinymath::Color(0.1f, 0.05f, 0.2f, 1.0f);
 		main_light.specular = tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f);
-		main_light.position = tinymath::vec3f(1.0f, 1.0f, 1.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
 	}
 
@@ -88,6 +87,14 @@ namespace Guarneri
 				s->main_cam->transform->move_backward(CAMERA_ZOOM_SPEED);
 			}
 		}, this);
+
+		// setup shadowmap and cubemap
+		shadowmap_id = INST(GraphicsDevice).create_buffer(512, 512, FrameContent::Depth);
+		std::shared_ptr<FrameBuffer> shadowmap;
+		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+
+		Shader::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
+		Shader::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
 	}
 
 
@@ -222,12 +229,15 @@ namespace Guarneri
 
 	void Scene::render()
 	{
-		INST(GraphicsDevice).clear_buffer(BufferFlag::COLOR | BufferFlag::DEPTH | BufferFlag::STENCIL);
+		INST(GraphicsDevice).clear_buffer(FrameContent::Color | FrameContent::Depth | FrameContent::Stencil | FrameContent::Coverage);
 		if (INST(GlobalShaderParams).enable_shadow)
 		{
+			INST(GraphicsDevice).set_active_frame_buffer(shadowmap_id);
 			render_shadow();
 			INST(GraphicsDevice).present();
+			INST(GraphicsDevice).reset_active_frame_buffer();
 		}
+
 		render_objects();
 		INST(GraphicsDevice).present();
 		draw_gizmos();
@@ -235,7 +245,7 @@ namespace Guarneri
 
 	void Scene::render_shadow()
 	{
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
 		{
 			return;
 		}
@@ -251,7 +261,7 @@ namespace Guarneri
 		INST(GraphicsDevice).multi_thread = true;
 		INST(GraphicsDevice).tile_based = true;
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
 		{
 			return;
 		}
@@ -293,6 +303,77 @@ namespace Guarneri
 
 		draw_camera_coords();
 		//draw_world_coords();
+
+		debug_scene();
+	}
+
+	void Scene::debug_scene()
+	{
+		if (INST(GlobalShaderParams).debug_flag == RenderFlag::DISABLE) { return; }
+
+		FrameBuffer* active_fbo = INST(GraphicsDevice).get_active_framebuffer();
+		std::shared_ptr<FrameBuffer> shadow_map;
+		INST(GraphicsDevice).get_buffer(shadowmap_id, shadow_map);
+		size_t w, h;
+		active_fbo->get_size(w, h);
+		for (size_t row = 0; row < h; ++row)
+		{
+			for (size_t col = 0; col < w; ++col)
+			{
+				// stencil visualization
+				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
+				{
+					uint8_t stencil;
+					if (active_fbo->read_stencil(row, col, stencil))
+					{
+						tinymath::color_rgba c = ColorEncoding::encode_rgba(stencil, stencil, stencil, 255);
+						active_fbo->write_color(row, col, c);
+					}
+				}
+
+				// depth buffer visualization
+				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+				{
+					float cur_depth;
+					if (active_fbo->read_depth(row, col, cur_depth))
+					{
+						float linear_depth = Shader::linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
+						tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
+						tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
+						active_fbo->write_color(row, col, c);
+					}
+				}
+
+				// shadowmap visualization
+				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+				{
+					float u, v;
+					pixel2uv(w, h, row, col, u, v);
+					float cur_depth;
+					if (shadow_map->read_depth(u, v, cur_depth))
+					{
+						tinymath::Color depth_color = tinymath::kColorWhite * cur_depth;
+						tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
+						active_fbo->write_color(u, v, c);
+					}
+				}
+			}
+		}
+	}
+
+	void Scene::resize_shadowmap(const size_t& w, const size_t& h)
+	{
+		std::shared_ptr<FrameBuffer> shadowmap;
+		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+		shadowmap->resize(w, h);
+	}
+
+	void Scene::get_shadowmap_size(size_t & w, size_t & h)
+	{
+		std::shared_ptr<FrameBuffer> shadowmap;
+		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+		w = shadowmap->get_width();
+		h = shadowmap->get_height();
 	}
 
 	void Scene::open_scene(const char* path)
@@ -307,6 +388,7 @@ namespace Guarneri
 		INST(GlobalShaderParams).color_space = deserialized_scene->color_space;
 		INST(GlobalShaderParams).workflow = deserialized_scene->work_flow;
 		current_scene = deserialized_scene;
+		current_scene->initialize();
 		LOG("open scene: {}", path);
 	}
 }

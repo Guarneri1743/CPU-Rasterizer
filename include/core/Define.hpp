@@ -178,6 +178,15 @@ namespace Guarneri{
 		INDIRECT_SPECULAR = 1 << 18
 	};
 
+	enum class FrameContent
+	{
+		None = 0,
+		Color = 1 << 0,
+		Depth = 1 << 1,
+		Stencil = 1 << 2,
+		Coverage = 1 << 3
+	};
+
 #ifdef OPAQUE
 #undef OPAQUE
 #endif
@@ -205,4 +214,7 @@ namespace Guarneri{
 
 	template<>
 	struct support_bitwise_enum<ColorMask> : std::true_type {};
+
+	template<>
+	struct support_bitwise_enum<FrameContent> : std::true_type {};
 }

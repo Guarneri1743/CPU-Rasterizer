@@ -1,25 +1,26 @@
 #include "tinymath.h"
+#include "..\RawBuffer.hpp"
 
 namespace Guarneri
 {
 	template<typename T>
-	RawBuffer<T>::RawBuffer(size_t _width, size_t _height)
+	RawBuffer<T>::RawBuffer(size_t w, size_t h)
 	{
-		this->width = _width;
-		this->height = _height;
+		this->width = w;
+		this->height = h;
 		this->deletor = [](T* ptr)
 		{
 			delete[] ptr;
 		};
-		int buf_size = static_cast<int>(static_cast<long>(width) * static_cast<long>(_height));
+		int buf_size = static_cast<int>(static_cast<long>(width) * static_cast<long>(height));
 		this->buffer = new T[buf_size];
 	}
 
 	template<typename T>
-	RawBuffer<T>::RawBuffer(void* _buffer, size_t _width, size_t _height, void (*deletor)(T* ptr))
+	RawBuffer<T>::RawBuffer(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr))
 	{
-		this->width = _width;
-		this->height = _height;
+		this->width = w;
+		this->height = h;
 		this->deletor = deletor;
 		this->buffer = (T*)_buffer;
 	}
@@ -37,15 +38,15 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(size_t _width, size_t _height)
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(size_t w, size_t h)
 	{
-		return std::make_shared<RawBuffer>(_width, _height);
+		return std::make_shared<RawBuffer>(w, h);
 	}
 
 	template<typename T>
-	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(void* _buffer, size_t _width, size_t _height, void (*deletor)(T* ptr))
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr))
 	{
-		return std::make_shared<RawBuffer>(_buffer, _width, _height, deletor);
+		return std::make_shared<RawBuffer>(_buffer, w, h, deletor);
 	}
 
 	template<typename T>
@@ -57,55 +58,106 @@ namespace Guarneri
 	template<typename T>
 	bool RawBuffer<T>::read(const float& u, const float& v, T& out) const
 	{
-		size_t row, col;
-		uv2pixel(width, height, u, v, row, col);
-		return read(row, col, out);
+		return read(buffer, u, v, width, height, out);
 	}
 
 	template<typename T>
 	bool RawBuffer<T>::read(const size_t& row, const size_t& col, T& out) const
 	{
-		size_t pos = row * width + col;
-		if (row >= height || col >= width || pos >= width * height)
-		{
-			return false;
-		}
-		out = buffer[pos];
-		return true;
+		return read(buffer, row, col, width, height, out);
 	}
 
 	template<typename T>
 	bool RawBuffer<T>::write(const float& u, const float& v, const T& data)
 	{
-		size_t row, col;
-		uv2pixel(width, height, u, v, row, col);
-		return this->write(row, col, data);
+		return write(buffer, u, v, width, height, data);
 	}
 
 	template<typename T>
 	bool RawBuffer<T>::write(const size_t& row, const size_t& col, const T& data)
 	{
-		size_t pos = row * width + col;
-		if (row >= height || col >= width || pos >= width * height)
+		return write(buffer, row, col, width, height, data);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::read(T* buf, const float& u, const float& v, const size_t& w, const size_t& h, T& out) const
+	{
+		size_t row, col;
+		uv2pixel(w, h, u, v, row, col);
+		return read(buf, row, col, w, h, out);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::read(T* buf, const size_t& row, const size_t& col, const size_t& w, const size_t& h, T& out) const
+	{
+		size_t pos = row * w + col;
+		if (row >= h || col >= w || pos >= w * h)
 		{
 			return false;
 		}
-		buffer[pos] = data;
+		out = buf[pos];
 		return true;
 	}
 
-	inline void uv2pixel(const size_t& width, const size_t& height, const float& u, const float& v, size_t& row, size_t& col) 
+	template<typename T>
+	bool RawBuffer<T>::write(T* buf, const float& u, const float& v, const size_t& w, const size_t& h, const T& data)
 	{
-		// [0.0, 1.0] -> [0, width/height - 1]
-		row = (size_t)(tinymath::floor(v * (float)(height - 1)));
-		col = (size_t)(tinymath::floor(u * (float)(width - 1)));
+		size_t row, col;
+		uv2pixel(w, h, u, v, row, col);
+		return write(buf, row, col, w, h, data);
 	}
 
-	inline void pixel2uv(const size_t& width, const size_t& height, const size_t& row, const size_t& col, float& u, float& v)
+	template<typename T>
+	bool RawBuffer<T>::write(T* buf, const size_t& row, const size_t& col, const size_t& w, const size_t& h, const T& data)
 	{
-		//[0, width/height - 1] -> [0.0, 1.0]
-		u = (float)col / (float)(width - 1);
-		v = (float)row / (float)(height - 1);
+		size_t pos = row * w + col;
+		if (row >= h || col >= w || pos >= w * h)
+		{
+			return false;
+		}
+		buf[pos] = data;
+		return true;
+	}
+
+	template<typename T>
+	void RawBuffer<T>::resize(size_t w, size_t h)
+	{
+		size_t pw = width;
+		size_t ph = height;
+
+		T* new_buffer = new T[w * h];
+
+		for (size_t row = 0; row < h; ++row)
+		{
+			for (size_t col = 0; col < w; ++col)
+			{
+				float u, v;
+				pixel2uv(w, h, row, col, u, v);
+
+				T val;
+				read(buffer, u, v, pw, ph, val);
+				write(new_buffer, u, v, w, h, val);
+			}
+		}
+
+		delete[] buffer;
+		width = w;
+		height = h;
+		buffer = new_buffer;
+	}
+
+	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col) 
+	{
+		// [0.0, 1.0] -> [0, w/h - 1]
+		row = (size_t)(tinymath::floor(v * (float)(h - 1)));
+		col = (size_t)(tinymath::floor(u * (float)(w - 1)));
+	}
+
+	inline void pixel2uv(const size_t& w, const size_t& h, const size_t& row, const size_t& col, float& u, float& v)
+	{
+		//[0, w/h - 1] -> [0.0, 1.0]
+		u = (float)col / (float)(w - 1);
+		v = (float)row / (float)(h - 1);
 	}
 
 	template<typename T>

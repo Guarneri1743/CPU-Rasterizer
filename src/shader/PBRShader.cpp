@@ -27,7 +27,7 @@ namespace Guarneri
 		}
 		o.color = input.color;
 		tinymath::mat3x3 normal_matrix = tinymath::transpose(tinymath::inverse(tinymath::mat4x4_to_mat3x3(model)));
-		if (normal_map && !is_error_shader)
+		if (local_properties.has_texture(normal_prop) && !is_error_shader)
 		{
 			tinymath::vec3f t = tinymath::normalize(normal_matrix * input.tangent);
 			tinymath::vec3f n = tinymath::normalize(normal_matrix * input.normal);
@@ -47,10 +47,12 @@ namespace Guarneri
 
 	float PBRShader::get_shadow_atten(const tinymath::vec4f& light_space_pos) const
 	{
-		if (shadowmap == nullptr)
+		if (!global_shader_properties.has_framebuffer(shadowmap_prop))
 		{
 			return 0.0f;
 		}
+
+		auto shadowmap = global_shader_properties.get_framebuffer(shadowmap_prop);
 
 		tinymath::vec3f proj_shadow_coord = light_space_pos.xyz;
 		proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
@@ -62,7 +64,7 @@ namespace Guarneri
 
 		float shadow_atten = 0.0f;
 
-		tinymath::vec2f texel_size = 1.0f / tinymath::vec2f((float)shadowmap->height, (float)shadowmap->width);
+		tinymath::vec2f texel_size = 1.0f / tinymath::vec2f((float)shadowmap->get_height(), (float)shadowmap->get_width());
 
 		if (INST(GlobalShaderParams).pcf_on)
 		{
@@ -73,7 +75,7 @@ namespace Guarneri
 				for (int y = -kernel_size; y <= kernel_size; y++)
 				{
 					float depth;
-					if (shadowmap->read(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
+					if (shadowmap->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 					{
 						//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
 						shadow_atten += (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
@@ -86,9 +88,8 @@ namespace Guarneri
 		else
 		{
 			float depth;
-			if (shadowmap->read(proj_shadow_coord.x, proj_shadow_coord.y, depth))
+			if (shadowmap->read_depth(proj_shadow_coord.x, proj_shadow_coord.y, depth))
 			{
-				//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
 				shadow_atten = (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
 			}
 		}
@@ -121,7 +122,7 @@ namespace Guarneri
 		tinymath::vec3f diffuse_term = tinymath::vec3f(1.0f) - spec_term;
 		diffuse_term *= 1.0f - metallic;
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
 		{
 			return specular;
 		}
@@ -129,7 +130,15 @@ namespace Guarneri
 		return ((diffuse_term * albedo) / PI + specular) * radiance * ndl;
 	}
 
-	tinymath::Color PBRShader::calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const
+	tinymath::Color PBRShader::calculate_main_light(const DirectionalLight& light, 
+													const LightingData& lighting_data, 
+													const tinymath::vec3f& wpos, 
+													const tinymath::vec3f& view_dir, 
+													const tinymath::vec3f& normal, 
+													const tinymath::Color& albedo, 
+													const float& ao,
+													const tinymath::vec2f& uv, 
+													const tinymath::mat3x3& tbn) const
 	{
 		UNUSED(wpos);
 		UNUSED(lighting_data);
@@ -143,7 +152,7 @@ namespace Guarneri
 		float light_distance = 1.0f;
 
 		auto light_dir = -tinymath::normalize(light.forward);
-		if (this->normal_map)
+		if (local_properties.has_texture(normal_prop))
 		{
 			light_dir = tbn * light_dir;
 		}
@@ -151,47 +160,49 @@ namespace Guarneri
 		auto half_dir = tinymath::normalize(view_dir + light_dir);
 
 		// sample textures
-		tinymath::Color metallic_color = tinymath::kColorBlack;
 		float metallic = 0.0f;
-		name2tex.count(metallic_prop) > 0 && name2tex.at(metallic_prop)->sample(uv.x, uv.y, metallic_color);
-		metallic = metallic_color.r;
+		tinymath::Color metallic_color = tinymath::kColorBlack;
+		if (local_properties.has_texture(metallic_prop) && local_properties.get_texture(metallic_prop)->sample(uv.x, uv.y, metallic_color))
+		{
+			metallic = metallic_color.r;
+		}
+
 		tinymath::Color roughness_color;
 		float roughness = 0.0f;
-		if (name2tex.count(roughness_prop) > 0)
+		if (local_properties.has_texture(roughness_prop) && local_properties.get_texture(roughness_prop)->sample(uv.x, uv.y, roughness_color))
 		{
-			name2tex.at(roughness_prop)->sample(uv.x, uv.y, roughness_color);
 			roughness = roughness_color.r;
 		}
-		else if (name2tex.count(specular_prop))
+		else if (local_properties.has_texture(specular_prop))
 		{
 			tinymath::Color spec;
-			name2tex.at(specular_prop)->sample(uv.x, uv.y, spec);
+			local_properties.get_texture(specular_prop)->sample(uv.x, uv.y, spec);
 			roughness = 1.0f - spec.r;
 		}
 
-		if (name2float.count(roughness_multiplier_prop) > 0 && name2float.count(roughness_offset_prop) > 0)
+		if (local_properties.has_float(roughness_multiplier_prop) && local_properties.has_float(roughness_offset_prop))
 		{
-			roughness = roughness * name2float.at(roughness_multiplier_prop) + name2float.at(roughness_offset_prop);
+			roughness = roughness * local_properties.get_float(roughness_multiplier_prop) + local_properties.get_float(roughness_offset_prop);
 		}
 
-		if (name2float.count(metallic_multiplier_prop) > 0 && name2float.count(metallic_offset_prop) > 0)
+		if (local_properties.has_float(metallic_multiplier_prop) && local_properties.has_float(metallic_offset_prop))
 		{
-			metallic = metallic * name2float.at(metallic_multiplier_prop) + name2float.at(metallic_offset_prop);
+			metallic = metallic * local_properties.get_float(metallic_multiplier_prop) + local_properties.get_float(metallic_offset_prop);
 		}
 
 		roughness = tinymath::max(roughness, EPSILON); // brdf lut bug (baking error)
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::ROUGHNESS) != RenderFlag::DISABLE)
 		{
 			return tinymath::Color(roughness);
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::METALLIC) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::METALLIC) != RenderFlag::DISABLE)
 		{
 			return tinymath::Color(metallic_color);
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::AO) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::AO) != RenderFlag::DISABLE)
 		{
 			return ao;
 		}
@@ -203,8 +214,11 @@ namespace Guarneri
 
 			auto diffuse = tinymath::saturate(light_diffuse * ndl * albedo);
 			tinymath::Color spec_tex = tinymath::kColorWhite;
-			name2tex.count(specular_prop) > 0 && name2tex.at(specular_prop)->sample(uv.x, uv.y, spec_tex);
-			auto specular = tinymath::saturate(light_spec * spec * spec_tex);
+			tinymath::Color specular;
+			if (local_properties.has_texture(specular_prop) && local_properties.get_texture(specular_prop)->sample(uv.x, uv.y, spec_tex))
+			{
+				specular = tinymath::saturate(light_spec * spec * spec_tex);
+			}
 			auto ambient = light_ambient;
 			auto ret = ambient + diffuse + specular;
 			return ret;
@@ -223,56 +237,55 @@ namespace Guarneri
 			tinymath::vec3f diffuse_term = 1.0f - specular_term;
 			diffuse_term *= 1.0f - metallic;
 
+			tinymath::Color ret = tinymath::Color(lo);
+			ret.a = 1.0f;
+
 			// IBL
 			tinymath::Color irradiance;
-			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
-			{
-				name2cubemap.at(cubemap_prop)->sample_irradiance_map(normal, irradiance);
-			}
-
 			tinymath::Color prefiltered_color;
-			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
-			{
-				auto reflect_dir = reflect(normal, view_dir);
-				name2cubemap.at(cubemap_prop)->sample_prefilter_map_lod(reflect_dir, roughness, prefiltered_color);
-			}
-
 			tinymath::Color brdf_lut;
-			if (INST(GlobalShaderParams).enable_ibl && name2cubemap.count(cubemap_prop) > 0)
+			tinymath::Color indirect_diffuse; 
+			tinymath::Color indirect_specular;
+			tinymath::Color env_brdf;
+			if (INST(GlobalShaderParams).enable_ibl && global_shader_properties.has_cubemap(cubemap_prop))
 			{
-				name2cubemap.at(cubemap_prop)->sample_brdf(tinymath::vec2f(ndv, roughness), brdf_lut);
+				auto cubemap = global_shader_properties.get_cubemap(cubemap_prop);
+				cubemap->sample_irradiance_map(normal, irradiance);
+				auto reflect_dir = reflect(normal, view_dir);
+				cubemap->sample_prefilter_map_lod(reflect_dir, roughness, prefiltered_color);
+				cubemap->sample_brdf(tinymath::vec2f(ndv, roughness), brdf_lut);
 
-				/*if (INST(GlobalShaderParams).enable_ibl && brdf_lut.r <= 0.0f)
-				{
-					uint32_t row, col;
-					uv2pixel(512, 512, ndv, roughness, row, col);
-					printf("error, %f, %f  ndv: %f, roughness: %f\n", brdf_lut.r, brdf_lut.g, ndv, roughness);
-				}*/
+				indirect_diffuse = irradiance.xyz * albedo.xyz * diffuse_term;
+				env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
+				indirect_specular = prefiltered_color * env_brdf;
+
+				auto ambient = (indirect_diffuse + indirect_specular) * ao;
+				ret += tinymath::Color(ambient.x, ambient.y, ambient.z, 0.0f);
 			}
 
-			tinymath::vec3f indirect_diffuse = tinymath::vec3f(irradiance.r, irradiance.g, irradiance.b) * tinymath::vec3f(albedo.r, albedo.g, albedo.b) * diffuse_term;
-			tinymath::vec3f env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
-
-			tinymath::vec3f indirect_specular = tinymath::vec3f(prefiltered_color.r, prefiltered_color.g, prefiltered_color.b) * env_brdf;
-
-			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_DIFFUSE) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::INDIRECT_DIFFUSE) != RenderFlag::DISABLE)
 			{
-				return tinymath::Color(indirect_diffuse);
+				return tinymath::Color(indirect_diffuse.r, indirect_diffuse.g, indirect_diffuse.b, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).render_flag & RenderFlag::INDIRECT_SPECULAR) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::INDIRECT_SPECULAR) != RenderFlag::DISABLE)
 			{
-				return tinymath::Color(indirect_specular);
+				return tinymath::Color(indirect_specular.r, indirect_specular.g, indirect_specular.b, 1.0f);
 			}
-
-			auto ambient = (indirect_diffuse + indirect_specular) * ao.r;
-			auto ret = ambient + lo;
 
 			return ret;
 		}
 	}
 
-	tinymath::Color PBRShader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const
+	tinymath::Color PBRShader::calculate_point_light(const PointLight& light, 
+													 const LightingData& lighting_data,
+													 const tinymath::vec3f& wpos,
+													 const tinymath::vec3f& view_dir,
+													 const tinymath::vec3f& normal, 
+													 const tinymath::Color& albedo, 
+													 const float& ao, 
+													 const tinymath::vec2f& uv,
+													 const tinymath::mat3x3& tbn) const
 	{
 		UNUSED(light);
 		UNUSED(lighting_data);
@@ -303,7 +316,7 @@ namespace Guarneri
 
 		tinymath::Color normal_tex;
 		tinymath::mat3x3 tbn;
-		if (name2tex.count(normal_prop) > 0 && name2tex.at(normal_prop)->sample(input.uv.x, input.uv.y, normal_tex))
+		if (local_properties.has_texture(normal_prop) && local_properties.get_texture(normal_prop)->sample(input.uv.x, input.uv.y, normal_tex))
 		{
 			tbn = tinymath::mat3x3(input.tangent, input.bitangent, input.normal);
 			view_dir = tinymath::normalize(tbn * view_dir);
@@ -316,7 +329,7 @@ namespace Guarneri
 
 		tinymath::Color ret = tinymath::kColorBlack;
 		tinymath::Color albedo = tinymath::kColorWhite;
-		if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
+		if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
 		{
 			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 			{
@@ -324,16 +337,17 @@ namespace Guarneri
 			}
 		}
 
-		if (name2float4.count(tint_color_prop) > 0)
+		if (local_properties.has_float4(tint_color_prop))
 		{
-			albedo *= tinymath::Color(name2float4.at(tint_color_prop));
+			albedo *= tinymath::Color(local_properties.get_float4(tint_color_prop));
 		}
 
-		tinymath::Color ao = tinymath::kColorWhite;
-		name2tex.count(ao_prop) > 0 && name2tex.at(ao_prop)->sample(input.uv.x, input.uv.y, ao);
-
-		tinymath::Color emmision = tinymath::kColorBlack;
-		name2tex.count(emission_prop) > 0 && name2tex.at(emission_prop)->sample(input.uv.x, input.uv.y, emmision);
+		tinymath::Color ao_color = tinymath::kColorWhite;
+		float ao = 1.0f;
+		if (local_properties.has_texture(ao_prop) && local_properties.get_texture(ao_prop)->sample(input.uv.x, input.uv.y, ao_color))
+		{
+			ao = ao_color.r;
+		}
 
 		ret += calculate_main_light(main_light, lighting_param, wpos, view_dir, normal, albedo, ao, input.uv, tbn);
 
@@ -342,25 +356,30 @@ namespace Guarneri
 			ret += calculate_point_light(light, lighting_param, wpos, view_dir, normal, albedo, ao, input.uv, tbn);
 		}
 
-		ret += emmision;
-		ret *= shadow_atten;
-
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		tinymath::Color emmision = tinymath::kColorBlack;
+		if (local_properties.has_texture(emission_prop) && local_properties.get_texture(emission_prop)->sample(input.uv.x, input.uv.y, emmision))
 		{
-			return tinymath::Color(ao.r, ao.r, ao.r, 1.0f);
+			ret += emmision;
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		ret *= shadow_atten;
+
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SPECULAR) != RenderFlag::DISABLE)
+		{
+			return tinymath::Color(ao, ao, ao, 1.0f);
+		}
+
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
 		{
 			return input.color;
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
 		{
 			return normal;
 		}

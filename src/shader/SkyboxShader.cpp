@@ -29,14 +29,14 @@ namespace Guarneri
 	{
 		tinymath::Color ret;
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			tinymath::vec2f uv = spherical_coord_to_uv(tinymath::vec3f(input.shadow_coord.xyz));
 			return tinymath::Color(uv.x, uv.y, 0.0f, 1.0f);
 		}
-		else if ((INST(GlobalShaderParams).render_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
+		else if ((INST(GlobalShaderParams).debug_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
 		{
-			if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz, ret))
+			if (global_shader_properties.has_cubemap(cubemap_prop) && global_shader_properties.get_cubemap(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz, ret))
 			{
 				if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 				{
@@ -47,7 +47,7 @@ namespace Guarneri
 			}
 		}
 
-		if (name2cubemap.count(cubemap_prop) > 0 && name2cubemap.at(cubemap_prop)->sample(input.shadow_coord.xyz, ret))
+		if (global_shader_properties.has_cubemap(cubemap_prop) && global_shader_properties.get_cubemap(cubemap_prop)->sample(input.shadow_coord.xyz, ret))
 		{
 			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 			{

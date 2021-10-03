@@ -12,6 +12,7 @@
 #include "Transform.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
+#include "ShaderPropertyMap.hpp"
 #include "Material.hpp"
 #include "ShaderLab.hpp"
 #include "Model.hpp"
@@ -421,6 +422,98 @@ namespace Guarneri
 		// CubeMap
 		//====================================================================================
 
+		//====================================================================================
+		// ShaderPropertyMap
+		static void serialize(const ShaderPropertyMap& properties, rapidjson::Document& doc)
+		{
+			rapidjson::Value name2float;
+			name2float.SetArray();
+			for (auto& kv : properties.name2float)
+			{
+				rapidjson::Value pair;
+				pair.SetArray();
+				pair.PushBack(kv.first, doc.GetAllocator());
+				pair.PushBack(kv.second, doc.GetAllocator());
+				name2float.PushBack(pair, doc.GetAllocator());
+			}
+			doc.AddMember("name2float", name2float, doc.GetAllocator());
+
+			rapidjson::Value name2float4;
+			name2float4.SetArray();
+			for (auto& kv : properties.name2float4)
+			{
+				rapidjson::Value pair;
+				pair.SetArray();
+				pair.PushBack(kv.first, doc.GetAllocator());
+				pair.PushBack(Serializer::serialize(doc, kv.second), doc.GetAllocator());
+				name2float4.PushBack(pair, doc.GetAllocator());
+			}
+			doc.AddMember("name2float4", name2float4, doc.GetAllocator());
+
+			rapidjson::Value name2int;
+			name2int.SetArray();
+			for (auto& kv : properties.name2int)
+			{
+				rapidjson::Value pair;
+				pair.SetArray();
+				pair.PushBack(kv.first, doc.GetAllocator());
+				pair.PushBack(kv.second, doc.GetAllocator());
+				name2int.PushBack(pair, doc.GetAllocator());
+			}
+			doc.AddMember("name2int", name2int, doc.GetAllocator());
+
+			rapidjson::Value name2tex;
+			name2tex.SetArray();
+			for (auto& kv : properties.name2tex)
+			{
+				if (kv.second == nullptr || kv.second->meta_path == "") continue;
+				rapidjson::Value pair;
+				pair.SetArray();
+				pair.PushBack(kv.first, doc.GetAllocator());
+				rapidjson::Value tex_path;
+				tex_path.SetString(kv.second->meta_path.c_str(), doc.GetAllocator());
+				pair.PushBack(tex_path, doc.GetAllocator());
+				name2tex.PushBack(pair, doc.GetAllocator());
+			}
+			doc.AddMember("name2tex", name2tex, doc.GetAllocator());
+		}
+
+		static void deserialize(rapidjson::Document& doc, ShaderPropertyMap& properties)
+		{
+			rapidjson::Value name2int, name2float, name2float4, name2tex;
+			name2int = doc["name2int"].GetArray();
+			name2float = doc["name2float"].GetArray();
+			name2float4 = doc["name2float4"].GetArray();
+			name2tex = doc["name2tex"].GetArray();
+
+			for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2int[idx].GetArray();
+				properties.name2int[pair[0].GetUint()] = pair[1].GetInt();
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2float.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2float[idx].GetArray();
+				properties.name2float[pair[0].GetUint()] = pair[1].GetFloat();
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2float4.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2float4[idx].GetArray();
+				Serializer::deserialize(pair[1].GetObject(), properties.name2float4[pair[0].GetUint()]);
+			}
+
+			for (rapidjson::SizeType idx = 0; idx < name2tex.Size(); idx++)
+			{
+				const rapidjson::Value& pair = name2tex[idx].GetArray();
+				const char* tex_path = pair[1].GetString();
+				properties.name2tex[pair[0].GetUint()] = Texture::load_asset(tex_path);
+			}
+		}
+		// ShaderPropertyMap
+		//====================================================================================
+
 
 		//====================================================================================
 		// Material
@@ -454,56 +547,7 @@ namespace Guarneri
 			doc.AddMember("transparent", material.transparent, doc.GetAllocator());
 			doc.AddMember("cast_shadow", material.cast_shadow, doc.GetAllocator());
 
-			rapidjson::Value name2float;
-			name2float.SetArray();
-			for (auto& kv : material.name2float)
-			{
-				rapidjson::Value pair;
-				pair.SetArray();
-				pair.PushBack(kv.first, doc.GetAllocator());
-				pair.PushBack(kv.second, doc.GetAllocator());
-				name2float.PushBack(pair, doc.GetAllocator());
-			}
-			doc.AddMember("name2float", name2float, doc.GetAllocator());
-
-			rapidjson::Value name2float4;
-			name2float4.SetArray();
-			for (auto& kv : material.name2float4)
-			{
-				rapidjson::Value pair;
-				pair.SetArray();
-				pair.PushBack(kv.first, doc.GetAllocator());
-				pair.PushBack(Serializer::serialize(doc, kv.second), doc.GetAllocator());
-				name2float4.PushBack(pair, doc.GetAllocator());
-			}
-			doc.AddMember("name2float4", name2float4, doc.GetAllocator());
-
-			rapidjson::Value name2int;
-			name2int.SetArray();
-			for (auto& kv : material.name2int)
-			{
-				rapidjson::Value pair;
-				pair.SetArray();
-				pair.PushBack(kv.first, doc.GetAllocator());
-				pair.PushBack(kv.second, doc.GetAllocator());
-				name2int.PushBack(pair, doc.GetAllocator());
-			}
-			doc.AddMember("name2int", name2int, doc.GetAllocator());
-
-			rapidjson::Value name2tex;
-			name2tex.SetArray();
-			for (auto& kv : material.name2tex)
-			{
-				if (kv.second == nullptr || kv.second->meta_path == "") continue;
-				rapidjson::Value pair;
-				pair.SetArray();
-				pair.PushBack(kv.first, doc.GetAllocator());
-				rapidjson::Value tex_path;
-				tex_path.SetString(kv.second->meta_path.c_str(), doc.GetAllocator());
-				pair.PushBack(tex_path, doc.GetAllocator());
-				name2tex.PushBack(pair, doc.GetAllocator());
-			}
-			doc.AddMember("name2tex", name2tex, doc.GetAllocator());
+			serialize(material.local_properties, doc);
 
 			std::filesystem::path abs_path(ASSETS_PATH + path);
 			if (!std::filesystem::exists(abs_path.parent_path()))
@@ -556,36 +600,7 @@ namespace Guarneri
 				material.meta_path = doc["meta_path"].GetString();
 				material.target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
 
-				rapidjson::Value name2int, name2float, name2float4, name2tex;
-				name2int = doc["name2int"].GetArray();
-				name2float = doc["name2float"].GetArray();
-				name2float4 = doc["name2float4"].GetArray();
-				name2tex = doc["name2tex"].GetArray();
-
-				for (rapidjson::SizeType idx = 0; idx < name2int.Size(); idx++)
-				{
-					const rapidjson::Value& pair = name2int[idx].GetArray();
-					material.name2int[pair[0].GetUint()] = pair[1].GetInt();
-				}
-
-				for (rapidjson::SizeType idx = 0; idx < name2float.Size(); idx++)
-				{
-					const rapidjson::Value& pair = name2float[idx].GetArray();
-					material.name2float[pair[0].GetUint()] = pair[1].GetFloat();
-				}
-
-				for (rapidjson::SizeType idx = 0; idx < name2float4.Size(); idx++)
-				{
-					const rapidjson::Value& pair = name2float4[idx].GetArray();
-					Serializer::deserialize(pair[1].GetObject(), material.name2float4[pair[0].GetUint()]);
-				}
-
-				for (rapidjson::SizeType idx = 0; idx < name2tex.Size(); idx++)
-				{
-					const rapidjson::Value& pair = name2tex[idx].GetArray();
-					const char* tex_path = pair[1].GetString();
-					material.name2tex[pair[0].GetUint()] = Texture::load_asset(tex_path);
-				}
+				deserialize(doc, material.local_properties);
 
 				fclose(fd);
 			}
@@ -829,14 +844,14 @@ namespace Guarneri
 			rapidjson::Value intensity; intensity.SetFloat(light.intensity);
 			rapidjson::Value yaw; yaw.SetFloat(light.yaw);
 			rapidjson::Value pitch; pitch.SetFloat(light.pitch);
-			rapidjson::Value position = Serializer::serialize(doc, light.position);
+			rapidjson::Value distance; distance.SetFloat(light.distance);
 			serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
 			serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
 			serialized_light.AddMember("specular", specular, doc.GetAllocator());
 			serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
 			serialized_light.AddMember("yaw", yaw, doc.GetAllocator());
 			serialized_light.AddMember("pitch", pitch, doc.GetAllocator());
-			serialized_light.AddMember("position", position, doc.GetAllocator());
+			serialized_light.AddMember("position", distance, doc.GetAllocator());
 			return serialized_light;
 		}
 
@@ -847,8 +862,8 @@ namespace Guarneri
 			Serializer::deserialize(v["specular"].GetObject(), light.specular);
 			light.intensity = v["intensity"].GetFloat();
 			light.yaw = v["yaw"].GetFloat();
-			light.pitch = v["pitch"].GetFloat();
-			Serializer::deserialize(v["position"].GetObject(), light.position);
+			light.pitch = v["pitch"].GetFloat(); 
+			light.distance = v["distance"].GetFloat();
 		}
 
 		static rapidjson::Value serialize(rapidjson::Document& doc, const PointLight& light)
@@ -967,7 +982,6 @@ namespace Guarneri
 
 		static void deserialize(const std::string& path, Scene& scene)
 		{
-			scene.initialize();
 			scene.asset_path = path;
 			std::filesystem::path abs_path(ASSETS_PATH + path);
 			std::FILE* fd = fopen(abs_path.string().c_str(), "r");

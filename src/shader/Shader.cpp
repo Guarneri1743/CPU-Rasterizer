@@ -6,6 +6,8 @@
 
 namespace Guarneri
 {
+	ShaderPropertyMap Shader::global_shader_properties;
+
 	Shader* Shader::error_shader = new Shader("error_shader", true);
 
 	Shader::Shader(std::string name) : Shader(name, false) {}
@@ -30,7 +32,6 @@ namespace Guarneri
 		this->double_face = false;
 		this->skybox = false;
 		this->shadow = false;
-		this->shadowmap = nullptr;
 		this->name = name;
 		this->is_error_shader = is_error_shader;
 	}
@@ -69,7 +70,7 @@ namespace Guarneri
 
 		tinymath::Color ret = tinymath::kColorBlack;
 		tinymath::Color albedo = tinymath::kColorWhite;
-		if (name2tex.count(albedo_prop) > 0 && name2tex.at(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
+		if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
 		{
 			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
 			{
@@ -77,26 +78,26 @@ namespace Guarneri
 			}
 		}
 
-		if (name2float4.count(tint_color_prop) > 0)
+		if (local_properties.has_float4(tint_color_prop))
 		{
-			albedo *= tinymath::Color(name2float4.at(tint_color_prop));
+			albedo *= tinymath::Color(local_properties.get_float4(tint_color_prop));
 		}
 
 		float ndl = tinymath::dot(normal, -tinymath::normalize(main_light.forward));
 
 		ret += ndl * albedo;
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{
 			return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
 		{
 			return input.color;
 		}
 
-		if ((INST(GlobalShaderParams).render_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
 		{
 			return normal;
 		}
@@ -108,5 +109,33 @@ namespace Guarneri
 		}
 
 		return tinymath::Color(ret.r, ret.g, ret.b, 1.0f);
+	}
+
+	float Shader::linearize_01depth(const float& depth, const float& near, const float& far)
+	{
+		return (linearize_depth(depth, near, far) - near) / (far - near);
+	}
+
+	float Shader::linearize_depth(const float& depth, const float& near, const float& far)
+	{
+	#ifdef GL_LIKE
+		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
+	#else
+		float ndc_z = depth; // [0, 1] (DX)
+	#endif
+
+	#ifdef LEFT_HANDED 
+	#ifdef GL_LIKE
+		return (2.0f * near * far) / (far + near - ndc_z * (far - near));
+	#else
+		return (far * near) / (far - (far - near) * ndc_z);
+	#endif
+	#else
+	#ifdef GL_LIKE
+		return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
+	#else
+		return (far * near) / (-far - (far - near) * ndc_z);
+	#endif
+	#endif
 	}
 }

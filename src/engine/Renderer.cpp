@@ -48,6 +48,7 @@ namespace Guarneri
 		{
 			return INST(GlobalShaderParams).main_light.projection_matrix();
 		}
+
 		return INST(GlobalShaderParams).proj_matrix;
 	}
 
@@ -73,8 +74,6 @@ namespace Guarneri
 			return;
 		}
 
-		target->material->set_cubemap(cubemap_prop, Scene::current()->cubemap);
-		target->material->set_shadowmap(INST(GraphicsDevice).get_shadowmap());
 		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
 		if (target != nullptr)
 		{

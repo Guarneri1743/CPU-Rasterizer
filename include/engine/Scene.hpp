@@ -60,13 +60,15 @@ namespace Guarneri
 		void render_shadow();
 		void render_objects();
 		void draw_gizmos();
+		void debug_scene();
+		void resize_shadowmap(const size_t& w, const size_t& h);
+		void get_shadowmap_size(size_t& w, size_t& h);
 		std::string get_asset_path() { return asset_path; }
-
 		static Scene* current() { return current_scene; }
-
 		static void open_scene(const char* path);
 
 	private:
+		uint32_t shadowmap_id;
 		static Scene* current_scene;
 	};
 }

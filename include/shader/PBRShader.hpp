@@ -16,13 +16,13 @@ namespace Guarneri
 
 		tinymath::vec3f reflect(const tinymath::vec3f& n, const tinymath::vec3f& light_out_dir) const;
 
-		tinymath::Color calculate_main_light(const DirectionalLight& light, 
-											 const LightingData& lighting_data, 
-											 const tinymath::vec3f& wpos, 
-											 const tinymath::vec3f& v, 
-											 const tinymath::vec3f& n, 
-											 tinymath::Color albedo, 
-											 tinymath::Color ao, 
+		tinymath::Color calculate_main_light(const DirectionalLight& light,
+											 const LightingData& lighting_data,
+											 const tinymath::vec3f& wpos,
+											 const tinymath::vec3f& v,
+											 const tinymath::vec3f& n,
+											 const tinymath::Color& albedo,
+											 const float& ao,
 											 const tinymath::vec2f& uv, 
 											 const tinymath::mat3x3& tbn) const;
 
@@ -31,8 +31,8 @@ namespace Guarneri
 											  const tinymath::vec3f& wpos, 
 											  const tinymath::vec3f& v, 
 											  const tinymath::vec3f& n, 
-											  tinymath::Color albedo, 
-											  tinymath::Color ao, 
+											  const tinymath::Color& albedo,
+											  const float& ao,
 											  const tinymath::vec2f& uv, 
 											  const tinymath::mat3x3& tbn) const;
 	};
