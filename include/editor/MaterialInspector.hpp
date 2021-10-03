@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <memory>
 #include "BaseInspector.hpp"
 #include "Material.hpp"
@@ -19,6 +20,7 @@ namespace Guarneri
 		void on_gui(Material& material);
 
 	private:
+		std::string target_shader;
 		float tint_color[4];
 		float roughness_multiplier;
 		float roughness_offset;

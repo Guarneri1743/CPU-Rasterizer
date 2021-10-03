@@ -4,6 +4,7 @@
 #include "Serialization.hpp"
 #include "imgui/imgui.h"
 #include "tinymath/tinymath.h"
+#include "Shader.hpp"
 
 namespace Guarneri
 {
@@ -11,6 +12,27 @@ namespace Guarneri
 	{
 		if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
 		{
+			// shader selections
+			{
+				const char* shaders[] = { "Shader", "PBRShader" };
+				static int selected_flow = 0;
+				if (ImGui::Button("Shaders.."))
+					ImGui::OpenPopup("shaders");
+				ImGui::SameLine();
+				ImGui::TextUnformatted(selected_flow == -1 ? "<None>" : shaders[selected_flow]);
+				if (ImGui::BeginPopup("shaders"))
+				{
+					ImGui::Separator();
+					for (int i = 0; i < IM_ARRAYSIZE(shaders); i++)
+						if (ImGui::Selectable(shaders[i]))
+						{
+							selected_flow = i;
+
+						}
+					ImGui::EndPopup();
+				}
+			}
+
 			if (ImGui::ColorEdit3("TintColor", tint_color))
 			{
 				material.set_float4(tint_color_prop, tinymath::vec4f(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
