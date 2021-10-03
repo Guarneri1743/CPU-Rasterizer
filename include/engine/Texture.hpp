@@ -90,8 +90,7 @@ namespace Guarneri
 		bool read(const size_t& row, const size_t& col, tinymath::Color& ret) const;
 		bool write(const size_t& x, const size_t& y, const tinymath::Color& data);
 		bool write(const float& u, const float& v, const tinymath::Color& data);
-		void save2file();
-		void resize();
+		void resize(const size_t& w, const size_t& h);
 		void release();
 		static void export_image(const Texture& tex, const std::string& path);
 

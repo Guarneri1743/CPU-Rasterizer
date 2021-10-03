@@ -556,7 +556,6 @@ namespace Guarneri
 		case TextureFormat::rgb:
 		{
 			auto buffer = use_mip ? rgb_mipmaps[mip] : rgb_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgb pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -565,7 +564,6 @@ namespace Guarneri
 		case TextureFormat::rgba:
 		{
 			auto buffer = use_mip ? rgba_mipmaps[mip] : rgba_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgba pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -574,7 +572,6 @@ namespace Guarneri
 		case TextureFormat::rg:
 		{
 			auto buffer = use_mip ? rg_mipmaps[mip] : rg_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rg pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -583,7 +580,6 @@ namespace Guarneri
 		case TextureFormat::r32:
 		{
 			auto buffer = use_mip ? gray_mipmaps[mip] : gray_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_gray pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -592,7 +588,6 @@ namespace Guarneri
 		case TextureFormat::rgb16f:
 		{
 			auto buffer = use_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgb16f pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -601,7 +596,6 @@ namespace Guarneri
 		case TextureFormat::rgba16f:
 		{
 			auto buffer = use_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgba16f pixel;
 			bool ok = buffer->read(u, v, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -618,7 +612,6 @@ namespace Guarneri
 		case TextureFormat::rgb:
 		{
 			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgb pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -627,7 +620,6 @@ namespace Guarneri
 		case TextureFormat::rgba:
 		{
 			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgba pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -636,7 +628,6 @@ namespace Guarneri
 		case TextureFormat::rg:
 		{
 			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rg pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -645,7 +636,6 @@ namespace Guarneri
 		case TextureFormat::r32:
 		{
 			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_gray pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -654,7 +644,6 @@ namespace Guarneri
 		case TextureFormat::rgb16f:
 		{
 			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgb16f pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -663,7 +652,6 @@ namespace Guarneri
 		case TextureFormat::rgba16f:
 		{
 			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
-			if (buffer == nullptr) return false;
 			tinymath::color_rgba16f pixel;
 			bool ok = buffer->read(row, col, pixel);
 			ret = ColorEncoding::decode(pixel);
@@ -679,32 +667,26 @@ namespace Guarneri
 		{
 		case TextureFormat::rgb:
 		{
-			if (rgb_buffer == nullptr) return false;
 			return rgb_buffer->write(x, y, ColorEncoding::encode_rgb(data));
 		}
 		case TextureFormat::rgba:
 		{
-			if (rgba_buffer == nullptr) return false;
 			return rgba_buffer->write(x, y, ColorEncoding::encode_rgba(data));
 		}
 		case TextureFormat::rg:
 		{
-			if (rg_buffer == nullptr) return false;
 			return rg_buffer->write(x, y, ColorEncoding::encode_rg(data.r, data.g));
 		}
 		case TextureFormat::r32:
 		{
-			if (gray_buffer == nullptr) return false;
 			return gray_buffer->write(x, y, ColorEncoding::encode_gray(data));
 		}
 		case TextureFormat::rgb16f:
 		{
-			if (rgb16f_buffer == nullptr) return false;
 			return rgb16f_buffer->write(x, y, ColorEncoding::encode_rgb16f(data));
 		}
 		case TextureFormat::rgba16f:
 		{
-			if (rgba16f_buffer == nullptr) return false;
 			return rgba16f_buffer->write(x, y, ColorEncoding::encode_rgba16f(data));
 		}
 		}
@@ -720,55 +702,61 @@ namespace Guarneri
 		{
 		case TextureFormat::rgb:
 		{
-			if (rgb_buffer == nullptr) return false;
 			return rgb_buffer->write(wu, wv, ColorEncoding::encode_rgb(data));
 		}
 		case TextureFormat::rgba:
 		{
-			if (rgba_buffer == nullptr) return false;
 			return rgba_buffer->write(wu, wv, ColorEncoding::encode_rgba(data));
 		}
 		case TextureFormat::rg:
 		{
-			if (rg_buffer == nullptr) return false;
 			return rg_buffer->write(wu, wv, ColorEncoding::encode_rg(data.r, data.g));
 		}
 		case TextureFormat::r32:
 		{
-			if (gray_buffer == nullptr) return false;
 			return gray_buffer->write(wu, wv, ColorEncoding::encode_gray(data));
 		}
 		case TextureFormat::rgb16f:
 		{
-			if (rgb16f_buffer == nullptr) return false;
 			return rgb16f_buffer->write(wu, wv, ColorEncoding::encode_rgb16f(data));
 		}
 		case TextureFormat::rgba16f:
 		{
-			if (rgba16f_buffer == nullptr) return false;
 			return rgba16f_buffer->write(wu, wv, ColorEncoding::encode_rgba16f(data));
 		}
 		}
 		return false;
 	}
 
-	void Texture::save2file()
+	void Texture::resize(const size_t& w, const size_t& h)
 	{
 		switch (format)
 		{
 		case TextureFormat::rgb:
-			break;
-		case TextureFormat::rgba:
-			break;
-		case TextureFormat::r32:
-			break;
+		{
+			return rgb_buffer->resize(w, h);
 		}
-	}
-
-	// todo
-	void Texture::resize()
-	{
-
+		case TextureFormat::rgba:
+		{
+			return rgba_buffer->resize(w, h);
+		}
+		case TextureFormat::rg:
+		{
+			return rg_buffer->resize(w, h);
+		}
+		case TextureFormat::r32:
+		{
+			return gray_buffer->resize(w, h);
+		}
+		case TextureFormat::rgb16f:
+		{
+			return rgb16f_buffer->resize(w, h);
+		}
+		case TextureFormat::rgba16f:
+		{
+			return rgba16f_buffer->resize(w, h);
+		}
+		}
 	}
 
 	void Texture::release()

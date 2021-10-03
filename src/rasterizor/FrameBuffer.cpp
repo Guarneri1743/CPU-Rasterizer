@@ -287,8 +287,6 @@ namespace Guarneri
 		return coverage_buffer->read(u, v, coverage);
 	}
 
-
-
 	void FrameBuffer::clear(const FrameContent& flag)
 	{
 		if ((flag & content_flag & FrameContent::Color) != FrameContent::None)
