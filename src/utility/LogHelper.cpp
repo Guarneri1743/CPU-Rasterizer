@@ -1,4 +1,4 @@
-#include "LogHelper.h"
+#include "LogHelper.hpp"
 #include "tinymath.h"
 
 std::ostream& operator<<(std::ostream& stream, const tinymath::vec2f& v)

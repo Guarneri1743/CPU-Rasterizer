@@ -46,6 +46,8 @@ namespace Guarneri
 		}
 	};
 
+	constexpr tinymath::Color kErrorColor = tinymath::Color(199.0f, 0.0f, 106.0f, 1.0f);
+
 	class Shader : public Object
 	{
 	public:
@@ -85,15 +87,11 @@ namespace Guarneri
 		Shader(std::string name);
 		virtual ~Shader();
 		virtual v2f vertex_shader(const a2v& input) const;
-		float get_shadow_atten(const tinymath::vec4f& light_space_pos) const;
-		tinymath::vec3f reflect(const tinymath::vec3f& n, const tinymath::vec3f& light_out_dir) const;
-		tinymath::Color calculate_main_light(const DirectionalLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
-		tinymath::Color calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& v, const tinymath::vec3f& n, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const;
 		virtual tinymath::Color fragment_shader(const v2f& input) const;
 
 		static Shader*  get_error_shader() { return error_shader; }
 
-	private:
+	protected:
 		Shader(std::string name, bool is_error);
 		bool is_error_shader;
 		static Shader* error_shader;

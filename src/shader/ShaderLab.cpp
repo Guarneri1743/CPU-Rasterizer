@@ -1,4 +1,5 @@
 #include "ShaderLab.hpp"
+#include "PBRShader.hpp"
 #include "SkyboxShader.hpp"
 #include "ShadowShader.hpp"
 #include "LightShader.hpp"
@@ -9,14 +10,13 @@ namespace Guarneri
 	std::unordered_map<std::string, std::shared_ptr<Shader>> ShaderLab::name2shaders;
 
 	void ShaderLab::initialize()
-	{
-	}
+	{}
 
 	std::shared_ptr<Shader> ShaderLab::get_shader(std::string name)
 	{
 		if (name == "pbr_shader")
 		{
-			return  std::make_shared<Shader>(name);
+			return  std::make_shared<PBRShader>(name);
 		}
 		else if (name == "skybox_shader")
 		{

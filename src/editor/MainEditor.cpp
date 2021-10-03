@@ -55,7 +55,7 @@ namespace Guarneri
 			//Scene::open_scene(scene);
 		}
 
-		if (ImGui::MenuItem("Save", "Ctrl+S"))
+		if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
 		{
 			Serializer::serialize(*Scene::current(), Scene::current()->get_asset_path());
 		}
