@@ -8,6 +8,7 @@
 #include "Model.hpp"
 #include "Logger.hpp"
 #include "Serialization.hpp"
+#include "EditorSharedData.hpp"
 
 namespace Guarneri
 {
@@ -21,13 +22,13 @@ namespace Guarneri
 		no_move = true;
 		no_scrollbar_with_mouse = true;
 		no_scrollbar = true;
-		selected_log = INT_MAX;
 		title = "Explorer";
 	}
 
 	void ExplorerEditor::on_gui()
 	{
 		rect = tinymath::Rect(0.0f, (float)Window::main()->get_height() - (float)kBottomHeight, (float)Window::main()->get_width(), (float)kBottomHeight);
+		EditorSharedData::explorer_selection_dirty = false;
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("ExplorerBar", tab_bar_flags))
 		{
@@ -37,7 +38,7 @@ namespace Guarneri
 				// explorer
 				{
 					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, rect.h()), true, window_flags);
-					draw_directories(ASSETS_PATH.c_str(), selected_in_explorer);
+					draw_directories(ASSETS_PATH.c_str());
 					ImGui::EndChild();
 				}
 
@@ -47,9 +48,9 @@ namespace Guarneri
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
 					ImGui::BeginChild("Content", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.75f, rect.h()), true, window_flags);
-					if (std::filesystem::is_directory(selected_in_explorer))
+					if (std::filesystem::is_directory(EditorSharedData::explorer_selection))
 					{
-						draw_files(selected_in_explorer, selected_in_contents);
+						draw_files(EditorSharedData::explorer_selection);
 					}
 					ImGui::EndChild();
 					ImGui::PopStyleVar();
@@ -72,7 +73,7 @@ namespace Guarneri
 		}
 	}
 
-	void ExplorerEditor::draw_files(std::filesystem::path dir, std::filesystem::path& selected)
+	void ExplorerEditor::draw_files(const std::filesystem::path& dir)
 	{
 		for (auto& path : std::filesystem::directory_iterator(dir))
 		{
@@ -82,39 +83,48 @@ namespace Guarneri
 			nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
 
 			ImGui::PushID(full_name.c_str());
-			if (!path.is_directory())
+			bool is_dir = path.is_directory();
+			std::string label = get_prefix(path) + nice_name;
+			if (!is_dir)
 			{
-				if (ImGui::Selectable(nice_name.c_str(), selected == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
+				if (ImGui::Selectable(label.c_str(), EditorSharedData::content_selection == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
 				{
-					selected = path.path();
+					EditorSharedData::content_selection = path.path().string();
 				}
-				
-				if (path.path().has_extension())
+
+				if (ImGui::BeginPopupContextItem("RightClickPopup"))
 				{
-					std::string asset_path = ASSETS_PATH;
-					size_t length = asset_path.length();
-					std::string relative_path = path.path().generic_string();
-					relative_path = relative_path.replace(relative_path.begin(), relative_path.begin() + length, "");
-					std::string ext = path.path().extension().string();
-					if (ext == ".scene")
+					if (path.path().has_extension())
 					{
-						ImGui::SameLine();
-						if (ImGui::SmallButton("Open"))
+						std::string asset_path = ASSETS_PATH;
+						size_t length = asset_path.length();
+						std::string relative_path = path.path().generic_string();
+						relative_path = relative_path.replace(relative_path.begin(), relative_path.begin() + length, "");
+						std::string ext = path.path().extension().string();
+						if (ext == ".scene")
 						{
-							Scene::open_scene(relative_path.c_str());
+							if (ImGui::Selectable("Open")) { Scene::open_scene(relative_path.c_str()); }
+						}
+						else if (ext == ".model")
+						{
+							if (ImGui::Selectable("Add")) 
+							{
+								Model* deserialized_model = new Model();
+								Serializer::deserialize(relative_path.c_str(), *deserialized_model);
+								std::shared_ptr<Model> model = std::shared_ptr<Model>(deserialized_model);
+								Scene::current()->add(model);
+							}
 						}
 					}
-					else if (ext == ".model")
-					{
-						ImGui::SameLine();
-						if (ImGui::SmallButton("Add"))
-						{
-							Model* deserialized_model = new Model();
-							Serializer::deserialize(relative_path.c_str(), *deserialized_model);
-							std::shared_ptr<Model> model = std::shared_ptr<Model>(deserialized_model);
-							Scene::current()->add(model);
-						}
-					}
+
+					ImGui::EndPopup();
+				}
+			}
+			else
+			{
+				if (ImGui::Selectable(label.c_str(), EditorSharedData::content_selection == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
+				{
+					
 				}
 			}
 
@@ -135,9 +145,9 @@ namespace Guarneri
 		auto logs = Logger::get_console_logs();
 		for (size_t idx = 0; idx < logs.size(); idx++)
 		{
-			if (ImGui::Selectable(logs[idx].c_str(), selected_log == idx))
+			if (ImGui::Selectable(logs[idx].c_str(), EditorSharedData::log_selection == idx))
 			{
-				selected_log = idx;
+				EditorSharedData::log_selection = idx;
 			}
 		}
 		draw_space(3);
@@ -150,21 +160,65 @@ namespace Guarneri
 		return std::count_if(directory_iterator(path), directory_iterator{}, (fp)std::filesystem::is_directory);
 	}
 
-	void ExplorerEditor::draw_directories(std::filesystem::path dir, std::filesystem::path& selected)
+	std::string ExplorerEditor::get_prefix(const std::filesystem::path& path)
 	{
-		ImGuiTreeNodeFlags flags =
-			ImGuiTreeNodeFlags_OpenOnArrow |
-			ImGuiTreeNodeFlags_OpenOnDoubleClick |
-			ImGuiTreeNodeFlags_SpanAvailWidth;
+		std::string prefix = "";
+		if (std::filesystem::is_directory(path))
+		{
+			 prefix = "[folder]";
+		}
+		else
+		{
+			// todo: support icon
+			if (path.has_extension())
+			{
+				std::string ext = path.extension().string();
+				if (ext == ".scene")
+				{
+					prefix = "[scene]";
+				}
+				else if (ext == ".model")
+				{
+					prefix = "[model]";
+				}
+				else if (ext == ".material")
+				{
+					prefix = "[mat]";
+				}
+				else if (ext == ".texture")
+				{
+					prefix = "[tex]";
+				}
+				else if (ext == ".cubemap")
+				{
+					prefix = "[cubemap]";
+				}
+				else
+				{
+					prefix = "[other]";
+				}
+			}
+		}
 
+		return prefix;
+	}
+
+	void ExplorerEditor::draw_directories(const std::filesystem::path& dir)
+	{
 		for (auto& path : std::filesystem::directory_iterator(dir))
 		{
+			ImGuiTreeNodeFlags flags =
+				ImGuiTreeNodeFlags_OpenOnArrow |
+				ImGuiTreeNodeFlags_OpenOnDoubleClick |
+				ImGuiTreeNodeFlags_SpanAvailWidth;
+
 			std::string full_name = path.path().generic_string();
 			size_t last_slash = full_name.find_last_of("/\\");
 			std::string nice_name = full_name;
 			nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
 
-			if (path.path() == selected)
+			bool is_selected = path.path() == EditorSharedData::explorer_selection;
+			if (is_selected)
 			{
 				flags |= ImGuiTreeNodeFlags_Selected;
 			}
@@ -173,27 +227,36 @@ namespace Guarneri
 				flags &= ~ImGuiTreeNodeFlags_Selected;
 			}
 
-			ImGuiTreeNodeFlags node_flags = flags;
 			if (path.is_directory())
 			{
 				if (count_dirs(path) > 0)
 				{
-					if (ImGui::TreeNodeEx(nice_name.c_str(), node_flags))
+					bool clicked = ImGui::TreeNodeEx(nice_name.c_str(), flags);
+
+					if (!EditorSharedData::explorer_selection_dirty && ImGui::IsItemClicked(0))
 					{
-						draw_directories(path.path(), selected);
+						EditorSharedData::explorer_selection = path.path().string();
+						EditorSharedData::explorer_selection_dirty = true;
+					}
+
+					if(clicked)
+					{
+						draw_directories(path.path());
 						ImGui::TreePop();
 					}
 				}
 				else
 				{
-					node_flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-					ImGui::TreeNodeEx(nice_name.c_str(), node_flags);
-				}
-			}
+					flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+					ImGui::TreeNodeEx(nice_name.c_str(), flags);
 
-			if (ImGui::IsItemClicked(0))
-			{
-				selected = path.path();
+					if (!EditorSharedData::explorer_selection_dirty && ImGui::IsItemClicked(0))
+					{
+						EditorSharedData::explorer_selection = path.path().string();
+						EditorSharedData::explorer_selection_dirty = true;
+					}
+
+				}
 			}
 
 			// todo

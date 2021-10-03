@@ -1,34 +1,31 @@
 #pragma once
 
-namespace Guarneri
+template<typename T>
+class Singleton
 {
-	template<typename T>
-	class Singleton
-	{
-	public:
-		~Singleton();
-		static T& get();
+public:
+	~Singleton();
+	static T& get();
 
-	private:
-		Singleton();
-		Singleton(const Singleton&) = delete;
-		void operator=(const Singleton&) = delete;
-	};
+private:
+	Singleton();
+	Singleton(const Singleton&) = delete;
+	void operator=(const Singleton&) = delete;
+};
 
-	template<typename T>
-	Singleton<T>::Singleton()
-	{}
+template<typename T>
+Singleton<T>::Singleton()
+{}
 
-	template<typename T>
-	Singleton<T>::~Singleton()
-	{}
+template<typename T>
+Singleton<T>::~Singleton()
+{}
 
-	template<typename T>
-	T& Singleton<T>::get()
-	{
-		static T _inst;
-		return _inst;
-	}
+template<typename T>
+T& Singleton<T>::get()
+{
+	static T _inst;
+	return _inst;
+}
 
 #define INST(type) Singleton<type>::get()
-}

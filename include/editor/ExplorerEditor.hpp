@@ -11,11 +11,9 @@ namespace Guarneri
 		virtual void on_gui();
 
 	private:
-		void draw_directories(std::filesystem::path dir, std::filesystem::path& selected);
-		void draw_files(std::filesystem::path dir, std::filesystem::path& selected);
+		std::string get_prefix(const std::filesystem::path& path); // todo: support icon
+		void draw_directories(const std::filesystem::path& dir);
+		void draw_files(const std::filesystem::path& dir);
 		void draw_console();
-		std::filesystem::path selected_in_explorer;
-		std::filesystem::path selected_in_contents;
-		size_t selected_log;
 	};
 }

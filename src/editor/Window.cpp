@@ -17,8 +17,7 @@ namespace Guarneri
 	constexpr int kDefaultWindowHeight = 1080;
 	Window* Window::main_window;
 
-	Window::Window(const char* title, int w, int h)
-		:
+	Window::Window(const char* title, int w, int h) :
 		width(w),
 		height(h),
 		valid(false),

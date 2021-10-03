@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "Object.hpp"
 #include "tinymath.h"
 
 namespace Guarneri
 {
 	class Model;
-	class Transform
+	class Transform : public Object
 	{
 	public:
 		std::string name;

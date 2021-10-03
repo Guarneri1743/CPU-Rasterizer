@@ -26,10 +26,33 @@ namespace Guarneri
 	//todo
 	void MainEditor::draw_file_menu()
 	{
-		//ImGui::MenuItem("()", NULL, false, false);
-
-		if (ImGui::MenuItem("Import", "Ctrl+O"))
+		if (ImGui::MenuItem("NewScene", "Ctrl+N"))
 		{
+			// todo: support create default scene
+			
+			//Scene* scene = new Scene();
+			//scene->initialize();
+			//DirectionalLight main_light;
+			//main_light.position = tinymath::vec3f(0.0f, 8.0f, 0.0f);
+			//main_light.ambient = tinymath::Color(0.05f, 0.05f, 0.05f, 1.0f);
+			//main_light.diffuse = tinymath::Color(0.9f, 0.9f, 1.0f, 1.0f);
+			//main_light.specular = tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f);
+			//main_light.intensity = 1.3f;
+			//scene->set_main_light(main_light);
+
+			//// setup Camera
+			//scene->main_cam->transform->set_world_position(tinymath::vec3f(3.4f, 21.8f, -14.0f));
+			//scene->main_cam->set_near(0.5f);
+			//scene->main_cam->transform->set_world_angle(-311.0f, -15.0f, 0.0f);
+
+			//// Plane
+			//Model* plane = new Model();
+			//Serializer::deserialize("/models/plane.model", *plane);
+			//scene->add(std::shared_ptr<Model>(plane));
+			//scene->shadow_bias = 0.00125f;
+			//scene->color_space = ColorSpace::Linear;
+			//scene->work_flow = PBRWorkFlow::Metallic;
+			//Scene::open_scene(scene);
 		}
 
 		if (ImGui::MenuItem("Save", "Ctrl+S"))
@@ -39,6 +62,7 @@ namespace Guarneri
 
 		if (ImGui::MenuItem("Save As.."))
 		{
+			// todo: suppor open file browser
 		}
 	}
 

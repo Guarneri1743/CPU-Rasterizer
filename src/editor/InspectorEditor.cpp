@@ -19,20 +19,7 @@
 namespace Guarneri
 {
 	bool show = true;	
-	float tint_color[4];
-	float roughness_multiplier;
-	float roughness_offset;
-	float metallic_multiplier;
-	float metallic_offset;
-	float main_light_ambient[4];
-	float main_light_diffuse[4];
-	float main_light_specular[4];
 	int rt_size[2];
-	float position[3];
-	float angles[3];
-	float scale[3];
-	float main_light_yaw;
-	float main_light_pitch;
 	int sub_samples = 4;
 
 	InspectorEditor::InspectorEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
@@ -44,9 +31,6 @@ namespace Guarneri
 		no_resize = true;
 		no_close = true;
 		no_move = true;
-		std::fill(std::begin(position), std::end(position), 0.0f);
-		std::fill(std::begin(angles), std::end(angles), 0.0f);
-		std::fill(std::begin(scale), std::end(scale), 0.0f);
 		title = "Setting";
 	}
 
@@ -58,109 +42,17 @@ namespace Guarneri
 
 		if (scene.selection != nullptr)
 		{
-			if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+			Model* model = scene.selection->get_model();
+			if (model != nullptr)
 			{
-				if (ImGui::InputFloat3("position", position))
+				if (model->transform != nullptr)
 				{
-					scene.selection->set_local_position({ position[0], position[1], position[2] });
-				}
-				else
-				{
-					position[0] = scene.selection->local_position.x;
-					position[1] = scene.selection->local_position.y;
-					position[2] = scene.selection->local_position.z;
+					transform_inspector.on_gui(*model->transform);
 				}
 
-				if (ImGui::InputFloat3("angles", angles))
+				if (model->material != nullptr)
 				{
-					scene.selection->set_local_rotation({ DEGREE2RAD(angles[0]), DEGREE2RAD(angles[1]), DEGREE2RAD(angles[2]) });
-				}
-				else
-				{
-					angles[0] = RAD2DEGREE(scene.selection->local_rotation.x);
-					angles[1] = RAD2DEGREE(scene.selection->local_rotation.y);
-					angles[2] = RAD2DEGREE(scene.selection->local_rotation.z);
-				}
-
-				if (ImGui::InputFloat3("scale", scale))
-				{
-					scene.selection->set_local_scale({ scale[0], scale[1], scale[2] });
-				}
-				else
-				{
-					scale[0] = scene.selection->local_scale.x;
-					scale[1] = scene.selection->local_scale.y;
-					scale[2] = scene.selection->local_scale.z;
-				}
-			}
-
-			if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				if (scene.selection->get_model() != nullptr)
-				{
-					auto material = scene.selection->get_model()->material;
-
-					if (material != nullptr)
-					{
-						if (ImGui::ColorEdit3("TintColor", tint_color))
-						{
-							material->set_float4(tint_color_prop, tinymath::vec4f(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
-						}
-						else
-						{
-							tint_color[0] = material->get_float4(tint_color_prop).x;
-							tint_color[1] = material->get_float4(tint_color_prop).y;
-							tint_color[2] = material->get_float4(tint_color_prop).z;
-							tint_color[3] = material->get_float4(tint_color_prop).w;
-						}
-
-						if (ImGui::SliderFloat("roughness_multiplier", &roughness_multiplier, 0.0f, 2.0f))
-						{
-							material->set_float(roughness_multiplier_prop, roughness_multiplier);
-						}
-						else
-						{
-							roughness_multiplier = material->get_float(roughness_multiplier_prop);
-						}
-
-						if (ImGui::SliderFloat("roughness_offset", &roughness_offset, -1.0f, 1.0f))
-						{
-							material->set_float(roughness_offset_prop, roughness_offset);
-						}
-						else
-						{
-							roughness_offset = material->get_float(roughness_offset_prop);
-						}
-
-						if (ImGui::SliderFloat("metallic_multiplier", &metallic_multiplier, 0.0f, 2.0f))
-						{
-							material->set_float(metallic_multiplier_prop, metallic_multiplier);
-						}
-						else
-						{
-							metallic_multiplier = material->get_float(metallic_multiplier_prop);
-						}
-
-						if (ImGui::SliderFloat("metallic_offset", &metallic_offset, -1.0f, 1.0f))
-						{
-							material->set_float(metallic_offset_prop, metallic_offset);
-						}
-						else
-						{
-							metallic_offset = material->get_float(metallic_offset_prop);
-						}
-
-						if (ImGui::Button("Save"))
-						{
-							std::filesystem::path path(ASSETS_PATH + material->meta_path);
-							if (!std::filesystem::exists(path) || std::filesystem::is_directory(path))
-							{
-								material->meta_path = "/materials/" + scene.selection->get_model()->name +".material";
-							}
-							Serializer::serialize(*material, material->meta_path);
-							Serializer::serialize(*scene.selection->get_model(), scene.selection->get_model()->meta_path);
-						}
-					}
+					material_inspector.on_gui(*model->material);
 				}
 			}
 		}
@@ -184,6 +76,8 @@ namespace Guarneri
 
 		Scene& scene = *Scene::current();
 
+		light_inspector.on_gui(scene.main_light);
+	
 		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::Text("Position: %f, %f, %f", scene.main_cam->transform->world_position().x , scene.main_cam->transform->world_position().y, scene.main_cam->transform->world_position().z);
@@ -232,54 +126,6 @@ namespace Guarneri
 		if (ImGui::CollapsingHeader("IBL", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::Checkbox("IBL_On", &INST(GlobalShaderParams).enable_ibl);
-		}
-
-		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
-		{
-			if (ImGui::SliderFloat("Yaw", &scene.main_light.yaw, -180.0f, 180.0f))
-			{
-				scene.main_light.update_rotation();
-			}
-
-			if (ImGui::SliderFloat("Pitch", &scene.main_light.pitch, -180.0f, 180.0f))
-			{
-				scene.main_light.update_rotation();
-			}
-
-			ImGui::SliderFloat("Intensity", &scene.main_light.intensity, 0.0f, 10.0f);
-			if (ImGui::ColorEdit3("Ambient", main_light_ambient))
-			{
-				scene.main_light.ambient = tinymath::Color(main_light_ambient[0], main_light_ambient[1], main_light_ambient[2], main_light_ambient[3]);
-			}
-			else
-			{
-				main_light_ambient[0] = scene.main_light.ambient.r;
-				main_light_ambient[1] = scene.main_light.ambient.g;
-				main_light_ambient[2] = scene.main_light.ambient.b;
-				main_light_ambient[3] = scene.main_light.ambient.a;
-			}
-			if (ImGui::ColorEdit3("Diffuse", main_light_diffuse))
-			{
-				scene.main_light.diffuse = tinymath::Color(main_light_diffuse[0], main_light_diffuse[1], main_light_diffuse[2], main_light_diffuse[3]);
-			}
-			else
-			{
-				main_light_diffuse[0] = scene.main_light.diffuse.r;
-				main_light_diffuse[1] = scene.main_light.diffuse.g;
-				main_light_diffuse[2] = scene.main_light.diffuse.b;
-				main_light_diffuse[3] = scene.main_light.diffuse.a;
-			}
-			if (ImGui::ColorEdit3("Specular", main_light_specular))
-			{
-				scene.main_light.specular = tinymath::Color(main_light_specular[0], main_light_specular[1], main_light_specular[2], main_light_specular[3]);
-			}
-			else
-			{
-				main_light_specular[0] = scene.main_light.specular.r;
-				main_light_specular[1] = scene.main_light.specular.g;
-				main_light_specular[2] = scene.main_light.specular.b;
-				main_light_specular[3] = scene.main_light.specular.a;
-			}
 		}
 
 		if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))

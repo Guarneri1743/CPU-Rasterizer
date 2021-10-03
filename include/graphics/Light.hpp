@@ -1,5 +1,6 @@
 #pragma once
 #include "tinymath.h"
+#include "Object.hpp"
 
 namespace Guarneri {
 	struct Light {
