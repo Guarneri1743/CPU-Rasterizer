@@ -94,16 +94,20 @@ namespace Guarneri
 
 	void Renderer::draw_gizmos() const
 	{
-		//todo
-		/*auto view = INST(GlobalShaderParams).view_matrix;
+		if (!INST(GlobalShaderParams).enable_gizmos)
+		{
+			return;
+		}
+
+		auto view = INST(GlobalShaderParams).view_matrix;
 		auto proj = INST(GlobalShaderParams).proj_matrix;
-		auto pos = Vector3::ZERO;
-		auto up = Vector3::UP;
-		auto forward = Vector3::FORWARD;
-		auto right = Vector3::RIGHT;
-		auto scale = tinymath::mat4x4::scale(model_matrix().get_scale());
-		tinymath::mat4x4 mat = scale.inverse() * model_matrix();
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, mat, view, proj);*/
+		auto pos = tinymath::kVec3fZero;
+		auto up = tinymath::kVec3fUp;
+		auto forward = tinymath::kVec3fForward;
+		auto right = tinymath::kVec3fRight;
+		auto scale = tinymath::scale(model_matrix().get_scale());
+		tinymath::mat4x4 m = model_matrix() * tinymath::inverse(scale);
+		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, m, view, proj);
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

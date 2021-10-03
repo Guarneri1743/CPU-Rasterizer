@@ -142,6 +142,8 @@ namespace Guarneri
 
 		if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
 		{
+			ImGui::Checkbox("Gizmos", &INST(GlobalShaderParams).enable_gizmos);
+
 			const char* debug_views[] = {
 				"None",
 				"WireFrame",

@@ -975,7 +975,7 @@ namespace Guarneri
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
 		size_t w, h;
-		get_active_framebuffer()->get_size(w, h);
+		frame_buffer->get_size(w, h);
 
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
@@ -991,32 +991,33 @@ namespace Guarneri
 		s1 = translation * s1;
 		s2 = translation * s2;
 
-		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
 	{
-		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start);
-		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end);
+		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start.x, start.y, start.z, 1.0f);
+		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end.x, end.y, end.z, 1.0f);
+
 		draw_segment(clip_start, clip_end, col);
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
 	{
-		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
-		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
+		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start.x, start.y, start.z, 1.0f);
+		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end.x, end.y, end.z, 1.0f);
 		draw_segment(clip_start, clip_end, col);
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const tinymath::Color& col)
 	{
 		size_t w, h;
-		get_active_framebuffer()->get_size(w, h);
+		frame_buffer->get_size(w, h);
 
 		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
 		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
@@ -1024,7 +1025,7 @@ namespace Guarneri
 		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
 		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
 
-		SegmentDrawer::bresenham(get_active_framebuffer()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)

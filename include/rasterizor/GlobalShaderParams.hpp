@@ -21,6 +21,7 @@ namespace Guarneri {
 			pcf_on = true;
 			enable_msaa = false;
 			enable_ibl = true;
+			enable_gizmos = true;
 			color_space = ColorSpace::Gamma;
 			persample_op_flag =
 				PerSampleOperation::SCISSOR_TEST |
@@ -52,5 +53,6 @@ namespace Guarneri {
 		bool pcf_on;
 		float shadow_bias;
 		bool enable_msaa;
+		bool enable_gizmos;
 	};
 }
