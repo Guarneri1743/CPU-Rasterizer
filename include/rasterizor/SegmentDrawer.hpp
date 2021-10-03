@@ -31,7 +31,7 @@ namespace Guarneri
 		sy = (float)(y1 - y0) / length;
 		for (float i = 1, x = x0, y = y0; i <= length; i++)
 		{
-			buffer->write((int)(y + 0.5f), (int)(x + 0.5f), c);
+			buffer->write((size_t)(y + 0.5f), (size_t)(x + 0.5f), c);
 			x += sx;
 			y += sy;
 		}
@@ -50,7 +50,7 @@ namespace Guarneri
 		int dy2 = 2 * dy;
 		int xi = x0;
 		int yi = y0;
-		while (buffer->write((uint32_t)yi, (uint32_t)xi, c), xi != x1 || yi != y1)
+		while (buffer->write((size_t)yi, (size_t)xi, c), xi != x1 || yi != y1)
 		{
 			int e = bias;
 			if (e > -dx2)

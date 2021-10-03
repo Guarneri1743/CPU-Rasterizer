@@ -68,8 +68,8 @@ namespace Guarneri
 			}
 			else
 			{
-				rt_size[0] = INST(GraphicsDevice).get_width();
-				rt_size[1] = INST(GraphicsDevice).get_height();
+				rt_size[0] = (int)INST(GraphicsDevice).get_width();
+				rt_size[1] = (int)INST(GraphicsDevice).get_height();
 			}
 			ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 		}

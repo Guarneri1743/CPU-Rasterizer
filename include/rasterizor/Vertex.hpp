@@ -32,7 +32,7 @@ namespace Guarneri
 		static Vertex intagral(const Vertex& left, const Vertex& differential);
 		static Vertex clip2ndc(const Vertex& v);
 		static tinymath::vec4f clip2ndc(const tinymath::vec4f& v);
-		static Vertex ndc2screen(const int& width, const int& height, const Vertex& v);
-		static tinymath::vec4f ndc2screen(const int& width, const int& height, const tinymath::vec4f& v);
+		static Vertex ndc2screen(const size_t& width, const size_t& height, const Vertex& v);
+		static tinymath::vec4f ndc2screen(const size_t& width, const size_t& height, const tinymath::vec4f& v);
 	};
 }

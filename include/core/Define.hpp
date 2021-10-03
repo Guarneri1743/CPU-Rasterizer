@@ -42,16 +42,16 @@ namespace Guarneri{
 	// statistics
 	struct GraphicsStatistic
 	{
-		uint32_t triangle_count;
-		uint32_t culled_triangle_count;
-		uint32_t culled_backface_triangle_count;
-		uint32_t earlyz_optimized;
+		size_t triangle_count;
+		size_t culled_triangle_count;
+		size_t culled_backface_triangle_count;
+		size_t earlyz_optimized;
 	};
 
 	// pixel block
 	typedef struct
 	{
-		uint32_t start_x; uint32_t start_y; uint32_t size;
+		size_t start_x; size_t start_y; size_t size;
 	} PixelBlock;
 
 	typedef uint8_t image_ubyte;

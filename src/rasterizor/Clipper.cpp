@@ -1,4 +1,5 @@
 #include "Clipper.hpp"
+#include "Marcos.h"
 #include <assert.h>
 #include "Logger.hpp"
 
@@ -48,6 +49,7 @@ namespace Guarneri
 			return {};
 		}
 
+		UNUSED(cvv);
 		//// clipping against rest planes
 		//for (int i = 1; i < 6; i++)
 		//{
@@ -105,7 +107,7 @@ namespace Guarneri
 	/// <param name="lhs">left screen vertex</param>
 	/// <param name="rhs">right screen vertex</param>
 	/// <param name="width">screen width</param>
-	void Clipper::screen_clipping(Vertex& lhs, Vertex& rhs, const int& width)
+	void Clipper::screen_clipping(Vertex& lhs, Vertex& rhs, const size_t& width)
 	{
 		if (lhs.position.x <= 0.0f)
 		{

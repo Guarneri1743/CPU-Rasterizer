@@ -14,7 +14,7 @@
 
 namespace Guarneri
 {
-	constexpr uint32_t kMaxPrefilteredMapCount = 4;
+	constexpr size_t kMaxPrefilteredMapCount = 4;
 
 	CubeMap::CubeMap()
 	{
@@ -87,7 +87,7 @@ namespace Guarneri
 	{
 		// todo: mipmap
 		auto uv = spherical_coord_to_uv(dir);
-		uint32_t mip = std::clamp((uint32_t)(lod * (float)kMaxPrefilteredMapCount), 0u, kMaxPrefilteredMapCount - 1);
+		size_t mip = std::clamp((size_t)(lod * (float)kMaxPrefilteredMapCount), 0ull, kMaxPrefilteredMapCount - 1);
 		return prefiltered_maps[mip]->sample(uv.x, uv.y, ret);
 	}
 
@@ -103,7 +103,7 @@ namespace Guarneri
 			precompute_irradiance_map();
 
 			prefiltered_maps.clear();
-			for (uint32_t mip = 0; mip < kMaxPrefilteredMapCount; mip++) 
+			for (size_t mip = 0; mip < kMaxPrefilteredMapCount; mip++) 
 			{
 				precompute_prefilter_map(mip);
 			}
@@ -134,11 +134,11 @@ namespace Guarneri
 		irradiance_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
 		irradiance_map->filtering = Filtering::POINT;
 
-		std::vector<std::pair<uint32_t, uint32_t>> indexers;
+		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
-		for (uint32_t row = 0; row < texture->height; row++)
+		for (size_t row = 0; row < texture->height; row++)
 		{
-			for (uint32_t col = 0; col < texture->width; col++)
+			for (size_t col = 0; col < texture->width; col++)
 			{
 				indexers.push_back({ row, col });
 			}
@@ -150,8 +150,8 @@ namespace Guarneri
 			indexers.end(),
 			[this](auto&& coord)
 		{
-			uint32_t row = coord.first;
-			uint32_t col = coord.second;
+			size_t row = coord.first;
+			size_t col = coord.second;
 			float u, v;
 			pixel2uv(texture->width, texture->height, row, col, u, v);
 			tinymath::vec2f uv = { u, v };
@@ -186,9 +186,9 @@ namespace Guarneri
 		Texture::export_image(*irradiance_map, irradiance_path);
 	}
 
-	constexpr uint32_t kSampleCount = 1024u;
+	constexpr size_t kSampleCount = 1024u;
 
-	void CubeMap::precompute_prefilter_map(const uint32_t& mip)
+	void CubeMap::precompute_prefilter_map(const size_t& mip)
 	{
 		float roughness = mip / (float)(kMaxPrefilteredMapCount - 1);
 		size_t begin = texture_path.find(".hdr");
@@ -204,11 +204,11 @@ namespace Guarneri
 		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
 		prefilter_map->filtering = Filtering::POINT;
 
-		std::vector<std::pair<uint32_t, uint32_t>> indexers;
+		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
-		for (uint32_t row = 0; row < texture->height; row++)
+		for (size_t row = 0; row < texture->height; row++)
 		{
-			for (uint32_t col = 0; col < texture->width; col++)
+			for (size_t col = 0; col < texture->width; col++)
 			{
 				indexers.push_back({ row, col });
 			}
@@ -221,8 +221,8 @@ namespace Guarneri
 			indexers.end(),
 			[this, r, prefilter_map](auto&& coord)
 		{
-			uint32_t row = coord.first;
-			uint32_t col = coord.second;
+			size_t row = coord.first;
+			size_t col = coord.second;
 			float u, v;
 			pixel2uv(texture->width, texture->height, row, col, u, v);
 			tinymath::vec2f uv = { u, v };
@@ -235,7 +235,7 @@ namespace Guarneri
 			float total_weight = 0.0f;
 			tinymath::Color prefilter_color = tinymath::Color(0.0f);
 
-			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
+			for (size_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
 				tinymath::vec2f random_dir = random_vec2_01(kSampleCount);
 				tinymath::vec3f half_way = importance_sampling(random_dir, normal, r);
@@ -275,25 +275,25 @@ namespace Guarneri
 		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::rgb16f);
 		brdf_lut->filtering = Filtering::POINT;
 
-		std::vector<std::pair<uint32_t, uint32_t>> indexers;
+		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)(brdf_size) * (size_t)(brdf_size));
-		for (uint32_t row = 0; row < brdf_size; row++)
+		for (size_t row = 0; row < brdf_size; row++)
 		{
-			for (uint32_t col = 0; col < brdf_size; col++)
+			for (size_t col = 0; col < brdf_size; col++)
 			{
 				indexers.push_back({ row, col });
 			}
 		}
 
-		uint32_t size = brdf_size;
+		size_t size = brdf_size;
 		std::for_each(
 			std::execution::par_unseq,
 			indexers.begin(),
 			indexers.end(),
 			[this, size](auto&& coord)
 		{
-			uint32_t row = coord.first;
-			uint32_t col = coord.second;
+			size_t row = coord.first;
+			size_t col = coord.second;
 
 			float u, v;
 			pixel2uv(size, size, row, col, u, v);
@@ -310,9 +310,9 @@ namespace Guarneri
 
 			tinymath::Color brdf = tinymath::Color(0.0f);
 
-			for (uint32_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
+			for (size_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
 			{
-				tinymath::vec2f random_dir = hammersley(sample_index, kSampleCount);
+				tinymath::vec2f random_dir = hammersley((uint32_t)sample_index, (uint32_t)kSampleCount);
 				tinymath::vec3f half_way = importance_sampling(random_dir, normal, roughness);
 				tinymath::vec3f w_i = tinymath::normalize(2.0f * tinymath::dot(view_dir, half_way) * half_way - view_dir);
 

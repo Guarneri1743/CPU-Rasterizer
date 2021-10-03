@@ -229,9 +229,9 @@ namespace Guarneri
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	void Window::blit2screen(uint8_t* framebuffer, uint32_t w, uint32_t h)
+	void Window::blit2screen(uint8_t* framebuffer, size_t w, size_t h)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 		glBindTexture(GL_TEXTURE_2D, FBO);
 		//uint32_t view_px, view_py, view_w, view_h;
 		//view_px = kHierarchyWidth;

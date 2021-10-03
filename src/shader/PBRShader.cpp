@@ -274,6 +274,15 @@ namespace Guarneri
 
 	tinymath::Color PBRShader::calculate_point_light(const PointLight& light, const LightingData& lighting_data, const tinymath::vec3f& wpos, const tinymath::vec3f& view_dir, const tinymath::vec3f& normal, tinymath::Color albedo, tinymath::Color ao, const tinymath::vec2f& uv, const tinymath::mat3x3& tbn) const
 	{
+		UNUSED(light);
+		UNUSED(lighting_data);
+		UNUSED(wpos);
+		UNUSED(view_dir);
+		UNUSED(normal);
+		UNUSED(albedo);
+		UNUSED(ao);
+		UNUSED(uv);
+		UNUSED(tbn);
 		// TODO
 		return tinymath::kColorBlack;
 	}

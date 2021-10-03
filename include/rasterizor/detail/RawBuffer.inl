@@ -3,7 +3,7 @@
 namespace Guarneri
 {
 	template<typename T>
-	RawBuffer<T>::RawBuffer(uint32_t _width, uint32_t _height)
+	RawBuffer<T>::RawBuffer(size_t _width, size_t _height)
 	{
 		this->width = _width;
 		this->height = _height;
@@ -16,7 +16,7 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	RawBuffer<T>::RawBuffer(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr))
+	RawBuffer<T>::RawBuffer(void* _buffer, size_t _width, size_t _height, void (*deletor)(T* ptr))
 	{
 		this->width = _width;
 		this->height = _height;
@@ -37,13 +37,13 @@ namespace Guarneri
 	}
 
 	template<typename T>
-	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(uint32_t _width, uint32_t _height)
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(size_t _width, size_t _height)
 	{
 		return std::make_shared<RawBuffer>(_width, _height);
 	}
 
 	template<typename T>
-	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(void* _buffer, uint32_t _width, uint32_t _height, void (*deletor)(T* ptr))
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(void* _buffer, size_t _width, size_t _height, void (*deletor)(T* ptr))
 	{
 		return std::make_shared<RawBuffer>(_buffer, _width, _height, deletor);
 	}
@@ -57,15 +57,15 @@ namespace Guarneri
 	template<typename T>
 	bool RawBuffer<T>::read(const float& u, const float& v, T& out) const
 	{
-		uint32_t row, col;
+		size_t row, col;
 		uv2pixel(width, height, u, v, row, col);
 		return read(row, col, out);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(const uint32_t& row, const uint32_t& col, T& out) const
+	bool RawBuffer<T>::read(const size_t& row, const size_t& col, T& out) const
 	{
-		uint32_t pos = row * width + col;
+		size_t pos = row * width + col;
 		if (row >= height || col >= width || pos >= width * height)
 		{
 			return false;
@@ -77,15 +77,15 @@ namespace Guarneri
 	template<typename T>
 	bool RawBuffer<T>::write(const float& u, const float& v, const T& data)
 	{
-		uint32_t row, col;
+		size_t row, col;
 		uv2pixel(width, height, u, v, row, col);
 		return this->write(row, col, data);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::write(const uint32_t& row, const uint32_t& col, const T& data)
+	bool RawBuffer<T>::write(const size_t& row, const size_t& col, const T& data)
 	{
-		uint32_t pos = row * width + col;
+		size_t pos = row * width + col;
 		if (row >= height || col >= width || pos >= width * height)
 		{
 			return false;
@@ -94,14 +94,14 @@ namespace Guarneri
 		return true;
 	}
 
-	inline void uv2pixel(const uint32_t& width, const uint32_t& height, const float& u, const float& v, uint32_t& row, uint32_t& col) 
+	inline void uv2pixel(const size_t& width, const size_t& height, const float& u, const float& v, size_t& row, size_t& col) 
 	{
 		// [0.0, 1.0] -> [0, width/height - 1]
-		row = (uint32_t)(tinymath::floor(v * (float)(height - 1)));
-		col = (uint32_t)(tinymath::floor(u * (float)(width - 1)));
+		row = (size_t)(tinymath::floor(v * (float)(height - 1)));
+		col = (size_t)(tinymath::floor(u * (float)(width - 1)));
 	}
 
-	inline void pixel2uv(const uint32_t& width, const uint32_t& height, const uint32_t& row, const uint32_t& col, float& u, float& v)
+	inline void pixel2uv(const size_t& width, const size_t& height, const size_t& row, const size_t& col, float& u, float& v)
 	{
 		//[0, width/height - 1] -> [0.0, 1.0]
 		u = (float)col / (float)(width - 1);
@@ -111,7 +111,7 @@ namespace Guarneri
 	template<typename T>
 	void RawBuffer<T>::clear(const T& val)
 	{
-		uint32_t size = width * height;
+		size_t size = width * height;
 		std::fill(buffer, buffer + size, val);
 	}
 

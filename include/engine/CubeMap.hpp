@@ -28,7 +28,7 @@ namespace Guarneri
 		bool sample_brdf(const tinymath::vec2f& uv, tinymath::Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
-		void precompute_prefilter_map(const uint32_t& roughness);
+		void precompute_prefilter_map(const size_t& mip);
 		void precompute_brdf_lut();
 		//tinymath::vec2f sample(const tinymath::vec3f& dir, int& index);
 		std::string meta_path;

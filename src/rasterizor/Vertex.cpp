@@ -132,7 +132,7 @@ namespace Guarneri
 		return ndc;
 	}
 
-	Vertex Vertex::ndc2screen(const int& width, const int& height, const Vertex& ndc)
+	Vertex Vertex::ndc2screen(const size_t& width, const size_t& height, const Vertex& ndc)
 	{
 		Vertex screen = ndc;
 		screen.position = ndc2screen(width, height, ndc.position);
@@ -146,7 +146,7 @@ namespace Guarneri
 		return ndc;
 	}
 
-	tinymath::vec4f Vertex::ndc2screen(const int& width, const int& height, const tinymath::vec4f& ndc)
+	tinymath::vec4f Vertex::ndc2screen(const size_t& width, const size_t& height, const tinymath::vec4f& ndc)
 	{
 		tinymath::vec4f screen = ndc;
 		screen.x = (ndc.x + 1.0f) * width * 0.5f;

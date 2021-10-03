@@ -18,7 +18,7 @@ namespace Guarneri
 		GLFWwindow* get() const { return window; }
 
 		void clear();
-		void blit2screen(uint8_t* framebuffer, uint32_t w, uint32_t h);
+		void blit2screen(uint8_t* framebuffer, size_t w, size_t h);
 		void flush();
 		void close() { closed = true; }
 		void get_cursor_pos(double& x, double& y) { x = cursor_x; y = cursor_y; }

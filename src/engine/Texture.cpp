@@ -45,7 +45,7 @@ namespace Guarneri
 		INST(Cache<Texture>).free(this->raw_path);
 	}
 
-	Texture::Texture(const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) : Texture()
+	Texture::Texture(const size_t& _width, const size_t& _height, const TextureFormat& _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -79,7 +79,7 @@ namespace Guarneri
 		}
 	}
 
-	Texture::Texture(void* tex_buffer, const uint32_t& _width, const uint32_t& _height, const TextureFormat& _fmt) : Texture()
+	Texture::Texture(void* tex_buffer, const size_t& _width, const size_t& _height, const TextureFormat& _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -280,13 +280,13 @@ namespace Guarneri
 		LOG("raw texture loaded: {}", abs_path.c_str());
 	}
 
-	bool Texture::bilinear(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
+	bool Texture::bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
 		float rf = v * (float)this->width + 0.5f;
 		float cf = u * (float)this->height + 0.5f;
 
-		uint32_t row = (uint32_t)std::floor(rf);
-		uint32_t col = (uint32_t)std::floor(cf);
+		size_t row = (size_t)std::floor(rf);
+		size_t col = (size_t)std::floor(cf);
 
 		float frac_row = rf - (float)row;
 		float frac_col = cf - (float)col;
@@ -303,7 +303,7 @@ namespace Guarneri
 		return true;
 	}
 
-	bool Texture::point(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
+	bool Texture::point(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
 		read(u, v, mip, ret);
 		return true;
@@ -325,13 +325,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgb>>(w, h);
 			
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -358,13 +358,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgba>>(w, h);
 
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -391,13 +391,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rg>>(w, h);
 
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -423,13 +423,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_gray>>(w, h);
 
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -455,13 +455,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgb16f>>(w, h);
 
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -487,13 +487,13 @@ namespace Guarneri
 
 			for (int i = 1; i < count; i++)
 			{
-				uint32_t w = this->width >> i;
-				uint32_t h = this->height >> i;
+				size_t w = this->width >> i;
+				size_t h = this->height >> i;
 				auto mipmap = std::make_shared<RawBuffer<tinymath::color_rgba16f>>(w, h);
 
-				for (uint32_t row = 0; row < h; row++)
+				for (size_t row = 0; row < h; row++)
 				{
-					for (uint32_t col = 0; col < w; col++)
+					for (size_t col = 0; col < w; col++)
 					{
 						float u, v;
 						pixel2uv(w, h, row, col, u, v);
@@ -515,10 +515,10 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, tinymath::Color& ret) const
 	{
-		return sample(u, v, 0u, ret);
+		return sample(u, v, 0ull, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
+	bool Texture::sample(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
 		switch (this->filtering)
 		{
@@ -532,7 +532,7 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const
 	{
-		return sample(u, v, (uint32_t)std::floor(lod * kMaxMip), ret);
+		return sample(u, v, (size_t)std::floor(lod * kMaxMip), ret);
 	}
 
 	bool Texture::read(const float& u, const float& v, tinymath::Color& ret) const
@@ -540,12 +540,12 @@ namespace Guarneri
 		return read(u, v, 0, ret);
 	}
 
-	bool Texture::read(const uint32_t& row, const uint32_t& col, tinymath::Color& ret) const
+	bool Texture::read(const size_t& row, const size_t& col, tinymath::Color& ret) const
 	{
 		return read(row, col, 0, ret);
 	}
 
-	bool Texture::read(const float& u, const float& v, const uint32_t& mip, tinymath::Color& ret) const
+	bool Texture::read(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
 		float wu = u;
 		float wv = v;
@@ -611,7 +611,7 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Texture::read(const uint32_t& row, const uint32_t& col, const uint32_t& mip, tinymath::Color& ret) const
+	bool Texture::read(const size_t& row, const size_t& col, const size_t& mip, tinymath::Color& ret) const
 	{
 		switch (format)
 		{
@@ -673,7 +673,7 @@ namespace Guarneri
 		return false;
 	}
 
-	bool Texture::write(const uint32_t& x, const uint32_t& y, const tinymath::Color& data)
+	bool Texture::write(const size_t& x, const size_t& y, const tinymath::Color& data)
 	{
 		switch (format)
 		{
@@ -779,7 +779,7 @@ namespace Guarneri
 		rgba_buffer.reset();
 		rgb16f_buffer.reset();
 		rgba16f_buffer.reset();
-		for (uint32_t i = 1; i < this->mip_count; i++)
+		for (size_t i = 1; i < this->mip_count; i++)
 		{
 			switch (this->format)
 			{
@@ -810,42 +810,42 @@ namespace Guarneri
 		{
 			size_t size;
 			auto data = (*tex.rgb_buffer).get_ptr(size);
-			ret = stbi_write_png(dest, tex.width, tex.height, 3, data, 0);
+			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 3, data, 0);
 		}
 			break;
 		case TextureFormat::rgba:
 		{
 			size_t size;
 			auto data = (*tex.rgba_buffer).get_ptr(size);
-			ret = stbi_write_png(dest, tex.width, tex.height, 4, data, 0);
+			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 4, data, 0);
 		}
 			break;
 		case TextureFormat::rg:
 		{
 			size_t size;
 			auto data = (*tex.rg_buffer).get_ptr(size);
-			ret = stbi_write_png(dest, tex.width, tex.height, 2, data, 0);
+			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 2, data, 0);
 		}
 			break;
 		case TextureFormat::r32:
 		{
 			size_t size;
 			auto data = (*tex.gray_buffer).get_ptr(size);
-			ret = stbi_write_png(dest, tex.width, tex.height, 1, data, 0);
+			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 1, data, 0);
 		}
 			break;
 		case TextureFormat::rgb16f:
 		{
 			size_t size;
 			auto data = (*tex.rgb16f_buffer).get_ptr(size);
-			ret = stbi_write_hdr(dest, tex.width, tex.height, 3, (float*)data);
+			ret = stbi_write_hdr(dest, (int)tex.width, (int)tex.height, 3, (float*)data);
 		}
 			break;
 		case TextureFormat::rgba16f:
 		{
 			size_t size;
 			auto data = (*tex.rgba16f_buffer).get_ptr(size);
-			ret = stbi_write_hdr(dest, tex.width, tex.height, 4, (float*)data);
+			ret = stbi_write_hdr(dest, (int)tex.width, (int)tex.height, 4, (float*)data);
 		}
 			break;
 		}
