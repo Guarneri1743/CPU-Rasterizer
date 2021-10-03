@@ -1,11 +1,5 @@
 #pragma once
-#include <unordered_map>
 #include "Shader.hpp"
-#include "Light.hpp"
-#include "GlobalShaderParams.hpp"
-#include "tinymath.h"
-#include "Texture.hpp"
-#include "CubeMap.hpp"
 
 namespace Guarneri
 {
