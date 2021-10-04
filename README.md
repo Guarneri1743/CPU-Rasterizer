@@ -12,25 +12,25 @@ overview
 
 | DebugView |
 | --- |
-|  <img src="/gallery/DebugView.png" width = "512" height = "512" alt="DebugView" align=bottom/> |
+|  <img src="/gallery/DebugView.png" width = "600" height = "400" alt="DebugView" align=bottom/> |
 
 
 | Physical based rendering |
 | ---  |
-|  <img src="/gallery/Roughness.png" width = "512" height = "512" alt="Roughness" align=bottom/> |
+|  <img src="/gallery/Roughness.png" width = "600" height = "400" alt="Roughness" align=bottom/> |
 
 | Physical based rendering |
 | --- |
-| <img src="/gallery/Metallic.png" width = "512" height = "512" alt="Metallic" align=bottom/> |
+| <img src="/gallery/Metallic.png" width = "600" height = "400" alt="Metallic" align=bottom/> |
 
 
 | Image based lighting |
 | --- |
-| <img src="/gallery/IBL_Comparison.png" width = "512" height = "512" alt="MSAA" align=bottom/>  |
+| <img src="/gallery/IBL_Comparison.png" width = "600" height = "400" alt="MSAA" align=bottom/>  |
 
 | Clipping  |
 | ---  |
-| <img src="/gallery/Clipping.png" width = "256" height = "256" alt="Clipping" align=bottom />  |
+| <img src="/gallery/Clipping.png" width = "600" height = "400" alt="Clipping" align=bottom />  |
 
 | Stencil test | Depth test | Blending |
 | --- | --- | --- |
