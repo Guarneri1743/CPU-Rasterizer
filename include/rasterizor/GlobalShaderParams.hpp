@@ -23,6 +23,8 @@ namespace Guarneri {
 			msaa_subsample_count = 4;
 			enable_ibl = true;
 			enable_gizmos = true;
+			width = 800;
+			height = 600;
 			color_space = ColorSpace::Gamma;
 			multi_sample_frequency = MultiSampleFrequency::kPixelFrequency;
 			persample_op_flag =
@@ -37,6 +39,8 @@ namespace Guarneri {
 				CullingAndClippingFlag::BACK_FACE_CULLING;
 		}
 
+		size_t width;
+		size_t height;
 		float cam_near;
 		float cam_far;
 		tinymath::vec3f camera_pos;

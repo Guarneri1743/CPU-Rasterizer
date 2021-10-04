@@ -11,10 +11,10 @@ namespace Guarneri
 {
 	struct Triangle
 	{
-	public:
 		Vertex vertices[3];
 		bool flip;
 		bool culled;
+		float cached_area;
 
 	public:
 		Triangle();
@@ -26,6 +26,8 @@ namespace Guarneri
 		tinymath::Rect get_bounds() const;
 		float area() const;
 		float area_double() const;
+		bool barycentric_interpolate(const tinymath::vec2f& pos, Vertex& interpolated_vert) const;
+		void update_area();
 		static float area_double(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3);
 		static float area_double(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3);
 		static float area(const tinymath::vec3f& v1, const tinymath::vec3f& v2, const tinymath::vec3f& v3);

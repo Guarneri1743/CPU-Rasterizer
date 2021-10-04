@@ -54,9 +54,12 @@ namespace Guarneri
 		return o;
 	}
 
-	tinymath::Color Shader::fragment_shader(const v2f& input) const
+	tinymath::Color Shader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
 	{
 		if (is_error_shader) { return kErrorColor; }
+
+		UNUSED(ddx);
+		UNUSED(ddy);
 
 		auto main_light = INST(GlobalShaderParams).main_light;
 		auto point_lights = INST(GlobalShaderParams).point_lights;
@@ -109,6 +112,15 @@ namespace Guarneri
 		}
 
 		return tinymath::Color(ret.r, ret.g, ret.b, 1.0f);
+	}
+
+	int Shader::get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)
+	{
+		tinymath::vec2f ddx = ddx_uv * tinymath::vec2f((float)width, (float)height);
+		tinymath::vec2f ddy = ddy_uv * tinymath::vec2f((float)width, (float)height);
+		float p = tinymath::max(tinymath::sqrt(tinymath::dot(ddx, ddx)), tinymath::sqrt(tinymath::dot(ddy, ddy)));
+		int level = (int)(tinymath::log2(p) + 0.5f);
+		return std::clamp(level, 0, kMaxMip);
 	}
 
 	float Shader::linearize_01depth(const float& depth, const float& near, const float& far)

@@ -16,6 +16,12 @@
 
 namespace Guarneri
 {
+	struct SubsampleParam
+	{
+		tinymath::color_rgba pixel_color;
+		bool pixel_color_calculated;
+	};
+
 	struct DrawCommand
 	{
 		Shader* shader;
@@ -82,11 +88,23 @@ namespace Guarneri
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
 		void resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
 		void rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader);
+		void rasterize_pixel_block(const Triangle& tri, 
+								   const Shader& shader, 
+								   const RenderTexture& rt, 
+								   const Pixel& px1,
+								   const Pixel& px2,
+								   const Pixel& px3,
+								   const Pixel& px4,
+								   SubsampleParam& p1,
+								   SubsampleParam& p2,
+								   SubsampleParam& p3,
+								   SubsampleParam& p4);
 		void rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy);
 		void scanblock(const Triangle& tri, const Shader& shader);
 		void scanline(const Triangle& tri, const Shader& shader);
 		v2f process_vertex(const Shader& shader, const Vertex& vert) const;
-		bool process_fragment(FrameBuffer& rt, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader, bool run_fragment);
+		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader);
+		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
 		void process_commands();
 	};

@@ -14,12 +14,12 @@ namespace Guarneri
 		tinymath::vec2f pos;
 	};
 
-	struct SubPixel
+	struct PixelBlock
 	{
-		uint8_t index;
-		size_t row;
-		size_t col;
-		tinymath::vec2f pos;
+		Pixel top_left;
+		Pixel top_right;
+		Pixel bottom_left;
+		Pixel bottom_right; 
 	};
 
 	class RenderTexture
@@ -31,7 +31,9 @@ namespace Guarneri
 		void foreach_pixel(const tinymath::Rect& rect, std::function<void(RenderTexture& buffer, const Pixel& pixel)> pixel_func);
 		void foreach_pixel(std::function<void(RenderTexture& buffer, const Pixel& pixel)> pixel_func);
 
-		SubPixel get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx);
+		void foreach_pixel_block (const tinymath::Rect& rect, std::function<void(RenderTexture& buffer, const PixelBlock& pixel)> pixel_block_func);
+
+		Pixel get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx);
 
 		void clear(const FrameContent& flag);
 		void resize(const size_t& w, const size_t& h);

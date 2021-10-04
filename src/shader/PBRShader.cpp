@@ -300,9 +300,16 @@ namespace Guarneri
 		return tinymath::kColorBlack;
 	}
 
-	tinymath::Color PBRShader::fragment_shader(const v2f& input) const
+	tinymath::Color PBRShader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
 	{
 		if (is_error_shader) { return kErrorColor; }
+
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::MIPMAP) != RenderFlag::DISABLE
+			&& local_properties.has_texture(albedo_prop))
+		{
+			int mip = Shader::get_mip_level(ddx.uv, ddy.uv, local_properties.get_texture(albedo_prop)->width, local_properties.get_texture(albedo_prop)->height);
+			return mip_colors[mip];
+		}
 
 		auto main_light = INST(GlobalShaderParams).main_light;
 		auto point_lights = INST(GlobalShaderParams).point_lights;

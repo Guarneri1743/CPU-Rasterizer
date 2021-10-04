@@ -40,14 +40,41 @@ namespace Guarneri
 		}
 	}
 
-	SubPixel RenderTexture::get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx)
+	void RenderTexture::foreach_pixel_block(const tinymath::Rect& rect, std::function<void(RenderTexture& buffer, const PixelBlock& pixel)> pixel_block_func)
+	{
+		assert(rect.size().x % 2 == 0 && rect.size().y % 2 == 0);
+
+		for (size_t row = rect.min().y; row < rect.max().y; row += 2)
+		{
+			for (size_t col = rect.min().x; col < rect.max().x; col += 2)
+			{
+				tinymath::vec2f p1((float)col + 0.5f, (float)row + 0.5f);
+				Pixel top_left = { row, col, p1 };
+
+				tinymath::vec2f p2((float)col + 1.5f, (float)row + 0.5f);
+				Pixel top_right = { row, col + 1, p2 };
+
+				tinymath::vec2f p3((float)col + 0.5f, (float)row + 1.5f);
+				Pixel bottom_left = { row + 1, col, p3 };
+
+				tinymath::vec2f p4((float)col + 1.5f, (float)row + 1.5f);
+				Pixel bottom_right = { row + 1, col + 1, p4 };
+
+				PixelBlock block = { top_left, top_right, bottom_left, bottom_right };
+
+				pixel_block_func(*this, block);
+			}
+		}
+	}
+
+	Pixel RenderTexture::get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx)
 	{
 		uint8_t index = x_subsample_idx * subsamples_per_axis + y_subsample_idx;
 		size_t subsample_row = (size_t)(row * subsamples_per_axis + x_subsample_idx);
 		size_t subsample_col = (size_t)(col * subsamples_per_axis + y_subsample_idx);
 		auto local_pos = hammersley((uint32_t)index, (uint32_t)msaa_subsample_count);
 		tinymath::vec2f screen_pos((float)col + local_pos.x, (float)row + local_pos.y);
-		SubPixel subpixel = { index, subsample_row, subsample_col, screen_pos };
+		Pixel subpixel = { subsample_row, subsample_col, screen_pos };
 		return subpixel;
 	}
 

@@ -58,31 +58,31 @@ namespace Guarneri
 		return ret;
 	}
 
-	Vertex Vertex::interpolate_screen_space(const Vertex& left, const Vertex& right, const float& t)
+	Vertex Vertex::interpolate_screen_space(const Vertex& lhs, const Vertex& rhs, const float& t)
 	{
-		Vertex ret = interpolate_attributes(left, right, t);
-		ret.rhw = left.rhw + (right.rhw - left.rhw) * t;
+		Vertex ret = interpolate_attributes(lhs, rhs, t);
+		ret.rhw = lhs.rhw + (rhs.rhw - lhs.rhw) * t;
 		return ret;
 	}
 
-	Vertex Vertex::interpolate_clip_space(const Vertex& left, const Vertex& right, const float& t)
+	Vertex Vertex::interpolate_clip_space(const Vertex& lhs, const Vertex& rhs, const float& t)
 	{
-		Vertex ret = interpolate_attributes(left, right, t);
+		Vertex ret = interpolate_attributes(lhs, rhs, t);
 		ret.rhw = 1.0f / ret.position.w;
 		return ret;
 	}
 
-	Vertex Vertex::interpolate_attributes(const Vertex& left, const Vertex& right, const float& t)
+	Vertex Vertex::interpolate_attributes(const Vertex& lhs, const Vertex& rhs, const float& t)
 	{
 		Vertex ret;
-		ret.position = left.position + (right.position - left.position) * t;
-		ret.world_pos = left.world_pos + (right.world_pos - left.world_pos) * t;
-		ret.shadow_coord = left.shadow_coord + (right.shadow_coord - left.shadow_coord) * t;
-		ret.color = left.color + (right.color - left.color) * t;
-		ret.normal = left.normal + (right.normal - left.normal) * t;
-		ret.uv = left.uv + (right.uv - left.uv) * t;
-		ret.tangent = left.tangent + (right.tangent - left.tangent) * t;
-		ret.bitangent = left.bitangent + (right.bitangent - left.bitangent) * t;
+		ret.position = lhs.position + (rhs.position - lhs.position) * t;
+		ret.world_pos = lhs.world_pos + (rhs.world_pos - lhs.world_pos) * t;
+		ret.shadow_coord = lhs.shadow_coord + (rhs.shadow_coord - lhs.shadow_coord) * t;
+		ret.color = lhs.color + (rhs.color - lhs.color) * t;
+		ret.normal = lhs.normal + (rhs.normal - lhs.normal) * t;
+		ret.uv = lhs.uv + (rhs.uv - lhs.uv) * t;
+		ret.tangent = lhs.tangent + (rhs.tangent - lhs.tangent) * t;
+		ret.bitangent = lhs.bitangent + (rhs.bitangent - lhs.bitangent) * t;
 		return ret;
 	}
 
@@ -103,18 +103,33 @@ namespace Guarneri
 		return ret;
 	}
 
-	Vertex Vertex::intagral(const Vertex& left, const Vertex& differential)
+	Vertex Vertex::intagral(const Vertex& lhs, const Vertex& differential)
 	{
 		Vertex ret;
-		ret.position = (left.position + differential.position);
-		ret.world_pos = (left.world_pos + differential.world_pos);
-		ret.shadow_coord = (left.shadow_coord + differential.shadow_coord);
-		ret.color = (left.color + differential.color);
-		ret.normal = (left.normal + differential.normal);
-		ret.uv = (left.uv + differential.uv);
-		ret.tangent = (left.tangent + differential.tangent);
-		ret.bitangent = (left.bitangent + differential.bitangent);
-		ret.rhw = (left.rhw + differential.rhw);
+		ret.position = (lhs.position + differential.position);
+		ret.world_pos = (lhs.world_pos + differential.world_pos);
+		ret.shadow_coord = (lhs.shadow_coord + differential.shadow_coord);
+		ret.color = (lhs.color + differential.color);
+		ret.normal = (lhs.normal + differential.normal);
+		ret.uv = (lhs.uv + differential.uv);
+		ret.tangent = (lhs.tangent + differential.tangent);
+		ret.bitangent = (lhs.bitangent + differential.bitangent);
+		ret.rhw = (lhs.rhw + differential.rhw);
+		return ret;
+	}
+
+	Vertex Vertex::substract(const Vertex& lhs, const Vertex& rhs)
+	{
+		Vertex ret;
+		ret.position = (rhs.position - lhs.position);
+		ret.world_pos = (rhs.world_pos - lhs.world_pos);
+		ret.shadow_coord = (rhs.shadow_coord - lhs.shadow_coord);
+		ret.color = (rhs.color - lhs.color);
+		ret.uv = (rhs.uv - lhs.uv);
+		ret.normal = (rhs.normal - lhs.normal);
+		ret.tangent = (rhs.tangent - lhs.tangent);
+		ret.bitangent = (rhs.bitangent - lhs.bitangent);
+		ret.rhw = (rhs.rhw - lhs.rhw);
 		return ret;
 	}
 
@@ -130,6 +145,21 @@ namespace Guarneri
 		ndc.tangent /= clip.position.w;
 		ndc.bitangent /= clip.position.w;
 		return ndc;
+	}
+
+	Vertex Vertex::reverse_perspective_division(const Vertex& v)
+	{
+		Vertex ret;
+		float w = 1.0f / v.rhw;
+		ret.position = v.position * w;
+		ret.world_pos = v.world_pos * w;
+		ret.shadow_coord = v.shadow_coord * w;
+		ret.color = v.color * w;
+		ret.normal = v.normal * w;
+		ret.uv = v.uv * w;
+		ret.tangent = v.tangent * w;
+		ret.bitangent = v.bitangent * w;
+		return ret;
 	}
 
 	Vertex Vertex::ndc2screen(const size_t& width, const size_t& height, const Vertex& ndc)

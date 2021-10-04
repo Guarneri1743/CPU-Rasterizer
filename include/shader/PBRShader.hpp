@@ -9,7 +9,7 @@ namespace Guarneri
 		PBRShader(std::string name);
 		~PBRShader();
 		v2f vertex_shader(const a2v& input) const;
-		tinymath::Color fragment_shader(const v2f& input) const;
+		tinymath::Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const;
 		
 	private:
 		float get_shadow_atten(const tinymath::vec4f& light_space_pos) const;

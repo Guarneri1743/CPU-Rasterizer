@@ -404,7 +404,6 @@ struct Vector<Component, 3>
 	constexpr Vector<Component, 3>(const Component& v) : x(v), y(v), z(v) {}
 	constexpr Vector<Component, 3>(const Vector<Component, 2>& v) : x(v.data[0]), y(v.data[1]), z(0.0f) {}
 	constexpr Vector<Component, 3>(const Component& c1, const Component& c2, const Component& c3) : x(c1), y(c2), z(c3) { }
-	//constexpr Vector<Component, 3>(const Vector<Component, 3>& v) : x(v.x), y(v.y), z(v.z) {}
 
 	Component& operator[](const size_t& index) { return data[index]; }
 	const Component& operator[](const size_t& index) const { return data[index]; }
@@ -428,7 +427,6 @@ struct Vector<Component, 4>
 	constexpr Vector<Component, 4>(const Vector<Component, 2>& v) : x(v.data[0]), y(v.data[1]), z(0.0f) {}
 	constexpr Vector<Component, 4>(const Vector<Component, 3>& v) : x(v.data[0]), y(v.data[1]), z(v.data[2]), w(0.0f) {}
 	constexpr Vector<Component, 4>(const Component& c1, const Component& c2, const Component& c3, const Component& c4) : x(c1), y(c2), z(c3), w(c4) {}
-	//constexpr Vector<Component, 4>(const Vector<Component, 4>& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
 	Component& operator[](const size_t& index) { return data[index]; }
 	const Component& operator[](const size_t& index) const { return data[index]; }

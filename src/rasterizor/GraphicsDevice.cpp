@@ -31,6 +31,9 @@ namespace Guarneri
 
 	void GraphicsDevice::resize(size_t w, size_t h)
 	{
+		INST(GlobalShaderParams).width = w;
+		INST(GlobalShaderParams).height = h;
+
 		if (target_rendertexture == nullptr)
 		{
 			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil, INST(GlobalShaderParams).enable_msaa, INST(GlobalShaderParams).msaa_subsample_count);
@@ -257,6 +260,7 @@ namespace Guarneri
 			if (this->tile_based)
 			{
 				// push tile based draw task
+				triangle->update_area();
 				tile_based_manager->push_draw_task(*triangle, shader);
 			}
 			else
@@ -363,59 +367,27 @@ namespace Guarneri
 		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
 		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
-		bool flip = tri.flip;
-		int ccw_idx0 = 0;
-		int ccw_idx1 = flip ? 2 : 1;
-		int ccw_idx2 = flip ? 1 : 2;
-
-		auto& v0 = tri[ccw_idx0];
-		auto& v1 = tri[ccw_idx1];
-		auto& v2 = tri[ccw_idx2];
-
-		auto p0 = v0.position.xy;
-		auto p1 = v1.position.xy;
-		auto p2 = v2.position.xy;
-
-		float area = Triangle::area_double(p0, p1, p2);
-
 		if (INST(GlobalShaderParams).enable_msaa && !shader.shadow)
 		{
 			// msaa on
-			get_active_rendertexture()->foreach_pixel(
+			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
+				[this, tri, &shader](auto&& buffer, auto&& block)
 			{
-				bool pixel_color_calculated = false;
-				SubPixel hit_subpixel;
+				SubsampleParam sp1 = { {0, 0, 0, 1}, false };
+				SubsampleParam sp2 = { {0, 0, 0, 1}, false };
+				SubsampleParam sp3 = { {0, 0, 0, 1}, false };
+				SubsampleParam sp4 = { {0, 0, 0, 1}, false };
+
 				for (uint8_t x_subsample_idx = 0; x_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++x_subsample_idx)
 				{
 					for (uint8_t y_subsample_idx = 0; y_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++y_subsample_idx)
 					{
-						auto subpixel = buffer.get_subpixel(pixel.row, pixel.col, x_subsample_idx, y_subsample_idx);
-						float w0 = Triangle::area_double(p1, p2, subpixel.pos);
-						float w1 = Triangle::area_double(p2, p0, subpixel.pos);
-						float w2 = Triangle::area_double(p0, p1, subpixel.pos);
-						if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-						{
-							w0 /= area; w1 /= area; w2 /= area;
-							Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-
-							if (INST(GlobalShaderParams).multi_sample_frequency == MultiSampleFrequency::kPixelFrequency)
-							{
-								// but only run fragment shader once when using pixel frequency 
-								bool passed = process_fragment(*buffer.get_msaa_framebuffer(), vert, subpixel.row, subpixel.col, shader, !pixel_color_calculated);
-								if (passed)
-								{
-									hit_subpixel = subpixel;
-									pixel_color_calculated = true;
-								}
-							}
-							else
-							{
-								// run fragment shader for all subsamples
-								process_fragment(*buffer.get_msaa_framebuffer(), vert, subpixel.row, subpixel.col, shader, true);
-							}
-						}
+						auto px1 = buffer.get_subpixel(block.top_left.row, block.top_left.col, x_subsample_idx, y_subsample_idx);
+						auto px2 = buffer.get_subpixel(block.top_right.row, block.top_right.col, x_subsample_idx, y_subsample_idx);
+						auto px3 = buffer.get_subpixel(block.bottom_left.row, block.bottom_left.col, x_subsample_idx, y_subsample_idx);
+						auto px4 = buffer.get_subpixel(block.bottom_right.row, block.bottom_right.col, x_subsample_idx, y_subsample_idx);
+						rasterize_pixel_block(tri, shader, buffer, px1, px2, px3, px4, sp1, sp2, sp3, sp4);
 					}
 				}
 			});
@@ -423,20 +395,68 @@ namespace Guarneri
 		else
 		{
 			// msaa off
-			get_active_rendertexture()->foreach_pixel(
+			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
+				[this, &tri, &shader](auto&& buffer, auto&& block)
 			{
-				float w0 = Triangle::area_double(p1, p2, pixel.pos);
-				float w1 = Triangle::area_double(p2, p0, pixel.pos);
-				float w2 = Triangle::area_double(p0, p1, pixel.pos);
-				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-				{
-					w0 /= area; w1 /= area; w2 /= area;
-					Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-					process_fragment(*buffer.get_framebuffer(), vert, pixel.row, pixel.col, shader, true);
-				}
+				SubsampleParam sp;
+				Pixel p1, p2, p3, p4;
+				p1 = block.top_left;
+				p2 = block.top_right;
+				p3 = block.bottom_left;
+				p4 = block.bottom_right;
+				rasterize_pixel_block(tri, shader, buffer, p1, p2, p3, p4, sp, sp, sp, sp);
 			});
+		}
+	}
+
+	void GraphicsDevice::rasterize_pixel_block(const Triangle& tri,
+											   const Shader& shader, 
+											   const RenderTexture& rt, 
+											   const Pixel& px1,
+											   const Pixel& px2,
+											   const Pixel& px3,
+											   const Pixel& px4,
+											   SubsampleParam& p1,
+											   SubsampleParam& p2,
+											   SubsampleParam& p3,
+											   SubsampleParam& p4)
+	{
+		Vertex top_left_vert, top_right_vert, bottom_left_vert, bottom_right_vert;
+
+		bool top_left_valid = tri.barycentric_interpolate(px1.pos, top_left_vert);
+		bool top_right_valid = tri.barycentric_interpolate(px2.pos, top_right_vert);
+		bool bottom_left_valid = tri.barycentric_interpolate(px3.pos, bottom_left_vert);
+		bool bottom_right_valid = tri.barycentric_interpolate(px4.pos, bottom_right_vert);
+
+		top_left_vert = Vertex::reverse_perspective_division(top_left_vert);
+		top_right_vert = Vertex::reverse_perspective_division(top_right_vert);
+		bottom_left_vert = Vertex::reverse_perspective_division(bottom_left_vert);
+		bottom_right_vert = Vertex::reverse_perspective_division(bottom_right_vert);
+
+		Vertex ddx = Vertex::substract(top_right_vert, top_left_vert);
+		Vertex ddy = Vertex::substract(top_right_vert, bottom_left_vert);
+
+		FrameBuffer& fb = INST(GlobalShaderParams).enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+
+		if (top_left_valid)
+		{
+			process_fragment(fb, top_left_vert, ddx, ddy, px1.row, px1.col, shader, p1);
+		}
+
+		if (top_right_valid)
+		{
+			process_fragment(fb, top_right_vert, ddx, ddy, px2.row, px2.col, shader, p2);
+		}
+
+		if (bottom_left_valid)
+		{
+			process_fragment(fb, bottom_left_vert, ddx, ddy, px3.row, px3.col, shader, p3);
+		}
+
+		if (bottom_right_valid)
+		{
+			process_fragment(fb, bottom_right_vert, ddx, ddy, px4.row, px4.col, shader, p4);
 		}
 	}
 
@@ -478,33 +498,14 @@ namespace Guarneri
 
 		auto rect = tinymath::Rect(col_start, row_start, col_end - col_start, row_end - row_start);
 
-		bool flip = tri.flip;
-		int ccw_idx0 = 0;
-		int ccw_idx1 = flip ? 2 : 1;
-		int ccw_idx2 = flip ? 1 : 2;
-
-		auto& v0 = tri[ccw_idx0];
-		auto& v1 = tri[ccw_idx1];
-		auto& v2 = tri[ccw_idx2];
-
-		auto p0 = v0.position.xy;
-		auto p1 = v1.position.xy;
-		auto p2 = v2.position.xy;
-
-		float area = Triangle::area_double(p0, p1, p2);
-
 		get_active_rendertexture()->foreach_pixel(
 			rect,
-			[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
+			[this, &tri, &shader](auto&& buffer, auto&& pixel)
 		{
-			float w0 = Triangle::area_double(p1, p2, pixel.pos);
-			float w1 = Triangle::area_double(p2, p0, pixel.pos);
-			float w2 = Triangle::area_double(p0, p1, pixel.pos);
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+			Vertex vert;
+			if (tri.barycentric_interpolate(pixel.pos, vert))
 			{
-				w0 /= area; w1 /= area; w2 /= area;
-				Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-				process_fragment(*buffer.get_framebuffer(), vert, pixel.row, pixel.col, shader, true);
+				process_fragment(*buffer.get_framebuffer(), vert, Vertex(), Vertex(), pixel.row, pixel.col, shader);
 			}
 		});
 	}
@@ -539,18 +540,24 @@ namespace Guarneri
 			left = tinymath::clamp(left, 0, (int)w);
 			int right = (int)(rhs.position.x + 0.5f);
 			right = tinymath::clamp(right, 0, (int)w);
-			assert(right >= left);
 
+			assert(right >= left);
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, row, col, shader, true);
+				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, Vertex(), Vertex(), row, col, shader);
 				auto dx = Vertex::differential(lhs, rhs);
 				lhs = Vertex::intagral(lhs, dx);
 			}
 		}
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader, bool run_fragment)
+	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader)
+	{
+		SubsampleParam subsample_param;
+		return process_fragment(rt, v, ddx, ddy, row, col, shader, subsample_param);
+	}
+
+	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param)
 	{
 		tinymath::color_rgba pixel_color;
 
@@ -561,7 +568,7 @@ namespace Guarneri
 
 		PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
 
-		float z = v.position.z;
+		float z = v.position.z / v.position.w;
 
 		ColorMask color_mask = shader.color_mask;
 		CompareFunc stencil_func = shader.stencil_func;
@@ -593,13 +600,14 @@ namespace Guarneri
 		}
 
 		// fragment shader
-		tinymath::Color fragment_result;
-		
-		// todo: ddx ddy
-		if (run_fragment)
+		tinymath::Color fragment_result = tinymath::kColorBlack;
+
+		if (!INST(GlobalShaderParams).enable_msaa ||
+			!subsample_param.pixel_color_calculated ||
+			INST(GlobalShaderParams).multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
 			v2f v_out;
-			float w = 1.0f / v.rhw;
+			float w = 1.0f;// / v.rhw;
 			v_out.position = v.position * w;
 			v_out.world_pos = v.world_pos * w;
 			v_out.shadow_coord = v.shadow_coord * w;
@@ -608,8 +616,15 @@ namespace Guarneri
 			v_out.uv = v.uv * w;
 			v_out.tangent = v.tangent * w;
 			v_out.bitangent = v.bitangent * w;
-			fragment_result = shader.fragment_shader(v_out);
+
+			fragment_result = shader.fragment_shader(v_out, ddx, ddy);
 			pixel_color = ColorEncoding::encode_rgba(fragment_result);
+			subsample_param.pixel_color = pixel_color;
+			subsample_param.pixel_color_calculated = true;
+		}
+		else
+		{
+			pixel_color = subsample_param.pixel_color;
 		}
 
 		// todo: scissor test
@@ -653,7 +668,7 @@ namespace Guarneri
 		}
 
 		// blending
-		if (enable_blending && shader.transparent && run_fragment)
+		if (enable_blending && shader.transparent)
 		{
 			tinymath::color_rgba dst;
 			if (buffer.read_color(row, col, dst))
@@ -698,7 +713,7 @@ namespace Guarneri
 					}
 				}
 			}
-			
+
 			buffer.write_color(row, col, pixel_color);
 			return true;
 		}

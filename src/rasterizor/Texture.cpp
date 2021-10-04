@@ -20,8 +20,6 @@ constexpr uint8_t kChannelRGBA = 4;
 
 namespace Guarneri
 {
-	constexpr int kMaxMip = 8;
-
 	Texture::Texture()
 	{
 		wrap_mode = WrapMode::REPEAT;

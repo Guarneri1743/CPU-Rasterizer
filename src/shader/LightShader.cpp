@@ -19,9 +19,11 @@ namespace Guarneri
 		return o;
 	}
 
-	tinymath::Color LightShader::fragment_shader(const v2f& input) const
+	tinymath::Color LightShader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
 	{
 		UNUSED(input);
+		UNUSED(ddx);
+		UNUSED(ddy);
 		return tinymath::kColorWhite;
 	}
 }

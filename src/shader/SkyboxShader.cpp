@@ -25,9 +25,12 @@ namespace Guarneri
 		return o;
 	}
 
-	tinymath::Color SkyboxShader::fragment_shader(const v2f& input) const
+	tinymath::Color SkyboxShader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
 	{
 		tinymath::Color ret;
+
+		UNUSED(ddx);
+		UNUSED(ddy);
 
 		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
 		{

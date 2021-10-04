@@ -6,6 +6,8 @@
 #include "Traits.hpp"
 
 namespace Guarneri{
+	constexpr int kMaxMip = 8;
+
 	typedef uint32_t property_name;
 
 	// pbr
@@ -47,12 +49,6 @@ namespace Guarneri{
 		size_t culled_backface_triangle_count;
 		size_t earlyz_optimized;
 	};
-
-	// pixel block
-	typedef struct
-	{
-		size_t start_x; size_t start_y; size_t size;
-	} PixelBlock;
 
 	typedef uint8_t image_ubyte;
 

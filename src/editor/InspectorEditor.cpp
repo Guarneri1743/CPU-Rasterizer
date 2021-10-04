@@ -188,7 +188,8 @@ namespace Guarneri
 				"Metallic",
 				"AO",
 				"IndirectDiffuse",
-				"IndirectSpecular"
+				"IndirectSpecular",
+				"Mipmap"
 			};
 			const RenderFlag view_flags[] =
 			{
@@ -207,7 +208,8 @@ namespace Guarneri
 				RenderFlag::METALLIC,
 				RenderFlag::AO,
 				RenderFlag::INDIRECT_DIFFUSE,
-				RenderFlag::INDIRECT_SPECULAR
+				RenderFlag::INDIRECT_SPECULAR,
+				RenderFlag::MIPMAP
 			};
 			static int selected_view = 0;
 			if (ImGui::Button("Views.."))

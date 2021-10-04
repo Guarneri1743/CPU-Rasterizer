@@ -5,9 +5,22 @@
 #include "GlobalShaderParams.hpp"
 #include "tinymath.h"
 #include "ShaderPropertyMap.hpp"
+#include "Vertex.hpp"
 
 namespace Guarneri
 {
+	static tinymath::Color mip_colors[kMaxMip] =
+	{
+		tinymath::Color(1.f, 0.f, 0.f, 1.f),
+		tinymath::Color(0.f, 0.f, 1.f, 1.f),
+		tinymath::Color(1.f, 0.5f, 0.f, 1.f),
+		tinymath::Color(1.f, 0.f, 0.5f, 1.f),
+		tinymath::Color(0.f, 0.5f, 0.5f, 1.f),
+		tinymath::Color(0.f, 0.25f, 0.5f, 1.f),
+		tinymath::Color(0.25f, 0.5f, 0.f, 1.f),
+		tinymath::Color(0.5f, 0.f, 1.f, 1.f),
+	};
+
 	struct a2v
 	{
 		tinymath::vec4f position;
@@ -80,7 +93,9 @@ namespace Guarneri
 		Shader(std::string name);
 		virtual ~Shader();
 		virtual v2f vertex_shader(const a2v& input) const;
-		virtual tinymath::Color fragment_shader(const v2f& input) const;
+		virtual tinymath::Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const;
+
+		static int get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height);
 		static float linearize_depth(const float& depth, const float& near, const float& far);
 		static float linearize_01depth(const float& depth, const float& near, const float& far);
 		static Shader*  get_error_shader() { return error_shader; }
