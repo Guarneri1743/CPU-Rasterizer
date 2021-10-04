@@ -260,7 +260,6 @@ namespace Guarneri
 			if (this->tile_based)
 			{
 				// push tile based draw task
-				triangle->update_area();
 				tile_based_manager->push_draw_task(*triangle, shader);
 			}
 			else

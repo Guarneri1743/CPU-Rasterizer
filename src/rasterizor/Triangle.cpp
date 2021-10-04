@@ -216,11 +216,11 @@ namespace Guarneri
 		float w1 = Triangle::area_double(p2, p0, pos);
 		float w2 = Triangle::area_double(p0, p1, pos);
 
-		assert(area > 0.0f); // cached_area should be calculated in advance
+		float area = Triangle::area_double(p0, p1, p2);
 
-		if (w0 >= 0 && w1 >= 0 && w2 >= 0 && cached_area > 0.0f)
+		if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 		{
-			w0 /= cached_area; w1 /= cached_area; w2 /= cached_area;
+			w0 /= area; w1 /= area; w2 /= area;
 			interpolated_vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
 			return true;
 		}
@@ -229,23 +229,6 @@ namespace Guarneri
 			interpolated_vert = Vertex();
 			return false;
 		}
-	}
-
-	void Triangle::update_area()
-	{
-		int ccw_idx0 = 0;
-		int ccw_idx1 = flip ? 2 : 1;
-		int ccw_idx2 = flip ? 1 : 2;
-
-		auto v0 = vertices[ccw_idx0];
-		auto v1 = vertices[ccw_idx1];
-		auto v2 = vertices[ccw_idx2];
-
-		auto p0 = v0.position.xy;
-		auto p1 = v1.position.xy;
-		auto p2 = v2.position.xy;
-
-		cached_area = Triangle::area_double(p0, p1, p2);
 	}
 
 	float Triangle::area_double(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3)
