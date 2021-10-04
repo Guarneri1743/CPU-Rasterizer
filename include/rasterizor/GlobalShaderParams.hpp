@@ -20,9 +20,11 @@ namespace Guarneri {
 			enable_shadow = true;
 			pcf_on = true;
 			enable_msaa = false;
+			msaa_subsample_count = 4;
 			enable_ibl = true;
 			enable_gizmos = true;
 			color_space = ColorSpace::Gamma;
+			multi_sample_frequency = MultiSampleFrequency::kPixelFrequency;
 			persample_op_flag =
 				PerSampleOperation::SCISSOR_TEST |
 				PerSampleOperation::STENCIL_TEST |
@@ -53,6 +55,8 @@ namespace Guarneri {
 		bool pcf_on;
 		float shadow_bias;
 		bool enable_msaa;
+		MultiSampleFrequency multi_sample_frequency;
+		uint8_t msaa_subsample_count;
 		bool enable_gizmos;
 	};
 }

@@ -90,7 +90,7 @@ namespace Guarneri
 
 		// setup shadowmap and cubemap
 		shadowmap_id = INST(GraphicsDevice).create_buffer(512, 512, FrameContent::Depth);
-		std::shared_ptr<FrameBuffer> shadowmap;
+		std::shared_ptr<RenderTexture> shadowmap;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
 
 		Shader::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
@@ -232,10 +232,10 @@ namespace Guarneri
 		INST(GraphicsDevice).clear_buffer(FrameContent::Color | FrameContent::Depth | FrameContent::Stencil | FrameContent::Coverage);
 		if (INST(GlobalShaderParams).enable_shadow)
 		{
-			INST(GraphicsDevice).set_active_frame_buffer(shadowmap_id);
+			INST(GraphicsDevice).set_active_rendertexture(shadowmap_id);
 			render_shadow();
 			INST(GraphicsDevice).present();
-			INST(GraphicsDevice).reset_active_frame_buffer();
+			INST(GraphicsDevice).reset_active_rendertexture();
 		}
 
 		render_objects();
@@ -311,66 +311,66 @@ namespace Guarneri
 	{
 		if (INST(GlobalShaderParams).debug_flag == RenderFlag::DISABLE) { return; }
 
-		FrameBuffer* active_fbo = INST(GraphicsDevice).get_active_framebuffer();
-		std::shared_ptr<FrameBuffer> shadow_map;
+		RenderTexture* active_fbo = INST(GraphicsDevice).get_active_rendertexture();
+		std::shared_ptr<RenderTexture> shadow_map;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadow_map);
 		size_t w, h;
 		active_fbo->get_size(w, h);
-		for (size_t row = 0; row < h; ++row)
-		{
-			for (size_t col = 0; col < w; ++col)
+
+		active_fbo->foreach_pixel(
+		[&shadow_map, w, h](auto&& buffer, auto&& pixel) {
+			// stencil visualization
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
 			{
-				// stencil visualization
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
+				uint8_t stencil;
+				if (buffer.get_framebuffer()->read_stencil(pixel.row, pixel.col, stencil))
 				{
-					uint8_t stencil;
-					if (active_fbo->read_stencil(row, col, stencil))
-					{
-						tinymath::color_rgba c = ColorEncoding::encode_rgba(stencil, stencil, stencil, 255);
-						active_fbo->write_color(row, col, c);
-					}
-				}
-
-				// depth buffer visualization
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
-				{
-					float cur_depth;
-					if (active_fbo->read_depth(row, col, cur_depth))
-					{
-						float linear_depth = Shader::linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
-						tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
-						tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
-						active_fbo->write_color(row, col, c);
-					}
-				}
-
-				// shadowmap visualization
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
-				{
-					float u, v;
-					pixel2uv(w, h, row, col, u, v);
-					float cur_depth;
-					if (shadow_map->read_depth(u, v, cur_depth))
-					{
-						tinymath::Color depth_color = tinymath::kColorWhite * cur_depth;
-						tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
-						active_fbo->write_color(u, v, c);
-					}
+					tinymath::color_rgba c = ColorEncoding::encode_rgba(stencil, stencil, stencil, 255);
+					buffer.get_framebuffer()->write_color(pixel.row, pixel.col, c);
 				}
 			}
-		}
+
+			// depth buffer visualization
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+			{
+				float cur_depth;
+				if (buffer.get_framebuffer()->read_depth(pixel.row, pixel.col, cur_depth))
+				{
+					float linear_depth = Shader::linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
+					tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
+					depth_color.a = 1.0f;
+					tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
+					buffer.get_framebuffer()->write_color(pixel.row, pixel.col, c);
+				}
+			}
+
+			// shadowmap visualization
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+			{
+				float u, v;
+				pixel2uv(w, h, pixel.row, pixel.col, u, v);
+				float cur_depth;
+				if (shadow_map->get_framebuffer()->read_depth(u, v, cur_depth))
+				{
+					tinymath::Color depth_color = tinymath::kColorWhite * cur_depth; 
+					depth_color.a = 1.0f;
+					tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
+					buffer.get_framebuffer()->write_color(u, v, c);
+				}
+			}
+		});
 	}
 
 	void Scene::resize_shadowmap(const size_t& w, const size_t& h)
 	{
-		std::shared_ptr<FrameBuffer> shadowmap;
+		std::shared_ptr<RenderTexture> shadowmap;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
 		shadowmap->resize(w, h);
 	}
 
 	void Scene::get_shadowmap_size(size_t & w, size_t & h)
 	{
-		std::shared_ptr<FrameBuffer> shadowmap;
+		std::shared_ptr<RenderTexture> shadowmap;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
 		w = shadowmap->get_width();
 		h = shadowmap->get_height();

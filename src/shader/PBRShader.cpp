@@ -75,7 +75,7 @@ namespace Guarneri
 				for (int y = -kernel_size; y <= kernel_size; y++)
 				{
 					float depth;
-					if (shadowmap->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
+					if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 					{
 						//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
 						shadow_atten += (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
@@ -88,7 +88,7 @@ namespace Guarneri
 		else
 		{
 			float depth;
-			if (shadowmap->read_depth(proj_shadow_coord.x, proj_shadow_coord.y, depth))
+			if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x, proj_shadow_coord.y, depth))
 			{
 				shadow_atten = (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
 			}

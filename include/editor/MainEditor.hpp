@@ -6,7 +6,7 @@ namespace Guarneri
 	class MainEditor : public BaseEditor
 	{
 	public:
-		MainEditor(float x, float y, float w, float h);
+		MainEditor(int x, int y, int w, int h);
 		virtual void on_gui();
 
 	private:

@@ -187,6 +187,12 @@ namespace Guarneri{
 		Coverage = 1 << 3
 	};
 
+	enum class MultiSampleFrequency
+	{
+		kPixelFrequency,
+		kSubsampleFrequency
+	};
+
 #ifdef OPAQUE
 #undef OPAQUE
 #endif

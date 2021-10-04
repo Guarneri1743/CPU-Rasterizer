@@ -4,7 +4,7 @@
 #include "tinymath.h"
 #include "Texture.hpp"
 #include "CubeMap.hpp"
-#include "FrameBuffer.hpp"
+#include "RenderTexture.hpp"
 
 namespace Guarneri
 {
@@ -17,7 +17,7 @@ namespace Guarneri
 		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
 		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		std::unordered_map<property_name, std::string> keywords;
-		std::unordered_map<property_name, std::shared_ptr<FrameBuffer>> name2framebuffer;
+		std::unordered_map<property_name, std::shared_ptr<RenderTexture>> name2framebuffer;
 
 		ShaderPropertyMap() {}
 		ShaderPropertyMap(const ShaderPropertyMap& other);
@@ -34,13 +34,13 @@ namespace Guarneri
 		void set_float(const property_name& name, const float& val);
 		void set_texture(const property_name& name, std::shared_ptr<Texture> tex);
 		void set_cubemap(const property_name& name, std::shared_ptr<CubeMap> cubemap);
-		void set_framebuffer(const property_name& name, std::shared_ptr<FrameBuffer> buffer);
+		void set_framebuffer(const property_name& name, std::shared_ptr<RenderTexture> buffer);
 		int get_int(const property_name& name) const;
 		tinymath::vec4f get_float4(const property_name& name) const;
 		float get_float(const property_name& name) const;
 		std::shared_ptr<Texture> get_texture(const property_name& name) const;
 		std::shared_ptr<CubeMap> get_cubemap(const property_name& name) const;
-		std::shared_ptr<FrameBuffer> get_framebuffer(const property_name& name) const;
+		std::shared_ptr<RenderTexture> get_framebuffer(const property_name& name) const;
 
 	private:
 		void copy(const ShaderPropertyMap& other);

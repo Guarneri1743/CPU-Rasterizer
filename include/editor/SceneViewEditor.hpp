@@ -6,7 +6,7 @@ namespace Guarneri
 	class SceneViewEditor : public BaseEditor
 	{
 	public:
-		SceneViewEditor(float x, float y, float w, float h);
+		SceneViewEditor(int x, int y, int w, int h);
 		virtual void on_gui();
 	};
 }

@@ -12,7 +12,7 @@
 
 namespace Guarneri
 {
-	HierarchyEditor::HierarchyEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	HierarchyEditor::HierarchyEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
 		no_scrollbar_with_mouse = true;
 		no_scrollbar = true;
@@ -101,7 +101,7 @@ namespace Guarneri
 
 	void HierarchyEditor::on_gui()
 	{
-		rect = tinymath::Rect(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		rect = tinymath::Rect(0, kTopHeight, kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("Hierarchy", tab_bar_flags))

@@ -4,6 +4,7 @@
 #include "tinymath/MathDefine.h"
 #include "tinymath/Vector2.h"
 #include "tinymath/Vector3.h"
+#include "tinymath/primitives/Rect.h"
 #include "Vertex.hpp"
 
 namespace Guarneri
@@ -22,6 +23,7 @@ namespace Guarneri
 		Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, const bool& flip);
 		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const;
 		std::vector<Triangle> horizontally_split() const;
+		tinymath::Rect get_bounds() const;
 		float area() const;
 		float area_double() const;
 		static float area_double(const tinymath::vec2f& v1, const tinymath::vec2f& v2, const tinymath::vec2f& v3);

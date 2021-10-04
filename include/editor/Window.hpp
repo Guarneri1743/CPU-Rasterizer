@@ -23,10 +23,11 @@ namespace Guarneri
 		void close() { closed = true; }
 		void get_cursor_pos(double& x, double& y) { x = cursor_x; y = cursor_y; }
 		bool is_open();
-		int get_width() { return width; }
-		int get_height() { return height; }
 		void add_on_resize_evt(void (*on_resize)(int w, int h, void* ud), void* user_data);
 		uint32_t get_fbo() { return FBO; }
+
+		size_t get_width() { return width; }
+		size_t get_height() { return height; }
 
 	private:
 		static void glfw_error_callback(int error, const char* description);
@@ -43,10 +44,11 @@ namespace Guarneri
 		GLFWwindow* window;
 		double cursor_x;
 		double cursor_y;
-		int width;
-		int height;
 		bool valid;
 		bool closed;
+
+		size_t width;
+		size_t height;
 
 		uint32_t shader_id;
 		uint32_t FBO;

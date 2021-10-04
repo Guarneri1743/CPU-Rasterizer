@@ -76,7 +76,7 @@ namespace Guarneri
 		name2cubemap[name] = cubemap;
 	}
 
-	void ShaderPropertyMap::set_framebuffer(const property_name& name, std::shared_ptr<FrameBuffer> buffer)
+	void ShaderPropertyMap::set_framebuffer(const property_name& name, std::shared_ptr<RenderTexture> buffer)
 	{
 		if (buffer == nullptr)
 		{
@@ -130,7 +130,7 @@ namespace Guarneri
 		return nullptr;
 	}
 
-	std::shared_ptr<FrameBuffer> ShaderPropertyMap::get_framebuffer(const property_name& name) const
+	std::shared_ptr<RenderTexture> ShaderPropertyMap::get_framebuffer(const property_name& name) const
 	{
 		if (name2framebuffer.count(name) > 0)
 		{

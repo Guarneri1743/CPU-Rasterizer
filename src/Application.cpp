@@ -15,11 +15,11 @@ namespace Guarneri
 	{
 		if (playing) return;
 		Window::initialize_main_window("CPU-Rasterizer");
-		auto main_editor = std::make_unique<MainEditor>(0.0f, 0.0f, (float)Window::main()->get_width(), (float)Window::main()->get_height());
-		auto sceneview = std::make_unique<SceneViewEditor>((float)kLeftWidth, (float)kTopHeight, (float)Window::main()->get_width() - (float)kRightWidth - (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		auto setting = std::make_unique<InspectorEditor>(0.0f, (float)kTopHeight, (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		auto hierarchy = std::make_unique<HierarchyEditor>((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
-		auto explorer = std::make_unique<ExplorerEditor>(0.0f, (float)Window::main()->get_height() - (float)kBottomHeight, (float)Window::main()->get_width(), (float)kBottomHeight);
+		auto main_editor = std::make_unique<MainEditor>(0, 0, Window::main()->get_width(), Window::main()->get_height());
+		auto sceneview = std::make_unique<SceneViewEditor>(kLeftWidth, kTopHeight, Window::main()->get_width() - kRightWidth - kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
+		auto setting = std::make_unique<InspectorEditor>(0, kTopHeight, kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
+		auto hierarchy = std::make_unique<HierarchyEditor>(Window::main()->get_width() - kRightWidth, kTopHeight, kRightWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
+		auto explorer = std::make_unique<ExplorerEditor>(0, Window::main()->get_height() - kBottomHeight, Window::main()->get_width(), kBottomHeight);
 		editors.emplace_back(std::move(main_editor));
 		editors.emplace_back(std::move(setting));
 		editors.emplace_back(std::move(hierarchy));
@@ -51,7 +51,7 @@ namespace Guarneri
 				}
 
 				// blit framebuffer to screen
-				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_framebuffer()),
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_target_color_buffer()),
 											INST(GraphicsDevice).get_width(),
 											INST(GraphicsDevice).get_height());
 

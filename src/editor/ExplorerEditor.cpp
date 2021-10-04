@@ -12,7 +12,7 @@
 
 namespace Guarneri
 {
-	ExplorerEditor::ExplorerEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	ExplorerEditor::ExplorerEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
 		no_titlebar = true;
 		no_menu = true;
@@ -27,7 +27,7 @@ namespace Guarneri
 
 	void ExplorerEditor::on_gui()
 	{
-		rect = tinymath::Rect(0.0f, (float)Window::main()->get_height() - (float)kBottomHeight, (float)Window::main()->get_width(), (float)kBottomHeight);
+		rect = tinymath::Rect(0, Window::main()->get_height() - kBottomHeight, Window::main()->get_width(), kBottomHeight);
 		EditorSharedData::explorer_selection_dirty = false;
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("ExplorerBar", tab_bar_flags))
@@ -37,7 +37,7 @@ namespace Guarneri
 			{
 				// explorer
 				{
-					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, rect.h()), true, window_flags);
+					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, (float)rect.h()), true, window_flags);
 					draw_directories(ASSETS_PATH.c_str());
 					ImGui::EndChild();
 				}
@@ -47,7 +47,7 @@ namespace Guarneri
 				// contents
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
-					ImGui::BeginChild("Content", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.75f, rect.h()), true, window_flags);
+					ImGui::BeginChild("Content", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.75f, (float)rect.h()), true, window_flags);
 					if (std::filesystem::is_directory(EditorSharedData::explorer_selection))
 					{
 						draw_files(EditorSharedData::explorer_selection);
@@ -62,7 +62,7 @@ namespace Guarneri
 			if (ImGui::BeginTabItem("Console"))
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
-				ImGui::BeginChild("Console", ImVec2(ImGui::GetWindowContentRegionWidth(), rect.h()), true, window_flags);
+				ImGui::BeginChild("Console", ImVec2(ImGui::GetWindowContentRegionWidth(), (float)rect.h()), true, window_flags);
 				draw_console();
 				ImGui::EndChild();
 				ImGui::PopStyleVar();

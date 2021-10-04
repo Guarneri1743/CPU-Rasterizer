@@ -9,7 +9,7 @@ namespace Guarneri
 	class InspectorEditor : public BaseEditor
 	{
 	public:
-		InspectorEditor(float x, float y, float w, float h);
+		InspectorEditor(int x, int y, int w, int h);
 		virtual void on_gui();
 		void draw_inspector();
 		void draw_settings();

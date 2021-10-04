@@ -12,6 +12,7 @@
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Serialization.hpp"
+#include "Time.hpp"
 
 #undef near
 #undef far
@@ -23,7 +24,7 @@ namespace Guarneri
 	int shadowmap_size[2];
 	int sub_samples = 4;
 
-	InspectorEditor::InspectorEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	InspectorEditor::InspectorEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
 		no_scrollbar = true;
 		no_titlebar = true;
@@ -101,8 +102,35 @@ namespace Guarneri
 					INST(GraphicsDevice).set_subsample_count((uint8_t)0);
 				}
 			}
+
 			if (INST(GlobalShaderParams).enable_msaa)
 			{
+				const char* frequencies[] = {
+				"PixelFrequency",
+				"SubsampleFrequency",
+				};
+				const MultiSampleFrequency frequency_flags[] =
+				{
+					MultiSampleFrequency::kPixelFrequency,
+					MultiSampleFrequency::kSubsampleFrequency
+				};
+				static int selected_frequency = 0;
+				if (ImGui::Button("MultiSampleFrequency.."))
+					ImGui::OpenPopup("frequencies");
+				ImGui::SameLine();
+				ImGui::TextUnformatted(selected_frequency == -1 ? "<None>" : frequencies[selected_frequency]);
+				if (ImGui::BeginPopup("frequencies"))
+				{
+					ImGui::Separator();
+					for (int i = 0; i < IM_ARRAYSIZE(frequencies); i++)
+						if (ImGui::Selectable(frequencies[i]))
+						{
+							selected_frequency = i;
+							INST(GlobalShaderParams).multi_sample_frequency = frequency_flags[i];
+						}
+					ImGui::EndPopup();
+				}
+
 				if (ImGui::InputInt("Subsamples", &sub_samples))
 				{
 					INST(GraphicsDevice).set_subsample_count((uint8_t)sub_samples);
@@ -242,7 +270,7 @@ namespace Guarneri
 
 	void InspectorEditor::on_gui()
 	{
-		rect = tinymath::Rect((float)Window::main()->get_width() - (float)kRightWidth, (float)kTopHeight, (float)kRightWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		rect = tinymath::Rect(Window::main()->get_width() - kRightWidth, kTopHeight, kRightWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("Inspector", tab_bar_flags))

@@ -13,22 +13,15 @@
 
 namespace Guarneri
 {
-	constexpr size_t kTileSize = 16;
 	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
 
 	GraphicsDevice::GraphicsDevice()
 	{
 		active_frame_buffer_id = kInvalidID;
-		row_tile_count = 0;
-		col_tile_count = 0;
-		tile_length = 0;
-		msaa_subsample_count = 0;
-		subsamples_per_axis = 0;
 		statistics.culled_backface_triangle_count = 0;
 		statistics.culled_triangle_count = 0;
 		statistics.earlyz_optimized = 0;
 		statistics.triangle_count = 0;
-		tiles = nullptr;
 		multi_thread = true;
 		tile_based = true;
 	}
@@ -38,37 +31,23 @@ namespace Guarneri
 
 	void GraphicsDevice::resize(size_t w, size_t h)
 	{
-		resize_tiles(w, h);
-
-		if (frame_buffer == nullptr)
+		if (target_rendertexture == nullptr)
 		{
-			frame_buffer = std::make_unique<FrameBuffer>(w, h, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil);
+			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil, INST(GlobalShaderParams).enable_msaa, INST(GlobalShaderParams).msaa_subsample_count);
 		}
 		else
 		{
-			frame_buffer->resize(w, h);
+			target_rendertexture->resize(w, h);
 		}
 
-		if (msaa_buffer != nullptr)
+		if (tile_based_manager == nullptr)
 		{
-			msaa_buffer->resize(w * subsamples_per_axis, h * subsamples_per_axis);
+			tile_based_manager = std::make_unique<TileBasedManager>(w, h);
 		}
-	}
-
-	void GraphicsDevice::resize_tiles(size_t w, size_t h)
-	{
-		if (tiles != nullptr)
+		else
 		{
-			delete[] tiles;
+			tile_based_manager->resize(w, h);
 		}
-
-		size_t row_rest = h % kTileSize;
-		size_t col_rest = w % kTileSize;
-		row_tile_count = h / kTileSize + (row_rest > 0 ? 1 : 0);
-		col_tile_count = w / kTileSize + (col_rest > 0 ? 1 : 0);
-		tile_length = row_tile_count * col_tile_count;
-		tiles = new FrameTile[tile_length];
-		FrameTile::build_tiles(tiles, kTileSize, row_tile_count, col_tile_count, row_rest, col_rest);
 	}
 
 	void GraphicsDevice::initialize(size_t w, size_t h)
@@ -84,11 +63,11 @@ namespace Guarneri
 		commands.push(cmd);
 	}
 
-	FrameBuffer* GraphicsDevice::get_active_framebuffer() const noexcept
+	RenderTexture* GraphicsDevice::get_active_rendertexture() const noexcept
 	{
 		if (kInvalidID == active_frame_buffer_id)
 		{
-			return frame_buffer.get();
+			return target_rendertexture.get();
 		}
 
 		if (frame_buffer_map.count(active_frame_buffer_id) > 0)
@@ -96,12 +75,12 @@ namespace Guarneri
 			return frame_buffer_map.at(active_frame_buffer_id).get();
 		}
 
-		return frame_buffer.get();
+		return target_rendertexture.get();
 	}
 
 	uint32_t GraphicsDevice::create_buffer(const size_t& w, const size_t& h, const FrameContent& content) noexcept
 	{
-		auto buffer = std::make_shared<FrameBuffer>(w, h, content);
+		auto buffer = std::make_shared<RenderTexture>(w, h, content);
 
 		uint32_t id;
 		if (buffer_id_allocator.alloc(id))
@@ -113,38 +92,20 @@ namespace Guarneri
 		return kInvalidID;
 	}
 
-	void GraphicsDevice::set_active_frame_buffer(uint32_t& id)
+	void GraphicsDevice::set_active_rendertexture(uint32_t& id)
 	{
 		if (frame_buffer_map.count(id) > 0)
 		{
-			auto fb = frame_buffer_map[id];
-			size_t current_w, current_h;
-			frame_buffer->get_size(current_w, current_h);
-			if (current_w != fb->get_width() || current_h != fb->get_height())
-			{
-				resize_tiles(fb->get_width(), fb->get_height());
-			}
 			active_frame_buffer_id = id;
 		}
 	}
 
-	void GraphicsDevice::reset_active_frame_buffer() noexcept
+	void GraphicsDevice::reset_active_rendertexture() noexcept
 	{
-		if (frame_buffer_map.count(active_frame_buffer_id) > 0)
-		{
-			auto fb = frame_buffer_map[active_frame_buffer_id];
-			size_t current_w, current_h;
-			fb->get_size(current_w, current_h);
-			if (current_w != frame_buffer->get_width() || current_h != frame_buffer->get_height())
-			{
-				resize_tiles(frame_buffer->get_width(), frame_buffer->get_height());
-			}
-		}
-
 		active_frame_buffer_id = kInvalidID;
 	}
 
-	bool GraphicsDevice::get_buffer(const uint32_t& id, std::shared_ptr<FrameBuffer>& buffer) const noexcept
+	bool GraphicsDevice::get_buffer(const uint32_t& id, std::shared_ptr<RenderTexture>& buffer) const noexcept
 	{
 		buffer = nullptr;
 		if (frame_buffer_map.count(id) > 0)
@@ -154,11 +115,6 @@ namespace Guarneri
 		}
 
 		return false;
-	}
-
-	TileInfo GraphicsDevice::get_tile_info()
-	{
-		return { kTileSize, row_tile_count, col_tile_count, tile_length };
 	}
 
 	void GraphicsDevice::draw(DrawCommand task)
@@ -187,34 +143,23 @@ namespace Guarneri
 			draw_commands.begin(),
 			draw_commands.end(),
 			[this](auto&& cmd)
-			{
-				this->draw(cmd);
-			});
+		{
+			this->draw(cmd);
+		});
 		draw_commands.clear();
 	}
 
 	void GraphicsDevice::present()
 	{
-		std::for_each(
-			std::execution::par_unseq,
-			tiles,
-			tiles + tile_length,
-			[this](auto&& tile)
-			{
-				this->rasterize_tile(tile);
-			});
-
-		if (INST(GlobalShaderParams).enable_msaa)
+		tile_based_manager->foreach_tile(
+			[this](auto&& rect, auto&& task_queue)
 		{
-			std::for_each(
-				std::execution::par_unseq,
-				tiles,
-				tiles + tile_length,
-				[this](auto&& tile)
-				{
-					this->resolve_tile(tile);
-				});
-		}
+			this->rasterize_tile(rect, task_queue);
+			if (INST(GlobalShaderParams).enable_msaa)
+			{
+				this->resolve_tile(rect, task_queue);
+			}
+		});
 	}
 
 	void GraphicsDevice::process_commands()
@@ -226,16 +171,7 @@ namespace Guarneri
 			MsaaCommand* msaa = dynamic_cast<MsaaCommand*>(cmd);
 			if (msaa != nullptr)
 			{
-				INST(GlobalShaderParams).enable_msaa = msaa->enable;
-				uint8_t count = msaa->msaa_subsample_count;
-				if (count > 0)
-				{
-					size_t w, h;
-					get_active_framebuffer()->get_size(w, h);
-					msaa_subsample_count = count;
-					subsamples_per_axis = (uint8_t)(std::sqrt((double)count));
-					msaa_buffer = std::make_unique<FrameBuffer>(w * subsamples_per_axis, h * subsamples_per_axis, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil | FrameContent::Coverage);
-				}
+				target_rendertexture->set_msaa_param(msaa->enable, msaa->msaa_subsample_count);
 				delete msaa;
 			}
 		}
@@ -245,16 +181,11 @@ namespace Guarneri
 	{
 		process_commands();
 
-		get_active_framebuffer()->clear(flag);
+		get_active_rendertexture()->clear(flag);
 
 		for (auto& kv : frame_buffer_map)
 		{
 			kv.second->clear(flag);
-		}
-
-		if (INST(GlobalShaderParams).enable_msaa)
-		{
-			msaa_buffer->clear(flag);
 		}
 
 		statistics.culled_triangle_count = 0;
@@ -312,7 +243,7 @@ namespace Guarneri
 		}
 
 		size_t w, h;
-		get_active_framebuffer()->get_size(w, h);
+		get_active_rendertexture()->get_size(w, h);
 
 		// ndc to screen space
 		Vertex s1 = Vertex::ndc2screen(w, h, ndc1);
@@ -326,7 +257,7 @@ namespace Guarneri
 			if (this->tile_based)
 			{
 				// push tile based draw task
-				FrameTile::push_draw_task(tiles, row_tile_count, col_tile_count, *triangle, shader, w, h, kTileSize);
+				tile_based_manager->push_draw_task(*triangle, shader);
 			}
 			else
 			{
@@ -347,23 +278,14 @@ namespace Guarneri
 		return shader.vertex_shader(input);
 	}
 
-	void GraphicsDevice::rasterize_tiles(const size_t& start, const size_t& end)
+	void GraphicsDevice::rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue)
 	{
-		assert(end >= start);
-		for (auto idx = start; idx < end; idx++)
-		{
-			rasterize_tile(tiles[idx]);
-		}
-	}
-
-	void GraphicsDevice::rasterize_tile(FrameTile& tile)
-	{
-		while (!tile.tasks.empty())
+		while (!task_queue.empty())
 		{
 			TileTask task;
-			if (tile.pop_task(task))
+			if (task_queue.try_consume(task))
 			{
-				rasterize(tile, task.triangle, *task.shader);
+				rasterize(rect, task.triangle, *task.shader);
 
 				// wireframe
 				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
@@ -377,82 +299,69 @@ namespace Guarneri
 
 		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
 		{
-			for (size_t row = (size_t)tile.row_start; row < (size_t)tile.row_end; row++)
+			get_active_rendertexture()->foreach_pixel(
+				rect,
+				[this, rect](auto&& buffer, auto&& pixel)
 			{
-				for (size_t col = (size_t)tile.col_start; col < (size_t)tile.col_end; col++)
+				float r = (float)pixel.row / rect.max().y;
+				float g = (float)pixel.col / rect.max().x;
+				tinymath::color_rgba dst;
+				if (buffer.get_framebuffer()->read_color(pixel.row, pixel.col, dst))
 				{
-					float r = (float)row / tile.row_end;
-					float g = (float)col / tile.col_end;
-					tinymath::color_rgba dst;
-					if (get_active_framebuffer()->read_color(row, col, dst))
+					tinymath::Color dst_color = ColorEncoding::decode(dst);
+					tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
+					tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
+					auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
+					buffer.get_framebuffer()->write_color(pixel.row, pixel.col, pixel_color);
+				}
+			});
+		}
+	}
+
+	void GraphicsDevice::resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue)
+	{
+		UNUSED(task_queue);
+		get_active_rendertexture()->foreach_pixel(
+			rect,
+			[this](auto&& buffer, auto&& pixel)
+		{
+			tinymath::Color pixel_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+			for (uint8_t x_subsample_idx = 0; x_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++x_subsample_idx)
+			{
+				for (uint8_t y_subsample_idx = 0; y_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++y_subsample_idx)
+				{
+					auto subpixel = buffer.get_subpixel(pixel.row, pixel.col, x_subsample_idx, y_subsample_idx);
+					uint8_t coverage = 0;
+					if (buffer.get_msaa_framebuffer()->read_coverage(subpixel.row, subpixel.col, coverage) && coverage > 0)
 					{
-						tinymath::Color dst_color = ColorEncoding::decode(dst);
-						tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
-						tinymath::Color blended_color = blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
-						auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
-						get_active_framebuffer()->write_color(row, col, pixel_color);
+						tinymath::color_rgba msaa_color;
+						buffer.get_msaa_framebuffer()->read_color(subpixel.row, subpixel.col, msaa_color);
+						pixel_color += ColorEncoding::decode(msaa_color);
 					}
 				}
 			}
+
+			float weight = 1.0f / (float)buffer.get_subsample_count();
+			pixel_color *= weight;
+			pixel_color.a = 1.0f;
+			buffer.get_framebuffer()->write_color(pixel.row, pixel.col, ColorEncoding::encode_rgba(pixel_color));
 		}
+		);
 	}
 
-	void GraphicsDevice::resolve_tiles(const size_t& start, const size_t& end)
+	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader)
 	{
-		assert(end >= start);
-		for (auto idx = start; idx < end; idx++)
-		{
-			resolve_tile(tiles[idx]);
-		}
-	}
+		auto bounds = tri.get_bounds();
+		int row_start = bounds.min().y - 1;
+		int row_end = bounds.max().y + 1;
+		int col_start = bounds.min().x - 1;
+		int col_end = bounds.max().x + 1;
 
-	void GraphicsDevice::resolve_tile(FrameTile& tile)
-	{
-		for (size_t row = (size_t)tile.row_start; row < (size_t)tile.row_end; row++)
-		{
-			for (size_t col = (size_t)tile.col_start; col < (size_t)tile.col_end; col++)
-			{
-				uint8_t coverage_count = 0;
-				tinymath::Color pixel_color = {0.0f, 0.0f, 0.0f, 1.0f};
-				for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
-				{
-					for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
-					{
-						size_t sub_row = (size_t)(row * subsamples_per_axis + x_subsample_idx);
-						size_t sub_col = (size_t)(col * subsamples_per_axis + y_subsample_idx);
-						uint8_t coverage = 0;
-						if (msaa_buffer->read_coverage(sub_row, sub_col, coverage) && coverage > 0)
-						{
-							coverage_count++;
-							tinymath::color_rgba msaa_color;
-							msaa_buffer->read_color(sub_row, sub_col, msaa_color);
-							pixel_color += ColorEncoding::decode(msaa_color);
-						}
-					}
-				}
-
-				if (coverage_count > 0)
-				{
-					pixel_color *= 1.0f / msaa_subsample_count;
-					pixel_color.a = 1.0f;
-					frame_buffer->write_color(row, col, ColorEncoding::encode_rgba(pixel_color));
-				}
-			}
-		}
-	}
-
-	void GraphicsDevice::rasterize(const FrameTile& tile, const Triangle& tri, const Shader& shader)
-	{
-		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
-		int row_start = (int)(bounds.min().y) - 1;
-		int row_end = (int)(bounds.max().y) + 1;
-		int col_start = (int)(bounds.min().x) - 1;
-		int col_end = (int)(bounds.max().x) + 1;
-
-		row_start = std::clamp(row_start, (int)tile.row_start, (int)tile.row_end);
-		row_end = std::clamp(row_end, (int)tile.row_start, (int)tile.row_end);
-		col_start = std::clamp(col_start, (int)tile.col_start, (int)tile.col_end);
-		col_end = std::clamp(col_end, (int)tile.col_start, (int)tile.col_end);
+		row_start = tinymath::clamp(row_start, rect.y(), rect.y() + rect.size().y);
+		row_end = tinymath::clamp(row_end, rect.y(), rect.y() + rect.size().y);
+		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
+		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
 		bool flip = tri.flip;
 		int ccw_idx0 = 0;
@@ -471,32 +380,63 @@ namespace Guarneri
 
 		if (INST(GlobalShaderParams).enable_msaa && !shader.shadow)
 		{
-			for (size_t row = (size_t)row_start; row < (size_t)row_end; row++)
+			// msaa on
+			get_active_rendertexture()->foreach_pixel(
+				rect,
+				[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
 			{
-				for (size_t col = (size_t)col_start; col < (size_t)col_end; col++)
+				bool pixel_color_calculated = false;
+				SubPixel hit_subpixel;
+				for (uint8_t x_subsample_idx = 0; x_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++x_subsample_idx)
 				{
-					process_subsamples(*msaa_buffer, row, col, shader, v0, v1, v2, area);
+					for (uint8_t y_subsample_idx = 0; y_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++y_subsample_idx)
+					{
+						auto subpixel = buffer.get_subpixel(pixel.row, pixel.col, x_subsample_idx, y_subsample_idx);
+						float w0 = Triangle::area_double(p1, p2, subpixel.pos);
+						float w1 = Triangle::area_double(p2, p0, subpixel.pos);
+						float w2 = Triangle::area_double(p0, p1, subpixel.pos);
+						if (w0 >= 0 && w1 >= 0 && w2 >= 0)
+						{
+							w0 /= area; w1 /= area; w2 /= area;
+							Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
+
+							if (INST(GlobalShaderParams).multi_sample_frequency == MultiSampleFrequency::kPixelFrequency)
+							{
+								// but only run fragment shader once when using pixel frequency 
+								bool passed = process_fragment(*buffer.get_msaa_framebuffer(), vert, subpixel.row, subpixel.col, shader, !pixel_color_calculated);
+								if (passed)
+								{
+									hit_subpixel = subpixel;
+									pixel_color_calculated = true;
+								}
+							}
+							else
+							{
+								// run fragment shader for all subsamples
+								process_fragment(*buffer.get_msaa_framebuffer(), vert, subpixel.row, subpixel.col, shader, true);
+							}
+						}
+					}
 				}
-			}
+			});
 		}
 		else
 		{
-			for (size_t row = (size_t)row_start; row < (size_t)row_end; row++)
+			// msaa off
+			get_active_rendertexture()->foreach_pixel(
+				rect,
+				[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
 			{
-				for (size_t col = (size_t)col_start; col < (size_t)col_end; col++)
+				float w0 = Triangle::area_double(p1, p2, pixel.pos);
+				float w1 = Triangle::area_double(p2, p0, pixel.pos);
+				float w2 = Triangle::area_double(p0, p1, pixel.pos);
+				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 				{
-					tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
-					float w0 = Triangle::area_double(p1, p2, pixel);
-					float w1 = Triangle::area_double(p2, p0, pixel);
-					float w2 = Triangle::area_double(p0, p1, pixel);
-					if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-					{
-						w0 /= area; w1 /= area; w2 /= area;
-						Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-						process_fragment(*get_active_framebuffer(), vert, row, col, shader);
-					}
+					w0 /= area; w1 /= area; w2 /= area;
+					Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
+					process_fragment(*buffer.get_framebuffer(), vert, pixel.row, pixel.col, shader, true);
 				}
-			}
+			});
 		}
 	}
 
@@ -523,18 +463,20 @@ namespace Guarneri
 	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
 	{
 		size_t w, h;
-		get_active_framebuffer()->get_size(w, h);
+		get_active_rendertexture()->get_size(w, h);
 
-		auto bounds = tinymath::Rect(tri[0].position.xy, tri[1].position.xy, tri[2].position.xy);
-		int row_start = (int)(bounds.min().y) - 1;
-		int row_end = (int)(bounds.max().y) + 1;
-		int col_start = (int)(bounds.min().x) - 1;
-		int col_end = (int)(bounds.max().x) + 1;
+		auto bounds = tri.get_bounds();
+		int row_start = bounds.min().y - 1;
+		int row_end = bounds.max().y + 1;
+		int col_start = bounds.min().x - 1;
+		int col_end = bounds.max().x + 1;
 
-		row_start = std::clamp(row_start, 0, (int)h);
-		row_end = std::clamp(row_end, 0, (int)h);
-		col_start = std::clamp(col_start, 0, (int)w);
-		col_end = std::clamp(col_end, 0, (int)w);
+		row_start = tinymath::clamp(row_start, 0, (int)h);
+		row_end = tinymath::clamp(row_end, 0, (int)h);
+		col_start = tinymath::clamp(col_start, 0, (int)w);
+		col_end = tinymath::clamp(col_end, 0, (int)w);
+
+		auto rect = tinymath::Rect(col_start, row_start, col_end - col_start, row_end - row_start);
 
 		bool flip = tri.flip;
 		int ccw_idx0 = 0;
@@ -551,36 +493,34 @@ namespace Guarneri
 
 		float area = Triangle::area_double(p0, p1, p2);
 
-		for (size_t row = row_start; row < (size_t)row_end; row++)
+		get_active_rendertexture()->foreach_pixel(
+			rect,
+			[this, &p0, &p1, &p2, &area, &v0, &v1, &v2, &shader](auto&& buffer, auto&& pixel)
 		{
-			for (size_t col = col_start; col < (size_t)col_end; col++)
+			float w0 = Triangle::area_double(p1, p2, pixel.pos);
+			float w1 = Triangle::area_double(p2, p0, pixel.pos);
+			float w2 = Triangle::area_double(p0, p1, pixel.pos);
+			if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 			{
-				tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
-				float w0 = Triangle::area_double(p1, p2, pixel);
-				float w1 = Triangle::area_double(p2, p0, pixel);
-				float w2 = Triangle::area_double(p0, p1, pixel);
-				if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
-				{
-					w0 /= area; w1 /= area; w2 /= area;
-					Vertex vert = Vertex::barycentric_interpolate(tri[ccw_idx0], tri[ccw_idx1], tri[ccw_idx2], w0, w1, w2);
-					process_fragment(*get_active_framebuffer(), vert, row, col, shader);
-				}
+				w0 /= area; w1 /= area; w2 /= area;
+				Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
+				process_fragment(*buffer.get_framebuffer(), vert, pixel.row, pixel.col, shader, true);
 			}
-		}
+		});
 	}
 
 	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader)
 	{
 		size_t w, h;
-		get_active_framebuffer()->get_size(w, h);
+		get_active_rendertexture()->get_size(w, h);
 
 		bool flip = tri.flip;
 		int top_idx = flip ? 2 : 0;
 		int bottom_idx = flip ? 0 : 2;
 		int top = (int)(tri[top_idx].position.y + 0.5f);
 		int bottom = (int)(tri[bottom_idx].position.y + 0.5f);
-		top = std::clamp(top, 0, (int)h);
-		bottom = std::clamp(bottom, 0, (int)h);
+		top = tinymath::clamp(top, 0, (int)h);
+		bottom = tinymath::clamp(bottom, 0, (int)h);
 		assert(bottom >= top);
 
 		for (size_t row = (size_t)top; row < (size_t)bottom; row++)
@@ -592,158 +532,28 @@ namespace Guarneri
 			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
 			if (enable_screen_clipping)
 			{
-				Clipper::screen_clipping(lhs, rhs,w);
+				Clipper::screen_clipping(lhs, rhs, w);
 			}
 
 			int left = (int)(lhs.position.x + 0.5f);
-			left = std::clamp(left, 0, (int)w);
+			left = tinymath::clamp(left, 0, (int)w);
 			int right = (int)(rhs.position.x + 0.5f);
-			right = std::clamp(right, 0, (int)w);
+			right = tinymath::clamp(right, 0, (int)w);
 			assert(right >= left);
 
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				process_fragment(*get_active_framebuffer(), lhs, row, col, shader);
+				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, row, col, shader, true);
 				auto dx = Vertex::differential(lhs, rhs);
 				lhs = Vertex::intagral(lhs, dx);
 			}
 		}
 	}
 
-	void GraphicsDevice::process_subsamples(FrameBuffer& buffer, const size_t& row, const size_t& col, const Shader& shader, const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& area)
+	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader, bool run_fragment)
 	{
-		auto p0 = v0.position.xy;
-		auto p1 = v1.position.xy;
-		auto p2 = v2.position.xy;
+		tinymath::color_rgba pixel_color;
 
-		tinymath::vec2f pixel((float)col + 0.5f, (float)row + 0.5f);
-		bool color_calculated = false;
-
-		uint8_t total = msaa_subsample_count;
-
-		for (int x_subsample_idx = 0; x_subsample_idx < subsamples_per_axis; x_subsample_idx++)
-		{
-			for (int y_subsample_idx = 0; y_subsample_idx < subsamples_per_axis; y_subsample_idx++)
-			{
-				int i = x_subsample_idx * subsamples_per_axis + y_subsample_idx;
-				auto vec = hammersley(i, total);
-				tinymath::vec2f subsample((float)col + vec.x, (float)row + vec.y);
-				float w0 = Triangle::area_double(p1, p2, subsample);
-				float w1 = Triangle::area_double(p2, p0, subsample);
-				float w2 = Triangle::area_double(p0, p1, subsample);
-				if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-				{
-					w0 /= area; w1 /= area; w2 /= area;
-					Vertex vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-					size_t subsample_row = (size_t)(row * subsamples_per_axis + x_subsample_idx);
-					size_t subsample_col = (size_t)(col * subsamples_per_axis + y_subsample_idx);
-
-					bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
-					bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
-					bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-					bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
-
-					ColorMask color_mask = shader.color_mask;
-					CompareFunc stencil_func = shader.stencil_func;
-					StencilOp stencil_pass_op = shader.stencil_pass_op;
-					StencilOp stencil_fail_op = shader.stencil_fail_op;
-					StencilOp stencil_zfail_op = shader.stencil_zfail_op;
-					uint8_t stencil_read_mask = shader.stencil_read_mask;
-					uint8_t stencil_write_mask = shader.stencil_write_mask;
-					uint8_t stencil_ref_val = shader.stencil_ref_val;
-					CompareFunc ztest_func = shader.ztest_func;
-					ZWrite zwrite_mode = shader.zwrite_mode;
-					BlendFactor src_factor = shader.src_factor;
-					BlendFactor dst_factor = shader.dst_factor;
-					BlendOp blend_op = shader.blend_op;
-
-					UNUSED(enable_scissor_test);
-					UNUSED(enable_alpha_test);
-					UNUSED(color_mask);
-					UNUSED(stencil_write_mask);
-
-					bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader.transparent;
-
-					PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
-
-					buffer.write_coverage(subsample_row, subsample_col, 1);
-
-
-					tinymath::color_rgba pixel_color; 
-					tinymath::Color fragment_result;
-					if (!color_calculated)
-					{
-						// pixel frequent msaa
-						w0 = Triangle::area_double(p1, p2, pixel);
-						w1 = Triangle::area_double(p2, p0, pixel);
-						w2 = Triangle::area_double(p0, p1, pixel);
-						w0 /= area; w1 /= area; w2 /= area;
-						Vertex v = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
-
-						v2f v_out;
-						float w = 1.0f / v.rhw;
-						v_out.position = v.position * w;
-						v_out.world_pos = v.world_pos * w;
-						v_out.shadow_coord = v.shadow_coord * w;
-						v_out.color = v.color * w;
-						v_out.normal = v.normal * w;
-						v_out.uv = v.uv * w;
-						v_out.tangent = v.tangent * w;
-						v_out.bitangent = v.bitangent * w;
-						fragment_result = shader.fragment_shader(v_out);
-						pixel_color = ColorEncoding::encode_rgba(fragment_result);
-						color_calculated = true;
-					}
-
-					// stencil test
-					if (enable_stencil_test)
-					{
-						if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, subsample_row, subsample_col))
-						{
-							op_pass &= ~PerSampleOperation::STENCIL_TEST;
-						}
-					}
-
-					buffer.update_stencil_buffer(subsample_row, subsample_col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
-
-					// z test
-					if (enable_depth_test)
-					{
-						if (!buffer.perform_depth_test(ztest_func, subsample_row, subsample_col, vert.position.z))
-						{
-							op_pass &= ~PerSampleOperation::DEPTH_TEST;
-						}
-					}
-
-					if (zwrite_mode == ZWrite::ON && (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
-					{
-						buffer.write_depth(subsample_row, subsample_col, vert.position.z);
-					}
-
-					// blending
-					if (enable_blending && shader.transparent)
-					{
-						tinymath::color_rgba dst;
-						if (buffer.read_color(subsample_row, subsample_col, dst))
-						{
-							tinymath::Color dst_color = ColorEncoding::decode(dst);
-							tinymath::Color src_color = fragment_result;
-							tinymath::Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
-							pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
-						}
-					}
-
-					if (validate_fragment(op_pass))
-					{
-						buffer.write_color(subsample_row, subsample_col, pixel_color);
-					}
-				}
-			}
-		}
-	}
-
-	void GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const size_t& row, const size_t& col, const Shader& shader)
-	{
 		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
 		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
 		bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
@@ -778,27 +588,29 @@ namespace Guarneri
 			{
 				op_pass &= ~PerSampleOperation::DEPTH_TEST;
 				statistics.earlyz_optimized++;
+				return false; // here we can assume fragment shader will not modify depth (cuz modifying depth in fragment shader is not implemented yet)
 			}
 		}
 
-		tinymath::color_rgba pixel_color;
-
 		// fragment shader
 		tinymath::Color fragment_result;
-		v2f v_out;
-		float w = 1.0f / v.rhw;
-		v_out.position = v.position * w;
-		v_out.world_pos = v.world_pos * w;
-		v_out.shadow_coord = v.shadow_coord * w;
-		v_out.color = v.color * w;
-		v_out.normal = v.normal * w;
-		v_out.uv = v.uv * w;
-		v_out.tangent = v.tangent * w;
-		v_out.bitangent = v.bitangent * w;
-
+		
 		// todo: ddx ddy
-		fragment_result = shader.fragment_shader(v_out);
-		pixel_color = ColorEncoding::encode_rgba(fragment_result);
+		if (run_fragment)
+		{
+			v2f v_out;
+			float w = 1.0f / v.rhw;
+			v_out.position = v.position * w;
+			v_out.world_pos = v.world_pos * w;
+			v_out.shadow_coord = v.shadow_coord * w;
+			v_out.color = v.color * w;
+			v_out.normal = v.normal * w;
+			v_out.uv = v.uv * w;
+			v_out.tangent = v.tangent * w;
+			v_out.bitangent = v.bitangent * w;
+			fragment_result = shader.fragment_shader(v_out);
+			pixel_color = ColorEncoding::encode_rgba(fragment_result);
+		}
 
 		// todo: scissor test
 		if (enable_scissor_test)
@@ -811,7 +623,7 @@ namespace Guarneri
 		{
 			if (shader.discarded)
 			{
-				return;
+				return false;
 			}
 		}
 
@@ -841,26 +653,29 @@ namespace Guarneri
 		}
 
 		// blending
-		if (enable_blending && shader.transparent)
+		if (enable_blending && shader.transparent && run_fragment)
 		{
 			tinymath::color_rgba dst;
 			if (buffer.read_color(row, col, dst))
 			{
 				tinymath::Color dst_color = ColorEncoding::decode(dst);
 				tinymath::Color src_color = fragment_result;
-				tinymath::Color blended_color = blend(src_color, dst_color, src_factor, dst_factor, blend_op);
+				tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, src_factor, dst_factor, blend_op);
 				pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 			}
 		}
 
-		// write color
-		if (validate_fragment(op_pass))
+		bool fragment_passed = validate_fragment(op_pass);
+
+		if (fragment_passed)
 		{
-			if (color_mask == (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
-			{
-				buffer.write_color(row, col, pixel_color);
-			}
-			else
+			buffer.write_coverage(row, col, (uint8_t)1); // pixel is guarantee to be covered here
+		}
+
+		// write color
+		if (fragment_passed)
+		{
+			if (color_mask != (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
 			{
 				tinymath::color_rgba cur;
 				if (buffer.read_color(row, col, cur))
@@ -881,10 +696,14 @@ namespace Guarneri
 					{
 						pixel_color.a = cur.a;
 					}
-					buffer.write_color(row, col, pixel_color);
 				}
 			}
+			
+			buffer.write_color(row, col, pixel_color);
+			return true;
 		}
+
+		return false;
 	}
 
 	bool GraphicsDevice::validate_fragment(const PerSampleOperation& op_pass) const
@@ -896,86 +715,10 @@ namespace Guarneri
 		return true;
 	}
 
-	// todo: alpha factor
-	tinymath::Color GraphicsDevice::blend(const tinymath::Color& src_color, const tinymath::Color& dst_color, const BlendFactor& src_factor, const BlendFactor& dst_factor, const BlendOp& op)
-	{
-		tinymath::Color lhs, rhs;
-		switch (src_factor)
-		{
-		case BlendFactor::ONE:
-			lhs = src_color;
-			break;
-		case BlendFactor::SRC_ALPHA:
-			lhs = src_color * src_color.a;
-			break;
-		case BlendFactor::SRC_COLOR:
-			lhs = src_color * src_color;
-			break;
-		case BlendFactor::ONE_MINUS_SRC_ALPHA:
-			lhs = src_color * (1.0f - src_color);
-			break;
-		case BlendFactor::ONE_MINUS_SRC_COLOR:
-			lhs = src_color * (1.0f - dst_color);
-			break;
-		case BlendFactor::DST_ALPHA:
-			lhs = src_color * dst_color.a;
-			break;
-		case BlendFactor::DST_COLOR:
-			lhs = src_color * dst_color;
-			break;
-		case BlendFactor::ONE_MINUS_DST_ALPHA:
-			lhs = src_color * (1.0f - dst_color.a);
-			break;
-		case BlendFactor::ONE_MINUS_DST_COLOR:
-			lhs = src_color * (1.0f - dst_color);
-			break;
-		}
-
-		switch (dst_factor)
-		{
-		case BlendFactor::ONE:
-			rhs = src_color;
-			break;
-		case BlendFactor::SRC_ALPHA:
-			rhs = dst_color * src_color.a;
-			break;
-		case BlendFactor::SRC_COLOR:
-			rhs = dst_color * src_color;
-			break;
-		case BlendFactor::ONE_MINUS_SRC_ALPHA:
-			rhs = dst_color * (1.0f - src_color);
-			break;
-		case BlendFactor::ONE_MINUS_SRC_COLOR:
-			rhs = dst_color * (1.0f - dst_color);
-			break;
-		case BlendFactor::DST_ALPHA:
-			rhs = dst_color * dst_color.a;
-			break;
-		case BlendFactor::DST_COLOR:
-			rhs = dst_color * dst_color;
-			break;
-		case BlendFactor::ONE_MINUS_DST_ALPHA:
-			rhs = dst_color * (1.0f - dst_color.a);
-			break;
-		case BlendFactor::ONE_MINUS_DST_COLOR:
-			rhs = dst_color * (1.0f - dst_color);
-			break;
-		}
-
-		switch (op)
-		{
-		case BlendOp::ADD:
-			return lhs + rhs;
-		case BlendOp::SUB:
-			return lhs - rhs;
-		}
-		return lhs + rhs;
-	}
-
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
 		size_t w, h;
-		frame_buffer->get_size(w, h);
+		target_rendertexture->get_size(w, h);
 
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
@@ -991,12 +734,12 @@ namespace Guarneri
 		s1 = translation * s1;
 		s2 = translation * s2;
 
-		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
 	{
-		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
@@ -1017,7 +760,7 @@ namespace Guarneri
 	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const tinymath::Color& col)
 	{
 		size_t w, h;
-		frame_buffer->get_size(w, h);
+		target_rendertexture->get_size(w, h);
 
 		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
 		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
@@ -1025,7 +768,7 @@ namespace Guarneri
 		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
 		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
 
-		SegmentDrawer::bresenham(frame_buffer->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)

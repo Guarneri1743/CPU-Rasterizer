@@ -173,6 +173,13 @@ namespace Guarneri
 		return ret;
 	}
 
+	tinymath::Rect Triangle::get_bounds() const
+	{
+		return tinymath::Rect(tinymath::vec2i((int)vertices[0].position.x, (int)vertices[0].position.y), 
+							  tinymath::vec2i((int)vertices[1].position.x, (int)vertices[1].position.y), 
+							  tinymath::vec2i((int)vertices[2].position.x, (int)vertices[2].position.y));
+	}
+
 	float Triangle::area() const
 	{
 		auto e1 = vertices[1].position - vertices[0].position;

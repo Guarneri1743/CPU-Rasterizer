@@ -21,7 +21,7 @@ namespace Guarneri
 			SaveAs
 		};
 
-		BaseEditor(float x, float y, float w, float h);
+		BaseEditor(int x, int y, int w, int h);
 		virtual ~BaseEditor();
 		void open();
 		void close();
@@ -34,7 +34,7 @@ namespace Guarneri
 		void add_top(BaseEditor* editor);
 		void add_bottom(BaseEditor* editor);
 		void on_pos_size_change(tinymath::Rect prev, tinymath::Rect cur);
-		void set_rect(float x, float y, float w, float h);
+		void set_rect(int x, int y, int w, int h);
 
 	protected:
 		bool show;

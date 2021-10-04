@@ -21,7 +21,7 @@ namespace Guarneri
 {
 	bool BaseEditor::imgui_initialized = false;
 
-	BaseEditor::BaseEditor(float x, float y, float w, float h) : rect(x, y, w, h), show(true), title("Editor")
+	BaseEditor::BaseEditor(int x, int y, int w, int h) : rect(x, y, w, h), show(true), title("Editor")
 	{
 		initialize_imgui();
 	}
@@ -43,8 +43,8 @@ namespace Guarneri
 	{
 		if (!show) { return; }
 
-		ImGui::SetNextWindowPos(ImVec2(rect.x(), rect.y()));
-		ImGui::SetNextWindowSize(ImVec2(rect.w(), rect.h()));
+		ImGui::SetNextWindowPos(ImVec2((float)rect.x(), (float)rect.y()));
+		ImGui::SetNextWindowSize(ImVec2((float)rect.w(), (float)rect.h()));
 
 		if (!ImGui::Begin(title, no_close ? nullptr : &show, get_window_flag()))
 		{
@@ -177,17 +177,17 @@ namespace Guarneri
 
 	void BaseEditor::on_pos_size_change(tinymath::Rect prev, tinymath::Rect cur)
 	{
-		float l = cur.x() - prev.x();
-		float r = cur.x() + cur.w() - prev.x() - prev.w();
-		float t = cur.y() - prev.y();
-		float b = cur.y() + cur.h() - prev.y() - prev.h();
+		int l = cur.x() - prev.x();
+		int r = cur.x() + cur.w() - prev.x() - prev.w();
+		int t = cur.y() - prev.y();
+		int b = cur.y() + cur.h() - prev.y() - prev.h();
 
 		for (auto& editor : left)
 		{
 			if (editor != nullptr)
 			{
 				editor->rect.center.x -= l;
-				editor->rect.extents.x -= l * 0.5f;
+				editor->rect.extents.x -= l / 2;
 			}
 		}
 
@@ -196,7 +196,7 @@ namespace Guarneri
 			if (editor != nullptr)
 			{
 				editor->rect.center.x += r;
-				editor->rect.extents.x += r * 0.5f;
+				editor->rect.extents.x += r / 2;
 			}
 		}
 
@@ -205,7 +205,7 @@ namespace Guarneri
 			if (editor != nullptr)
 			{
 				editor->rect.center.y -= t;
-				editor->rect.extents.y -= t * 0.5f;
+				editor->rect.extents.y -= t / 2;
 			}
 		}
 
@@ -214,12 +214,12 @@ namespace Guarneri
 			if (editor != nullptr)
 			{
 				editor->rect.center.y -= b;
-				editor->rect.extents.y -= b * 0.5f;
+				editor->rect.extents.y -= b / 2;
 			}
 		}
 	}
 
-	void BaseEditor::set_rect(float x, float y, float w, float h)
+	void BaseEditor::set_rect(int x, int y, int w, int h)
 	{
 		tinymath::Rect new_rect = tinymath::Rect(x, y, w, h);
 		on_pos_size_change(rect, new_rect);

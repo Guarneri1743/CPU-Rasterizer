@@ -10,34 +10,48 @@ overview
 
 <img src="/gallery/IBL3.png" width = "800" height = "600" alt="overview" align=bottom /> 
 
-| tile based rasterization | near plane clipping |  near plane clipping | perspective correct interpolation |
-| --- | --- | --- | --- |
-| <img src="/gallery/tile_based_rendering.jpg" width = "220" height = "180" alt="Tile based rasterization" align=bottom/> | <img src="/gallery/near_plane_clipping2.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/near_plane_clipping.jpg" width = "180" height = "180" alt="Near Plane Clipping" align=bottom /> | <img src="/gallery/perspective_correct_uv.jpg" width = "180" height = "180" alt="Perspective Correct Interpolation" align=bottom /> |
+| DebugView |
+| --- |
+|  <img src="/gallery/DebugView.png" width = "512" height = "512" alt="DebugView" align=bottom/> |
 
-| no msaa | 16x msaa |
-| --- | --- |
-| <img src="/gallery/no_msaa.jpg" width = "180" height = "180" alt="MSAA" align=bottom/> | <img src="/gallery/16xMSAA.jpg" width = "180" height = "180" alt="MSAA" align=bottom/> |
 
-| point | bilinear |
-| --- | --- |
-| <img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> | <img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>  |
+| Physical based rendering |
+| ---  |
+|  <img src="/gallery/Roughness.png" width = "512" height = "512" alt="Roughness" align=bottom/> |
 
-| stencil-test | z-test | blending |
+| Physical based rendering |
+| --- |
+| <img src="/gallery/Metallic.png" width = "512" height = "512" alt="Metallic" align=bottom/> |
+
+
+| Image based lighting |
+| --- |
+| <img src="/gallery/IBL_Comparison.png" width = "512" height = "512" alt="MSAA" align=bottom/>  |
+
+| Clipping  |
+| ---  |
+| <img src="/gallery/Clipping.png" width = "256" height = "256" alt="Clipping" align=bottom />  |
+
+| Stencil test | Depth test | Blending |
 | --- | --- | --- |
 | <img src="/gallery/stencil_test.jpg" width = "180" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/z_buffer.jpg" width = "220" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/transparent_cube.jpg" width = "180" height = "180" alt="Blending" align=bottom/> |
 
 
-| shadow mapping |
-| --- |
-| <img src="/gallery/shadowmap.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_off.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> <img src="/gallery/shadow_on.jpg" width = "180" height = "180" alt="Shadow Mapping" align=bottom/> |
+| Point sampler | Bilinear sampler |
+| --- | --- |
+| <img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> | <img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>  |
 
-| ao |
-| --- | 
-| <img src="/gallery/ao.jpg" width = "200" height = "180" alt="AO" align=bottom/> <img src="/gallery/ao2.jpg" width = "180" height = "180" alt="AO" align=bottom/> |
+
+| MSAA |
+| ---  |
+| <img src="/gallery/msaa_on_4x.png" width = "512" height = "512" alt="MSAA" align=bottom/> |
+
 
 --- 
 
 #### Features
+
+- tile based
 
 - fully parallel of triangle/pixel processing
 			
@@ -49,13 +63,13 @@ overview
 			
 - back-face culling
 
-- msaa
+- msaa (pixel frequency and subsample frequency)
 
 - perspective correct interpolation
 			
 - early-z
 			
-- alpha test (discard)
+- alpha test
 			
 - stencil test
 			
@@ -91,7 +105,7 @@ overview
 			
 - cook-torrance brdf
 
-- ibl baking
+- ibl baker
 
 - ibl
 
@@ -123,8 +137,6 @@ overview
 	- simd
 				
 	- ddx, ddy
-	
-	- vector swizzling
 				
 	- gl/dx like api
 		 
@@ -135,5 +147,3 @@ overview
 	- skeleton-animation
 	
 	- skinning
-					
-	- hdr

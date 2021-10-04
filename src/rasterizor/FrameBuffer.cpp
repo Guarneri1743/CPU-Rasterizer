@@ -1,14 +1,21 @@
 #include "FrameBuffer.hpp"
+#include <execution>
+#include <algorithm>
 
 namespace Guarneri
 {
-	FrameBuffer::FrameBuffer(const size_t& w, const size_t& h, const FrameContent& flag)
+	FrameBuffer::FrameBuffer(const size_t& w, const size_t& h, const FrameContent& flag) : 
+		content_flag(flag),
+		width(w), height(h)
 	{
-		this->content_flag = flag;
 		resize(w, h);
 	}
 
-	bool FrameBuffer::perform_stencil_test(const uint8_t& ref_val, const uint8_t& read_mask, const CompareFunc& func, const size_t& row, const size_t& col) const
+	bool FrameBuffer::perform_stencil_test(const uint8_t& ref_val,
+										   const uint8_t& read_mask, 
+										   const CompareFunc& func,
+										   const size_t& row, 
+										   const size_t& col) const
 	{
 		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
 		{
@@ -50,7 +57,13 @@ namespace Guarneri
 		return pass;
 	}
 
-	void FrameBuffer::update_stencil_buffer(const size_t& row, const size_t& col, const PerSampleOperation& op_pass, const StencilOp& stencil_pass_op, const StencilOp& stencil_fail_op, const StencilOp& stencil_zfail_op, const uint8_t& ref_val) const
+	void FrameBuffer::update_stencil_buffer(const size_t& row, 
+											const size_t& col,
+											const PerSampleOperation& op_pass,
+											const StencilOp& stencil_pass_op, 
+											const StencilOp& stencil_fail_op, 
+											const StencilOp& stencil_zfail_op, 
+											const uint8_t& ref_val) const
 	{
 		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
 		{
@@ -98,7 +111,10 @@ namespace Guarneri
 		}
 	}
 
-	bool FrameBuffer::perform_depth_test(const CompareFunc& func, const size_t& row, const size_t& col, const float& z) const
+	bool FrameBuffer::perform_depth_test(const CompareFunc& func,
+										 const size_t& row, 
+										 const size_t& col, 
+										 const float& z) const
 	{
 		if ((content_flag & FrameContent::Depth) == FrameContent::None)
 		{
@@ -139,6 +155,86 @@ namespace Guarneri
 			}
 		}
 		return pass;
+	}
+
+	// todo: alpha factor
+	tinymath::Color FrameBuffer::blend(const tinymath::Color& src_color,
+									   const tinymath::Color& dst_color,
+									   const BlendFactor& src_factor, 
+									   const BlendFactor& dst_factor, 
+									   const BlendOp& op)
+	{
+		tinymath::Color lhs, rhs;
+		switch (src_factor)
+		{
+		case BlendFactor::ONE:
+			lhs = src_color;
+			break;
+		case BlendFactor::SRC_ALPHA:
+			lhs = src_color * src_color.a;
+			break;
+		case BlendFactor::SRC_COLOR:
+			lhs = src_color * src_color;
+			break;
+		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+			lhs = src_color * (1.0f - src_color);
+			break;
+		case BlendFactor::ONE_MINUS_SRC_COLOR:
+			lhs = src_color * (1.0f - dst_color);
+			break;
+		case BlendFactor::DST_ALPHA:
+			lhs = src_color * dst_color.a;
+			break;
+		case BlendFactor::DST_COLOR:
+			lhs = src_color * dst_color;
+			break;
+		case BlendFactor::ONE_MINUS_DST_ALPHA:
+			lhs = src_color * (1.0f - dst_color.a);
+			break;
+		case BlendFactor::ONE_MINUS_DST_COLOR:
+			lhs = src_color * (1.0f - dst_color);
+			break;
+		}
+
+		switch (dst_factor)
+		{
+		case BlendFactor::ONE:
+			rhs = src_color;
+			break;
+		case BlendFactor::SRC_ALPHA:
+			rhs = dst_color * src_color.a;
+			break;
+		case BlendFactor::SRC_COLOR:
+			rhs = dst_color * src_color;
+			break;
+		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+			rhs = dst_color * (1.0f - src_color);
+			break;
+		case BlendFactor::ONE_MINUS_SRC_COLOR:
+			rhs = dst_color * (1.0f - dst_color);
+			break;
+		case BlendFactor::DST_ALPHA:
+			rhs = dst_color * dst_color.a;
+			break;
+		case BlendFactor::DST_COLOR:
+			rhs = dst_color * dst_color;
+			break;
+		case BlendFactor::ONE_MINUS_DST_ALPHA:
+			rhs = dst_color * (1.0f - dst_color.a);
+			break;
+		case BlendFactor::ONE_MINUS_DST_COLOR:
+			rhs = dst_color * (1.0f - dst_color);
+			break;
+		}
+
+		switch (op)
+		{
+		case BlendOp::ADD:
+			return lhs + rhs;
+		case BlendOp::SUB:
+			return lhs - rhs;
+		}
+		return lhs + rhs;
 	}
 
 	void FrameBuffer::write_color(const size_t& row, const size_t& col, const tinymath::color_rgba& color)
@@ -306,7 +402,7 @@ namespace Guarneri
 
 		if ((flag & content_flag & FrameContent::Coverage) != FrameContent::None)
 		{
-			coverage_buffer->clear(0);
+			coverage_buffer->clear((uint8_t)0);
 		}
 	}
 

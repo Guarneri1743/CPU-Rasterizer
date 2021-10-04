@@ -12,7 +12,7 @@
 
 namespace Guarneri
 {
-	MainEditor::MainEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	MainEditor::MainEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
 		no_titlebar = true;
 		no_collapse = true;
@@ -68,7 +68,7 @@ namespace Guarneri
 
 	void MainEditor::on_gui()
 	{
-		this->rect = tinymath::Rect(0.0f, 0.0f, (float)Window::main()->get_width(), (float)Window::main()->get_height());
+		this->rect = tinymath::Rect(0, 0, Window::main()->get_width(), Window::main()->get_height());
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))

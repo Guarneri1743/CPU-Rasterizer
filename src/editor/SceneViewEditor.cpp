@@ -4,7 +4,7 @@
 
 namespace Guarneri
 {
-	SceneViewEditor::SceneViewEditor(float x, float y, float w, float h) : BaseEditor(x, y, w, h)
+	SceneViewEditor::SceneViewEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
 		no_scrollbar_with_mouse = true;
 		no_scrollbar = true;
@@ -20,7 +20,7 @@ namespace Guarneri
 
 	void SceneViewEditor::on_gui()
 	{
-		rect = tinymath::Rect((float)kLeftWidth, (float)kTopHeight, (float)Window::main()->get_width() - (float)kRightWidth - (float)kLeftWidth, (float)Window::main()->get_height() - (float)kTopHeight - (float)kBottomHeight);
+		rect = tinymath::Rect(kLeftWidth, kTopHeight, Window::main()->get_width() - kRightWidth - kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("SceneView", tab_bar_flags))
@@ -29,7 +29,7 @@ namespace Guarneri
 			{
 #pragma warning(push)
 #pragma warning(disable : 4312)
-				ImGui::Image((ImTextureID)Window::main()->get_fbo(), ImVec2(this->rect.w(), this->rect.h()), ImVec2(0, 1), ImVec2(1, 0));
+				ImGui::Image((ImTextureID)Window::main()->get_fbo(), ImVec2((float)this->rect.w(), (float)this->rect.h()), ImVec2(0, 1), ImVec2(1, 0));
 #pragma warning(pop)
 				ImGui::EndTabItem();
 			}

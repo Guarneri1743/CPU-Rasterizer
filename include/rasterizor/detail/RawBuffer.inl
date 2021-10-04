@@ -122,6 +122,11 @@ namespace Guarneri
 	template<typename T>
 	void RawBuffer<T>::resize(size_t w, size_t h)
 	{
+		if (w == width && h == height)
+		{
+			return;
+		}
+
 		size_t pw = width;
 		size_t ph = height;
 

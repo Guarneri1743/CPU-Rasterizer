@@ -1,7 +1,34 @@
 #include <algorithm>
 #include <cmath>
+#include "..\Wrapper.h"
 
 TINYMATH_NAMESPACE
+
+template<typename T>
+T round_up(const T& num, const T& alignment)
+{
+	return (num + alignment - 1) & ~(alignment - 1);
+}
+
+template<typename T>
+T round_up_to_power_of_two(const T& num)
+{
+	T ret = num;
+	T n = 0;
+
+	while (true)
+	{
+		T power_of_two = (T)std::pow((T)2, n);
+		if (ret <= power_of_two)
+		{
+			ret = power_of_two;
+			break;
+		}
+		n++;
+	}
+
+	return ret;
+}
 
 template<typename T>
 T max(const T& lhs, const T& rhs)
@@ -21,9 +48,10 @@ T abs(const T& val)
 	return(val < (T)0 ? -val : val);
 }
 
-float sqrt(const float& x)
+template<typename T>
+T sqrt(const T& x)
 {
-	return std::sqrt(x);
+	return static_cast<T>(std::sqrt(x));
 }
 
 template<typename T>
@@ -142,6 +170,13 @@ float lerp(const float& lhs, const float& rhs, const float& t)
 bool approx(const float& lhs, const float& rhs)
 {
 	return abs(lhs - rhs) <= EPSILON;
+}
+
+bool is_sqrt_integer(const int& num)
+{
+	int ret = tinymath::sqrt(num + 1);
+	int ret_power_two = ret * ret;
+	return (int)ret_power_two == num;
 }
 
 END_NAMESPACE
