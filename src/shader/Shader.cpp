@@ -120,7 +120,7 @@ namespace Guarneri
 		tinymath::vec2f ddy = ddy_uv * tinymath::vec2f((float)width, (float)height);
 		float p = tinymath::max(tinymath::sqrt(tinymath::dot(ddx, ddx)), tinymath::sqrt(tinymath::dot(ddy, ddy)));
 		int level = (int)(tinymath::log2(p) + 0.5f);
-		return std::clamp(level, 0, kMaxMip);
+		return std::clamp(level, 0, kMaxMip - 1);
 	}
 
 	float Shader::linearize_01depth(const float& depth, const float& near, const float& far)

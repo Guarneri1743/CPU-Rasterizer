@@ -356,10 +356,11 @@ namespace Guarneri
 	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = tri.get_bounds();
-		int row_start = bounds.min().y - 1;
-		int row_end = bounds.max().y + 1;
-		int col_start = bounds.min().x - 1;
-		int col_end = bounds.max().x + 1;
+		int padding = kBoundsPadding;
+		int row_start = bounds.min().y - padding;
+		int row_end = bounds.max().y + padding;
+		int col_start = bounds.min().x - padding;
+		int col_end = bounds.max().x + padding;
 
 		row_start = tinymath::clamp(row_start, rect.y(), rect.y() + rect.size().y);
 		row_end = tinymath::clamp(row_end, rect.y(), rect.y() + rect.size().y);
@@ -421,41 +422,41 @@ namespace Guarneri
 											   SubsampleParam& p3,
 											   SubsampleParam& p4)
 	{
-		Vertex top_left_vert, top_right_vert, bottom_left_vert, bottom_right_vert;
+		Vertex vert1, vert2, vert3, vert4;
 
-		bool top_left_valid = tri.barycentric_interpolate(px1.pos, top_left_vert);
-		bool top_right_valid = tri.barycentric_interpolate(px2.pos, top_right_vert);
-		bool bottom_left_valid = tri.barycentric_interpolate(px3.pos, bottom_left_vert);
-		bool bottom_right_valid = tri.barycentric_interpolate(px4.pos, bottom_right_vert);
+		bool px1_valid = tri.barycentric_interpolate(px1.pos, vert1);
+		bool px2_valid = tri.barycentric_interpolate(px2.pos, vert2);
+		bool px3_valid = tri.barycentric_interpolate(px3.pos, vert3);
+		bool px4_valid = tri.barycentric_interpolate(px4.pos, vert4);
 
-		top_left_vert = Vertex::reverse_perspective_division(top_left_vert);
-		top_right_vert = Vertex::reverse_perspective_division(top_right_vert);
-		bottom_left_vert = Vertex::reverse_perspective_division(bottom_left_vert);
-		bottom_right_vert = Vertex::reverse_perspective_division(bottom_right_vert);
+		vert1 = Vertex::reverse_perspective_division(vert1);
+		vert2 = Vertex::reverse_perspective_division(vert2);
+		vert3 = Vertex::reverse_perspective_division(vert3);
+		vert4 = Vertex::reverse_perspective_division(vert4);
 
-		Vertex ddx = Vertex::substract(top_right_vert, top_left_vert);
-		Vertex ddy = Vertex::substract(top_right_vert, bottom_left_vert);
+		Vertex ddx = Vertex::substract(vert1, vert2);
+		Vertex ddy = Vertex::substract(vert1, vert3);
 
 		FrameBuffer& fb = INST(GlobalShaderParams).enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
-		if (top_left_valid)
+		if (px1_valid)
 		{
-			process_fragment(fb, top_left_vert, ddx, ddy, px1.row, px1.col, shader, p1);
+			process_fragment(fb, vert1, ddx, ddy, px1.row, px1.col, shader, p1);
 		}
 
-		if (top_right_valid)
+		if (px2_valid)
 		{
-			process_fragment(fb, top_right_vert, ddx, ddy, px2.row, px2.col, shader, p2);
+			process_fragment(fb, vert2, ddx, ddy, px2.row, px2.col, shader, p2);
 		}
 
-		if (bottom_left_valid)
+		if (px3_valid)
 		{
-			process_fragment(fb, bottom_left_vert, ddx, ddy, px3.row, px3.col, shader, p3);
+			process_fragment(fb, vert3, ddx, ddy, px3.row, px3.col, shader, p3);
 		}
 
-		if (bottom_right_valid)
+		if (px4_valid)
 		{
-			process_fragment(fb, bottom_right_vert, ddx, ddy, px4.row, px4.col, shader, p4);
+			process_fragment(fb, vert4, ddx, ddy, px4.row, px4.col, shader, p4);
 		}
 	}
 
@@ -483,12 +484,12 @@ namespace Guarneri
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
-
+		int padding = kBoundsPadding;
 		auto bounds = tri.get_bounds();
-		int row_start = bounds.min().y - 1;
-		int row_end = bounds.max().y + 1;
-		int col_start = bounds.min().x - 1;
-		int col_end = bounds.max().x + 1;
+		int row_start = bounds.min().y - padding;
+		int row_end = bounds.max().y + padding;
+		int col_start = bounds.min().x - padding;
+		int col_end = bounds.max().x + padding;
 
 		row_start = tinymath::clamp(row_start, 0, (int)h);
 		row_end = tinymath::clamp(row_end, 0, (int)h);

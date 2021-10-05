@@ -7,6 +7,7 @@
 
 namespace Guarneri{
 	constexpr int kMaxMip = 8;
+	constexpr int kBoundsPadding = 1;
 
 	typedef uint32_t property_name;
 

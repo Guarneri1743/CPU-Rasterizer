@@ -218,15 +218,15 @@ namespace Guarneri
 
 		float area = Triangle::area_double(p0, p1, p2);
 
+		w0 /= area; w1 /= area; w2 /= area;
+		interpolated_vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
+
 		if (w0 >= 0 && w1 >= 0 && w2 >= 0)
 		{
-			w0 /= area; w1 /= area; w2 /= area;
-			interpolated_vert = Vertex::barycentric_interpolate(v0, v1, v2, w0, w1, w2);
 			return true;
 		}
 		else
 		{
-			interpolated_vert = Vertex();
 			return false;
 		}
 	}

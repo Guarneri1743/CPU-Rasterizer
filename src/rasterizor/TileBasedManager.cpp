@@ -103,10 +103,11 @@ namespace Guarneri
 	void TileBasedManager::push_draw_task(const Triangle& tri, const Shader& shader)
 	{
 		auto bounds = tri.get_bounds();
-		int row_start = bounds.min().y - 1;
-		int row_end = bounds.max().y + 1;
-		int col_start = bounds.min().x - 1;
-		int col_end = bounds.max().x + 1;
+		int padding = kBoundsPadding;
+		int row_start = bounds.min().y - padding;
+		int row_end = bounds.max().y + padding;
+		int col_start = bounds.min().x - padding;
+		int col_end = bounds.max().x + padding;
 
 		int w = (int)width;
 		int h = (int)height;
