@@ -32,6 +32,14 @@ overview
 | ---  |
 | <img src="/gallery/Clipping.png" width = "512" height = "400" alt="Clipping" align=bottom />  |
 
+| MSAA |
+| ---  |
+| <img src="/gallery/msaa_on_4x.png" width = "512" height = "512" alt="MSAA" align=bottom/> |
+
+| Mipmapping |
+| ---  |
+| <img src="/gallery/mipmap.png" width = "512" height = "400" alt="Mipmap" align=bottom/> |
+
 | Stencil test | Depth test | Blending |
 | --- | --- | --- |
 | <img src="/gallery/stencil_test.jpg" width = "180" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/z_buffer.jpg" width = "220" height = "180" alt="Per Sample Operation" align=bottom/> | <img src="/gallery/transparent_cube.jpg" width = "180" height = "180" alt="Blending" align=bottom/> |
@@ -40,11 +48,6 @@ overview
 | Point sampler | Bilinear sampler |
 | --- | --- |
 | <img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> | <img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>  |
-
-
-| MSAA |
-| ---  |
-| <img src="/gallery/msaa_on_4x.png" width = "512" height = "512" alt="MSAA" align=bottom/> |
 
 
 --- 
@@ -135,8 +138,6 @@ overview
 - low-level:
 	
 	- simd
-				
-	- ddx, ddy
 				
 	- gl/dx like api
 		 
