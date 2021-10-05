@@ -36,7 +36,7 @@ overview
 | ---  |
 | <img src="/gallery/msaa_on_4x.png" width = "512" height = "512" alt="MSAA" align=bottom/> |
 
-| Mipmapping |
+| Mipmap |
 | ---  |
 | <img src="/gallery/mipmap.png" width = "512" height = "400" alt="Mipmap" align=bottom/> |
 
