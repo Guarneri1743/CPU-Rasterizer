@@ -88,6 +88,7 @@ Hello Triangle Shader:
 	#include "Shader.hpp"
 	
 	using namespace CpuRasterizor;
+	using namespace tinymath;
 	
 	class HelloTriangleShader : public Shader
 	{
@@ -97,7 +98,7 @@ Hello Triangle Shader:
 		v2f vertex_shader(const a2v& input) const
 		{
 			v2f o;
-			auto opos = tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
+			auto opos = vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
 			auto m = model();
 			auto vp = vp_matrix();
 			auto wpos = m * opos;
@@ -106,12 +107,12 @@ Hello Triangle Shader:
 			return o;
 		}
 	
-		tinymath::Color fragment_shader(const v2f& input) const
+		Color fragment_shader(const v2f& input) const
 		{
 			UNUSED(input);
 	
 			// draw a white triangle
-			return tinymath::kColorWhite;
+			return kColorWhite;
 		}
 	};
 
@@ -216,6 +217,7 @@ Texture Mapping Shader:
 	#include "Shader.hpp"
 	
 	using namespace CpuRasterizor;
+	using namespace tinymath;
 	
 	class HelloTextureShader : public Shader
 	{
@@ -225,7 +227,7 @@ Texture Mapping Shader:
 		v2f vertex_shader(const a2v& input) const
 		{
 			v2f o;
-			auto opos = tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
+			auto opos = vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
 			auto m = model();
 			auto vp = vp_matrix();
 			auto wpos = m * opos;
@@ -235,12 +237,12 @@ Texture Mapping Shader:
 			return o;
 		}
 	
-		tinymath::Color fragment_shader(const v2f& input) const
+		Color fragment_shader(const v2f& input) const
 		{
 			UNUSED(input);
 	
 			// sample texture
-			tinymath::Color c;
+			Color c;
 			if (local_properties.has_texture(123))
 			{
 				local_properties.get_texture(123)->sample(input.uv.x, input.uv.y, c);

@@ -3,6 +3,7 @@
 #include "Window.hpp"
 #include "GraphicsDevice.hpp"
 #include "InputManager.hpp"
+#include "Shader.hpp"
 #include "Logger.hpp"
 
 #define crApi CpuRasterApi
@@ -18,14 +19,15 @@
 
 #define crMath tinymath
 
-typedef crMath::vec2f crVec2;
-typedef crMath::vec3f crVec3;
-typedef crMath::vec4f crVec4;
-typedef crMath::vec2i crVec2Int;
-typedef crMath::vec3i crVec3Int;
-typedef crMath::vec4i crVec4Int;
-typedef crMath::mat3x3 crMat3;
-typedef crMath::mat4x4 crMat4;
+#define crVec2 crMath::vec2f
+#define crVec3 crMath::vec3f
+#define crVec4 crMath::vec4f
+#define crVec2Int crMath::vec2i
+#define crVec3Int crMath::vec3i
+#define crVec4Int crMath::vec4i
+#define crMat3 crMath::mat3x3
+#define crMat4 crMath::mat4x4
+#define crColor crMath::Color
 
 #define crDot tinymath::dot
 #define crCross tinymath::cross
@@ -77,6 +79,12 @@ typedef crMath::mat4x4 crMat4;
 #define crVec3Right tinymath::kVec3fZero
 #define crVec3Forward tinymath::kVec3fZero
 #define crVec3Back tinymath::kVec3fZero
+
+#define crWhite tinymath::kColorWhite
+#define crBlack tinymath::kColorBlack
+#define crRed tinymath::kColorRed
+#define crBlue tinymath::kColorBlue
+#define crGreen tinymath::kColorGreen
 
 #define crMat3Identity tinymath::kMat3x3Identity
 #define crMat4Identity tinymath::kMat4x4Identity
