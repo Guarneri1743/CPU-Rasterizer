@@ -1,4 +1,4 @@
-# Tile Based CPU Rasterizer
+# CPU Rasterizer
 
 ### Usage
 
