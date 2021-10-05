@@ -31,7 +31,6 @@ namespace Guarneri
 		bool double_face;
 		bool transparent;
 		bool cast_shadow;
-		LightingData lighting_param;
 		std::shared_ptr<Shader> target_shader;
 		std::shared_ptr<Shader> shadow_caster;
 		ShaderPropertyMap local_properties;

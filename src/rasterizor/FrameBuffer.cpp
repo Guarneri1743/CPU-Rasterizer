@@ -17,7 +17,7 @@ namespace Guarneri
 										   const size_t& row, 
 										   const size_t& col) const
 	{
-		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -28,28 +28,28 @@ namespace Guarneri
 		{
 			switch (func)
 			{
-			case CompareFunc::NEVER:
+			case CompareFunc::kNever:
 				pass = false;
 				break;
-			case CompareFunc::ALWAYS:
+			case CompareFunc::kAlways:
 				pass = true;
 				break;
-			case CompareFunc::EQUAL:
+			case CompareFunc::kEqual:
 				pass = (ref_val & read_mask) == (stencil & read_mask);
 				break;
-			case CompareFunc::GREATER:
+			case CompareFunc::kGreater:
 				pass = (ref_val & read_mask) > (stencil & read_mask);
 				break;
-			case CompareFunc::LEQUAL:
+			case CompareFunc::kLEqual:
 				pass = (ref_val & read_mask) <= (stencil & read_mask);
 				break;
-			case CompareFunc::NOT_EQUAL:
+			case CompareFunc::kNotEqual:
 				pass = (ref_val & read_mask) != (stencil & read_mask);
 				break;
-			case CompareFunc::GEQUAL:
+			case CompareFunc::kGEqual:
 				pass = (ref_val & read_mask) > (stencil & read_mask);
 				break;
-			case CompareFunc::LESS:
+			case CompareFunc::kLess:
 				pass = (ref_val & read_mask) < (stencil & read_mask);
 				break;
 			}
@@ -65,13 +65,13 @@ namespace Guarneri
 											const StencilOp& stencil_zfail_op, 
 											const uint8_t& ref_val) const
 	{
-		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
 			return;
 		}
 
-		bool stencil_pass = (op_pass & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-		bool z_pass = (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+		bool stencil_pass = (op_pass & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
+		bool z_pass = (op_pass & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
 		uint8_t stencil;
 		stencil_buffer->read(row, col, stencil);
 		StencilOp stencil_op;
@@ -85,27 +85,27 @@ namespace Guarneri
 		}
 		switch (stencil_op)
 		{
-		case StencilOp::KEEP:
+		case StencilOp::kKeep:
 			break;
-		case StencilOp::ZERO:
+		case StencilOp::kZero:
 			stencil_buffer->write(row, col, 0);
 			break;
-		case StencilOp::REPLACE:
+		case StencilOp::kReplace:
 			stencil_buffer->write(row, col, ref_val);
 			break;
-		case StencilOp::INCR:
+		case StencilOp::kIncrement:
 			stencil_buffer->write(row, col, std::clamp((uint8_t)(stencil + 1), (uint8_t)0, (uint8_t)255));
 			break;
-		case StencilOp::DECR:
+		case StencilOp::kDecrement:
 			stencil_buffer->write(row, col, std::clamp((uint8_t)(stencil - 1), (uint8_t)0, (uint8_t)255));
 			break;
-		case StencilOp::INCR_WRAP:
+		case StencilOp::kIncrementWrap:
 			stencil_buffer->write(row, col, stencil + 1);
 			break;
-		case StencilOp::DECR_WRAP:
+		case StencilOp::kDecrementWrap:
 			stencil_buffer->write(row, col, stencil - 1);
 			break;
-		case StencilOp::INVERT:
+		case StencilOp::kInvert:
 			stencil_buffer->write(row, col, ~stencil);
 			break;
 		}
@@ -116,7 +116,7 @@ namespace Guarneri
 										 const size_t& col, 
 										 const float& z) const
 	{
-		if ((content_flag & FrameContent::Depth) == FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -128,28 +128,28 @@ namespace Guarneri
 			pass = z <= depth;
 			switch (func)
 			{
-			case CompareFunc::NEVER:
+			case CompareFunc::kNever:
 				pass = false;
 				break;
-			case CompareFunc::ALWAYS:
+			case CompareFunc::kAlways:
 				pass = true;
 				break;
-			case CompareFunc::EQUAL:
+			case CompareFunc::kEqual:
 				pass = tinymath::approx(z, depth);
 				break;
-			case CompareFunc::GREATER:
+			case CompareFunc::kGreater:
 				pass = z > depth;
 				break;
-			case CompareFunc::LEQUAL:
+			case CompareFunc::kLEqual:
 				pass = z <= depth;
 				break;
-			case CompareFunc::NOT_EQUAL:
+			case CompareFunc::kNotEqual:
 				pass = z != depth;
 				break;
-			case CompareFunc::GEQUAL:
+			case CompareFunc::kGEqual:
 				pass = z >= depth;
 				break;
-			case CompareFunc::LESS:
+			case CompareFunc::kLess:
 				pass = z < depth;
 				break;
 			}
@@ -167,71 +167,71 @@ namespace Guarneri
 		tinymath::Color lhs, rhs;
 		switch (src_factor)
 		{
-		case BlendFactor::ONE:
+		case BlendFactor::kOne:
 			lhs = src_color;
 			break;
-		case BlendFactor::SRC_ALPHA:
+		case BlendFactor::kSrcAlpha:
 			lhs = src_color * src_color.a;
 			break;
-		case BlendFactor::SRC_COLOR:
+		case BlendFactor::kSrcColor:
 			lhs = src_color * src_color;
 			break;
-		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+		case BlendFactor::kOneMinusSrcAlpha:
 			lhs = src_color * (1.0f - src_color);
 			break;
-		case BlendFactor::ONE_MINUS_SRC_COLOR:
+		case BlendFactor::kOneMinusSrcColor:
 			lhs = src_color * (1.0f - dst_color);
 			break;
-		case BlendFactor::DST_ALPHA:
+		case BlendFactor::kDstAlpha:
 			lhs = src_color * dst_color.a;
 			break;
-		case BlendFactor::DST_COLOR:
+		case BlendFactor::kDstColor:
 			lhs = src_color * dst_color;
 			break;
-		case BlendFactor::ONE_MINUS_DST_ALPHA:
+		case BlendFactor::kOneMinusDstAlpha:
 			lhs = src_color * (1.0f - dst_color.a);
 			break;
-		case BlendFactor::ONE_MINUS_DST_COLOR:
+		case BlendFactor::kOneMinusDstColor:
 			lhs = src_color * (1.0f - dst_color);
 			break;
 		}
 
 		switch (dst_factor)
 		{
-		case BlendFactor::ONE:
+		case BlendFactor::kOne:
 			rhs = src_color;
 			break;
-		case BlendFactor::SRC_ALPHA:
+		case BlendFactor::kSrcAlpha:
 			rhs = dst_color * src_color.a;
 			break;
-		case BlendFactor::SRC_COLOR:
+		case BlendFactor::kSrcColor:
 			rhs = dst_color * src_color;
 			break;
-		case BlendFactor::ONE_MINUS_SRC_ALPHA:
+		case BlendFactor::kOneMinusSrcAlpha:
 			rhs = dst_color * (1.0f - src_color);
 			break;
-		case BlendFactor::ONE_MINUS_SRC_COLOR:
+		case BlendFactor::kOneMinusSrcColor:
 			rhs = dst_color * (1.0f - dst_color);
 			break;
-		case BlendFactor::DST_ALPHA:
+		case BlendFactor::kDstAlpha:
 			rhs = dst_color * dst_color.a;
 			break;
-		case BlendFactor::DST_COLOR:
+		case BlendFactor::kDstColor:
 			rhs = dst_color * dst_color;
 			break;
-		case BlendFactor::ONE_MINUS_DST_ALPHA:
+		case BlendFactor::kOneMinusDstAlpha:
 			rhs = dst_color * (1.0f - dst_color.a);
 			break;
-		case BlendFactor::ONE_MINUS_DST_COLOR:
+		case BlendFactor::kOneMinusDstColor:
 			rhs = dst_color * (1.0f - dst_color);
 			break;
 		}
 
 		switch (op)
 		{
-		case BlendOp::ADD:
+		case BlendOp::kAdd:
 			return lhs + rhs;
-		case BlendOp::SUB:
+		case BlendOp::kSub:
 			return lhs - rhs;
 		}
 		return lhs + rhs;
@@ -239,7 +239,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_color(const size_t& row, const size_t& col, const tinymath::color_rgba& color)
 	{
-		if ((content_flag & FrameContent::Color) != FrameContent::None)
+		if ((content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
 			color_buffer->write(row, col, color);
 		}
@@ -247,7 +247,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_depth(const size_t & row, const size_t & col, const float& depth)
 	{
-		if ((content_flag & FrameContent::Depth) != FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
 			depth_buffer->write(row, col, depth);
 		}
@@ -255,7 +255,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_stencil(const size_t & row, const size_t & col, const uint8_t & stencil)
 	{
-		if ((content_flag & FrameContent::Stencil) != FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
 			stencil_buffer->write(row, col, stencil);
 		}
@@ -263,7 +263,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_coverage(const size_t & row, const size_t & col, const uint8_t & coverage)
 	{
-		if ((content_flag & FrameContent::Coverage) != FrameContent::None)
+		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
 			coverage_buffer->write(row, col, coverage);
 		}
@@ -271,7 +271,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_color(const size_t & row, const size_t & col, tinymath::color_rgba & color)
 	{
-		if ((content_flag & FrameContent::Color) == FrameContent::None)
+		if ((content_flag & FrameContent::kColor) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -281,7 +281,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_depth(const size_t& row, const size_t& col, float& depth)
 	{
-		if ((content_flag & FrameContent::Depth) == FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -291,7 +291,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_stencil(const size_t& row, const size_t& col, uint8_t& stencil)
 	{
-		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -301,7 +301,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_coverage(const size_t& row, const size_t& col, uint8_t& coverage)
 	{
-		if ((content_flag & FrameContent::Coverage) == FrameContent::None)
+		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -313,7 +313,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_color(const float& u, const float& v, const tinymath::color_rgba& color)
 	{
-		if ((content_flag & FrameContent::Color) != FrameContent::None)
+		if ((content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
 			color_buffer->write(u, v, color);
 		}
@@ -321,7 +321,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_depth(const float& u, const float& v, const float& depth)
 	{
-		if ((content_flag & FrameContent::Depth) != FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
 			depth_buffer->write(u, v, depth);
 		}
@@ -329,7 +329,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_stencil(const float& u, const float& v, const uint8_t& stencil)
 	{
-		if ((content_flag & FrameContent::Stencil) != FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
 			stencil_buffer->write(u, v, stencil);
 		}
@@ -337,7 +337,7 @@ namespace Guarneri
 
 	void FrameBuffer::write_coverage(const float& u, const float& v, const uint8_t& coverage)
 	{
-		if ((content_flag & FrameContent::Coverage) != FrameContent::None)
+		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
 			coverage_buffer->write(u, v, coverage);
 		}
@@ -345,7 +345,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_color(const float& u, const float& v, tinymath::color_rgba& color)
 	{
-		if ((content_flag & FrameContent::Color) == FrameContent::None)
+		if ((content_flag & FrameContent::kColor) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -355,7 +355,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_depth(const float& u, const float& v, float& depth)
 	{
-		if ((content_flag & FrameContent::Depth) == FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -365,7 +365,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_stencil(const float& u, const float& v, uint8_t& stencil)
 	{
-		if ((content_flag & FrameContent::Stencil) == FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -375,7 +375,7 @@ namespace Guarneri
 
 	bool FrameBuffer::read_coverage(const float& u, const float& v, uint8_t& coverage)
 	{
-		if ((content_flag & FrameContent::Coverage) == FrameContent::None)
+		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
 			return false;
 		}
@@ -385,22 +385,22 @@ namespace Guarneri
 
 	void FrameBuffer::clear(const FrameContent& flag)
 	{
-		if ((flag & content_flag & FrameContent::Color) != FrameContent::None)
+		if ((flag & content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
 			color_buffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
 		}
 
-		if ((flag & content_flag & FrameContent::Depth) != FrameContent::None)
+		if ((flag & content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
 			depth_buffer->clear(kFarZ);
 		}
 
-		if ((flag & content_flag & FrameContent::Stencil) != FrameContent::None)
+		if ((flag & content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
 			stencil_buffer->clear(kDefaultStencil);
 		}
 
-		if ((flag & content_flag & FrameContent::Coverage) != FrameContent::None)
+		if ((flag & content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
 			coverage_buffer->clear((uint8_t)0);
 		}
@@ -411,7 +411,7 @@ namespace Guarneri
 		this->width = w;
 		this->height = h;
 
-		if ((content_flag & FrameContent::Color) != FrameContent::None)
+		if ((content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
 			if (color_buffer == nullptr)
 			{
@@ -423,7 +423,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((content_flag & FrameContent::Depth) != FrameContent::None)
+		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
 			if (depth_buffer == nullptr)
 			{
@@ -435,7 +435,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((content_flag & FrameContent::Stencil) != FrameContent::None)
+		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
 			if (stencil_buffer == nullptr)
 			{
@@ -447,7 +447,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((content_flag & FrameContent::Coverage) != FrameContent::None)
+		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
 			if (coverage_buffer == nullptr)
 			{

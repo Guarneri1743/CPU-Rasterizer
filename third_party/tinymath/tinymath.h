@@ -28,6 +28,7 @@
 #include "primitives/Rect.h"
 #include "primitives/Segment.h"
 #include "primitives/Sphere.h"
+#include "primitives/Frustum.h"
 
 #include "color/Color.h"
 #include "color/ColorEncoding.h"

@@ -4,6 +4,7 @@
 #include "GlobalShaderParams.hpp"
 #include "tinymath/primitives/Rect.h"
 #include "Clipper.hpp"
+#include "Pipeline.hpp"
 #include "SegmentDrawer.hpp"
 #include <execution>
 #include <algorithm>
@@ -36,7 +37,7 @@ namespace Guarneri
 
 		if (target_rendertexture == nullptr)
 		{
-			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::Color | FrameContent::Depth | FrameContent::Stencil, INST(GlobalShaderParams).enable_msaa, INST(GlobalShaderParams).msaa_subsample_count);
+			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil, INST(GlobalShaderParams).enable_msaa, INST(GlobalShaderParams).msaa_subsample_count);
 		}
 		else
 		{
@@ -207,7 +208,7 @@ namespace Guarneri
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
+		if (Clipping::inside_cvv(c1.position, c2.position, c3.position))
 		{
 			// all in cvv, rasterize directly
 			clip2raster(shader, c1, c2, c3);
@@ -216,7 +217,7 @@ namespace Guarneri
 		else
 		{
 			// clip in homogenous space
-			auto triangles = Clipper::cvv_clipping(INST(GlobalShaderParams).cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
+			auto triangles = Clipping::cvv_clipping(INST(GlobalShaderParams).cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
 
 			if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
@@ -233,25 +234,25 @@ namespace Guarneri
 	void GraphicsDevice::clip2raster(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		// clip space to ndc (perspective division)
-		Vertex ndc1 = Vertex::clip2ndc(c1);
-		Vertex ndc2 = Vertex::clip2ndc(c2);
-		Vertex ndc3 = Vertex::clip2ndc(c3);
+		Vertex ndc1 = Pipeline::clip2ndc(c1);
+		Vertex ndc2 = Pipeline::clip2ndc(c2);
+		Vertex ndc3 = Pipeline::clip2ndc(c3);
 
 		// backface culling
 		bool double_face = shader.double_face;
-		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::BACK_FACE_CULLING) != CullingAndClippingFlag::DISABLE;
+		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kBackFaceCulling) != CullingAndClippingFlag::kNone;
 		if (!double_face && enable_backface_culling && !shader.skybox)
 		{
-			if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+			if (Clipping::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
 		}
 
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
 
 		// ndc to screen space
-		Vertex s1 = Vertex::ndc2screen(w, h, ndc1);
-		Vertex s2 = Vertex::ndc2screen(w, h, ndc2);
-		Vertex s3 = Vertex::ndc2screen(w, h, ndc3);
+		Vertex s1 = Pipeline::ndc2screen(w, h, ndc1);
+		Vertex s2 = Pipeline::ndc2screen(w, h, ndc2);
+		Vertex s3 = Pipeline::ndc2screen(w, h, ndc3);
 
 		// triangle assembly
 		std::vector<Triangle> assembled_triangles = Triangle(s1, s2, s3).horizontally_split();
@@ -265,7 +266,7 @@ namespace Guarneri
 			else
 			{
 				// rasterize triangle directly
-				rasterize(*triangle, shader, RasterizerStrategy::SCANLINE);
+				rasterize(*triangle, shader, RasterizerStrategy::kScanline);
 			}
 		}
 	}
@@ -291,7 +292,7 @@ namespace Guarneri
 				rasterize(rect, task.triangle, *task.shader);
 
 				// wireframe
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
 				{
 					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
@@ -300,7 +301,7 @@ namespace Guarneri
 			}
 		}
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::FRAME_TILE) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kFrameTile) != RenderFlag::kNone)
 		{
 			get_active_rendertexture()->foreach_pixel(
 				rect,
@@ -313,7 +314,7 @@ namespace Guarneri
 				{
 					tinymath::Color dst_color = ColorEncoding::decode(dst);
 					tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
-					tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, BlendFactor::SRC_ALPHA, BlendFactor::ONE_MINUS_SRC_ALPHA, BlendOp::ADD);
+					tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, BlendFactor::kSrcAlpha, BlendFactor::kOneMinusSrcAlpha, BlendOp::kAdd);
 					auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 					buffer.get_framebuffer()->write_color(pixel.row, pixel.col, pixel_color);
 				}
@@ -422,47 +423,47 @@ namespace Guarneri
 											   SubsampleParam& p3,
 											   SubsampleParam& p4)
 	{
-		Vertex vert1, vert2, vert3, vert4;
+		Fragment frag1, frag2, frag3, frag4;
 
-		bool px1_valid = tri.barycentric_interpolate(px1.pos, vert1);
-		bool px2_valid = tri.barycentric_interpolate(px2.pos, vert2);
-		bool px3_valid = tri.barycentric_interpolate(px3.pos, vert3);
-		bool px4_valid = tri.barycentric_interpolate(px4.pos, vert4);
+		bool px1_valid = tri.barycentric_interpolate(px1.pos, frag1);
+		bool px2_valid = tri.barycentric_interpolate(px2.pos, frag2);
+		bool px3_valid = tri.barycentric_interpolate(px3.pos, frag3);
+		bool px4_valid = tri.barycentric_interpolate(px4.pos, frag4);
 
-		vert1 = Vertex::reverse_perspective_division(vert1);
-		vert2 = Vertex::reverse_perspective_division(vert2);
-		vert3 = Vertex::reverse_perspective_division(vert3);
-		vert4 = Vertex::reverse_perspective_division(vert4);
+		frag1 = Pipeline::reverse_perspective_division(frag1);
+		frag2 = Pipeline::reverse_perspective_division(frag2);
+		frag3 = Pipeline::reverse_perspective_division(frag3);
+		frag4 = Pipeline::reverse_perspective_division(frag4);
 
-		Vertex ddx = Vertex::substract(vert1, vert2);
-		Vertex ddy = Vertex::substract(vert1, vert3);
+		Fragment ddx = Pipeline::substract(frag1, frag2);
+		Fragment ddy = Pipeline::substract(frag1, frag3);
 
 		FrameBuffer& fb = INST(GlobalShaderParams).enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
 		if (px1_valid)
 		{
-			process_fragment(fb, vert1, ddx, ddy, px1.row, px1.col, shader, p1);
+			process_fragment(fb, frag1, ddx, ddy, px1.row, px1.col, shader, p1);
 		}
 
 		if (px2_valid)
 		{
-			process_fragment(fb, vert2, ddx, ddy, px2.row, px2.col, shader, p2);
+			process_fragment(fb, frag2, ddx, ddy, px2.row, px2.col, shader, p2);
 		}
 
 		if (px3_valid)
 		{
-			process_fragment(fb, vert3, ddx, ddy, px3.row, px3.col, shader, p3);
+			process_fragment(fb, frag3, ddx, ddy, px3.row, px3.col, shader, p3);
 		}
 
 		if (px4_valid)
 		{
-			process_fragment(fb, vert4, ddx, ddy, px4.row, px4.col, shader, p4);
+			process_fragment(fb, frag4, ddx, ddy, px4.row, px4.col, shader, p4);
 		}
 	}
 
 	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy)
 	{
-		if (strategy == RasterizerStrategy::SCANBLOCK)
+		if (strategy == RasterizerStrategy::kScanblock)
 		{
 			scanblock(tri, shader);
 		}
@@ -472,7 +473,7 @@ namespace Guarneri
 		}
 
 		// wireframe
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::WIREFRAME) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
 		{
 			draw_screen_segment(tri[0].position, tri[1].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
 			draw_screen_segment(tri[0].position, tri[2].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -502,10 +503,10 @@ namespace Guarneri
 			rect,
 			[this, &tri, &shader](auto&& buffer, auto&& pixel)
 		{
-			Vertex vert;
-			if (tri.barycentric_interpolate(pixel.pos, vert))
+			Fragment frag;
+			if (tri.barycentric_interpolate(pixel.pos, frag))
 			{
-				process_fragment(*buffer.get_framebuffer(), vert, Vertex(), Vertex(), pixel.row, pixel.col, shader);
+				process_fragment(*buffer.get_framebuffer(), frag, Fragment(), Fragment(), pixel.row, pixel.col, shader);
 			}
 		});
 	}
@@ -526,14 +527,14 @@ namespace Guarneri
 
 		for (size_t row = (size_t)top; row < (size_t)bottom; row++)
 		{
-			Vertex lhs, rhs;
+			Fragment lhs, rhs;
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
 
 			// screen space clipping
-			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::SCREEN_CLIPPING) != CullingAndClippingFlag::DISABLE;
+			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kScreenClipping) != CullingAndClippingFlag::kNone;
 			if (enable_screen_clipping)
 			{
-				Clipper::screen_clipping(lhs, rhs, w);
+				Clipping::screen_clipping(lhs, rhs, w);
 			}
 
 			int left = (int)(lhs.position.x + 0.5f);
@@ -544,31 +545,31 @@ namespace Guarneri
 			assert(right >= left);
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, Vertex(), Vertex(), row, col, shader);
-				auto dx = Vertex::differential(lhs, rhs);
-				lhs = Vertex::intagral(lhs, dx);
+				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, Fragment(), Fragment(), row, col, shader);
+				auto dx = Pipeline::differential(lhs, rhs);
+				lhs = Pipeline::intagral(lhs, dx);
 			}
 		}
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader)
+	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, const size_t& row, const size_t& col, const Shader& shader)
 	{
 		SubsampleParam subsample_param;
-		return process_fragment(rt, v, ddx, ddy, row, col, shader, subsample_param);
+		return process_fragment(rt, frag, ddx, ddy, row, col, shader, subsample_param);
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param)
+	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param)
 	{
 		tinymath::color_rgba pixel_color;
 
-		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::SCISSOR_TEST) != PerSampleOperation::DISABLE;
-		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::ALPHA_TEST) != PerSampleOperation::DISABLE;
-		bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::STENCIL_TEST) != PerSampleOperation::DISABLE;
-		bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE;
+		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kScissorTest) != PerSampleOperation::kNone;
+		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kAlphaTest) != PerSampleOperation::kNone;
+		bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
+		bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
 
-		PerSampleOperation op_pass = PerSampleOperation::SCISSOR_TEST | PerSampleOperation::ALPHA_TEST | PerSampleOperation::STENCIL_TEST | PerSampleOperation::DEPTH_TEST;
+		PerSampleOperation op_pass = PerSampleOperation::kScissorTest | PerSampleOperation::kAlphaTest | PerSampleOperation::kStencilTest | PerSampleOperation::kDepthTest;
 
-		float z = v.position.z / v.position.w;
+		float z = frag.position.z / frag.position.w;
 
 		ColorMask color_mask = shader.color_mask;
 		CompareFunc stencil_func = shader.stencil_func;
@@ -586,14 +587,14 @@ namespace Guarneri
 
 		UNUSED(stencil_write_mask);
 
-		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::BLENDING) != PerSampleOperation::DISABLE && shader.transparent;
+		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kBlending) != PerSampleOperation::kNone && shader.transparent;
 
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~PerSampleOperation::DEPTH_TEST;
+				op_pass &= ~PerSampleOperation::kDepthTest;
 				statistics.earlyz_optimized++;
 				return false; // here we can assume fragment shader will not modify depth (cuz modifying depth in fragment shader is not implemented yet)
 			}
@@ -607,17 +608,19 @@ namespace Guarneri
 			INST(GlobalShaderParams).multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
 			v2f v_out;
-			float w = 1.0f;// / v.rhw;
-			v_out.position = v.position * w;
-			v_out.world_pos = v.world_pos * w;
-			v_out.shadow_coord = v.shadow_coord * w;
-			v_out.color = v.color * w;
-			v_out.normal = v.normal * w;
-			v_out.uv = v.uv * w;
-			v_out.tangent = v.tangent * w;
-			v_out.bitangent = v.bitangent * w;
+			v_out.position = frag.position ;
+			v_out.world_pos = frag.world_pos ;
+			v_out.shadow_coord = frag.shadow_coord ;
+			v_out.color = frag.color ;
+			v_out.normal = frag.normal ;
+			v_out.uv = frag.uv ;
+			v_out.tangent = frag.tangent ;
+			v_out.bitangent = frag.bitangent ;
 
-			fragment_result = shader.fragment_shader(v_out, ddx, ddy);
+			v_out.ddx = ddx;
+			v_out.ddy = ddy;
+
+			fragment_result = shader.fragment_shader(v_out);
 			pixel_color = ColorEncoding::encode_rgba(fragment_result);
 			subsample_param.pixel_color = pixel_color;
 			subsample_param.pixel_color_calculated = true;
@@ -647,7 +650,7 @@ namespace Guarneri
 		{
 			if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col))
 			{
-				op_pass &= ~PerSampleOperation::STENCIL_TEST;
+				op_pass &= ~PerSampleOperation::kStencilTest;
 			}
 			buffer.update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 		}
@@ -657,12 +660,12 @@ namespace Guarneri
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~PerSampleOperation::DEPTH_TEST;
+				op_pass &= ~PerSampleOperation::kDepthTest;
 			}
 		}
 
 		// write depth
-		if (zwrite_mode == ZWrite::ON && (op_pass & PerSampleOperation::DEPTH_TEST) != PerSampleOperation::DISABLE)
+		if (zwrite_mode == ZWrite::kOn && (op_pass & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone)
 		{
 			buffer.write_depth(row, col, z);
 		}
@@ -690,24 +693,24 @@ namespace Guarneri
 		// write color
 		if (fragment_passed)
 		{
-			if (color_mask != (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A))
+			if (color_mask != (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha))
 			{
 				tinymath::color_rgba cur;
 				if (buffer.read_color(row, col, cur))
 				{
-					if ((color_mask & ColorMask::R) == ColorMask::ZERO)
+					if ((color_mask & ColorMask::kRed) == ColorMask::kZero)
 					{
 						pixel_color.r = cur.r;
 					}
-					if ((color_mask & ColorMask::G) == ColorMask::ZERO)
+					if ((color_mask & ColorMask::kGreen) == ColorMask::kZero)
 					{
 						pixel_color.g = cur.g;
 					}
-					if ((color_mask & ColorMask::B) == ColorMask::ZERO)
+					if ((color_mask & ColorMask::kBlue) == ColorMask::kZero)
 					{
 						pixel_color.b = cur.b;
 					}
-					if ((color_mask & ColorMask::A) == ColorMask::ZERO)
+					if ((color_mask & ColorMask::kAlpha) == ColorMask::kZero)
 					{
 						pixel_color.a = cur.a;
 					}
@@ -723,10 +726,10 @@ namespace Guarneri
 
 	bool GraphicsDevice::validate_fragment(const PerSampleOperation& op_pass) const
 	{
-		if ((op_pass & PerSampleOperation::SCISSOR_TEST) == PerSampleOperation::DISABLE) return false;
-		if ((op_pass & PerSampleOperation::ALPHA_TEST) == PerSampleOperation::DISABLE) return false;
-		if ((op_pass & PerSampleOperation::STENCIL_TEST) == PerSampleOperation::DISABLE) return false;
-		if ((op_pass & PerSampleOperation::DEPTH_TEST) == PerSampleOperation::DISABLE) return false;
+		if ((op_pass & PerSampleOperation::kScissorTest) == PerSampleOperation::kNone) return false;
+		if ((op_pass & PerSampleOperation::kAlphaTest) == PerSampleOperation::kNone) return false;
+		if ((op_pass & PerSampleOperation::kStencilTest) == PerSampleOperation::kNone) return false;
+		if ((op_pass & PerSampleOperation::kDepthTest) == PerSampleOperation::kNone) return false;
 		return true;
 	}
 
@@ -738,11 +741,11 @@ namespace Guarneri
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 
-		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
-		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
+		tinymath::vec4f n1 = Pipeline::clip2ndc(clip_start);
+		tinymath::vec4f n2 = Pipeline::clip2ndc(clip_end);
 
-		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
-		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
+		tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
+		tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
 
 		tinymath::mat4x4 translation = tinymath::translation(tinymath::vec3f(screen_translation));
 
@@ -777,11 +780,11 @@ namespace Guarneri
 		size_t w, h;
 		target_rendertexture->get_size(w, h);
 
-		tinymath::vec4f n1 = Vertex::clip2ndc(clip_start);
-		tinymath::vec4f n2 = Vertex::clip2ndc(clip_end);
+		tinymath::vec4f n1 = Pipeline::clip2ndc(clip_start);
+		tinymath::vec4f n2 = Pipeline::clip2ndc(clip_end);
 
-		tinymath::vec4f s1 = Vertex::ndc2screen(w, h, n1);
-		tinymath::vec4f s2 = Vertex::ndc2screen(w, h, n2);
+		tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
+		tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
 
 		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 	}

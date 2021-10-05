@@ -12,19 +12,19 @@ namespace Guarneri
 		this->material_name = "default_material";
 		this->target_shader = std::make_shared<Shader>("pbr_shader");
 		this->shadow_caster = std::dynamic_pointer_cast<Shader>(std::make_shared<ShadowShader>());
-		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
-		this->stencil_func = CompareFunc::ALWAYS;
-		this->stencil_pass_op = StencilOp::KEEP;
-		this->stencil_fail_op = StencilOp::KEEP;
-		this->stencil_zfail_op = StencilOp::KEEP;
+		this->color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
+		this->stencil_func = CompareFunc::kAlways;
+		this->stencil_pass_op = StencilOp::kKeep;
+		this->stencil_fail_op = StencilOp::kKeep;
+		this->stencil_zfail_op = StencilOp::kKeep;
 		this->stencil_read_mask = 0xFF;
 		this->stencil_write_mask = 0xFF;
 		this->stencil_ref_val = 0;
-		this->ztest_func = CompareFunc::LESS;
-		this->zwrite_mode = ZWrite::ON;
-		this->src_factor = BlendFactor::SRC_ALPHA;
-		this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-		this->blend_op = BlendOp::ADD;
+		this->ztest_func = CompareFunc::kLess;
+		this->zwrite_mode = ZWrite::kOn;
+		this->src_factor = BlendFactor::kSrcAlpha;
+		this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
+		this->blend_op = BlendOp::kAdd;
 		this->double_face = false;
 		this->transparent = false;
 		this->cast_shadow = true;
@@ -50,7 +50,7 @@ namespace Guarneri
 
 	Shader* Material::get_shader(const RenderPass& pass) const
 	{
-		if (pass == RenderPass::SHADOW)
+		if (pass == RenderPass::kShadow)
 		{
 			return shadow_caster.get();
 		}
@@ -78,7 +78,6 @@ namespace Guarneri
 		shader->stencil_write_mask = stencil_write_mask;
 		shader->stencil_ref_val = stencil_ref_val;
 		shader->color_mask = color_mask;
-		shader->lighting_param = lighting_param;
 		shader->double_face = double_face;
 		shader->local_properties = local_properties;
 	}

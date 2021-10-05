@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include <string>
 #include "tinymath/MathDefine.h"
 #include "tinymath/Vector3.h"
 

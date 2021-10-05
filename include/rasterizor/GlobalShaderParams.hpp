@@ -14,8 +14,8 @@ namespace Guarneri {
 			view_matrix = tinymath::kMat4x4Identity;
 			proj_matrix = tinymath::kMat4x4Identity;
 			main_light = DirectionalLight();
-			debug_flag = RenderFlag::DISABLE;
-			workflow = PBRWorkFlow::Metallic;
+			debug_flag = RenderFlag::kNone;
+			workflow = PBRWorkFlow::kMetallic;
 			shadow_bias = 0.02f;
 			enable_shadow = true;
 			pcf_on = true;
@@ -25,18 +25,18 @@ namespace Guarneri {
 			enable_gizmos = true;
 			width = 800;
 			height = 600;
-			color_space = ColorSpace::Gamma;
+			color_space = ColorSpace::kGamma;
 			multi_sample_frequency = MultiSampleFrequency::kPixelFrequency;
 			persample_op_flag =
-				PerSampleOperation::SCISSOR_TEST |
-				PerSampleOperation::STENCIL_TEST |
-				PerSampleOperation::DEPTH_TEST |
-				PerSampleOperation::BLENDING;
+				PerSampleOperation::kScissorTest |
+				PerSampleOperation::kStencilTest |
+				PerSampleOperation::kDepthTest |
+				PerSampleOperation::kBlending;
 			culling_clipping_flag =
-				CullingAndClippingFlag::APP_FRUSTUM_CULLING |
-				CullingAndClippingFlag::NEAR_PLANE_CLIPPING |
-				CullingAndClippingFlag::SCREEN_CLIPPING |
-				CullingAndClippingFlag::BACK_FACE_CULLING;
+				CullingAndClippingFlag::kAppFrustumCulling |
+				CullingAndClippingFlag::kNearPlaneClipping |
+				CullingAndClippingFlag::kScreenClipping |
+				CullingAndClippingFlag::kBackFaceCulling;
 		}
 
 		size_t width;
@@ -54,6 +54,7 @@ namespace Guarneri {
 		PerSampleOperation persample_op_flag;
 		CullingAndClippingFlag culling_clipping_flag;
 
+		bool enable_mipmap;
 		bool enable_shadow;
 		bool enable_ibl;
 		bool pcf_on;

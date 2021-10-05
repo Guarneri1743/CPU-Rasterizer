@@ -8,7 +8,7 @@
 #include "assimp/Scene.h"
 
 #include "Mesh.hpp"
-#include "Vertex.hpp"
+#include "RasterAttributes.hpp"
 #include "Material.hpp"
 #include "Transform.hpp"
 

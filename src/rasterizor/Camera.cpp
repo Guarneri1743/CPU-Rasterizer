@@ -17,7 +17,7 @@ namespace Guarneri
 	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far)
 	{
 		auto ret = std::unique_ptr<Camera>(new Camera());
-		ret->initialize(_position, _aspect, _fov, _near, _far, Projection::PERSPECTIVE);
+		ret->initialize(_position, _aspect, _fov, _near, _far, Projection::kPerspective);
 		return ret;
 	}
 
@@ -77,10 +77,10 @@ namespace Guarneri
 	{
 		switch (this->projection)
 		{
-		case Projection::PERSPECTIVE:
+		case Projection::kPerspective:
 			this->proj_matrix = tinymath::perspective(this->fov, this->aspect, this->near, this->far);
 			break;
-		case Projection::ORTHO:
+		case Projection::kOrtho:
 			this->proj_matrix = tinymath::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
 			break;
 		default:

@@ -4,6 +4,9 @@
 
 TINYMATH_NAMESPACE
 
+#undef near
+#undef far
+
 struct Frustum
 {
 public:

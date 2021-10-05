@@ -5,7 +5,7 @@
 #include "GlobalShaderParams.hpp"
 #include "tinymath.h"
 #include "ShaderPropertyMap.hpp"
-#include "Vertex.hpp"
+#include "RasterAttributes.hpp"
 
 namespace Guarneri
 {
@@ -40,22 +40,9 @@ namespace Guarneri
 		tinymath::vec3f bitangent;
 		tinymath::vec3f normal;
 		tinymath::vec4f shadow_coord;
-	};
 
-	struct LightingData
-	{
-		tinymath::vec3f f0;
-		float roughness;
-		float metallic;
-		float glossiness;
-
-		LightingData()
-		{
-			glossiness = 32.0f;
-			f0 = tinymath::vec3f(0.04f);
-			metallic = 0.0f;
-			roughness = 0.5f;
-		}
+		Fragment ddx;
+		Fragment ddy;
 	};
 
 	constexpr tinymath::Color kErrorColor = tinymath::Color(199.0f, 0.0f, 106.0f, 1.0f);
@@ -83,7 +70,6 @@ namespace Guarneri
 		bool double_face;
 		bool skybox;
 		bool shadow;
-		LightingData lighting_param;
 		bool discarded = false;
 		std::string name;
 		ShaderPropertyMap local_properties;
@@ -93,9 +79,8 @@ namespace Guarneri
 		Shader(std::string name);
 		virtual ~Shader();
 		virtual v2f vertex_shader(const a2v& input) const;
-		virtual tinymath::Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const;
+		virtual tinymath::Color fragment_shader(const v2f& input) const;
 
-		static int get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height);
 		static float linearize_depth(const float& depth, const float& near, const float& far);
 		static float linearize_01depth(const float& depth, const float& near, const float& far);
 		static Shader*  get_error_shader() { return error_shader; }

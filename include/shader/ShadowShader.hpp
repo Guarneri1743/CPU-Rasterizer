@@ -13,6 +13,6 @@ namespace Guarneri
 
 	public:
 		v2f vertex_shader(const a2v& input) const;
-		tinymath::Color fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const;
+		tinymath::Color fragment_shader(const v2f& input) const;
 	};
 }

@@ -172,6 +172,8 @@ namespace Guarneri
 		{
 			ImGui::Checkbox("Gizmos", &INST(GlobalShaderParams).enable_gizmos);
 
+			ImGui::Checkbox("Mipmap", &INST(GlobalShaderParams).enable_mipmap);
+
 			const char* debug_views[] = {
 				"None",
 				"WireFrame",
@@ -184,6 +186,7 @@ namespace Guarneri
 				"Specular",
 				"Tiles",
 				"IrradianceMap",
+				"Albedo",
 				"Roughness",
 				"Metallic",
 				"AO",
@@ -193,23 +196,24 @@ namespace Guarneri
 			};
 			const RenderFlag view_flags[] =
 			{
-				RenderFlag::DISABLE,
-				RenderFlag::WIREFRAME,
-				RenderFlag::SHADOWMAP,
-				RenderFlag::DEPTH,
-				RenderFlag::STENCIL,
-				RenderFlag::UV,
-				RenderFlag::NORMAL,
-				RenderFlag::VERTEX_COLOR,
-				RenderFlag::SPECULAR,
-				RenderFlag::FRAME_TILE,
-				RenderFlag::IRRADIANCE_MAP,
-				RenderFlag::ROUGHNESS,
-				RenderFlag::METALLIC,
-				RenderFlag::AO,
-				RenderFlag::INDIRECT_DIFFUSE,
-				RenderFlag::INDIRECT_SPECULAR,
-				RenderFlag::MIPMAP
+				RenderFlag::kNone,
+				RenderFlag::kWireFrame,
+				RenderFlag::kShadowMap,
+				RenderFlag::kDepth,
+				RenderFlag::kStencil,
+				RenderFlag::kUV,
+				RenderFlag::kNormal,
+				RenderFlag::kVertexColor,
+				RenderFlag::kSpecular,
+				RenderFlag::kFrameTile,
+				RenderFlag::kIrradianceMap,
+				RenderFlag::kAlbedo,
+				RenderFlag::kRoughness,
+				RenderFlag::kMetallic,
+				RenderFlag::kAO,
+				RenderFlag::kIndirectDiffuse,
+				RenderFlag::kIndirectSpecular,
+				RenderFlag::kMipmap
 			};
 			static int selected_view = 0;
 			if (ImGui::Button("Views.."))
@@ -223,7 +227,7 @@ namespace Guarneri
 					if (ImGui::Selectable(debug_views[i]))
 					{
 						selected_view = i;
-						INST(GlobalShaderParams).debug_flag = RenderFlag::DISABLE;
+						INST(GlobalShaderParams).debug_flag = RenderFlag::kNone;
 						INST(GlobalShaderParams).debug_flag = view_flags[i];
 					}
 				ImGui::EndPopup();

@@ -9,7 +9,7 @@ namespace Guarneri
 	SkyboxShader::SkyboxShader() : Shader("skybox_shader")
 	{
 		this->skybox = true;
-		this->ztest_func = CompareFunc::ALWAYS;
+		this->ztest_func = CompareFunc::kAlways;
 	}
 
 	SkyboxShader::~SkyboxShader()
@@ -25,23 +25,20 @@ namespace Guarneri
 		return o;
 	}
 
-	tinymath::Color SkyboxShader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
+	tinymath::Color SkyboxShader::fragment_shader(const v2f& input) const
 	{
 		tinymath::Color ret;
 
-		UNUSED(ddx);
-		UNUSED(ddy);
-
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
 		{
 			tinymath::vec2f uv = spherical_coord_to_uv(tinymath::vec3f(input.shadow_coord.xyz));
 			return tinymath::Color(uv.x, uv.y, 0.0f, 1.0f);
 		}
-		else if ((INST(GlobalShaderParams).debug_flag & RenderFlag::IRRADIANCE_MAP) != RenderFlag::DISABLE)
+		else if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kIrradianceMap) != RenderFlag::kNone)
 		{
 			if (global_shader_properties.has_cubemap(cubemap_prop) && global_shader_properties.get_cubemap(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz, ret))
 			{
-				if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
+				if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
 				{
 					ret = ret / (ret + tinymath::kColorWhite);
 					ret = tinymath::pow(ret, 1.0f / 2.2f);
@@ -52,7 +49,7 @@ namespace Guarneri
 
 		if (global_shader_properties.has_cubemap(cubemap_prop) && global_shader_properties.get_cubemap(cubemap_prop)->sample(input.shadow_coord.xyz, ret))
 		{
-			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
+			if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
 			{
 				ret = ret / (ret + tinymath::kColorWhite);
 				ret = tinymath::pow(ret, 1.0f / 2.2f);

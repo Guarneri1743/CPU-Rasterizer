@@ -35,7 +35,7 @@ namespace Guarneri
 
 	tinymath::mat4x4 Renderer::view_matrix(const RenderPass& render_pass) const
 	{
-		if (render_pass == RenderPass::SHADOW)
+		if (render_pass == RenderPass::kShadow)
 		{
 			return INST(GlobalShaderParams).main_light.view_matrix();
 		}
@@ -44,7 +44,7 @@ namespace Guarneri
 
 	tinymath::mat4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
 	{
-		if (render_pass == RenderPass::SHADOW)
+		if (render_pass == RenderPass::kShadow)
 		{
 			return INST(GlobalShaderParams).main_light.projection_matrix();
 		}
@@ -59,17 +59,17 @@ namespace Guarneri
 
 	void Renderer::render_shadow() const
 	{
-		render_internal(RenderPass::SHADOW);
+		render_internal(RenderPass::kShadow);
 	}
 
 	void Renderer::render() const
 	{
-		render_internal(RenderPass::OBJECT);
+		render_internal(RenderPass::kObject);
 	}
 
 	void Renderer::render_internal(const RenderPass& render_pass) const
 	{
-		if (!target->material->cast_shadow && render_pass == RenderPass::SHADOW)
+		if (!target->material->cast_shadow && render_pass == RenderPass::kShadow)
 		{
 			return;
 		}

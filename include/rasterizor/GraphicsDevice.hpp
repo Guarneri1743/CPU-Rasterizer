@@ -2,17 +2,15 @@
 #include <stdint.h>
 #include <queue>
 #include <memory>
+#include <vector>
+#include <future>
 #include "Marcos.h"
 #include "Define.hpp"
 #include "RawBuffer.hpp"
-#include "GraphicsCommand.hpp"
 #include "tinymath.h"
 #include "Triangle.hpp"
-#include "FrameTile.hpp"
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
-#include <vector>
-#include <future>
 
 namespace Guarneri
 {
@@ -33,24 +31,27 @@ namespace Guarneri
 		tinymath::mat4x4 p;
 	};
 
+	class GraphicsCommand
+	{
+		virtual void execute() = 0;
+	};
+
+	class MsaaCommand : public GraphicsCommand
+	{
+	public:
+		bool enable;
+		uint8_t msaa_subsample_count;
+
+	public:
+		void execute() {}
+	};
+
 	class GraphicsDevice
 	{
 	public:
-		GraphicsStatistic statistics;
-		bool tile_based;
-		bool multi_thread;
-
-	private:
-		std::unique_ptr<TileBasedManager> tile_based_manager;
-		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
-		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
-		std::vector<DrawCommand> draw_commands;
-		std::queue<GraphicsCommand*> commands;
-		uint32_t active_frame_buffer_id;
-
-	public:
 		GraphicsDevice();
 		~GraphicsDevice();
+
 		void resize(size_t w, size_t h);
 		void initialize(size_t w, size_t h);
 		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
@@ -64,11 +65,11 @@ namespace Guarneri
 		void reset_active_rendertexture() noexcept;
 		uint32_t create_buffer(const size_t& width, const size_t& height, const FrameContent& content) noexcept;
 		bool get_buffer(const uint32_t& id, std::shared_ptr<RenderTexture>& buffer) const noexcept;
-
+		uint8_t get_subsample_count() { return target_rendertexture->get_subsample_count(); }
 		size_t get_width() { return target_rendertexture->get_width(); }
 		size_t get_height() { return target_rendertexture->get_height(); }
-
-	public:
+		
+		// segment drawer
 		void draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation);
 		void draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col);
 		void draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
@@ -77,9 +78,6 @@ namespace Guarneri
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset);
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
-
-	public:
-		uint8_t get_subsample_count() { return target_rendertexture->get_subsample_count(); }
 
 	private:
 		void draw(DrawCommand task);
@@ -107,5 +105,18 @@ namespace Guarneri
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
 		void process_commands();
+
+	public:
+		GraphicsStatistic statistics;
+		bool tile_based;
+		bool multi_thread;
+
+	private:
+		std::unique_ptr<TileBasedManager> tile_based_manager;
+		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
+		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
+		std::vector<DrawCommand> draw_commands;
+		std::queue<GraphicsCommand*> commands;
+		uint32_t active_frame_buffer_id;
 	};
 }

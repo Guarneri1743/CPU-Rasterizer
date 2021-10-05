@@ -8,7 +8,7 @@ namespace Guarneri
 		msaa_subsample_count(tinymath::round_up_to_power_of_two(subsample_count)),
 		multi_sample_frequency(MultiSampleFrequency::kPixelFrequency)
 	{
-		framebuffer = std::make_unique<FrameBuffer>(w, h, flag & ~FrameContent::Coverage);
+		framebuffer = std::make_unique<FrameBuffer>(w, h, flag & ~FrameContent::kCoverage);
 		reset_msaa_buffer();
 	}
 
@@ -80,10 +80,10 @@ namespace Guarneri
 
 	void RenderTexture::clear(const FrameContent& flag)
 	{
-		framebuffer->clear(flag & ~FrameContent::Coverage);
+		framebuffer->clear(flag & ~FrameContent::kCoverage);
 		if (has_msaa_buffer)
 		{
-			msaa_framebuffer->clear(flag | FrameContent::Coverage);
+			msaa_framebuffer->clear(flag | FrameContent::kCoverage);
 		}
 	}
 
@@ -111,7 +111,7 @@ namespace Guarneri
 		{
 			if (msaa_framebuffer == nullptr)
 			{
-				msaa_framebuffer = std::make_unique<FrameBuffer>(framebuffer->get_width() * subsamples_per_axis, framebuffer->get_height() * subsamples_per_axis, framebuffer->get_flag() | FrameContent::Coverage);
+				msaa_framebuffer = std::make_unique<FrameBuffer>(framebuffer->get_width() * subsamples_per_axis, framebuffer->get_height() * subsamples_per_axis, framebuffer->get_flag() | FrameContent::kCoverage);
 			}
 			else if(msaa_framebuffer->get_width() != (framebuffer->get_width() * subsamples_per_axis) || msaa_framebuffer->get_height() != (framebuffer->get_height() * subsamples_per_axis))
 			{

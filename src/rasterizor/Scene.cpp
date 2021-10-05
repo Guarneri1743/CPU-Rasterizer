@@ -89,7 +89,7 @@ namespace Guarneri
 		}, this);
 
 		// setup shadowmap and cubemap
-		shadowmap_id = INST(GraphicsDevice).create_buffer(512, 512, FrameContent::Depth);
+		shadowmap_id = INST(GraphicsDevice).create_buffer(512, 512, FrameContent::kDepth);
 		std::shared_ptr<RenderTexture> shadowmap;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
 
@@ -229,7 +229,7 @@ namespace Guarneri
 
 	void Scene::render()
 	{
-		INST(GraphicsDevice).clear_buffer(FrameContent::Color | FrameContent::Depth | FrameContent::Stencil | FrameContent::Coverage);
+		INST(GraphicsDevice).clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
 		if (INST(GlobalShaderParams).enable_shadow)
 		{
 			INST(GraphicsDevice).set_active_rendertexture(shadowmap_id);
@@ -245,7 +245,7 @@ namespace Guarneri
 
 	void Scene::render_shadow()
 	{
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
 		{
 			return;
 		}
@@ -261,12 +261,12 @@ namespace Guarneri
 		INST(GraphicsDevice).multi_thread = true;
 		INST(GraphicsDevice).tile_based = true;
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
 		{
 			return;
 		}
 
-		bool enable_frustum_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::APP_FRUSTUM_CULLING) != CullingAndClippingFlag::DISABLE;
+		bool enable_frustum_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kAppFrustumCulling) != CullingAndClippingFlag::kNone;
 		if (enable_frustum_culling)
 		{
 			// todo: CPU Frustum Culling
@@ -309,7 +309,7 @@ namespace Guarneri
 
 	void Scene::debug_scene()
 	{
-		if (INST(GlobalShaderParams).debug_flag == RenderFlag::DISABLE) { return; }
+		if (INST(GlobalShaderParams).debug_flag == RenderFlag::kNone) { return; }
 
 		RenderTexture* active_fbo = INST(GraphicsDevice).get_active_rendertexture();
 		std::shared_ptr<RenderTexture> shadow_map;
@@ -320,7 +320,7 @@ namespace Guarneri
 		active_fbo->foreach_pixel(
 		[&shadow_map, w, h](auto&& buffer, auto&& pixel) {
 			// stencil visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::STENCIL) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kStencil) != RenderFlag::kNone)
 			{
 				uint8_t stencil;
 				if (buffer.get_framebuffer()->read_stencil(pixel.row, pixel.col, stencil))
@@ -331,7 +331,7 @@ namespace Guarneri
 			}
 
 			// depth buffer visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::DEPTH) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
 			{
 				float cur_depth;
 				if (buffer.get_framebuffer()->read_depth(pixel.row, pixel.col, cur_depth))
@@ -345,7 +345,7 @@ namespace Guarneri
 			}
 
 			// shadowmap visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::SHADOWMAP) != RenderFlag::DISABLE)
+			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
 			{
 				float u, v;
 				pixel2uv(w, h, pixel.row, pixel.col, u, v);

@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "Object.hpp"
-#include "Vertex.hpp"
+#include "RasterAttributes.hpp"
 
 namespace Guarneri
 {

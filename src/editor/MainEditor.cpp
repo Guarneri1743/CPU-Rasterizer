@@ -51,7 +51,7 @@ namespace Guarneri
 			//scene->add(std::shared_ptr<Model>(plane));
 			//scene->shadow_bias = 0.00125f;
 			//scene->color_space = ColorSpace::Linear;
-			//scene->work_flow = PBRWorkFlow::Metallic;
+			//scene->work_flow = PBRWorkFlow::kMetallic;
 			//Scene::open_scene(scene);
 		}
 

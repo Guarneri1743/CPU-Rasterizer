@@ -6,6 +6,7 @@
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Serialization.hpp"
+#include "Sampling.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -513,10 +514,16 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, tinymath::Color& ret) const
 	{
-		return sample(u, v, 0ull, ret);
+		return sample(u, v, 0, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
+	bool Texture::sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const
+	{
+		int mip = get_mip_level(ddx, ddy, width, height);
+		return sample(u, v, mip, ret);
+	}
+
+	bool Texture::sample(const float& u, const float& v, const int& mip, tinymath::Color& ret) const
 	{
 		switch (this->filtering)
 		{
@@ -530,7 +537,7 @@ namespace Guarneri
 
 	bool Texture::sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const
 	{
-		return sample(u, v, (size_t)std::floor(lod * kMaxMip), ret);
+		return sample(u, v, (int)std::floor(lod * kMaxMip), ret);
 	}
 
 	bool Texture::read(const float& u, const float& v, tinymath::Color& ret) const

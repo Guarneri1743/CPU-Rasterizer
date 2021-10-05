@@ -6,6 +6,8 @@
 #ifdef WIN32
 #undef min
 #undef max
+#undef near
+#undef far
 #endif
 
 TINYMATH_NAMESPACE

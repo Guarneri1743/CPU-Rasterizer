@@ -14,20 +14,19 @@ namespace Guarneri
 
 	Shader::Shader(std::string name, bool is_error_shader)
 	{
-		this->color_mask = (ColorMask::R | ColorMask::G | ColorMask::B | ColorMask::A);
-		this->stencil_func = CompareFunc::ALWAYS;
-		this->stencil_pass_op = StencilOp::KEEP;
-		this->stencil_fail_op = StencilOp::KEEP;
-		this->stencil_zfail_op = StencilOp::KEEP;
+		this->color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
+		this->stencil_func = CompareFunc::kAlways;
+		this->stencil_pass_op = StencilOp::kKeep;
+		this->stencil_fail_op = StencilOp::kKeep;
+		this->stencil_zfail_op = StencilOp::kKeep;
 		this->stencil_read_mask = 0xFF;
 		this->stencil_write_mask = 0xFF;
 		this->stencil_ref_val = 0;
-		this->ztest_func = CompareFunc::LEQUAL;
-		this->zwrite_mode = ZWrite::ON;
-		this->src_factor = BlendFactor::SRC_ALPHA;
-		this->dst_factor = BlendFactor::ONE_MINUS_SRC_ALPHA;
-		this->blend_op = BlendOp::ADD;
-		this->lighting_param = LightingData();
+		this->ztest_func = CompareFunc::kLEqual;
+		this->zwrite_mode = ZWrite::kOn;
+		this->src_factor = BlendFactor::kSrcAlpha;
+		this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
+		this->blend_op = BlendOp::kAdd;
 		this->transparent = false;
 		this->double_face = false;
 		this->skybox = false;
@@ -54,12 +53,9 @@ namespace Guarneri
 		return o;
 	}
 
-	tinymath::Color Shader::fragment_shader(const v2f& input, const Vertex& ddx, const Vertex& ddy) const
+	tinymath::Color Shader::fragment_shader(const v2f& input) const
 	{
 		if (is_error_shader) { return kErrorColor; }
-
-		UNUSED(ddx);
-		UNUSED(ddy);
 
 		auto main_light = INST(GlobalShaderParams).main_light;
 		auto point_lights = INST(GlobalShaderParams).point_lights;
@@ -75,7 +71,7 @@ namespace Guarneri
 		tinymath::Color albedo = tinymath::kColorWhite;
 		if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
 		{
-			if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
+			if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
 			{
 				albedo = tinymath::pow(albedo, 2.2f);
 			}
@@ -90,37 +86,28 @@ namespace Guarneri
 
 		ret += ndl * albedo;
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::UV) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
 		{
 			return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 		}
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::VERTEX_COLOR) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
 		{
 			return input.color;
 		}
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::NORMAL) != RenderFlag::DISABLE)
+		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
 		{
 			return normal;
 		}
 
-		if (INST(GlobalShaderParams).color_space == ColorSpace::Linear)
+		if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
 		{
 			ret = ret / (ret + tinymath::kColorWhite);
 			ret = tinymath::pow(ret, 1.0f / 2.2f);
 		}
 
 		return tinymath::Color(ret.r, ret.g, ret.b, 1.0f);
-	}
-
-	int Shader::get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)
-	{
-		tinymath::vec2f ddx = ddx_uv * tinymath::vec2f((float)width, (float)height);
-		tinymath::vec2f ddy = ddy_uv * tinymath::vec2f((float)width, (float)height);
-		float p = tinymath::max(tinymath::sqrt(tinymath::dot(ddx, ddx)), tinymath::sqrt(tinymath::dot(ddy, ddy)));
-		int level = (int)(tinymath::log2(p) + 0.5f);
-		return std::clamp(level, 0, kMaxMip - 1);
 	}
 
 	float Shader::linearize_01depth(const float& depth, const float& near, const float& far)

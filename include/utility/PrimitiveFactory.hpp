@@ -3,7 +3,7 @@
 #include <memory>
 #include "tinymath.h"
 #include "Model.hpp"
-#include "Vertex.hpp"
+#include "RasterAttributes.hpp"
 
 namespace Guarneri {
 	class PrimitiveFactory {

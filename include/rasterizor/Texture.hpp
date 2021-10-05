@@ -82,7 +82,8 @@ namespace Guarneri
 		bool point(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
 		void generate_mipmap(const int& mip_count, const Filtering& filtering);
 		bool sample(const float& u, const float& v, tinymath::Color& ret) const;
-		bool sample(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
+		bool sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const;
+		bool sample(const float& u, const float& v, const int& mip, tinymath::Color& ret) const;
 		bool sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const;
 		bool read(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
 		bool read(const size_t& row, const size_t& col, const size_t& mip, tinymath::Color& ret) const;
