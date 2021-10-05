@@ -281,7 +281,7 @@ Result:
 
 
 | MSAA | Mipmap | Clipping | DebugView |
-| ---  | --- | ---  |
+| ---  | --- | ---  | --- |
 | <img src="/gallery/msaa_on_4x.png" width = "180" height = "180" alt="MSAA" align=bottom/> | <img src="/gallery/mipmap.png" width = "180" height = "180" alt="Mipmap" align=bottom/> | <img src="/gallery/Clipping.png" width = "180" height = "180" alt="Clipping" align=bottom />  | <img src="/gallery/DebugView.png" width = "180" height = "180" alt="DebugView" align=bottom/> |
 
 | Stencil test | Depth test | Blending |
