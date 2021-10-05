@@ -912,7 +912,6 @@ namespace CpuRasterizor
 
 	void Texture::copy(const Texture& other)
 	{
-		this->id = other.id;
 		this->wrap_mode = other.wrap_mode;
 		this->filtering = other.filtering;
 		this->format = other.format;

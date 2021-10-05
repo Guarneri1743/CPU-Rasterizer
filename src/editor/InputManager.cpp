@@ -1,5 +1,5 @@
 #include "InputManager.hpp"
-#include "Marcos.h"
+#include "Define.hpp"
 #include "Singleton.hpp"
 #include "Window.hpp"
 #include "GLFW/glfw3.h"

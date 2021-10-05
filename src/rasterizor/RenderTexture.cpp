@@ -87,6 +87,15 @@ namespace CpuRasterizor
 		}
 	}
 
+	void RenderTexture::set_clear_color(const tinymath::color_rgba color)
+	{
+		framebuffer->set_clear_color(color);
+		if (has_msaa_buffer)
+		{
+			msaa_framebuffer->set_clear_color(color);
+		}
+	}
+
 	void RenderTexture::resize(const size_t& w, const size_t& h)
 	{
 		framebuffer->resize(w, h);

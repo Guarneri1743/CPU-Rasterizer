@@ -11,6 +11,7 @@
 #include "stb_image.h"
 #include "Sampling.hpp"
 #include "Serialization.hpp"
+#include "Texture.hpp"
 
 namespace CpuRasterizor
 {

@@ -8,6 +8,7 @@ namespace CpuRasterizor
 		content_flag(flag),
 		width(w), height(h)
 	{
+		clear_color = {0, 0, 0, 0};
 		resize(w, h);
 	}
 
@@ -387,7 +388,7 @@ namespace CpuRasterizor
 	{
 		if ((flag & content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
-			color_buffer->clear(ColorEncoding::encode_rgba(tinymath::kColorBlack));
+			color_buffer->clear(clear_color);
 		}
 
 		if ((flag & content_flag & FrameContent::kDepth) != FrameContent::kNone)
@@ -404,6 +405,11 @@ namespace CpuRasterizor
 		{
 			coverage_buffer->clear((uint8_t)0);
 		}
+	}
+
+	void FrameBuffer::set_clear_color(const tinymath::color_rgba& color)
+	{
+		clear_color = color;
 	}
 
 	void FrameBuffer::resize(const size_t& w, const size_t& h)
@@ -458,5 +464,15 @@ namespace CpuRasterizor
 				coverage_buffer->resize(w, h);
 			}
 		}
+	}
+
+	RawBuffer<tinymath::color_rgba>* FrameBuffer::get_color_raw_buffer() const noexcept 
+	{
+		return color_buffer.get(); 
+	}
+
+	tinymath::color_rgba* FrameBuffer::get_color_buffer_ptr() const noexcept
+	{ 
+		size_t size;  return color_buffer->get_ptr(size); 
 	}
 }

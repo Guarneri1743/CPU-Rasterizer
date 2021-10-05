@@ -4,6 +4,7 @@ local res_dir = "res"
 local src_dir = "src"
 local include_dir = "include"
 local third_party_dir = "third_party"
+local shader_dir = "shader"
 local sample_dir = "samples"
 
 function setupIncludeDirs()
@@ -14,6 +15,7 @@ function setupIncludeDirs()
       include_dir .. "/editor",
       include_dir .. "/shader",
       include_dir .. "/utility",
+      shader_dir,
       third_party_dir,
       third_party_dir .. "/assimp",
       third_party_dir .. "/ply",
@@ -100,8 +102,8 @@ function setupSlotion()
          links { "assimp", "opengl32", "glfw3"  }
 end
 
-function setupProject()
-   project "CPURasterizer"
+function setupViewerProject()
+   project "Viewer"
    kind "ConsoleApp"
    language "C++"
 
@@ -110,7 +112,6 @@ function setupProject()
       src_dir .. "/utility/*.*",
       src_dir .. "/core/*.*",
       src_dir .. "/rasterizor/*.*",
-      src_dir .. "/shader/*.*",
       src_dir .. "/editor/*.*",
       include_dir .. "/*.*", 
       include_dir .. "/detail/*.*", 
@@ -119,8 +120,8 @@ function setupProject()
       include_dir .. "/core/*.*",
       include_dir .. "/rasterizor/*.*",
       include_dir .. "/rasterizor/detail/*.*",
-      include_dir .. "/shader/*.*",
       include_dir .. "/editor/*.*",
+      shader_dir  .. "/*.*",
       third_party_dir .. "/*.*",
       third_party_dir .. "/assimp/*.*",
       third_party_dir .. "/stb_image/*.*",
@@ -133,7 +134,94 @@ function setupProject()
       third_party_dir .. "/tinymath/detail/*.*",
       third_party_dir .. "/tinymath/primitives/*.*",
       third_party_dir .. "/tinymath/color/*.*",
-      sample_dir .. "/Editor.cpp"
+      sample_dir .. "/ViewerSample.cpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+function setuoHelloTriangle()
+   project "HelloTriangle"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/rasterizor/*.*",
+      src_dir .. "/editor/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/utility/detail/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/rasterizor/*.*",
+      include_dir .. "/rasterizor/detail/*.*",
+      include_dir .. "/editor/*.*",
+      shader_dir  .. "/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/tinymath/*.*",
+      third_party_dir .. "/tinymath/detail/*.*",
+      third_party_dir .. "/tinymath/primitives/*.*",
+      third_party_dir .. "/tinymath/color/*.*",
+      sample_dir .. "/HelloTriangle.cpp",
+      sample_dir .. "/HelloTriangleShader.hpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+
+function setupTextureProject()
+   project "HelloTexture"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/rasterizor/*.*",
+      src_dir .. "/editor/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/utility/detail/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/rasterizor/*.*",
+      include_dir .. "/rasterizor/detail/*.*",
+      include_dir .. "/editor/*.*",
+      shader_dir  .. "/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/tinymath/*.*",
+      third_party_dir .. "/tinymath/detail/*.*",
+      third_party_dir .. "/tinymath/primitives/*.*",
+      third_party_dir .. "/tinymath/color/*.*",
+      sample_dir .. "/HelloTexture.cpp",
+      sample_dir .. "/HelloTextureShader.hpp"
    }
 
    filter { "configurations:Debug*" }
@@ -145,4 +233,6 @@ end
 
 setupIncludeDirs()
 setupSlotion()
-setupProject()
+setupViewerProject()
+setuoHelloTriangle()
+setupTextureProject()

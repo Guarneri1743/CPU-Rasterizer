@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <string>
-#include "Marcos.h"
+#include "Define.hpp"
 
 namespace CpuRasterizor {
 	static std::string replace(std::string str, std::string pattern, std::string content) {

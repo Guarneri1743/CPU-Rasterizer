@@ -74,18 +74,29 @@ namespace CpuRasterizor
 			return;
 		}
 
-		target->material->sync(model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+		target->material->sync();
+
+		auto m = model_matrix();
+		auto v = view_matrix(render_pass);
+		auto p = projection_matrix(render_pass);
+
+		target->material->local_properties.set_mat4x4(mat_model, m);
+		target->material->local_properties.set_mat4x4(mat_view, v);
+		target->material->local_properties.set_mat4x4(mat_projection, p);
+		target->material->local_properties.set_mat4x4(mat_vp, p * v);
+		target->material->local_properties.set_mat4x4(mat_mvp, p * v * m);
+
 		if (target != nullptr)
 		{
-			for (auto& m : target->meshes)
+			for (auto& mesh : target->meshes)
 			{
-				assert(m.indices.size() % 3 == 0);
-				for (size_t idx = 0; idx < m.indices.size(); idx += 3)
+				assert(mesh.indices.size() % 3 == 0);
+				for (size_t idx = 0; idx < mesh.indices.size(); idx += 3)
 				{
-					auto& v0 = m.vertices[m.indices[idx]];
-					auto& v1 = m.vertices[m.indices[idx + 1]];
-					auto& v2 = m.vertices[m.indices[idx + 2]];
-					INST(GraphicsDevice).submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2, model_matrix(), view_matrix(render_pass), projection_matrix(render_pass));
+					auto& v0 = mesh.vertices[mesh.indices[idx]];
+					auto& v1 = mesh.vertices[mesh.indices[idx + 1]];
+					auto& v2 = mesh.vertices[mesh.indices[idx + 2]];
+					INST(GraphicsDevice).submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2);
 				}
 			}
 		}

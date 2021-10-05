@@ -1,5 +1,5 @@
 #include "Material.hpp"
-#include "Marcos.h"
+#include "Define.hpp"
 #include "ShaderLab.hpp"
 #include "Singleton.hpp"
 #include "Utility.hpp"
@@ -57,13 +57,8 @@ namespace CpuRasterizor
 		return target_shader.get();
 	}
 
-	void Material::sync(Shader* shader, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
+	void Material::sync(Shader* shader)
 	{
-		shader->model = m;
-		shader->view = v;
-		shader->projection = p;
-		shader->vp_matrix = p * v;
-		shader->mvp_matrix = p * v * m;
 		shader->ztest_func = ztest_func;
 		shader->zwrite_mode = zwrite_mode;
 		shader->src_factor = src_factor;
@@ -82,12 +77,12 @@ namespace CpuRasterizor
 		shader->local_properties = local_properties;
 	}
 
-	void Material::sync(const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
+	void Material::sync()
 	{
-		sync(target_shader.get(), m, v, p);
+		sync(target_shader.get());
 		if (shadow_caster != nullptr)
 		{
-			sync(shadow_caster.get(), m, v, p);
+			sync(shadow_caster.get());
 		}
 	}
 

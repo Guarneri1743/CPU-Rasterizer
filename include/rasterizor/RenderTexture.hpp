@@ -36,6 +36,8 @@ namespace CpuRasterizor
 		Pixel get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx);
 
 		void clear(const FrameContent& flag);
+		void set_clear_color(const tinymath::color_rgba color);
+
 		void resize(const size_t& w, const size_t& h);
 		size_t get_width() const noexcept { return framebuffer->get_width(); }
 		size_t get_height() const noexcept { return framebuffer->get_height(); }

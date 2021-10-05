@@ -2,13 +2,16 @@
 #include <memory>
 #include <functional>
 #include "Define.hpp"
-#include "tinymath/tinymath.h"
+#include "tinymath.h"
 #include "RawBuffer.hpp"
 
 namespace CpuRasterizor
 {
 	constexpr float kFarZ = 1.0f;
 	constexpr uint8_t kDefaultStencil = 0x00;
+
+	template<typename T>
+	class RawBuffer;
 
 	class FrameBuffer
 	{
@@ -36,6 +39,7 @@ namespace CpuRasterizor
 		bool read_coverage(const float& u, const float& v, uint8_t& coverage);
 
 		void clear(const FrameContent& flag);
+		void set_clear_color(const tinymath::color_rgba& color);
 
 		void resize(const size_t& w, const size_t& h);
 		size_t get_width() const noexcept { return width; }
@@ -43,8 +47,8 @@ namespace CpuRasterizor
 		void get_size(size_t& w, size_t& h) const noexcept { w = width; h = height; }
 		FrameContent get_flag() const { return content_flag; }
 
-		RawBuffer<tinymath::color_rgba>* get_color_raw_buffer() const noexcept { return color_buffer.get(); }
-		tinymath::color_rgba* get_color_buffer_ptr() const noexcept { size_t size;  return color_buffer->get_ptr(size); };
+		RawBuffer<tinymath::color_rgba>* get_color_raw_buffer() const noexcept;
+		tinymath::color_rgba* get_color_buffer_ptr() const noexcept;
 
 
 		// Pper pixel operations
@@ -81,6 +85,8 @@ namespace CpuRasterizor
 		FrameContent content_flag;
 		size_t width;
 		size_t height;
+
+		tinymath::color_rgba clear_color;
 
 		// use 32 bits zbuffer here, for convenience 
 		std::unique_ptr<RawBuffer<float>> depth_buffer;

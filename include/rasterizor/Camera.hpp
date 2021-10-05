@@ -1,15 +1,14 @@
 #pragma once
 #include "Define.hpp"
-#include "Object.hpp"
 #include "tinymath.h"
-#include "Transform.hpp"
 
 #undef near
 #undef far
 
 namespace CpuRasterizor
 {
-	class Camera : public Object
+	class Transform;
+	class Camera 
 	{
 	public:
 		float fov;

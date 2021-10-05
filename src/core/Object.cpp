@@ -1,7 +1,7 @@
 #include "Object.hpp"
 #include <string>
 #include <stdint.h>
-#include "Marcos.h"
+#include "Define.hpp"
 #include "IdAllocator.hpp"
 
 namespace CpuRasterizor

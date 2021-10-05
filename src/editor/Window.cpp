@@ -131,12 +131,17 @@ namespace CpuRasterizor
 		valid = false;
 	}
 
-	void Window::initialize_main_window(const char* title)
+	void Window::initialize_main_window(const char* title, int w, int h)
 	{
 		if (main_window == nullptr)
 		{
-			main_window = new Window(title, kDefaultWindowWidth, kDefaultWindowHeight);
+			main_window = new Window(title, w, h);
 		}
+	}
+
+	void Window::initialize_main_window(const char* title)
+	{
+		initialize_main_window(title, kDefaultWindowWidth, kDefaultWindowHeight);
 	}
 
 	static void check_shader_error(GLuint shader, std::string type)
@@ -229,19 +234,18 @@ namespace CpuRasterizor
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
-	void Window::blit2screen(uint8_t* framebuffer, size_t w, size_t h)
+	void Window::blit2screen(uint8_t* framebuffer, size_t w, size_t h, bool draw_directly)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 		glBindTexture(GL_TEXTURE_2D, FBO);
-		//uint32_t view_px, view_py, view_w, view_h;
-		//view_px = kHierarchyWidth;
-		//view_py = kTopToolbarHeight;
-		//view_w = get_scene_view_width();
-		//view_h = get_scene_view_height();
-		//glViewport(view_px, view_py, view_w, view_h);
-		//glUseProgram(shader_id);
-		//glBindVertexArray(VAO);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		if (draw_directly)
+		{
+			glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+			glUseProgram(shader_id);
+			glBindVertexArray(VAO);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
 	}
 
 	void Window::flush()

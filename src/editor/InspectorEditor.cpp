@@ -3,7 +3,7 @@
 #include <filesystem>
 
 #include "imgui/imgui.h"
-#include "Marcos.h"
+#include "Define.hpp"
 #include "InputManager.hpp"
 #include "Window.hpp"
 #include "Singleton.hpp"
@@ -66,7 +66,7 @@ namespace CpuRasterizor
 			ImGui::Text("Window Size: %f, %f", tinymath::vec2f((float)Window::main()->get_width(), (float)Window::main()->get_height()));
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
-				INST(GraphicsDevice).resize(rt_size[0], rt_size[1]);
+				INST(GraphicsDevice).set_viewport(rt_size[0], rt_size[1]);
 			}
 			else
 			{

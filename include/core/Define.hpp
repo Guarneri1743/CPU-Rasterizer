@@ -3,7 +3,8 @@
 #include <ostream>
 #include <sstream>
 #include "Marcos.h"
-#include "Traits.hpp"
+#include <type_traits>
+
 
 constexpr int kMaxMip = 8;
 constexpr int kBoundsPadding = 1;
@@ -17,6 +18,7 @@ const property_name ao_prop = 2; // "texture_ao";
 const property_name emission_prop = 3; // "texture_emission"
 const property_name height_prop = 4; // "texture_emission"
 const property_name f0_prop = 5; // "texture_f0"
+
 
 // specular/glossiness workflow
 const property_name specular_prop = 11; // "texture_specular";
@@ -40,6 +42,13 @@ const property_name metallic_offset_prop = 33;
 // colors
 const property_name tint_color_prop = 40;
 
+// common
+const property_name mat_model = 50;
+const property_name mat_view = 51;
+const property_name mat_projection = 52;
+const property_name mat_vp = 53;
+const property_name mat_mvp = 54;
+
 
 // statistics
 struct GraphicsStatistic
@@ -51,6 +60,32 @@ struct GraphicsStatistic
 };
 
 typedef uint8_t image_ubyte;
+
+enum class WrapMode
+{
+	REPEAT = 0,
+	CLAMP_TO_EDGE = 1,
+	CLAMP_TO_BORDER = 2
+};
+
+enum class Filtering
+{
+	POINT = 0,
+	BILINEAR = 1,
+	MAX = 2,
+	MIN = 3
+};
+
+enum class TextureFormat
+{
+	INVALID = 0,
+	rgb = 1,
+	rgba = 2,
+	rg = 3,
+	r32 = 4,
+	rgb16f = 5,
+	rgba16f = 6
+};
 
 // pipeline defines
 enum class RasterizerStrategy
@@ -215,6 +250,68 @@ enum class RenderPass
 	kShadow,
 	kSkybox
 };
+
+template<typename TEnumType>
+struct support_bitwise_enum : std::false_type {};
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator&(TEnumType left, TEnumType right)
+{
+	return static_cast<TEnumType>(
+		static_cast<std::underlying_type_t<TEnumType>>(left) &
+		static_cast<std::underlying_type_t<TEnumType>>(right));
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator|(TEnumType left, TEnumType right)
+{
+	return static_cast<TEnumType>(
+		static_cast<std::underlying_type_t<TEnumType>>(left) |
+		static_cast<std::underlying_type_t<TEnumType>>(right));
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator^(TEnumType left, TEnumType right)
+{
+	return static_cast<TEnumType>(
+		static_cast<std::underlying_type_t<TEnumType>>(left) ^
+		static_cast<std::underlying_type_t<TEnumType>>(right));
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator~(TEnumType value)
+{
+	return static_cast<TEnumType>(
+		~static_cast<std::underlying_type_t<TEnumType>>(value));
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator&=(TEnumType& left, TEnumType right)
+{
+	left = left & right;
+	return left;
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator|=(TEnumType& left, TEnumType right)
+{
+	left = left | right;
+	return left;
+}
+
+template<typename TEnumType>
+typename std::enable_if_t<support_bitwise_enum<TEnumType>::value, TEnumType>
+operator^=(TEnumType& left, TEnumType right)
+{
+	left = left ^ right;
+	return left;
+}
 
 template<>
 struct support_bitwise_enum<RenderFlag> : std::true_type {};

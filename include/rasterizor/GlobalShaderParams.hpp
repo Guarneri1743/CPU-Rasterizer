@@ -2,12 +2,13 @@
 #include <vector>
 #include "Define.hpp"
 #include "Light.hpp"
-#include "Traits.hpp"
 #include "tinymath.h"
 
 namespace CpuRasterizor {
-	struct GlobalShaderParams {
-		GlobalShaderParams() {
+	struct GlobalShaderParams 
+	{
+		GlobalShaderParams() 
+		{
 			cam_near = 0.1f;
 			cam_far = 500.0f;
 			camera_pos = tinymath::kVec3fZero;

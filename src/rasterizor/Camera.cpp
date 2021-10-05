@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 #include <sstream>
 #include <iostream>
+#include "Transform.hpp"
 
 namespace CpuRasterizor
 {

@@ -93,8 +93,8 @@ namespace CpuRasterizor
 		std::shared_ptr<RenderTexture> shadowmap;
 		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
 
-		Shader::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
-		Shader::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
+		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
+		ShaderPropertyMap::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
 	}
 
 
@@ -258,9 +258,6 @@ namespace CpuRasterizor
 
 	void Scene::render_objects()
 	{
-		INST(GraphicsDevice).multi_thread = true;
-		INST(GraphicsDevice).tile_based = true;
-
 		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
 		{
 			return;

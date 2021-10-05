@@ -1,5 +1,5 @@
 {
-    "name": "",
+    "name": "default_scene",
     "main_light": {
         "ambient": {
             "x": 0.05000000074505806,

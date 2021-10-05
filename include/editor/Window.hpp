@@ -13,12 +13,13 @@ namespace CpuRasterizor
 		Window(const char* title, int width, int height);
 		~Window();
 
+		static void initialize_main_window(const char* title, int w, int h);
 		static void initialize_main_window(const char* title);
 		static Window* main() { return main_window; };
 		GLFWwindow* get() const { return window; }
 
 		void clear();
-		void blit2screen(uint8_t* framebuffer, size_t w, size_t h);
+		void blit2screen(uint8_t* framebuffer, size_t w, size_t h, bool draw_directly);
 		void flush();
 		void close() { closed = true; }
 		void get_cursor_pos(double& x, double& y) { x = cursor_x; y = cursor_y; }

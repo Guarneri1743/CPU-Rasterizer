@@ -4,7 +4,7 @@
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-#include "Marcos.h"
+#include "Define.hpp"
 #include "InputManager.hpp"
 #include "Window.hpp"
 #include "Singleton.hpp"

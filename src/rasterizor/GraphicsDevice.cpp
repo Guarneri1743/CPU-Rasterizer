@@ -1,20 +1,57 @@
 #include "GraphicsDevice.hpp"
 #include <iostream>
-#include "Singleton.hpp"
-#include "GlobalShaderParams.hpp"
-#include "tinymath/primitives/Rect.h"
-#include "Clipper.hpp"
-#include "Pipeline.hpp"
-#include "SegmentDrawer.hpp"
 #include <execution>
 #include <algorithm>
+#include "tinymath/color/ColorEncoding.h"
+#include "Clipper.hpp"
+#include "Pipeline.hpp"
+#include "Singleton.hpp"
 #include "Logger.hpp"
-#include "Sampling.hpp"
 #include "IdAllocator.hpp"
+#include "RawBuffer.hpp"
+#include "tinymath.h"
+#include "RasterAttributes.hpp"
+#include "Triangle.hpp"
+#include "RenderTexture.hpp"
+#include "TileBasedManager.hpp"
+#include "GlobalShaderParams.hpp"
+#include "tinymath/primitives/Rect.h"
+#include "SegmentDrawer.hpp"
+#include "Sampling.hpp"
+#include "Shader.hpp"
 
 namespace CpuRasterizor
 {
 	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
+
+	struct SubsampleParam
+	{
+		tinymath::color_rgba pixel_color;
+		bool pixel_color_calculated;
+	};
+
+	struct DrawCommand
+	{
+		Shader* shader;
+		Vertex v1;
+		Vertex v2;
+		Vertex v3;
+	};
+
+	class GraphicsCommand
+	{
+		virtual void execute() = 0;
+	};
+
+	class MsaaCommand : public GraphicsCommand
+	{
+	public:
+		bool enable;
+		uint8_t msaa_subsample_count;
+
+	public:
+		void execute() {}
+	};
 
 	GraphicsDevice::GraphicsDevice()
 	{
@@ -54,7 +91,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void GraphicsDevice::initialize(size_t w, size_t h)
+	void GraphicsDevice::set_viewport(size_t w, size_t h)
 	{
 		resize(w, h);
 	}
@@ -121,22 +158,14 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	void GraphicsDevice::draw(DrawCommand task)
+	void GraphicsDevice::draw(const DrawCommand& task)
 	{
-		const Shader& shader = *task.shader;
-		auto v1 = task.v1;
-		auto v2 = task.v2;
-		auto v3 = task.v3;
-		auto m = task.m;
-		auto v = task.v;
-		auto p = task.p;
-
-		input2raster(shader, v1, v2, v3);
+		input2raster(*task.shader, task.v1, task.v2, task.v3);
 	}
 
-	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
+	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
-		DrawCommand task = { shader, v1, v2, v3, m, v, p };
+		DrawCommand task = { shader, v1, v2, v3 };
 		draw_commands.emplace_back(task);
 	}
 
@@ -196,6 +225,11 @@ namespace CpuRasterizor
 		statistics.culled_backface_triangle_count = 0;
 		statistics.triangle_count = 0;
 		statistics.earlyz_optimized = 0;
+	}
+
+	void GraphicsDevice::set_clear_color(const tinymath::Color color)
+	{
+		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
 	void GraphicsDevice::input2raster(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)

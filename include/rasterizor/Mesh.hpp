@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include <vector>
 #include "Object.hpp"
 #include "RasterAttributes.hpp"

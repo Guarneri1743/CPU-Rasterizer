@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include "Object.hpp"
 #include "tinymath.h"
-#include "Triangle.hpp"
 #include "Model.hpp"
 
 namespace CpuRasterizor

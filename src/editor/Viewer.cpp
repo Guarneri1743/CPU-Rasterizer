@@ -1,20 +1,24 @@
-#include "Application.hpp"
+#include "Viewer.hpp"
+#include <iostream>
 #include "InspectorEditor.hpp"
 #include "HierarchyEditor.hpp"
 #include "MainEditor.hpp"
 #include "SceneViewEditor.hpp"
 #include "ExplorerEditor.hpp"
-#include <iostream>
+#include "Window.hpp"
+#include "GraphicsDevice.hpp"
+#include "Time.hpp"
+#include "Scene.hpp"
 
 namespace CpuRasterizor
 {
-	bool Application::playing = false;
-	std::vector<std::unique_ptr<BaseEditor>> Application::editors;
+	bool Viewer::playing = false;
+	std::vector<std::unique_ptr<BaseEditor>> Viewer::editors;
 
-	void Application::initialize()
+	void Viewer::initialize()
 	{
 		if (playing) return;
-		Window::initialize_main_window("CPU-Rasterizer");
+		Window::initialize_main_window("CPU Rasterizer Viewer");
 		auto main_editor = std::make_unique<MainEditor>(0, 0, Window::main()->get_width(), Window::main()->get_height());
 		auto sceneview = std::make_unique<SceneViewEditor>(kLeftWidth, kTopHeight, Window::main()->get_width() - kRightWidth - kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
 		auto setting = std::make_unique<InspectorEditor>(0, kTopHeight, kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
@@ -25,12 +29,13 @@ namespace CpuRasterizor
 		editors.emplace_back(std::move(hierarchy));
 		editors.emplace_back(std::move(sceneview));
 		editors.emplace_back(std::move(explorer));
-		INST(GraphicsDevice).initialize(600, 400);
+		INST(GraphicsDevice).set_viewport(600, 400);
 		Time::start();
+		CpuRasterizor::Scene::open_scene("/scenes/default_scene.scene");
 		playing = true;
 	}
 
-	void Application::loop()
+	void Viewer::run()
 	{
 		if (!playing) return;
 
@@ -53,7 +58,8 @@ namespace CpuRasterizor
 				// blit framebuffer to screen
 				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_target_color_buffer()),
 											INST(GraphicsDevice).get_width(),
-											INST(GraphicsDevice).get_height());
+											INST(GraphicsDevice).get_height(),
+											false);
 
 				// render editors
 				BaseEditor::pre_render();
@@ -72,7 +78,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void Application::stop()
+	void Viewer::stop()
 	{
 		Window::main()->close();
 	}

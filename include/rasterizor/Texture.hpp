@@ -5,39 +5,12 @@
 #include <unordered_map>
 #include <vector>
 #include "Define.hpp"
-#include "Object.hpp"
 #include "tinymath/color/Color.h"
 #include "RawBuffer.hpp"
 
 namespace CpuRasterizor
 {
-	enum class WrapMode
-	{
-		REPEAT = 0,
-		CLAMP_TO_EDGE = 1,
-		CLAMP_TO_BORDER = 2
-	};
-
-	enum class Filtering
-	{
-		POINT = 0,
-		BILINEAR = 1,
-		MAX = 2,
-		MIN = 3
-	};
-
-	enum class TextureFormat
-	{
-		INVALID = 0,
-		rgb = 1,
-		rgba = 2,
-		rg = 3,
-		r32 = 4,
-		rgb16f = 5,
-		rgba16f = 6
-	};
-
-	class Texture : public Object
+	class Texture 
 	{
 	public:
 		WrapMode wrap_mode;

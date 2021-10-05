@@ -2,12 +2,14 @@
 
 namespace CpuRasterizor
 {
+	ShaderPropertyMap ShaderPropertyMap::global_shader_properties;
+
 	ShaderPropertyMap::ShaderPropertyMap(const ShaderPropertyMap& other)
 	{
 		this->copy(other);
 	}
 
-	ShaderPropertyMap& ShaderPropertyMap::operator=(const ShaderPropertyMap & other)
+	ShaderPropertyMap& ShaderPropertyMap::operator=(const ShaderPropertyMap& other)
 	{
 		this->copy(other);
 		return *this;
@@ -18,29 +20,34 @@ namespace CpuRasterizor
 		return name2int.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_float4(const property_name & name) const
+	bool ShaderPropertyMap::has_float4(const property_name& name) const
 	{
 		return name2float4.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_float(const property_name & name) const
+	bool ShaderPropertyMap::has_float(const property_name& name) const
 	{
 		return name2float.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_texture(const property_name & name) const 
+	bool ShaderPropertyMap::has_texture(const property_name& name) const
 	{
 		return name2tex.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_cubemap(const property_name & name) const
+	bool ShaderPropertyMap::has_cubemap(const property_name& name) const
 	{
 		return name2cubemap.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_framebuffer(const property_name & name) const
+	bool ShaderPropertyMap::has_framebuffer(const property_name& name) const
 	{
 		return name2framebuffer.count(name) > 0;
+	}
+
+	bool ShaderPropertyMap::has_mat4x4(const property_name& name) const
+	{
+		return name2mat4x4.count(name) > 0;
 	}
 
 	void ShaderPropertyMap::set_int(const property_name& name, const int& val)
@@ -56,6 +63,11 @@ namespace CpuRasterizor
 	void ShaderPropertyMap::set_float(const property_name& name, const float& val)
 	{
 		name2float[name] = val;
+	}
+
+	void ShaderPropertyMap::set_mat4x4(const property_name& name, const tinymath::mat4x4& val)
+	{
+		name2mat4x4[name] = val;
 	}
 
 	void ShaderPropertyMap::set_texture(const property_name& name, std::shared_ptr<Texture> tex)
@@ -112,6 +124,15 @@ namespace CpuRasterizor
 		return 0;
 	}
 
+	tinymath::mat4x4 ShaderPropertyMap::get_mat4x4(const property_name& name) const
+	{
+		if (name2mat4x4.count(name) > 0)
+		{
+			return name2mat4x4.at(name);
+		}
+		return tinymath::kMat4x4Identity;
+	}
+
 	std::shared_ptr<Texture> ShaderPropertyMap::get_texture(const property_name& name) const
 	{
 		if (name2tex.count(name) > 0)
@@ -143,6 +164,7 @@ namespace CpuRasterizor
 	{
 		this->name2float = other.name2float;
 		this->name2float4 = other.name2float4;
+		this->name2mat4x4 = other.name2mat4x4;
 		this->name2int = other.name2int;
 		this->name2tex = other.name2tex;
 		this->name2cubemap = other.name2cubemap;

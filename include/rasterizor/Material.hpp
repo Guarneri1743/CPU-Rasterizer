@@ -4,9 +4,6 @@
 #include "tinymath.h"
 #include "Object.hpp"
 #include "Shader.hpp"
-#include "ShadowShader.hpp"
-#include "SkyboxShader.hpp"
-#include "FrameBuffer.hpp"
 
 namespace CpuRasterizor
 {
@@ -43,8 +40,8 @@ namespace CpuRasterizor
 		~Material();
 
 		Shader* get_shader(const RenderPass& pass) const;
-		void sync(Shader* shader, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
-		void sync(const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
+		void sync(Shader* shader);
+		void sync();
 		
 		Material& operator =(const Material& other);
 		void copy(const Material& other);

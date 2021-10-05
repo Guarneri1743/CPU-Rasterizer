@@ -4,47 +4,18 @@
 #include <memory>
 #include <vector>
 #include <future>
-#include "Marcos.h"
 #include "Define.hpp"
-#include "RawBuffer.hpp"
-#include "tinymath.h"
-#include "Triangle.hpp"
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
+#include "RasterAttributes.hpp"
+#include "Shader.hpp"
+#include "Triangle.hpp"
 
 namespace CpuRasterizor
 {
-	struct SubsampleParam
-	{
-		tinymath::color_rgba pixel_color;
-		bool pixel_color_calculated;
-	};
-
-	struct DrawCommand
-	{
-		Shader* shader;
-		Vertex v1;
-		Vertex v2;
-		Vertex v3;
-		tinymath::mat4x4 m;
-		tinymath::mat4x4 v;
-		tinymath::mat4x4 p;
-	};
-
-	class GraphicsCommand
-	{
-		virtual void execute() = 0;
-	};
-
-	class MsaaCommand : public GraphicsCommand
-	{
-	public:
-		bool enable;
-		uint8_t msaa_subsample_count;
-
-	public:
-		void execute() {}
-	};
+	struct SubsampleParam;
+	struct DrawCommand;
+	class GraphicsCommand;
 
 	class GraphicsDevice
 	{
@@ -52,12 +23,12 @@ namespace CpuRasterizor
 		GraphicsDevice();
 		~GraphicsDevice();
 
-		void resize(size_t w, size_t h);
-		void initialize(size_t w, size_t h);
-		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
+		void set_viewport(size_t w, size_t h);
+		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void fence_draw_commands();
 		void present();
 		void clear_buffer(const FrameContent& flag);
+		void set_clear_color(const tinymath::Color color);
 		void set_subsample_count(const uint8_t& multiplier);
 		RenderTexture* get_active_rendertexture() const noexcept;
 		tinymath::color_rgba* get_target_color_buffer() const noexcept { return target_rendertexture->get_color_buffer_ptr(); }
@@ -80,7 +51,7 @@ namespace CpuRasterizor
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 
 	private:
-		void draw(DrawCommand task);
+		void draw(const DrawCommand& task);
 		void input2raster(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void clip2raster(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
@@ -105,6 +76,7 @@ namespace CpuRasterizor
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param);
 		bool validate_fragment(const PerSampleOperation& op_pass) const;
 		void process_commands();
+		void resize(size_t w, size_t h);
 
 	public:
 		GraphicsStatistic statistics;

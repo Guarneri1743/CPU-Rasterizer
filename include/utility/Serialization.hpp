@@ -19,6 +19,7 @@
 #include "Scene.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "RasterAttributes.hpp"
 
 #undef GetObject
 
