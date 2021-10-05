@@ -6,7 +6,7 @@
 #include "PBR.hpp"
 #include "Sampling.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	PBRShader::PBRShader(std::string name) : Shader(name, false){}
 

@@ -2,7 +2,7 @@
 #include "GlobalShaderParams.hpp"
 #include "Singleton.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	ShadowShader::ShadowShader() : Shader("shadow_shader")
 	{

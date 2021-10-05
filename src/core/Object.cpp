@@ -4,7 +4,7 @@
 #include "Marcos.h"
 #include "IdAllocator.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	IdAllocator idalloc(kInvalidID + 1, kMaxID);
 

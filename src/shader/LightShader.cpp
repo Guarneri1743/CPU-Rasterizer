@@ -1,7 +1,7 @@
 #include "LightShader.hpp"
 #include <iostream>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	LightShader::LightShader() : Shader("light_shader")
 	{}

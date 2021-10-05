@@ -3,7 +3,7 @@
 #include <string>
 #include "Marcos.h"
 
-namespace Guarneri {
+namespace CpuRasterizor {
 	static std::string replace(std::string str, std::string pattern, std::string content) {
 		while (str.find(pattern) != std::string::npos) {
 			str.replace(str.find(pattern), 1, content);

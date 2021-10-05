@@ -7,7 +7,7 @@
 #undef near
 #undef far
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Camera : public Object
 	{

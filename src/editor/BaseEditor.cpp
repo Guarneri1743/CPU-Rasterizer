@@ -17,7 +17,7 @@
 #undef near
 #undef far
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	bool BaseEditor::imgui_initialized = false;
 

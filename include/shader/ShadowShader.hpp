@@ -3,7 +3,7 @@
 #include "Shader.hpp"
 #include "tinymath.h"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class ShadowShader : public Shader
 	{

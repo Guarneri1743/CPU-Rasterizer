@@ -12,7 +12,7 @@
 #include "Sampling.hpp"
 #include "IdAllocator.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
 

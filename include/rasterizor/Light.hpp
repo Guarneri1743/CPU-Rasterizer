@@ -2,7 +2,7 @@
 #include "tinymath.h"
 #include "Object.hpp"
 
-namespace Guarneri {
+namespace CpuRasterizor {
 	struct Light {
 		tinymath::Color ambient;
 		tinymath::Color diffuse;

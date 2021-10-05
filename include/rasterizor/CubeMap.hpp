@@ -5,7 +5,7 @@
 #include "tinymath.h"
 #include "Texture.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class CubeMap {
 	public:

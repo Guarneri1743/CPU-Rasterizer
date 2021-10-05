@@ -22,7 +22,7 @@
 
 #undef GetObject
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Serializer
 	{

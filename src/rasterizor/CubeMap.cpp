@@ -12,7 +12,7 @@
 #include "Sampling.hpp"
 #include "Serialization.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr size_t kMaxPrefilteredMapCount = 4;
 

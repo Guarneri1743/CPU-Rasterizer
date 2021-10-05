@@ -2,7 +2,7 @@
 #include <string>
 #include <stdint.h>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Object
 	{

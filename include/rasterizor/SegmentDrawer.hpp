@@ -1,7 +1,7 @@
 #pragma once
 #include "RawBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class SegmentDrawer
 	{

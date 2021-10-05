@@ -2,8 +2,8 @@
 
 int main()
 {
-	Guarneri::Application::initialize();
-	Guarneri::Scene::open_scene("/scenes/filtering_sample.scene");
-	Guarneri::Application::loop();
+	CpuRasterizor::Application::initialize();
+	CpuRasterizor::Scene::open_scene("/scenes/filtering_sample.scene");
+	CpuRasterizor::Application::loop();
 	return 0;
 }

@@ -4,7 +4,7 @@
 #include "Singleton.hpp"
 #include "Sampling.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	SkyboxShader::SkyboxShader() : Shader("skybox_shader")
 	{

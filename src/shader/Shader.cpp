@@ -4,7 +4,7 @@
 #include "Marcos.h"
 #include "Singleton.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	ShaderPropertyMap Shader::global_shader_properties;
 

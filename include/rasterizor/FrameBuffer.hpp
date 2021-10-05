@@ -5,7 +5,7 @@
 #include "tinymath/tinymath.h"
 #include "RawBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr float kFarZ = 1.0f;
 	constexpr uint8_t kDefaultStencil = 0x00;

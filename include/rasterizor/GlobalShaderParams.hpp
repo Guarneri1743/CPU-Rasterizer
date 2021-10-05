@@ -5,7 +5,7 @@
 #include "Traits.hpp"
 #include "tinymath.h"
 
-namespace Guarneri {
+namespace CpuRasterizor {
 	struct GlobalShaderParams {
 		GlobalShaderParams() {
 			cam_near = 0.1f;

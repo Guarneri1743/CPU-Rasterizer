@@ -13,7 +13,7 @@
 #include "Transform.hpp"
 
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Model : public Object
 	{

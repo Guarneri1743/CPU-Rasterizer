@@ -4,7 +4,7 @@
 #include "Object.hpp"
 #include "RasterAttributes.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Mesh : public Object
 	{

@@ -2,7 +2,7 @@
 #include "BaseEditor.hpp"
 #include <filesystem>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class ExplorerEditor : public BaseEditor
 	{

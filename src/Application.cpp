@@ -6,7 +6,7 @@
 #include "ExplorerEditor.hpp"
 #include <iostream>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	bool Application::playing = false;
 	std::vector<std::unique_ptr<BaseEditor>> Application::editors;

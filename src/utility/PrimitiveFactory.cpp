@@ -1,7 +1,7 @@
 #include "PrimitiveFactory.hpp"
 #include "Material.hpp"
 
-namespace Guarneri {
+namespace CpuRasterizor {
 	Vertex cube_vertices[36] = {
 		Vertex(tinymath::vec4f(-0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(0.0f,  0.0f)),
 		Vertex(tinymath::vec4f(0.5f, -0.5f, -0.5f, 1.0f), tinymath::vec3f(0.0f,  0.0f, -1.0f), tinymath::vec2f(1.0f,  0.0f)),

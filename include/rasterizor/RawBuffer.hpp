@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <memory>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	template<typename T>
 	class RawBuffer

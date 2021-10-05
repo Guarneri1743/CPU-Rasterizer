@@ -7,7 +7,7 @@
 #include "ShaderPropertyMap.hpp"
 #include "RasterAttributes.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	static tinymath::Color mip_colors[kMaxMip] =
 	{

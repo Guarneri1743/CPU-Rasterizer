@@ -2,7 +2,7 @@
 #include <execution>
 #include <algorithm>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	TileBasedManager::TileBasedManager(const size_t& w, const size_t& h) :
 		width(w), height(h), tile_tasks(nullptr),

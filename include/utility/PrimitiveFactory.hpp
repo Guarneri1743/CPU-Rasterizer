@@ -5,7 +5,7 @@
 #include "Model.hpp"
 #include "RasterAttributes.hpp"
 
-namespace Guarneri {
+namespace CpuRasterizor {
 	class PrimitiveFactory {
 	public:
 		static tinymath::vec3f cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3);

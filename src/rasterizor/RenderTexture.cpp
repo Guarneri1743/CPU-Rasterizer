@@ -1,7 +1,7 @@
 #include "RenderTexture.hpp"
 #include "Sampling.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	RenderTexture::RenderTexture(const size_t& w, const size_t& h, const FrameContent& flag, bool msaa_on, uint8_t subsample_count) :
 		has_msaa_buffer(msaa_on),

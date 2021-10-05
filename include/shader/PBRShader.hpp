@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class PBRShader : public Shader
 	{

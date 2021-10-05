@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Camera* Camera::main_cam;
 

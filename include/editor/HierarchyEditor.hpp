@@ -2,7 +2,7 @@
 #include "BaseEditor.hpp"
 #include "Transform.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class HierarchyEditor : public BaseEditor
 	{

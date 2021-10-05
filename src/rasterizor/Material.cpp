@@ -5,7 +5,7 @@
 #include "Utility.hpp"
 #include "Logger.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Material::Material()
 	{

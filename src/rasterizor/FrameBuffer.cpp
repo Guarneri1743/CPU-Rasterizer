@@ -2,7 +2,7 @@
 #include <execution>
 #include <algorithm>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	FrameBuffer::FrameBuffer(const size_t& w, const size_t& h, const FrameContent& flag) : 
 		content_flag(flag),

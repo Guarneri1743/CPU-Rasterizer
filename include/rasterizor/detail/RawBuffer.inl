@@ -1,7 +1,7 @@
 #include "tinymath.h"
 #include "..\RawBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	template<typename T>
 	RawBuffer<T>::RawBuffer(size_t w, size_t h)

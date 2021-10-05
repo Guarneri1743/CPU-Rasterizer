@@ -5,7 +5,7 @@
 #include "Singleton.hpp"
 #include "Serialization.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	SkyboxRenderer::SkyboxRenderer() : Renderer()
 	{

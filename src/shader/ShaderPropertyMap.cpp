@@ -1,6 +1,6 @@
 #include "ShaderPropertyMap.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	ShaderPropertyMap::ShaderPropertyMap(const ShaderPropertyMap& other)
 	{

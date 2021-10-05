@@ -7,7 +7,7 @@
 #include "Renderer.hpp"
 #include "SkyboxRenderer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Scene
 	{

@@ -1,7 +1,7 @@
 #include "Light.hpp"
 #include "Serialization.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Light::Light()
 	{

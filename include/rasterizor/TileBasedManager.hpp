@@ -8,7 +8,7 @@
 #include "Triangle.hpp"
 #include "Shader.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr size_t kTileSize = 16;
 

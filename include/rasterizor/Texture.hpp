@@ -9,7 +9,7 @@
 #include "tinymath/color/Color.h"
 #include "RawBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	enum class WrapMode
 	{

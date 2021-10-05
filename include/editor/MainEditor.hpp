@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseEditor.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class MainEditor : public BaseEditor
 	{

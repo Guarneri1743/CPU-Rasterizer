@@ -5,7 +5,7 @@
 #include "Define.hpp"
 #include "FrameBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	struct Pixel
 	{

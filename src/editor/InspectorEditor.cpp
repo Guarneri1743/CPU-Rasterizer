@@ -17,7 +17,7 @@
 #undef near
 #undef far
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	bool show = true;	
 	int rt_size[2];

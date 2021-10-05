@@ -5,7 +5,7 @@
 #include "Config.h"
 #include "Scene.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Renderer::Renderer() : gizmos(true)
 	{}

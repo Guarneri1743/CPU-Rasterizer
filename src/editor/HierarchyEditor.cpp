@@ -10,7 +10,7 @@
 #include "tinymath/primitives/Rect.h"
 
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	HierarchyEditor::HierarchyEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{

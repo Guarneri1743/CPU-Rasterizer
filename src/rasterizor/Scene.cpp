@@ -20,7 +20,7 @@
 #undef far
 #undef GetObject
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Scene* Scene::current_scene;
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include "tinymath/primitives/Rect.h"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr int kTopHeight = 19;
 	constexpr int kLeftWidth = 256;

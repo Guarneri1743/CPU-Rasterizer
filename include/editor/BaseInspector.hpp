@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class BaseInspector
 	{};

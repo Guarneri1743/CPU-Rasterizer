@@ -4,7 +4,7 @@
 #include "tinymath.h"
 #include "Renderer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class SkyboxRenderer : public Renderer
 	{

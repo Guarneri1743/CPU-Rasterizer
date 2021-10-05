@@ -3,7 +3,7 @@
 #include <unordered_set>
 #include "tinymath.h"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	enum class MouseButton
 	{

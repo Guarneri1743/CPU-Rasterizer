@@ -8,7 +8,7 @@
 #include "Triangle.hpp"
 #include "Model.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Renderer : public Object
 	{

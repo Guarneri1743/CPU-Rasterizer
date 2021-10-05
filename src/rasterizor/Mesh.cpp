@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Mesh::Mesh() {}
 

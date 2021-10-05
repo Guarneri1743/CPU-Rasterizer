@@ -12,7 +12,7 @@
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	struct SubsampleParam
 	{

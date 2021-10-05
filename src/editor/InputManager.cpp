@@ -4,7 +4,7 @@
 #include "Window.hpp"
 #include "GLFW/glfw3.h"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	std::unordered_map<int, KeyCode> key_mapping =
 	{

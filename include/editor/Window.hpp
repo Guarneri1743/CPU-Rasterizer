@@ -3,7 +3,7 @@
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr char* kGlslVersion = "#version 130";
 

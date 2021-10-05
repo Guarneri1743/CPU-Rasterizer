@@ -11,7 +11,7 @@
 #include "Singleton.hpp"
 #include "Logger.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	constexpr int kDefaultWindowWidth = 1920;
 	constexpr int kDefaultWindowHeight = 1080;

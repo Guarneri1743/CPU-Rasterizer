@@ -38,7 +38,7 @@
 #include "BaseEditor.hpp"
 #include "GraphicsDevice.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Application
 	{

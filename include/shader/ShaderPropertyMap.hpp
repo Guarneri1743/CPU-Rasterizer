@@ -6,7 +6,7 @@
 #include "CubeMap.hpp"
 #include "RenderTexture.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class ShaderPropertyMap
 	{

@@ -1,7 +1,7 @@
 #include "LightInspector.hpp"
 #include "imgui/imgui.h"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	void LightInspector::on_gui(DirectionalLight& light)
 	{

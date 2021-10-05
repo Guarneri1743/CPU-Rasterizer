@@ -5,7 +5,7 @@
 #include "LightShader.hpp"
 
 //TODO
-namespace Guarneri
+namespace CpuRasterizor
 {
 	std::unordered_map<std::string, std::shared_ptr<Shader>> ShaderLab::name2shaders;
 

@@ -3,7 +3,7 @@
 #include "tinymath.h"
 #include "Shader.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class SkyboxShader : public Shader
 	{

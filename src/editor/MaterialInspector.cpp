@@ -6,7 +6,7 @@
 #include "tinymath/tinymath.h"
 #include "Shader.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	void MaterialInspector::on_gui(Material& material)
 	{

@@ -8,7 +8,7 @@
 #include "SkyboxShader.hpp"
 #include "FrameBuffer.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class Material : public Object
 	{

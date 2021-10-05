@@ -19,7 +19,7 @@ constexpr uint8_t kChannelRG = 2;
 constexpr uint8_t kChannelRGB = 3;
 constexpr uint8_t kChannelRGBA = 4;
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	Texture::Texture()
 	{

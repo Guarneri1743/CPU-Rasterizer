@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "Shader.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class ShaderLab
 	{

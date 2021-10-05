@@ -4,7 +4,7 @@
 #include "TransformInspector.hpp"
 #include "LightInspector.hpp"
 
-namespace Guarneri
+namespace CpuRasterizor
 {
 	class InspectorEditor : public BaseEditor
 	{
