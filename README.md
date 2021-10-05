@@ -7,8 +7,6 @@
 
 ##### Hello Triangle
 
-Hello Triangle Sample:
-
 	#include "GraphicsApi.h"
 	#include "HelloTriangleShader.hpp"
 	
@@ -81,8 +79,7 @@ Hello Triangle Sample:
 	}
 
 
-
-Hello Triangle Shader:
+Shader:
 
 	#pragma once
 	#include "Shader.hpp"
@@ -121,7 +118,7 @@ Result:
 <img src="/gallery/HelloTriangle.png" width = "256" height = "256" alt="overview" align=bottom /> 
 
 
-Texture Mapping
+##### Texture Mapping
 
 	#include "GraphicsApi.h"
 	#include "HelloTextureShader.hpp"
@@ -211,7 +208,7 @@ Texture Mapping
 
 
 
-Texture Mapping Shader:
+Shader:
 
 	#pragma once
 	#include "Shader.hpp"
@@ -256,7 +253,7 @@ Result:
 
 <img src="/gallery/HelloTexture1.png" width = "256" height = "256" alt="overview" align=bottom /> 
 
-And you can visualize the uv by:
+UV can be visualized by:
 
 	tinymath::Color fragment_shader(const v2f& input) const
 	{
