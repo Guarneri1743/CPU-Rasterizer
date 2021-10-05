@@ -74,7 +74,6 @@ namespace CpuRasterizor
 			}
 
 			Time::frame_end();
-			Sleep(0);
 		}
 	}
 

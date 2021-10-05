@@ -370,9 +370,9 @@ namespace CpuRasterizor
 		{
 			tinymath::Color pixel_color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-			for (uint8_t x_subsample_idx = 0; x_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++x_subsample_idx)
+			for (uint8_t x_subsample_idx = 0; x_subsample_idx < buffer.get_subsamples_per_axis(); ++x_subsample_idx)
 			{
-				for (uint8_t y_subsample_idx = 0; y_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++y_subsample_idx)
+				for (uint8_t y_subsample_idx = 0; y_subsample_idx < buffer.get_subsamples_per_axis(); ++y_subsample_idx)
 				{
 					auto subpixel = buffer.get_subpixel(pixel.row, pixel.col, x_subsample_idx, y_subsample_idx);
 					uint8_t coverage = 0;
@@ -419,9 +419,9 @@ namespace CpuRasterizor
 				SubsampleParam sp3 = { {0, 0, 0, 1}, false };
 				SubsampleParam sp4 = { {0, 0, 0, 1}, false };
 
-				for (uint8_t x_subsample_idx = 0; x_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++x_subsample_idx)
+				for (uint8_t x_subsample_idx = 0; x_subsample_idx < buffer.get_subsamples_per_axis(); ++x_subsample_idx)
 				{
-					for (uint8_t y_subsample_idx = 0; y_subsample_idx < get_active_rendertexture()->get_subsamples_per_axis(); ++y_subsample_idx)
+					for (uint8_t y_subsample_idx = 0; y_subsample_idx < buffer.get_subsamples_per_axis(); ++y_subsample_idx)
 					{
 						auto px1 = buffer.get_subpixel(block.top_left.row, block.top_left.col, x_subsample_idx, y_subsample_idx);
 						auto px2 = buffer.get_subpixel(block.top_right.row, block.top_right.col, x_subsample_idx, y_subsample_idx);
@@ -477,7 +477,7 @@ namespace CpuRasterizor
 		Fragment ddx = Pipeline::substract(frag1, frag2);
 		Fragment ddy = Pipeline::substract(frag1, frag3);
 
-		FrameBuffer& fb = CpuRasterSharedData.enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+		FrameBuffer& fb = (CpuRasterSharedData.enable_msaa && !shader.shadow) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
 		if (px1_valid)
 		{

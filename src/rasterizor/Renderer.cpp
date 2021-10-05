@@ -74,8 +74,6 @@ namespace CpuRasterizor
 			return;
 		}
 
-		target->material->sync();
-
 		auto m = model_matrix();
 		auto v = view_matrix(render_pass);
 		auto p = projection_matrix(render_pass);
@@ -85,6 +83,8 @@ namespace CpuRasterizor
 		target->material->local_properties.set_mat4x4(mat_projection, p);
 		target->material->local_properties.set_mat4x4(mat_vp, p * v);
 		target->material->local_properties.set_mat4x4(mat_mvp, p * v * m);
+
+		target->material->sync();
 
 		if (target != nullptr)
 		{
