@@ -23,6 +23,8 @@ public:
 	tinymath::Color fragment_shader(const v2f& input) const
 	{
 		UNUSED(input);
+
+		// draw a white triangle
 		return tinymath::kColorWhite;
 	}
 };

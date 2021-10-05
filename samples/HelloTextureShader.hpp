@@ -17,12 +17,24 @@ public:
 		auto wpos = m * opos;
 		auto cpos = vp * wpos;
 		o.position = cpos;
+		o.uv = input.uv;
 		return o;
 	}
 
 	tinymath::Color fragment_shader(const v2f& input) const
 	{
 		UNUSED(input);
-		return tinymath::kColorRed;
+
+		// visualize uv
+		//return input.uv;
+
+		// sample texture
+		tinymath::Color c;
+		if (local_properties.has_texture(123))
+		{
+			local_properties.get_texture(123)->sample(input.uv.x, input.uv.y, c);
+		}
+
+		return c;
 	}
 };
