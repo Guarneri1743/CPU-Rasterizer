@@ -6,6 +6,10 @@ Cache<T>::~Cache()
 }
 
 template<typename T>
+inline Cache<T>::Cache()
+{}
+
+template<typename T>
 void Cache<T>::put(const std::string& path, const std::shared_ptr<T>& res)
 {
 	if (destructed) return;

@@ -69,12 +69,12 @@ namespace CpuRasterizor
 
 	void GraphicsDevice::resize(size_t w, size_t h)
 	{
-		INST(GlobalShaderParams).width = w;
-		INST(GlobalShaderParams).height = h;
+		CpuRasterSharedData.width = w;
+		CpuRasterSharedData.height = h;
 
 		if (target_rendertexture == nullptr)
 		{
-			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil, INST(GlobalShaderParams).enable_msaa, INST(GlobalShaderParams).msaa_subsample_count);
+			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil, CpuRasterSharedData.enable_msaa, CpuRasterSharedData.msaa_subsample_count);
 		}
 		else
 		{
@@ -133,6 +133,11 @@ namespace CpuRasterizor
 		return kInvalidID;
 	}
 
+	bool GraphicsDevice::try_alloc_id(uint32_t& id)
+	{
+		return buffer_id_allocator.alloc(id);
+	}
+
 	void GraphicsDevice::set_active_rendertexture(uint32_t& id)
 	{
 		if (frame_buffer_map.count(id) > 0)
@@ -188,7 +193,7 @@ namespace CpuRasterizor
 			[this](auto&& rect, auto&& task_queue)
 		{
 			this->rasterize_tile(rect, task_queue);
-			if (INST(GlobalShaderParams).enable_msaa)
+			if (CpuRasterSharedData.enable_msaa)
 			{
 				this->resolve_tile(rect, task_queue);
 			}
@@ -242,7 +247,7 @@ namespace CpuRasterizor
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
 
-		if (Clipping::inside_cvv(c1.position, c2.position, c3.position))
+		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
 			// all in cvv, rasterize directly
 			clip2raster(shader, c1, c2, c3);
@@ -251,7 +256,7 @@ namespace CpuRasterizor
 		else
 		{
 			// clip in homogenous space
-			auto triangles = Clipping::cvv_clipping(INST(GlobalShaderParams).cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
+			auto triangles = Clipper::cvv_clipping(CpuRasterSharedData.cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
 
 			if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
@@ -274,10 +279,10 @@ namespace CpuRasterizor
 
 		// backface culling
 		bool double_face = shader.double_face;
-		bool enable_backface_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kBackFaceCulling) != CullingAndClippingFlag::kNone;
+		bool enable_backface_culling = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kBackFaceCulling) != CullingAndClippingFlag::kNone;
 		if (!double_face && enable_backface_culling && !shader.skybox)
 		{
-			if (Clipping::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+			if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
 		}
 
 		size_t w, h;
@@ -326,7 +331,7 @@ namespace CpuRasterizor
 				rasterize(rect, task.triangle, *task.shader);
 
 				// wireframe
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
+				if ((CpuRasterSharedData.debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
 				{
 					draw_screen_segment(task.triangle[0].position, task.triangle[1].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
 					draw_screen_segment(task.triangle[0].position, task.triangle[2].position, tinymath::Color(0.5f, 0.5f, 1.0f, 1.0f));
@@ -335,7 +340,7 @@ namespace CpuRasterizor
 			}
 		}
 
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kFrameTile) != RenderFlag::kNone)
+		if ((CpuRasterSharedData.debug_flag & RenderFlag::kFrameTile) != RenderFlag::kNone)
 		{
 			get_active_rendertexture()->foreach_pixel(
 				rect,
@@ -402,7 +407,7 @@ namespace CpuRasterizor
 		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
 		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
-		if (INST(GlobalShaderParams).enable_msaa && !shader.shadow)
+		if (CpuRasterSharedData.enable_msaa && !shader.shadow)
 		{
 			// msaa on
 			get_active_rendertexture()->foreach_pixel_block(
@@ -472,7 +477,7 @@ namespace CpuRasterizor
 		Fragment ddx = Pipeline::substract(frag1, frag2);
 		Fragment ddy = Pipeline::substract(frag1, frag3);
 
-		FrameBuffer& fb = INST(GlobalShaderParams).enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+		FrameBuffer& fb = CpuRasterSharedData.enable_msaa ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
 		if (px1_valid)
 		{
@@ -507,7 +512,7 @@ namespace CpuRasterizor
 		}
 
 		// wireframe
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
+		if ((CpuRasterSharedData.debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
 		{
 			draw_screen_segment(tri[0].position, tri[1].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
 			draw_screen_segment(tri[0].position, tri[2].position, tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -565,10 +570,10 @@ namespace CpuRasterizor
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
 
 			// screen space clipping
-			bool enable_screen_clipping = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kScreenClipping) != CullingAndClippingFlag::kNone;
+			bool enable_screen_clipping = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kScreenClipping) != CullingAndClippingFlag::kNone;
 			if (enable_screen_clipping)
 			{
-				Clipping::screen_clipping(lhs, rhs, w);
+				Clipper::screen_clipping(lhs, rhs, w);
 			}
 
 			int left = (int)(lhs.position.x + 0.5f);
@@ -596,10 +601,10 @@ namespace CpuRasterizor
 	{
 		tinymath::color_rgba pixel_color;
 
-		bool enable_scissor_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kScissorTest) != PerSampleOperation::kNone;
-		bool enable_alpha_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kAlphaTest) != PerSampleOperation::kNone;
-		bool enable_stencil_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
-		bool enable_depth_test = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
+		bool enable_scissor_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kScissorTest) != PerSampleOperation::kNone;
+		bool enable_alpha_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kAlphaTest) != PerSampleOperation::kNone;
+		bool enable_stencil_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
+		bool enable_depth_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
 
 		PerSampleOperation op_pass = PerSampleOperation::kScissorTest | PerSampleOperation::kAlphaTest | PerSampleOperation::kStencilTest | PerSampleOperation::kDepthTest;
 
@@ -621,7 +626,7 @@ namespace CpuRasterizor
 
 		UNUSED(stencil_write_mask);
 
-		bool enable_blending = (INST(GlobalShaderParams).persample_op_flag & PerSampleOperation::kBlending) != PerSampleOperation::kNone && shader.transparent;
+		bool enable_blending = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kBlending) != PerSampleOperation::kNone && shader.transparent;
 
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
@@ -637,9 +642,9 @@ namespace CpuRasterizor
 		// fragment shader
 		tinymath::Color fragment_result = tinymath::kColorBlack;
 
-		if (!INST(GlobalShaderParams).enable_msaa ||
+		if (!CpuRasterSharedData.enable_msaa ||
 			!subsample_param.pixel_color_calculated ||
-			INST(GlobalShaderParams).multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
+			CpuRasterSharedData.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
 			v2f v_out;
 			v_out.position = frag.position ;

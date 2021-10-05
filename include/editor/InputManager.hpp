@@ -2,6 +2,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "tinymath.h"
+#include "Singleton.hpp"
+
+#define InputMgr Singleton<CpuRasterizor::InputManager>::get()
 
 namespace CpuRasterizor
 {

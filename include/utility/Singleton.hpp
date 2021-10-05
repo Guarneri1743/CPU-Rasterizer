@@ -27,5 +27,3 @@ T& Singleton<T>::get()
 	static T _inst;
 	return _inst;
 }
-
-#define INST(type) Singleton<type>::get()

@@ -49,7 +49,7 @@ namespace CpuRasterizor
 
 	void Scene::initialize()
 	{
-		float aspect = (float)INST(GraphicsDevice).get_width() / INST(GraphicsDevice).get_height();
+		float aspect = (float)CpuRasterApi.get_width() / CpuRasterApi.get_height();
 		main_cam = Camera::create(tinymath::vec3f(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
 		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
 		Camera::set_main_camera(main_cam.get());
@@ -58,15 +58,15 @@ namespace CpuRasterizor
 		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
 		world_debug_cam = std::move(Camera::create(tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
 
-		INST(InputManager).add_on_mouse_move_evt([](tinymath::vec2f prev, tinymath::vec2f pos, void* data)
+		InputMgr.add_on_mouse_move_evt([](tinymath::vec2f prev, tinymath::vec2f pos, void* data)
 		{
-			if (INST(InputManager).is_mouse_down(MouseButton::RIGHT))
+			if (InputMgr.is_mouse_down(MouseButton::RIGHT))
 			{
 				Scene* s = reinterpret_cast<Scene*>(data);
 				tinymath::vec2f offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				s->main_cam->transform->rotate(offset.y, offset.x, 0.0f);
 			}
-			if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
+			if (InputMgr.is_mouse_down(MouseButton::MIDDLE))
 			{
 				tinymath::vec2f offset = (pos - prev) * CAMERA_ROTATE_SPEED;
 				Scene* s = reinterpret_cast<Scene*>(data);
@@ -75,7 +75,7 @@ namespace CpuRasterizor
 			}
 		}, this);
 
-		INST(InputManager).add_on_mouse_wheel_rolling_evt([](MouseWheel rolling, void* data)
+		InputMgr.add_on_mouse_wheel_rolling_evt([](MouseWheel rolling, void* data)
 		{
 			Scene* s = reinterpret_cast<Scene*>(data);
 			if (rolling == MouseWheel::UP)
@@ -89,9 +89,9 @@ namespace CpuRasterizor
 		}, this);
 
 		// setup shadowmap and cubemap
-		shadowmap_id = INST(GraphicsDevice).create_buffer(512, 512, FrameContent::kDepth);
+		shadowmap_id = CpuRasterApi.create_buffer(512, 512, FrameContent::kDepth);
 		std::shared_ptr<RenderTexture> shadowmap;
-		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
 
 		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
 		ShaderPropertyMap::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
@@ -112,41 +112,41 @@ namespace CpuRasterizor
 
 	void Scene::update()
 	{
-		INST(GlobalShaderParams).cam_far = main_cam->far;
-		INST(GlobalShaderParams).cam_near = main_cam->near;
-		INST(GlobalShaderParams).view_matrix = main_cam->view_matrix();
-		INST(GlobalShaderParams).proj_matrix = main_cam->projection_matrix();
-		INST(GlobalShaderParams).main_light = main_light;
-		INST(GlobalShaderParams).point_lights = point_lights;
-		INST(GlobalShaderParams).camera_pos = main_cam->transform->world_position();
-		if (INST(InputManager).is_key_down(KeyCode::W)) {
+		CpuRasterSharedData.cam_far = main_cam->far;
+		CpuRasterSharedData.cam_near = main_cam->near;
+		CpuRasterSharedData.view_matrix = main_cam->view_matrix();
+		CpuRasterSharedData.proj_matrix = main_cam->projection_matrix();
+		CpuRasterSharedData.main_light = main_light;
+		CpuRasterSharedData.point_lights = point_lights;
+		CpuRasterSharedData.camera_pos = main_cam->transform->world_position();
+		if (InputMgr.is_key_down(KeyCode::W)) {
 			main_cam->transform->move_forward(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_key_down(KeyCode::A)) {
+		if (InputMgr.is_key_down(KeyCode::A)) {
 			main_cam->transform->move_left(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_key_down(KeyCode::S)) {
+		if (InputMgr.is_key_down(KeyCode::S)) {
 			main_cam->transform->move_backward(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_key_down(KeyCode::D)) {
+		if (InputMgr.is_key_down(KeyCode::D)) {
 			main_cam->transform->move_right(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_key_down(KeyCode::Q)) {
+		if (InputMgr.is_key_down(KeyCode::Q)) {
 			main_cam->transform->move_ascend(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_key_down(KeyCode::E)) {
+		if (InputMgr.is_key_down(KeyCode::E)) {
 			main_cam->transform->move_descend(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
+		if (InputMgr.is_mouse_down(MouseButton::MIDDLE))
 		{
 			main_cam->transform->move_ascend(CAMERA_MOVE_SPEED);
 		}
-		if (INST(InputManager).is_mouse_down(MouseButton::MIDDLE))
+		if (InputMgr.is_mouse_down(MouseButton::MIDDLE))
 		{
 			main_cam->transform->move_descend(CAMERA_MOVE_SPEED);
 		}
 
-		if (INST(InputManager).is_key_down(KeyCode::DELETION))
+		if (InputMgr.is_key_down(KeyCode::DELETION))
 		{
 			int remove_idx = -1;
 			if (selection != nullptr)
@@ -191,27 +191,27 @@ namespace CpuRasterizor
 
 	void Scene::draw_camera_coords()
 	{
-		tinymath::vec2f offset = tinymath::vec2f(-(INST(GraphicsDevice).get_width() / 2.0f - 50.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 50.0f));
+		tinymath::vec2f offset = tinymath::vec2f(-(CpuRasterApi.get_width() / 2.0f - 50.0f), -(CpuRasterApi.get_height() / 2.0f - 50.0f));
 		tinymath::vec3f pos = main_cam->transform->world_position();
 		tinymath::vec3f forward = main_cam->transform->forward();
 		tinymath::vec3f right = main_cam->transform->right();
 		tinymath::vec3f up = main_cam->transform->up();
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
+		CpuRasterApi.draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
 		debug_cam->transform->set_world_position((main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance));
 		debug_cam->transform->lookat(main_cam->transform->world_position());
 	}
 
 	void Scene::draw_world_coords()
 	{
-		tinymath::vec2f offset = tinymath::vec2f(-(INST(GraphicsDevice).get_width() / 2.0f - 150.0f), -(INST(GraphicsDevice).get_height() / 2.0f - 150.0f));
-		INST(GraphicsDevice).draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-		INST(GraphicsDevice).draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
+		tinymath::vec2f offset = tinymath::vec2f(-(CpuRasterApi.get_width() / 2.0f - 150.0f), -(CpuRasterApi.get_height() / 2.0f - 150.0f));
+		CpuRasterApi.draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+		CpuRasterApi.draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
 
 		tinymath::vec3f pos = main_cam->transform->world_position();
 		tinymath::vec3f forward = main_cam->transform->forward();
 		tinymath::vec3f right = main_cam->transform->right();
 		tinymath::vec3f up = main_cam->transform->up();
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
+		CpuRasterApi.draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
 
 		world_debug_cam->transform->set_world_position((tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance));
 		world_debug_cam->transform->lookat(tinymath::kVec3fZero);
@@ -229,23 +229,23 @@ namespace CpuRasterizor
 
 	void Scene::render()
 	{
-		INST(GraphicsDevice).clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
-		if (INST(GlobalShaderParams).enable_shadow)
+		CpuRasterApi.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
+		if (CpuRasterSharedData.enable_shadow)
 		{
-			INST(GraphicsDevice).set_active_rendertexture(shadowmap_id);
+			CpuRasterApi.set_active_rendertexture(shadowmap_id);
 			render_shadow();
-			INST(GraphicsDevice).present();
-			INST(GraphicsDevice).reset_active_rendertexture();
+			CpuRasterApi.present();
+			CpuRasterApi.reset_active_rendertexture();
 		}
 
 		render_objects();
-		INST(GraphicsDevice).present();
+		CpuRasterApi.present();
 		draw_gizmos();
 	}
 
 	void Scene::render_shadow()
 	{
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
+		if ((CpuRasterSharedData.debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
 		{
 			return;
 		}
@@ -258,18 +258,18 @@ namespace CpuRasterizor
 
 	void Scene::render_objects()
 	{
-		if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
+		if ((CpuRasterSharedData.debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
 		{
 			return;
 		}
 
-		bool enable_frustum_culling = (INST(GlobalShaderParams).culling_clipping_flag & CullingAndClippingFlag::kAppFrustumCulling) != CullingAndClippingFlag::kNone;
+		bool enable_frustum_culling = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kAppFrustumCulling) != CullingAndClippingFlag::kNone;
 		if (enable_frustum_culling)
 		{
 			// todo: CPU Frustum Culling
 		}
 
-		if (enable_skybox && INST(GlobalShaderParams).enable_ibl)
+		if (enable_skybox && CpuRasterSharedData.enable_ibl)
 		{
 			skybox->render();
 		}
@@ -306,18 +306,18 @@ namespace CpuRasterizor
 
 	void Scene::debug_scene()
 	{
-		if (INST(GlobalShaderParams).debug_flag == RenderFlag::kNone) { return; }
+		if (CpuRasterSharedData.debug_flag == RenderFlag::kNone) { return; }
 
-		RenderTexture* active_fbo = INST(GraphicsDevice).get_active_rendertexture();
+		RenderTexture* active_fbo = CpuRasterApi.get_active_rendertexture();
 		std::shared_ptr<RenderTexture> shadow_map;
-		INST(GraphicsDevice).get_buffer(shadowmap_id, shadow_map);
+		CpuRasterApi.get_buffer(shadowmap_id, shadow_map);
 		size_t w, h;
 		active_fbo->get_size(w, h);
 
 		active_fbo->foreach_pixel(
 		[&shadow_map, w, h](auto&& buffer, auto&& pixel) {
 			// stencil visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kStencil) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kStencil) != RenderFlag::kNone)
 			{
 				uint8_t stencil;
 				if (buffer.get_framebuffer()->read_stencil(pixel.row, pixel.col, stencil))
@@ -328,12 +328,12 @@ namespace CpuRasterizor
 			}
 
 			// depth buffer visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kDepth) != RenderFlag::kNone)
 			{
 				float cur_depth;
 				if (buffer.get_framebuffer()->read_depth(pixel.row, pixel.col, cur_depth))
 				{
-					float linear_depth = Shader::linearize_01depth(cur_depth, INST(GlobalShaderParams).cam_near, INST(GlobalShaderParams).cam_far);
+					float linear_depth = Shader::linearize_01depth(cur_depth, CpuRasterSharedData.cam_near, CpuRasterSharedData.cam_far);
 					tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
 					depth_color.a = 1.0f;
 					tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);
@@ -342,7 +342,7 @@ namespace CpuRasterizor
 			}
 
 			// shadowmap visualization
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kShadowMap) != RenderFlag::kNone)
 			{
 				float u, v;
 				pixel2uv(w, h, pixel.row, pixel.col, u, v);
@@ -361,29 +361,29 @@ namespace CpuRasterizor
 	void Scene::resize_shadowmap(const size_t& w, const size_t& h)
 	{
 		std::shared_ptr<RenderTexture> shadowmap;
-		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
 		shadowmap->resize(w, h);
 	}
 
 	void Scene::get_shadowmap_size(size_t & w, size_t & h)
 	{
 		std::shared_ptr<RenderTexture> shadowmap;
-		INST(GraphicsDevice).get_buffer(shadowmap_id, shadowmap);
+		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
 		w = shadowmap->get_width();
 		h = shadowmap->get_height();
 	}
 
 	void Scene::open_scene(const char* path)
 	{
-		INST(InputManager).clear_evts();
+		InputMgr.clear_evts();
 		Scene* deserialized_scene = new Scene();
 		Serializer::deserialize(path, *deserialized_scene);
 		if (deserialized_scene == nullptr) return;
-		INST(GlobalShaderParams).enable_shadow = deserialized_scene->enable_shadow;
-		INST(GlobalShaderParams).pcf_on = deserialized_scene->pcf_on;
-		INST(GlobalShaderParams).shadow_bias = deserialized_scene->shadow_bias;
-		INST(GlobalShaderParams).color_space = deserialized_scene->color_space;
-		INST(GlobalShaderParams).workflow = deserialized_scene->work_flow;
+		CpuRasterSharedData.enable_shadow = deserialized_scene->enable_shadow;
+		CpuRasterSharedData.pcf_on = deserialized_scene->pcf_on;
+		CpuRasterSharedData.shadow_bias = deserialized_scene->shadow_bias;
+		CpuRasterSharedData.color_space = deserialized_scene->color_space;
+		CpuRasterSharedData.workflow = deserialized_scene->work_flow;
 		current_scene = deserialized_scene;
 		current_scene->initialize();
 		LOG("open scene: {}", path);

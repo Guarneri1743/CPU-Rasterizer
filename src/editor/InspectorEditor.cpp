@@ -66,12 +66,12 @@ namespace CpuRasterizor
 			ImGui::Text("Window Size: %f, %f", tinymath::vec2f((float)Window::main()->get_width(), (float)Window::main()->get_height()));
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
-				INST(GraphicsDevice).set_viewport(rt_size[0], rt_size[1]);
+				CpuRasterApi.set_viewport(rt_size[0], rt_size[1]);
 			}
 			else
 			{
-				rt_size[0] = (int)INST(GraphicsDevice).get_width();
-				rt_size[1] = (int)INST(GraphicsDevice).get_height();
+				rt_size[0] = (int)CpuRasterApi.get_width();
+				rt_size[1] = (int)CpuRasterApi.get_height();
 			}
 			ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 		}
@@ -91,19 +91,19 @@ namespace CpuRasterizor
 			cam_update = ImGui::SliderFloat("Fov", &scene.main_cam->fov, 0.0f, 180.0f) || cam_update;
 			cam_update = ImGui::SliderFloat("Aspect", &scene.main_cam->aspect, 0.0f, 2.0f) || cam_update;
 			if (cam_update) scene.main_cam->update_proj_mode();
-			if (ImGui::Checkbox("MSAA", &INST(GlobalShaderParams).enable_msaa))
+			if (ImGui::Checkbox("MSAA", &CpuRasterSharedData.enable_msaa))
 			{
-				if (INST(GlobalShaderParams).enable_msaa)
+				if (CpuRasterSharedData.enable_msaa)
 				{
-					INST(GraphicsDevice).set_subsample_count((uint8_t)sub_samples);
+					CpuRasterApi.set_subsample_count((uint8_t)sub_samples);
 				}
 				else
 				{
-					INST(GraphicsDevice).set_subsample_count((uint8_t)0);
+					CpuRasterApi.set_subsample_count((uint8_t)0);
 				}
 			}
 
-			if (INST(GlobalShaderParams).enable_msaa)
+			if (CpuRasterSharedData.enable_msaa)
 			{
 				const char* frequencies[] = {
 				"PixelFrequency",
@@ -126,26 +126,26 @@ namespace CpuRasterizor
 						if (ImGui::Selectable(frequencies[i]))
 						{
 							selected_frequency = i;
-							INST(GlobalShaderParams).multi_sample_frequency = frequency_flags[i];
+							CpuRasterSharedData.multi_sample_frequency = frequency_flags[i];
 						}
 					ImGui::EndPopup();
 				}
 
 				if (ImGui::InputInt("Subsamples", &sub_samples))
 				{
-					INST(GraphicsDevice).set_subsample_count((uint8_t)sub_samples);
+					CpuRasterApi.set_subsample_count((uint8_t)sub_samples);
 				}
 				else
 				{
-					sub_samples = (int)INST(GraphicsDevice).get_subsample_count();
+					sub_samples = (int)CpuRasterApi.get_subsample_count();
 				}
 			}
 		}
 
 		if (ImGui::CollapsingHeader("Shadow", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Checkbox("ShadowOn", &INST(GlobalShaderParams).enable_shadow);
-			if (INST(GlobalShaderParams).enable_shadow)
+			ImGui::Checkbox("ShadowOn", &CpuRasterSharedData.enable_shadow);
+			if (CpuRasterSharedData.enable_shadow)
 			{
 				if (ImGui::InputInt2("ShadowMap Resolution", shadowmap_size))
 				{
@@ -158,21 +158,21 @@ namespace CpuRasterizor
 					shadowmap_size[0] = (int)sw;
 					shadowmap_size[1] = (int)sh;
 				}
-				ImGui::Checkbox("PCF", &INST(GlobalShaderParams).pcf_on);
-				ImGui::SliderFloat("Bias", &INST(GlobalShaderParams).shadow_bias, 0.0f, 0.01f);
+				ImGui::Checkbox("PCF", &CpuRasterSharedData.pcf_on);
+				ImGui::SliderFloat("Bias", &CpuRasterSharedData.shadow_bias, 0.0f, 0.01f);
 			}
 		}
 
 		if (ImGui::CollapsingHeader("IBL", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Checkbox("IBL_On", &INST(GlobalShaderParams).enable_ibl);
+			ImGui::Checkbox("IBL_On", &CpuRasterSharedData.enable_ibl);
 		}
 
 		if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::Checkbox("Gizmos", &INST(GlobalShaderParams).enable_gizmos);
+			ImGui::Checkbox("Gizmos", &CpuRasterSharedData.enable_gizmos);
 
-			ImGui::Checkbox("Mipmap", &INST(GlobalShaderParams).enable_mipmap);
+			ImGui::Checkbox("Mipmap", &CpuRasterSharedData.enable_mipmap);
 
 			const char* debug_views[] = {
 				"None",
@@ -227,8 +227,8 @@ namespace CpuRasterizor
 					if (ImGui::Selectable(debug_views[i]))
 					{
 						selected_view = i;
-						INST(GlobalShaderParams).debug_flag = RenderFlag::kNone;
-						INST(GlobalShaderParams).debug_flag = view_flags[i];
+						CpuRasterSharedData.debug_flag = RenderFlag::kNone;
+						CpuRasterSharedData.debug_flag = view_flags[i];
 					}
 				ImGui::EndPopup();
 			}
@@ -237,7 +237,7 @@ namespace CpuRasterizor
 		if (ImGui::CollapsingHeader("Others"))
 		{
 			const char* work_flows[] = { "Metallic", "Specular" };
-			static int selected_flow = (int)INST(GlobalShaderParams).workflow;
+			static int selected_flow = (int)CpuRasterSharedData.workflow;
 			if (ImGui::Button("Workflows.."))
 				ImGui::OpenPopup("work_flows");
 			ImGui::SameLine();
@@ -249,13 +249,13 @@ namespace CpuRasterizor
 					if (ImGui::Selectable(work_flows[i]))
 					{
 						selected_flow = i;
-						INST(GlobalShaderParams).workflow = (PBRWorkFlow)selected_flow;
+						CpuRasterSharedData.workflow = (PBRWorkFlow)selected_flow;
 					}
 				ImGui::EndPopup();
 			}
 
 			const char* color_spaces[] = { "Gamma", "Linear" };
-			static int selected_color_space = (int)INST(GlobalShaderParams).color_space;
+			static int selected_color_space = (int)CpuRasterSharedData.color_space;
 			if (ImGui::Button("ColorSpaces.."))
 				ImGui::OpenPopup("color_spaces");
 			ImGui::SameLine();
@@ -267,7 +267,7 @@ namespace CpuRasterizor
 					if (ImGui::Selectable(color_spaces[i]))
 					{
 						selected_color_space = i;
-						INST(GlobalShaderParams).color_space = (ColorSpace)selected_color_space;
+						CpuRasterSharedData.color_space = (ColorSpace)selected_color_space;
 					}
 				ImGui::EndPopup();
 			} 

@@ -11,6 +11,8 @@
 #include "Shader.hpp"
 #include "Triangle.hpp"
 
+#define CpuRasterApi Singleton<CpuRasterizor::GraphicsDevice>::get()
+
 namespace CpuRasterizor
 {
 	struct SubsampleParam;
@@ -35,6 +37,7 @@ namespace CpuRasterizor
 		void set_active_rendertexture(uint32_t& id);
 		void reset_active_rendertexture() noexcept;
 		uint32_t create_buffer(const size_t& width, const size_t& height, const FrameContent& content) noexcept;
+		bool try_alloc_id(uint32_t& id);
 		bool get_buffer(const uint32_t& id, std::shared_ptr<RenderTexture>& buffer) const noexcept;
 		uint8_t get_subsample_count() { return target_rendertexture->get_subsample_count(); }
 		size_t get_width() { return target_rendertexture->get_width(); }

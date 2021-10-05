@@ -19,17 +19,19 @@ constexpr uint8_t kChannelRG = 2;
 constexpr uint8_t kChannelRGB = 3;
 constexpr uint8_t kChannelRGBA = 4;
 
+static Cache<CpuRasterizor::Texture> texture_cache;
+
 namespace CpuRasterizor
 {
 	Texture::Texture()
 	{
-		wrap_mode = WrapMode::REPEAT;
-		filtering = Filtering::POINT;
-		format = TextureFormat::INVALID;
+		wrap_mode = WrapMode::kRepeat;
+		filtering = Filtering::kPoint;
+		format = TextureFormat::kInvalid;
 		width = 0;
 		height = 0;
 		mip_count = 0;
-		mip_filtering = Filtering::POINT;
+		mip_filtering = Filtering::kPoint;
 		enable_mip = true;
 	}
 
@@ -41,7 +43,7 @@ namespace CpuRasterizor
 	Texture::~Texture()
 	{
 		release();
-		INST(Cache<Texture>).free(this->raw_path);
+		texture_cache.free(this->raw_path);
 	}
 
 	Texture::Texture(const size_t& _width, const size_t& _height, const TextureFormat& _fmt) : Texture()
@@ -52,29 +54,29 @@ namespace CpuRasterizor
 		format = _fmt;
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 			rgb_buffer = RawBuffer<tinymath::color_rgb>::create(width, height);
 			break;
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 			rgba_buffer = RawBuffer<tinymath::color_rgba>::create(width, height);
 			break;
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 			rg_buffer = RawBuffer<tinymath::color_rg>::create(width, height);
 			break;
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 			gray_buffer = RawBuffer<tinymath::color_gray>::create(width, height);
 			break;
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 			rgb16f_buffer = RawBuffer<tinymath::color_rgb16f>::create(width, height);
 			break; 
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 			rgba16f_buffer = RawBuffer<tinymath::color_rgba16f>::create(width, height);
 			break;
 		}
 
 		if (enable_mip)
 		{
-			generate_mipmap(kMaxMip, Filtering::POINT);
+			generate_mipmap(kMaxMip, Filtering::kPoint);
 		}
 	}
 
@@ -86,7 +88,7 @@ namespace CpuRasterizor
 		format = _fmt;
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			rgb_buffer = RawBuffer<tinymath::color_rgb>::create(tex_buffer, width, height, [](tinymath::color_rgb* ptr)
 			{
@@ -94,7 +96,7 @@ namespace CpuRasterizor
 			});
 		}
 		break;
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			rgba_buffer = RawBuffer<tinymath::color_rgba>::create(tex_buffer, width, height, [](tinymath::color_rgba* ptr)
 			{
@@ -102,7 +104,7 @@ namespace CpuRasterizor
 			});
 		}
 		break;
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			rg_buffer = RawBuffer<tinymath::color_rg>::create(tex_buffer, width, height, [](tinymath::color_rg* ptr)
 			{
@@ -110,7 +112,7 @@ namespace CpuRasterizor
 			});
 		}
 		break;
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			gray_buffer = RawBuffer<tinymath::color_gray>::create(tex_buffer, width, height, [](tinymath::color_gray* ptr)
 			{
@@ -118,7 +120,7 @@ namespace CpuRasterizor
 			});
 		}
 		break; 
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			rgb16f_buffer = RawBuffer<tinymath::color_rgb16f>::create(tex_buffer, width, height, [](tinymath::color_rgb16f* ptr)
 			{
@@ -126,7 +128,7 @@ namespace CpuRasterizor
 			});
 		}
 		break;
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			rgba16f_buffer = RawBuffer<tinymath::color_rgba16f>::create(tex_buffer, width, height, [](tinymath::color_rgba16f* ptr)
 			{
@@ -138,21 +140,21 @@ namespace CpuRasterizor
 
 		if (enable_mip)
 		{
-			generate_mipmap(kMaxMip, Filtering::POINT);
+			generate_mipmap(kMaxMip, Filtering::kPoint);
 		}
 	}
 
 	std::shared_ptr<Texture> Texture::load_asset(const char* path)
 	{
 		std::shared_ptr<Texture> ret = nullptr;
-		if (INST(Cache<Texture>).get(path, ret) && ret != nullptr)
+		if (texture_cache.get(path, ret) && ret != nullptr)
 		{
 			return ret;
 		}
 		Texture* tex = new Texture();
 		Serializer::deserialize(path, *tex);
 		ret = std::shared_ptr<Texture>(tex);
-		INST(Cache<Texture>).put(path, ret);
+		texture_cache.put(path, ret);
 		return ret;
 	}
 
@@ -219,7 +221,7 @@ namespace CpuRasterizor
 					{
 						stbi_image_free((void*)ptr);
 					});
-					this->format = TextureFormat::rgb16f;
+					this->format = TextureFormat::kRGB16;
 				}
 				else
 				{
@@ -227,7 +229,7 @@ namespace CpuRasterizor
 					{
 						stbi_image_free((void*)ptr);
 					});
-					this->format = TextureFormat::rgb;
+					this->format = TextureFormat::kRGB;
 				}
 			}
 			else if (channels == kChannelRGBA)
@@ -238,7 +240,7 @@ namespace CpuRasterizor
 					{
 						stbi_image_free((void*)ptr);
 					});
-					this->format = TextureFormat::rgba16f;
+					this->format = TextureFormat::kRGBA16;
 				}
 				else
 				{
@@ -246,7 +248,7 @@ namespace CpuRasterizor
 					{
 						stbi_image_free((void*)ptr);
 					});
-					this->format = TextureFormat::rgba;
+					this->format = TextureFormat::kRGBA;
 				}
 			}
 			else if (channels == kChannelRG)
@@ -255,7 +257,7 @@ namespace CpuRasterizor
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->format = TextureFormat::rg;
+				this->format = TextureFormat::kRG;
 			}
 			else if (channels == kChannelR)
 			{
@@ -263,7 +265,7 @@ namespace CpuRasterizor
 				{
 					stbi_image_free((void*)ptr);
 				});
-				this->format = TextureFormat::r32;
+				this->format = TextureFormat::kGray;
 			}
 			else
 			{
@@ -273,7 +275,7 @@ namespace CpuRasterizor
 
 		if (enable_mip)
 		{
-			generate_mipmap(kMaxMip, Filtering::POINT);
+			generate_mipmap(kMaxMip, Filtering::kPoint);
 		}
 
 		LOG("raw texture loaded: {}", abs_path.c_str());
@@ -312,7 +314,7 @@ namespace CpuRasterizor
 	{
 		switch (this->format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			for (int i = 1; i < rgb_mipmaps.size(); i++)
 			{
@@ -345,7 +347,7 @@ namespace CpuRasterizor
 
 			break;
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			for (int i = 1; i < rgba_mipmaps.size(); i++)
 			{
@@ -378,7 +380,7 @@ namespace CpuRasterizor
 
 			break;
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			for (int i = 1; i < rg_mipmaps.size(); i++)
 			{
@@ -410,7 +412,7 @@ namespace CpuRasterizor
 			}
 			break;
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			for (int i = 1; i < gray_mipmaps.size(); i++)
 			{
@@ -442,7 +444,7 @@ namespace CpuRasterizor
 			}
 			break;
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			for (int i = 1; i < rgb16f_mipmaps.size(); i++)
 			{
@@ -474,7 +476,7 @@ namespace CpuRasterizor
 			}
 			break;
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			for (int i = 1; i < rgba16f_mipmaps.size(); i++)
 			{
@@ -527,9 +529,9 @@ namespace CpuRasterizor
 	{
 		switch (this->filtering)
 		{
-		case Filtering::BILINEAR:
+		case Filtering::kBilinear:
 			return bilinear(u, v, mip, ret);
-		case Filtering::POINT:
+		case Filtering::kPoint:
 			return point(u, v, mip, ret);
 		}
 		return false;
@@ -558,7 +560,7 @@ namespace CpuRasterizor
 		bool use_mip = enable_mip;
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			auto buffer = use_mip ? rgb_mipmaps[mip] : rgb_buffer;
 			tinymath::color_rgb pixel;
@@ -566,7 +568,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			auto buffer = use_mip ? rgba_mipmaps[mip] : rgba_buffer;
 			tinymath::color_rgba pixel;
@@ -574,7 +576,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			auto buffer = use_mip ? rg_mipmaps[mip] : rg_buffer;
 			tinymath::color_rg pixel;
@@ -582,7 +584,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			auto buffer = use_mip ? gray_mipmaps[mip] : gray_buffer;
 			tinymath::color_gray pixel;
@@ -590,7 +592,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			auto buffer = use_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
 			tinymath::color_rgb16f pixel;
@@ -598,7 +600,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			auto buffer = use_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
 			tinymath::color_rgba16f pixel;
@@ -614,7 +616,7 @@ namespace CpuRasterizor
 	{
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			auto buffer = enable_mip ? rgb_mipmaps[mip] : rgb_buffer;
 			tinymath::color_rgb pixel;
@@ -622,7 +624,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			auto buffer = enable_mip ? rgba_mipmaps[mip] : rgba_buffer;
 			tinymath::color_rgba pixel;
@@ -630,7 +632,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			auto buffer = enable_mip ? rg_mipmaps[mip] : rg_buffer;
 			tinymath::color_rg pixel;
@@ -638,7 +640,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			auto buffer = enable_mip ? gray_mipmaps[mip] : gray_buffer;
 			tinymath::color_gray pixel;
@@ -646,7 +648,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			auto buffer = enable_mip ? rgb16f_mipmaps[mip] : rgb16f_buffer;
 			tinymath::color_rgb16f pixel;
@@ -654,7 +656,7 @@ namespace CpuRasterizor
 			ret = ColorEncoding::decode(pixel);
 			return ok;
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			auto buffer = enable_mip ? rgba16f_mipmaps[mip] : rgba16f_buffer;
 			tinymath::color_rgba16f pixel;
@@ -670,27 +672,27 @@ namespace CpuRasterizor
 	{
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			return rgb_buffer->write(x, y, ColorEncoding::encode_rgb(data));
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			return rgba_buffer->write(x, y, ColorEncoding::encode_rgba(data));
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			return rg_buffer->write(x, y, ColorEncoding::encode_rg(data.r, data.g));
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			return gray_buffer->write(x, y, ColorEncoding::encode_gray(data));
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			return rgb16f_buffer->write(x, y, ColorEncoding::encode_rgb16f(data));
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			return rgba16f_buffer->write(x, y, ColorEncoding::encode_rgba16f(data));
 		}
@@ -705,27 +707,27 @@ namespace CpuRasterizor
 		this->wrap(wu, wv);
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			return rgb_buffer->write(wu, wv, ColorEncoding::encode_rgb(data));
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			return rgba_buffer->write(wu, wv, ColorEncoding::encode_rgba(data));
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			return rg_buffer->write(wu, wv, ColorEncoding::encode_rg(data.r, data.g));
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			return gray_buffer->write(wu, wv, ColorEncoding::encode_gray(data));
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			return rgb16f_buffer->write(wu, wv, ColorEncoding::encode_rgb16f(data));
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			return rgba16f_buffer->write(wu, wv, ColorEncoding::encode_rgba16f(data));
 		}
@@ -737,27 +739,27 @@ namespace CpuRasterizor
 	{
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			return rgb_buffer->resize(w, h);
 		}
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			return rgba_buffer->resize(w, h);
 		}
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			return rg_buffer->resize(w, h);
 		}
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			return gray_buffer->resize(w, h);
 		}
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			return rgb16f_buffer->resize(w, h);
 		}
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			return rgba16f_buffer->resize(w, h);
 		}
@@ -776,16 +778,16 @@ namespace CpuRasterizor
 		{
 			switch (this->format)
 			{
-			case TextureFormat::rgb:
+			case TextureFormat::kRGB:
 				this->rgb_mipmaps[i].reset();
 				break;
-			case TextureFormat::rgba:
+			case TextureFormat::kRGBA:
 				this->rgba_mipmaps[i].reset();
 				break;
-			case TextureFormat::rg:
+			case TextureFormat::kRG:
 				this->rg_mipmaps[i].reset();
 				break;
-			case TextureFormat::r32:
+			case TextureFormat::kGray:
 				this->gray_mipmaps[i].reset();
 				break;
 			}
@@ -799,42 +801,42 @@ namespace CpuRasterizor
 		int ret = 0;
 		switch (tex.format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 		{
 			size_t size;
 			auto data = (*tex.rgb_buffer).get_ptr(size);
 			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 3, data, 0);
 		}
 			break;
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 		{
 			size_t size;
 			auto data = (*tex.rgba_buffer).get_ptr(size);
 			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 4, data, 0);
 		}
 			break;
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 		{
 			size_t size;
 			auto data = (*tex.rg_buffer).get_ptr(size);
 			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 2, data, 0);
 		}
 			break;
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 		{
 			size_t size;
 			auto data = (*tex.gray_buffer).get_ptr(size);
 			ret = stbi_write_png(dest, (int)tex.width, (int)tex.height, 1, data, 0);
 		}
 			break;
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 		{
 			size_t size;
 			auto data = (*tex.rgb16f_buffer).get_ptr(size);
 			ret = stbi_write_hdr(dest, (int)tex.width, (int)tex.height, 3, (float*)data);
 		}
 			break;
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 		{
 			size_t size;
 			auto data = (*tex.rgba16f_buffer).get_ptr(size);
@@ -850,15 +852,15 @@ namespace CpuRasterizor
 	{
 		switch (wrap_mode)
 		{
-		case WrapMode::CLAMP_TO_BORDER:
+		case WrapMode::kClampToBorder:
 			u = tinymath::clamp(u, 0.0f, 1.0f);
 			v = tinymath::clamp(v, 0.0f, 1.0f);
 			break;
-		case WrapMode::CLAMP_TO_EDGE:
+		case WrapMode::kClampToEdge:
 			u = tinymath::clamp(u, 0.0f, 1.0f);
 			v = tinymath::clamp(v, 0.0f, 1.0f);
 			break;
-		case WrapMode::REPEAT:
+		case WrapMode::kRepeat:
 			if (u <= 0.0f)
 			{
 				u += 1.0f;
@@ -883,22 +885,22 @@ namespace CpuRasterizor
 	{
 		switch (format)
 		{
-		case TextureFormat::rgb:
+		case TextureFormat::kRGB:
 			rgb_buffer->clear(tinymath::color_rgb());
 			break;
-		case TextureFormat::rgba:
+		case TextureFormat::kRGBA:
 			rgba_buffer->clear(tinymath::color_rgba());
 			break;
-		case TextureFormat::rg:
+		case TextureFormat::kRG:
 			rg_buffer->clear(tinymath::color_rg());
 			break;
-		case TextureFormat::r32:
+		case TextureFormat::kGray:
 			gray_buffer->clear(tinymath::color_gray());
 			break;
-		case TextureFormat::rgb16f:
+		case TextureFormat::kRGB16:
 			rgb16f_buffer->clear(tinymath::color_rgb16f());
 			break;
-		case TextureFormat::rgba16f:
+		case TextureFormat::kRGBA16:
 			rgba16f_buffer->clear(tinymath::color_rgba16f());
 			break;
 		}

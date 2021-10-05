@@ -37,19 +37,19 @@ namespace CpuRasterizor
 	{
 		if (render_pass == RenderPass::kShadow)
 		{
-			return INST(GlobalShaderParams).main_light.view_matrix();
+			return CpuRasterSharedData.main_light.view_matrix();
 		}
-		return INST(GlobalShaderParams).view_matrix;
+		return CpuRasterSharedData.view_matrix;
 	}
 
 	tinymath::mat4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
 	{
 		if (render_pass == RenderPass::kShadow)
 		{
-			return INST(GlobalShaderParams).main_light.projection_matrix();
+			return CpuRasterSharedData.main_light.projection_matrix();
 		}
 
-		return INST(GlobalShaderParams).proj_matrix;
+		return CpuRasterSharedData.proj_matrix;
 	}
 
 	tinymath::mat4x4 Renderer::model_matrix() const
@@ -96,29 +96,29 @@ namespace CpuRasterizor
 					auto& v0 = mesh.vertices[mesh.indices[idx]];
 					auto& v1 = mesh.vertices[mesh.indices[idx + 1]];
 					auto& v2 = mesh.vertices[mesh.indices[idx + 2]];
-					INST(GraphicsDevice).submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2);
+					CpuRasterApi.submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2);
 				}
 			}
 		}
-		INST(GraphicsDevice).fence_draw_commands();
+		CpuRasterApi.fence_draw_commands();
 	}
 
 	void Renderer::draw_gizmos() const
 	{
-		if (!INST(GlobalShaderParams).enable_gizmos)
+		if (!CpuRasterSharedData.enable_gizmos)
 		{
 			return;
 		}
 
-		auto view = INST(GlobalShaderParams).view_matrix;
-		auto proj = INST(GlobalShaderParams).proj_matrix;
+		auto view = CpuRasterSharedData.view_matrix;
+		auto proj = CpuRasterSharedData.proj_matrix;
 		auto pos = tinymath::kVec3fZero;
 		auto up = tinymath::kVec3fUp;
 		auto forward = tinymath::kVec3fForward;
 		auto right = tinymath::kVec3fRight;
 		auto scale = tinymath::scale(model_matrix().get_scale());
 		tinymath::mat4x4 m = model_matrix() * tinymath::inverse(scale);
-		INST(GraphicsDevice).draw_coordinates(pos, forward, up, right, m, view, proj);
+		CpuRasterApi.draw_coordinates(pos, forward, up, right, m, view, proj);
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

@@ -56,7 +56,7 @@ namespace CpuRasterizor
 			o.position = cpos;
 			o.world_pos = wpos.xyz;
 			
-			auto light_space_pos = INST(GlobalShaderParams).main_light.light_space() * tinymath::vec4f(wpos.x, wpos.y, wpos.z, 1.0f);
+			auto light_space_pos = CpuRasterSharedData.main_light.light_space() * tinymath::vec4f(wpos.x, wpos.y, wpos.z, 1.0f);
 			o.shadow_coord = light_space_pos;
 			
 			o.color = input.color;
@@ -96,7 +96,7 @@ namespace CpuRasterizor
 			tinymath::Color normal_tex = tinymath::Color(0.0f, 1.0f, 0.0f, 1.0f);
 			if (local_properties.has_texture(normal_prop))
 			{
-				if (INST(GlobalShaderParams).enable_mipmap)
+				if (CpuRasterSharedData.enable_mipmap)
 				{
 					local_properties.get_texture(normal_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, normal_tex);
 				}
@@ -111,7 +111,7 @@ namespace CpuRasterizor
 
 			if (local_properties.has_texture(albedo_prop))
 			{
-				if (INST(GlobalShaderParams).enable_mipmap)
+				if (CpuRasterSharedData.enable_mipmap)
 				{
 					local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, material_data.albedo_color);
 				}
@@ -120,7 +120,7 @@ namespace CpuRasterizor
 					local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, material_data.albedo_color);
 				}
 
-				if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+				if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 				{
 					material_data.albedo_color = tinymath::pow(material_data.albedo_color, 2.2f);
 				}
@@ -128,7 +128,7 @@ namespace CpuRasterizor
 
 			if (local_properties.has_texture(metallic_prop))
 			{
-				if (INST(GlobalShaderParams).enable_mipmap)
+				if (CpuRasterSharedData.enable_mipmap)
 				{
 					local_properties.get_texture(metallic_prop)->sample(uv.x, uv.y, input.ddx.uv, input.ddy.uv, metallic_color);
 				}
@@ -140,11 +140,11 @@ namespace CpuRasterizor
 				material_data.metallic = metallic_color.r;
 			}
 
-			if (INST(GlobalShaderParams).workflow == PBRWorkFlow::kMetallic)
+			if (CpuRasterSharedData.workflow == PBRWorkFlow::kMetallic)
 			{
 				if (local_properties.has_texture(roughness_prop))
 				{
-					if (INST(GlobalShaderParams).enable_mipmap)
+					if (CpuRasterSharedData.enable_mipmap)
 					{
 						local_properties.get_texture(roughness_prop)->sample(uv.x, uv.y, input.ddx.uv, input.ddy.uv, roughness_color);
 					}
@@ -156,7 +156,7 @@ namespace CpuRasterizor
 				}
 				else if (local_properties.has_texture(specular_prop))
 				{
-					if (INST(GlobalShaderParams).enable_mipmap)
+					if (CpuRasterSharedData.enable_mipmap)
 					{
 						local_properties.get_texture(specular_prop)->sample(uv.x, uv.y, input.ddx.uv, input.ddy.uv, material_data.specular_color);
 					}
@@ -171,7 +171,7 @@ namespace CpuRasterizor
 			{
 				if (local_properties.has_texture(specular_prop))
 				{
-					if (INST(GlobalShaderParams).enable_mipmap)
+					if (CpuRasterSharedData.enable_mipmap)
 					{
 						local_properties.get_texture(specular_prop)->sample(uv.x, uv.y, input.ddx.uv, input.ddy.uv, material_data.specular_color);
 					}
@@ -185,7 +185,7 @@ namespace CpuRasterizor
 
 			if (local_properties.has_texture(ao_prop))
 			{
-				if (INST(GlobalShaderParams).enable_mipmap)
+				if (CpuRasterSharedData.enable_mipmap)
 				{
 					local_properties.get_texture(ao_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, ao_color);
 				}
@@ -198,7 +198,7 @@ namespace CpuRasterizor
 
 			if (local_properties.has_texture(emission_prop))
 			{
-				if (INST(GlobalShaderParams).enable_mipmap)
+				if (CpuRasterSharedData.enable_mipmap)
 				{
 					local_properties.get_texture(emission_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, material_data.emission_color);
 				}
@@ -226,7 +226,7 @@ namespace CpuRasterizor
 			ibl_data.irradiance = tinymath::kColorBlack;
 			ibl_data.prefiltered = tinymath::kColorBlack;
 			ibl_data.brdf_lut = tinymath::kColorBlack;
-			if (INST(GlobalShaderParams).enable_ibl && ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop))
+			if (CpuRasterSharedData.enable_ibl && ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop))
 			{
 				auto cubemap = ShaderPropertyMap::global_shader_properties.get_cubemap(cubemap_prop);
 				cubemap->sample_irradiance_map(normal, ibl_data.irradiance);
@@ -257,7 +257,7 @@ namespace CpuRasterizor
 
 			tinymath::vec2f texel_size = 1.0f / tinymath::vec2f((float)shadowmap->get_height(), (float)shadowmap->get_width());
 
-			if (INST(GlobalShaderParams).pcf_on)
+			if (CpuRasterSharedData.pcf_on)
 			{
 				const int kernel_size = 3;
 				// PCF
@@ -269,7 +269,7 @@ namespace CpuRasterizor
 						if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 						{
 							//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
-							shadow_atten += (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
+							shadow_atten += (proj_shadow_coord.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
 						}
 					}
 				}
@@ -281,7 +281,7 @@ namespace CpuRasterizor
 				float depth;
 				if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x, proj_shadow_coord.y, depth))
 				{
-					shadow_atten = (proj_shadow_coord.z - INST(GlobalShaderParams).shadow_bias) > depth ? 1.0f : 0.0f;
+					shadow_atten = (proj_shadow_coord.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
 				}
 			}
 
@@ -316,7 +316,7 @@ namespace CpuRasterizor
 			tinymath::vec3f diffuse_term = tinymath::vec3f(1.0f) - spec_term;
 			diffuse_term *= 1.0f - metallic;
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kSpecular) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kSpecular) != RenderFlag::kNone)
 			{
 				return specular;
 			}
@@ -353,27 +353,27 @@ namespace CpuRasterizor
 
 			auto half_dir = tinymath::normalize(view_dir + light_dir);
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kAlbedo) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kAlbedo) != RenderFlag::kNone)
 			{
 				return material_data.albedo_color;
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kRoughness) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kRoughness) != RenderFlag::kNone)
 			{
 				return tinymath::Color(material_data.roughness, material_data.roughness, material_data.roughness, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kMetallic) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kMetallic) != RenderFlag::kNone)
 			{
 				return tinymath::Color(material_data.metallic, material_data.metallic, material_data.metallic, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kAO) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kAO) != RenderFlag::kNone)
 			{
 				return ao;
 			}
 
-			if (INST(GlobalShaderParams).workflow == PBRWorkFlow::kSpecular)
+			if (CpuRasterSharedData.workflow == PBRWorkFlow::kSpecular)
 			{
 				auto spec = tinymath::pow(tinymath::max(tinymath::dot(normal, half_dir), 0.0f), (material_data.roughness) * 32.0f);
 				auto ndl = tinymath::max(tinymath::dot(normal, light_dir), 0.0f);
@@ -409,7 +409,7 @@ namespace CpuRasterizor
 				tinymath::Color indirect_diffuse;
 				tinymath::Color indirect_specular;
 				tinymath::Color env_brdf;
-				if (INST(GlobalShaderParams).enable_ibl && ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop))
+				if (CpuRasterSharedData.enable_ibl && ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop))
 				{
 					indirect_diffuse = irradiance.xyz * albedo.xyz * diffuse_term;
 					env_brdf = (fresnel * std::clamp(brdf_lut.r, 0.0f, 1.0f) + brdf_lut.g);
@@ -419,12 +419,12 @@ namespace CpuRasterizor
 					ret += tinymath::Color(ambient.x, ambient.y, ambient.z, 0.0f);
 				}
 
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kIndirectDiffuse) != RenderFlag::kNone)
+				if ((CpuRasterSharedData.debug_flag & RenderFlag::kIndirectDiffuse) != RenderFlag::kNone)
 				{
 					return tinymath::Color(indirect_diffuse.r, indirect_diffuse.g, indirect_diffuse.b, 1.0f);
 				}
 
-				if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kIndirectSpecular) != RenderFlag::kNone)
+				if ((CpuRasterSharedData.debug_flag & RenderFlag::kIndirectSpecular) != RenderFlag::kNone)
 				{
 					return tinymath::Color(indirect_specular.r, indirect_specular.g, indirect_specular.b, 1.0f);
 				}
@@ -461,17 +461,17 @@ namespace CpuRasterizor
 
 		tinymath::Color fragment_shader(const v2f& input) const
 		{
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kMipmap) != RenderFlag::kNone
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kMipmap) != RenderFlag::kNone
 				&& local_properties.has_texture(albedo_prop))
 			{
 				int mip = get_mip_level(input.ddx.uv, input.ddy.uv, local_properties.get_texture(albedo_prop)->width, local_properties.get_texture(albedo_prop)->height);
 				return mip_colors[mip];
 			}
 
-			auto main_light = INST(GlobalShaderParams).main_light;
-			auto point_lights = INST(GlobalShaderParams).point_lights;
+			auto main_light = CpuRasterSharedData.main_light;
+			auto point_lights = CpuRasterSharedData.point_lights;
 
-			tinymath::vec3f cam_pos = INST(GlobalShaderParams).camera_pos;
+			tinymath::vec3f cam_pos = CpuRasterSharedData.camera_pos;
 			tinymath::vec3f wpos = input.world_pos;
 			tinymath::vec4f screen_pos = input.position;
 
@@ -523,27 +523,27 @@ namespace CpuRasterizor
 			ret *= shadow_atten;
 			ret += material_data.emission_color;
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kSpecular) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kSpecular) != RenderFlag::kNone)
 			{
 				return tinymath::Color(ao, ao, ao, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
 			{
 				return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
 			{
 				return input.color;
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
 			{
 				return normal;
 			}
 
-			if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+			if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 			{
 				ret = ret / (ret + tinymath::kColorWhite);
 				ret = tinymath::pow(ret, 1.0f / 2.2f);

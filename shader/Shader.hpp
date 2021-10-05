@@ -113,10 +113,10 @@ namespace CpuRasterizor
 
 		virtual tinymath::Color fragment_shader(const v2f& input) const
 		{
-			auto main_light = INST(GlobalShaderParams).main_light;
-			auto point_lights = INST(GlobalShaderParams).point_lights;
+			auto main_light = CpuRasterSharedData.main_light;
+			auto point_lights = CpuRasterSharedData.point_lights;
 
-			tinymath::vec3f cam_pos = INST(GlobalShaderParams).camera_pos;
+			tinymath::vec3f cam_pos = CpuRasterSharedData.camera_pos;
 			tinymath::vec3f wpos = input.world_pos;
 			tinymath::vec4f screen_pos = input.position;
 
@@ -127,7 +127,7 @@ namespace CpuRasterizor
 			tinymath::Color albedo = tinymath::kColorWhite;
 			if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
 			{
-				if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+				if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 				{
 					albedo = tinymath::pow(albedo, 2.2f);
 				}
@@ -142,22 +142,22 @@ namespace CpuRasterizor
 
 			ret += ndl * albedo;
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
 			{
 				return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
 			{
 				return input.color;
 			}
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
 			{
 				return normal;
 			}
 
-			if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+			if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 			{
 				ret = ret / (ret + tinymath::kColorWhite);
 				ret = tinymath::pow(ret, 1.0f / 2.2f);

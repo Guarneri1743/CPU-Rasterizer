@@ -30,16 +30,16 @@ namespace CpuRasterizor
 		{
 			tinymath::Color ret;
 
-			if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
+			if ((CpuRasterSharedData.debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
 			{
 				tinymath::vec2f uv = spherical_coord_to_uv(tinymath::vec3f(input.shadow_coord.xyz));
 				return tinymath::Color(uv.x, uv.y, 0.0f, 1.0f);
 			}
-			else if ((INST(GlobalShaderParams).debug_flag & RenderFlag::kIrradianceMap) != RenderFlag::kNone)
+			else if ((CpuRasterSharedData.debug_flag & RenderFlag::kIrradianceMap) != RenderFlag::kNone)
 			{
 				if (ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop) && ShaderPropertyMap::global_shader_properties.get_cubemap(cubemap_prop)->sample_irradiance_map(input.shadow_coord.xyz, ret))
 				{
-					if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+					if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 					{
 						ret = ret / (ret + tinymath::kColorWhite);
 						ret = tinymath::pow(ret, 1.0f / 2.2f);
@@ -50,7 +50,7 @@ namespace CpuRasterizor
 
 			if (ShaderPropertyMap::global_shader_properties.has_cubemap(cubemap_prop) && ShaderPropertyMap::global_shader_properties.get_cubemap(cubemap_prop)->sample(input.shadow_coord.xyz, ret))
 			{
-				if (INST(GlobalShaderParams).color_space == ColorSpace::kLinear)
+				if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 				{
 					ret = ret / (ret + tinymath::kColorWhite);
 					ret = tinymath::pow(ret, 1.0f / 2.2f);

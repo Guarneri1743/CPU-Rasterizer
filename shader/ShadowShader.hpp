@@ -16,7 +16,7 @@ namespace CpuRasterizor
 		v2f vertex_shader(const a2v& input) const
 		{
 			v2f o;
-			o.position = INST(GlobalShaderParams).main_light.light_space() * model() * tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
+			o.position = CpuRasterSharedData.main_light.light_space() * model() * tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
 			o.shadow_coord = o.position;
 			return o;
 		}

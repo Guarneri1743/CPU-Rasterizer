@@ -12,6 +12,7 @@ private:
 	std::unordered_map<uint32_t, std::weak_ptr<T>> id2res;
 
 public:
+	Cache();
 	~Cache<T>();
 	void put(const std::string& path, const std::shared_ptr<T>& res);
 	void put(const uint32_t& id, const std::shared_ptr<T>& res);

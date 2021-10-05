@@ -25,7 +25,6 @@ namespace CpuRasterizor
 		bool enable_mip;
 
 	private:
-		static std::unordered_map<size_t, std::shared_ptr<Texture>> texture_cache;
 		std::shared_ptr<RawBuffer<tinymath::color_rgb16f>> rgb16f_buffer;
 		std::shared_ptr<RawBuffer<tinymath::color_rgba16f>> rgba16f_buffer;
 		std::shared_ptr<RawBuffer<tinymath::color_rgb>> rgb_buffer;

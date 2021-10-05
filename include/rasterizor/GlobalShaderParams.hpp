@@ -4,6 +4,8 @@
 #include "Light.hpp"
 #include "tinymath.h"
 
+#define CpuRasterSharedData Singleton<CpuRasterizor::GlobalShaderParams>::get()
+
 namespace CpuRasterizor {
 	struct GlobalShaderParams 
 	{

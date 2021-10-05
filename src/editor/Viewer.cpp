@@ -29,7 +29,7 @@ namespace CpuRasterizor
 		editors.emplace_back(std::move(hierarchy));
 		editors.emplace_back(std::move(sceneview));
 		editors.emplace_back(std::move(explorer));
-		INST(GraphicsDevice).set_viewport(600, 400);
+		CpuRasterApi.set_viewport(600, 400);
 		Time::start();
 		CpuRasterizor::Scene::open_scene("/scenes/default_scene.scene");
 		playing = true;
@@ -56,9 +56,9 @@ namespace CpuRasterizor
 				}
 
 				// blit framebuffer to screen
-				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(INST(GraphicsDevice).get_target_color_buffer()),
-											INST(GraphicsDevice).get_width(),
-											INST(GraphicsDevice).get_height(),
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(CpuRasterApi.get_target_color_buffer()),
+											CpuRasterApi.get_width(),
+											CpuRasterApi.get_height(),
 											false);
 
 				// render editors

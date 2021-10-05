@@ -38,7 +38,6 @@ namespace CpuRasterizor
 		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
 	
 	private:
-		static std::unordered_map<uint32_t, std::shared_ptr<Model>> texture_cache;
 		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
 		void load_vertices(aiMesh* ai_mesh);
 		void reload_mesh(aiNode* node, const aiScene* Scene);	

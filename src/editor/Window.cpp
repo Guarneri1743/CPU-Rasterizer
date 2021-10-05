@@ -281,11 +281,11 @@ namespace CpuRasterizor
 		UNUSED(window);
 		if (action == GLFW_PRESS)
 		{
-			INST(InputManager).on_key_down(key);
+			InputMgr.on_key_down(key);
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			INST(InputManager).on_key_up(key);
+			InputMgr.on_key_up(key);
 		}
 		else if (action == GLFW_REPEAT)
 		{
@@ -296,7 +296,7 @@ namespace CpuRasterizor
 	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
 	{
 		UNUSED(window);
-		INST(InputManager).on_mouse_move(x, y);
+		InputMgr.on_mouse_move(x, y);
 	}
 
 	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
@@ -305,11 +305,11 @@ namespace CpuRasterizor
 		UNUSED(mods);
 		if (action == GLFW_PRESS)
 		{
-			INST(InputManager).on_key_down(button);
+			InputMgr.on_key_down(button);
 		}
 		else if (action == GLFW_RELEASE)
 		{
-			INST(InputManager).on_key_up(button);
+			InputMgr.on_key_up(button);
 		}
 		else if (action == GLFW_REPEAT)
 		{
@@ -321,7 +321,7 @@ namespace CpuRasterizor
 	{
 		UNUSED(window);
 		UNUSED(delta_x);
-		INST(InputManager).on_wheel_rolling(delta_y);
+		InputMgr.on_wheel_rolling(delta_y);
 	}
 
 	void Window::glfw_resize_callback(GLFWwindow* window, int w, int h)

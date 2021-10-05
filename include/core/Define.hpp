@@ -1,7 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <ostream>
-#include <sstream>
 #include "Marcos.h"
 #include <type_traits>
 
@@ -63,28 +61,28 @@ typedef uint8_t image_ubyte;
 
 enum class WrapMode
 {
-	REPEAT = 0,
-	CLAMP_TO_EDGE = 1,
-	CLAMP_TO_BORDER = 2
+	kRepeat = 0,
+	kClampToEdge = 1,
+	kClampToBorder = 2
 };
 
 enum class Filtering
 {
-	POINT = 0,
-	BILINEAR = 1,
-	MAX = 2,
-	MIN = 3
+	kPoint = 0,
+	kBilinear = 1,
+	kMax = 2,
+	kMin = 3
 };
 
 enum class TextureFormat
 {
-	INVALID = 0,
-	rgb = 1,
-	rgba = 2,
-	rg = 3,
-	r32 = 4,
-	rgb16f = 5,
-	rgba16f = 6
+	kInvalid = 0,
+	kRGB = 1,
+	kRGBA = 2,
+	kRG = 3,
+	kGray = 4,
+	kRGB16 = 5,
+	kRGBA16 = 6
 };
 
 // pipeline defines

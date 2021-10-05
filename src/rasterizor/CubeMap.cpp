@@ -19,8 +19,8 @@ namespace CpuRasterizor
 
 	CubeMap::CubeMap()
 	{
-		this->wrap_mode = WrapMode::REPEAT;
-		this->filtering = Filtering::POINT;
+		this->wrap_mode = WrapMode::kRepeat;
+		this->filtering = Filtering::kPoint;
 	}
 
 	CubeMap::CubeMap(const char* path)
@@ -132,8 +132,8 @@ namespace CpuRasterizor
 			return;
 		}
 
-		irradiance_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
-		irradiance_map->filtering = Filtering::POINT;
+		irradiance_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
+		irradiance_map->filtering = Filtering::kPoint;
 
 		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
@@ -202,8 +202,8 @@ namespace CpuRasterizor
 			return;
 		}
 
-		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::rgb16f);
-		prefilter_map->filtering = Filtering::POINT;
+		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
+		prefilter_map->filtering = Filtering::kPoint;
 
 		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
@@ -273,8 +273,8 @@ namespace CpuRasterizor
 			return;
 		}
 
-		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::rgb16f);
-		brdf_lut->filtering = Filtering::POINT;
+		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::kRGB16);
+		brdf_lut->filtering = Filtering::kPoint;
 
 		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)(brdf_size) * (size_t)(brdf_size));
