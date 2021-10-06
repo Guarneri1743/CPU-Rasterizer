@@ -950,7 +950,7 @@ namespace CpuRasterizor
 
 			rapidjson::Value cubemap_path;
 			cubemap_path.SetString(scene.cubemap->meta_path.c_str(), doc.GetAllocator());
-			doc.AddMember("cubemap_path", cubemap_path, doc.GetAllocator());
+			doc.AddMember("hdri_path", cubemap_path, doc.GetAllocator());
 
 			rapidjson::Value main_cam = Serializer::serialize(doc, *scene.main_cam).GetObject();
 			doc.AddMember("main_cam", main_cam, doc.GetAllocator());
@@ -1020,7 +1020,7 @@ namespace CpuRasterizor
 					scene.add(std::shared_ptr<Model>(model));
 				}
 
-				const char* cubemap_path = doc["cubemap_path"].GetString();
+				const char* cubemap_path = doc["hdri_path"].GetString();
 				if (cubemap_path != nullptr)
 				{
 					scene.cubemap = std::shared_ptr<CubeMap>(new CubeMap(cubemap_path));

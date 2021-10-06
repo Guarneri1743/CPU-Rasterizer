@@ -120,7 +120,7 @@
         "/models/light.model",
         "/models/light.model"
     ],
-    "cubemap_path": "/cubemaps/ibl.cubemap",
+    "hdri_path": "/hdri/valley.hdri",
     "enable_ibl": true,
     "enable_shadow": true,
     "pcf_on": true,

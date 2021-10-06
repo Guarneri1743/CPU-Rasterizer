@@ -1,7 +1,7 @@
 {
     "raw_path": "/backpack/diffuse.jpg",
     "meta_path": "/backpack/diffuse.texture",
-    "filtering": 0,
+    "filtering": 1,
     "wrap_mode": 0,
     "format": 1,
     "width": 4096,

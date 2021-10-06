@@ -65,6 +65,7 @@ namespace CpuRasterizor
 		bool write(const float& u, const float& v, const tinymath::Color& data);
 		void resize(const size_t& w, const size_t& h);
 		void release();
+		void copy(const Texture& other);
 		static void export_image(const Texture& tex, const std::string& path);
 
 	private:
@@ -72,7 +73,6 @@ namespace CpuRasterizor
 		void wrap(float& u, float& v) const;
 		void clear();
 		Texture& operator =(const Texture& other);
-		void copy(const Texture& other);
 		Texture();
 	};
 }

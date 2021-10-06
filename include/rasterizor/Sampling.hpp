@@ -51,6 +51,15 @@ inline tinymath::vec3f radian_to_spherical_coord(const float& theta, const float
     return tinymath::normalize(tinymath::vec3f(x, y, z));
 }
 
+inline tinymath::vec3f tangent2world(const tinymath::vec3f& vec, const tinymath::vec3f& normal)
+{
+    tinymath::vec3f bitangent = normal.y < 0.999f ? tinymath::kVec3fLeft : tinymath::kVec3fRight;
+    tinymath::vec3f tangent = tinymath::normalize(tinymath::cross(bitangent, normal));
+    bitangent = tinymath::cross(normal, tangent);
+
+    return tinymath::normalize(vec.x * tangent + vec.y * normal + vec.z * bitangent);
+}
+
 inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, const tinymath::vec3f& normal, const float& roughness)
 {
     float a = roughness * roughness;
@@ -64,11 +73,7 @@ inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, con
 
     tinymath::vec3f w_i = tinymath::normalize(tinymath::vec3f(x, y, z));
 
-    tinymath::vec3f bitangent = normal.y < 0.999f ? tinymath::kVec3fLeft : tinymath::kVec3fRight;
-    tinymath::vec3f tangent = tinymath::normalize(tinymath::cross(bitangent, normal));
-    bitangent = tinymath::cross(normal, tangent);
-
-    return tinymath::normalize(w_i.x * tangent + w_i.y * normal + w_i.z * bitangent);
+    return tangent2world(w_i, normal);
 } 
 
 inline int get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)

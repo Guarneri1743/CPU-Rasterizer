@@ -20,6 +20,7 @@ namespace CpuRasterizor
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
 		void precompute_prefilter_map(const size_t& mip);
+		void precompute_prefilter_map_fast(const size_t& mip);
 		void precompute_brdf_lut();
 
 		std::string texture_path;

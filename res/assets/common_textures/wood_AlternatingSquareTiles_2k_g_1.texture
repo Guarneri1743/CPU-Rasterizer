@@ -1,7 +1,7 @@
 {
     "raw_path": "/common_textures/wood_AlternatingSquareTiles_2k_g_1.jpg",
     "meta_path": "/common_textures/wood_AlternatingSquareTiles_2k_g_1.texture",
-    "filtering": 0,
+    "filtering": 1,
     "wrap_mode": 0,
     "format": 1,
     "width": 2048,

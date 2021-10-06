@@ -1,7 +1,7 @@
 {
     "raw_path": "/pbr_helmet/textures/metallic.png",
     "meta_path": "/helmet/metallic.texture",
-    "filtering": 0,
+    "filtering": 1,
     "wrap_mode": 0,
     "format": 3,
     "width": 4096,

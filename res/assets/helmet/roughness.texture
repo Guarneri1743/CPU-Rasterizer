@@ -1,7 +1,7 @@
 {
     "raw_path": "/pbr_helmet/textures/roughness.png",
     "meta_path": "/helmet/roughness.texture",
-    "filtering": 0,
+    "filtering": 1,
     "wrap_mode": 0,
     "format": 3,
     "width": 4096,

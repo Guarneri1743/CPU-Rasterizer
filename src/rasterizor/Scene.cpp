@@ -373,6 +373,15 @@ namespace CpuRasterizor
 		h = shadowmap->get_height();
 	}
 
+	void Scene::set_cubemap(std::string path)
+	{
+		cubemap = std::shared_ptr<CubeMap>(new CubeMap(path.c_str()));
+		if (cubemap != nullptr && this == current())
+		{
+			ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, cubemap);
+		}
+	}
+
 	void Scene::open_scene(const char* path)
 	{
 		InputMgr.clear_evts();

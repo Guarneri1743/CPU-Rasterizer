@@ -1,7 +1,0 @@
-{
-    "name": "space",
-    "meta_path": "/cubemaps/ibl.cubemap",
-    "texture_path": "/cubemaps/ibl.hdr",
-    "wrap_mode": 0,
-    "filtering": 0
-}

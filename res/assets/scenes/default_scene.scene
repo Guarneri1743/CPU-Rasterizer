@@ -28,7 +28,7 @@
     "models": [
         "/models/plane.model"
     ],
-    "cubemap_path": "/cubemaps/ibl.cubemap",
+    "hdri_path": "/hdri/valley.hdri",
     "enable_ibl": true,
     "enable_shadow": false,
     "pcf_on": false,

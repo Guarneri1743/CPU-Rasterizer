@@ -166,6 +166,39 @@ namespace CpuRasterizor
 		if (ImGui::CollapsingHeader("IBL", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::Checkbox("IBL_On", &CpuRasterSharedData.enable_ibl);
+
+			std::string hdri_path[] = {
+				"None",
+				"valley",
+				"ballroom",
+				"cave_room",
+				"fireplace",
+				"green_house",
+				"kloppenheim",
+				"loft_hall",
+				"man_outside",
+				"memorial",
+				"nave",
+				"preller",
+				"veranda"
+			};
+
+			static int selected_view = 0;
+			if (ImGui::Button("HDRI.."))
+				ImGui::OpenPopup("hdri");
+			ImGui::SameLine();
+			ImGui::TextUnformatted(selected_view == -1 ? "<None>" : hdri_path[selected_view].c_str());
+			if (ImGui::BeginPopup("hdri"))
+			{
+				ImGui::Separator();
+				for (int i = 0; i < IM_ARRAYSIZE(hdri_path); i++)
+					if (ImGui::Selectable(hdri_path[i].c_str()))
+					{
+						selected_view = i;
+						Scene::current()->set_cubemap("/hdri/" + hdri_path[selected_view] + ".hdri");
+					}
+				ImGui::EndPopup();
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen))

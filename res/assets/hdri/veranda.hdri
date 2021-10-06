@@ -1,0 +1,7 @@
+{
+    "name": "space",
+    "meta_path": "/hdri/veranda.hdri",
+    "texture_path": "/hdri/veranda.hdr",
+    "wrap_mode": 0,
+    "filtering": 0
+}

@@ -283,21 +283,14 @@ namespace CpuRasterizor
 
 	bool Texture::bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
-		float rf = v * (float)this->width + 0.5f;
-		float cf = u * (float)this->height + 0.5f;
-
-		size_t row = (size_t)std::floor(rf);
-		size_t col = (size_t)std::floor(cf);
-
-		float frac_row = rf - (float)row;
-		float frac_col = cf - (float)col;
-
+		size_t row, col;
+		float frac_row, frac_col;
+		uv2pixel(width, height, u, v, row, col, frac_row, frac_col);
 		tinymath::Color c00, c01, c11, c10;
-		read(row, col, mip, c00);
-		read(row + 1, col, mip, c01);
-		read(row + 1, col + 1, mip, c11);
-		read(row, col + 1, mip, c10);
-
+		read(row, col, c00);
+		read(row + 1, col, c01);
+		read(row + 1, col + 1, c11);
+		read(row, col + 1, c10);
 		tinymath::Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
 		tinymath::Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
 		ret = a * (1.0f - frac_col) + b * frac_col;
@@ -306,8 +299,7 @@ namespace CpuRasterizor
 
 	bool Texture::point(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
 	{
-		read(u, v, mip, ret);
-		return true;
+		return read(u, v, mip, ret);
 	}
 
 	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
@@ -737,31 +729,69 @@ namespace CpuRasterizor
 
 	void Texture::resize(const size_t& w, const size_t& h)
 	{
+		if (w == width && h == height)
+		{
+			return;
+		}
+
+		width = w;
+		height = h;
+
 		switch (format)
 		{
 		case TextureFormat::kRGB:
 		{
-			return rgb_buffer->resize(w, h);
+			rgb_buffer->resize(w, h);
+			for(int mip = 1; mip < rgb_mipmaps.size(); ++mip)
+			{
+				rgb_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		case TextureFormat::kRGBA:
 		{
-			return rgba_buffer->resize(w, h);
+			rgba_buffer->resize(w, h);
+			for (int mip = 1; mip < rgba_mipmaps.size(); ++mip)
+			{
+				rgba_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		case TextureFormat::kRG:
 		{
-			return rg_buffer->resize(w, h);
+			rg_buffer->resize(w, h);
+			for (int mip = 1; mip < rg_mipmaps.size(); ++mip)
+			{
+				rg_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		case TextureFormat::kGray:
 		{
-			return gray_buffer->resize(w, h);
+			gray_buffer->resize(w, h);
+			for (int mip = 1; mip < gray_mipmaps.size(); ++mip)
+			{
+				gray_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		case TextureFormat::kRGB16:
 		{
-			return rgb16f_buffer->resize(w, h);
+			rgb16f_buffer->resize(w, h);
+			for (int mip = 1; mip < rgb16f_mipmaps.size(); ++mip)
+			{
+				rgb16f_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		case TextureFormat::kRGBA16:
 		{
-			return rgba16f_buffer->resize(w, h);
+			rgba16f_buffer->resize(w, h);
+			for (int mip = 1; mip < rgba16f_mipmaps.size(); ++mip)
+			{
+				rgba16f_mipmaps[mip]->resize(w >> mip, h >> mip);
+			}
+			break;
 		}
 		}
 	}
@@ -799,6 +829,7 @@ namespace CpuRasterizor
 		std::string abs_path = RES_PATH + path;
 		const char* dest = abs_path.c_str();
 		int ret = 0;
+		stbi_flip_vertically_on_write(true);
 		switch (tex.format)
 		{
 		case TextureFormat::kRGB:
@@ -846,6 +877,7 @@ namespace CpuRasterizor
 		}
 
 		LOG("export image: {}, ret: {}", abs_path.c_str(), ret);
+		Logger::log(Logger::Severity::kLog,"export image: {}, ret: {}", abs_path.c_str(), ret);
 	}
 
 	void Texture::wrap(float& u, float& v) const
@@ -861,19 +893,19 @@ namespace CpuRasterizor
 			v = tinymath::clamp(v, 0.0f, 1.0f);
 			break;
 		case WrapMode::kRepeat:
-			if (u <= 0.0f)
+			if (u < 0.0f)
 			{
 				u += 1.0f;
 			}
-			if (u >= 1.0f)
+			if (u > 1.0f)
 			{
 				u -= 1.0f;
 			}
-			if (v <= 0.0f)
+			if (v < 0.0f)
 			{
 				v += 1.0f;
 			}
-			if (v >= 1.0f)
+			if (v > 1.0f)
 			{
 				v -= 1.0f;
 			}
@@ -917,16 +949,24 @@ namespace CpuRasterizor
 		this->wrap_mode = other.wrap_mode;
 		this->filtering = other.filtering;
 		this->format = other.format;
+		this->raw_path = other.raw_path;
+		this->meta_path = other.meta_path;
+		this->enable_mip = other.enable_mip;
+		this->height = other.height;
+		this->width = other.width;
+		this->mip_count = other.mip_count;
+		this->mip_filtering = other.mip_filtering;
 		this->rgba_buffer = other.rgba_buffer;
 		this->rgb_buffer = other.rgb_buffer;
 		this->rgb16f_buffer = other.rgb16f_buffer;
 		this->rgba16f_buffer = other.rgba16f_buffer;
 		this->gray_buffer = other.gray_buffer;
 		this->rg_buffer = other.rg_buffer;
-		this->mip_count = other.mip_count;
 		this->gray_mipmaps = other.gray_mipmaps;
 		this->rg_mipmaps = other.rg_mipmaps;
 		this->rgba_mipmaps = other.rgba_mipmaps;
 		this->rgb_mipmaps = other.rgb_mipmaps;
+		this->rgb16f_mipmaps = other.rgb16f_mipmaps;
+		this->rgba16f_mipmaps = other.rgba16f_mipmaps;
 	}
 }

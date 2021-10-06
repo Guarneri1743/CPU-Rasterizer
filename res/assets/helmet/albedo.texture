@@ -1,7 +1,7 @@
 {
     "raw_path": "/pbr_helmet/textures/albedo.jpg",
     "meta_path": "/helmet/albedo.texture",
-    "filtering": 0,
+    "filtering": 1,
     "wrap_mode": 0,
     "format": 1,
     "width": 4096,

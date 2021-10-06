@@ -189,9 +189,9 @@ namespace CpuRasterizor
 				{
 					prefix = "[tex]";
 				}
-				else if (ext == ".cubemap")
+				else if (ext == ".hdri")
 				{
-					prefix = "[cubemap]";
+					prefix = "[hdri]";
 				}
 				else
 				{
@@ -205,7 +205,7 @@ namespace CpuRasterizor
 
 	void ExplorerEditor::draw_directories(const std::filesystem::path& dir)
 	{
-		for (auto& path : std::filesystem::directory_iterator(dir))
+		for (auto& path : std::filesystem::directory_iterator(dir)) 
 		{
 			ImGuiTreeNodeFlags flags =
 				ImGuiTreeNodeFlags_OpenOnArrow |

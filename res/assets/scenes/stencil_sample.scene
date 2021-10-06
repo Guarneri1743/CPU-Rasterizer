@@ -30,6 +30,7 @@
         "/models/stencil_backpack.model",
         "/models/plane.model"
     ],
+    "hdri_path": "/hdri/valley.hdri",
     "enable_ibl": false,
     "enable_shadow": false,
     "pcf_on": false,

@@ -1,0 +1,7 @@
+{
+    "name": "space",
+    "meta_path": "/hdri/nave.hdri",
+    "texture_path": "/hdri/nave.hdr",
+    "wrap_mode": 0,
+    "filtering": 0
+}

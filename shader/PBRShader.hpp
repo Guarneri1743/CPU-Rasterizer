@@ -268,7 +268,6 @@ namespace CpuRasterizor
 						float depth;
 						if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
 						{
-							//printf("shadowmap: %f depth: %f\n", depth, proj_shadow_coord.z);
 							shadow_atten += (proj_shadow_coord.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
 						}
 					}
@@ -332,8 +331,7 @@ namespace CpuRasterizor
 														const tinymath::vec3f& normal,
 														const float& ndv,
 														const tinymath::Color& albedo,
-														const float& ao,
-														const tinymath::mat3x3& tbn) const
+														const float& ao) const
 		{
 			UNUSED(wpos);
 			auto light_ambient = light.ambient;
@@ -346,10 +344,6 @@ namespace CpuRasterizor
 			float light_distance = 1.0f;
 
 			auto light_dir = -tinymath::normalize(light.forward);
-			if (local_properties.has_texture(normal_prop))
-			{
-				light_dir = tbn * light_dir;
-			}
 
 			auto half_dir = tinymath::normalize(view_dir + light_dir);
 
@@ -441,8 +435,7 @@ namespace CpuRasterizor
 														 const tinymath::vec3f& normal,
 														 const float& ndv,
 														 const tinymath::Color& albedo,
-														 const float& ao,
-														 const tinymath::mat3x3& tbn) const
+														 const float& ao) const
 		{
 			UNUSED(light);
 			UNUSED(material_data);
@@ -452,7 +445,6 @@ namespace CpuRasterizor
 			UNUSED(normal);
 			UNUSED(albedo);
 			UNUSED(ao);
-			UNUSED(tbn);
 			UNUSED(ndv);
 
 			// TODO
@@ -461,6 +453,11 @@ namespace CpuRasterizor
 
 		tinymath::Color fragment_shader(const v2f& input) const
 		{
+			MaterialData material_data;
+			IblData ibl_data;
+
+			setup(input, material_data);
+
 			if ((CpuRasterSharedData.debug_flag & RenderFlag::kMipmap) != RenderFlag::kNone
 				&& local_properties.has_texture(albedo_prop))
 			{
@@ -475,25 +472,18 @@ namespace CpuRasterizor
 			tinymath::vec3f wpos = input.world_pos;
 			tinymath::vec4f screen_pos = input.position;
 
-			tinymath::vec3f normal = tinymath::normalize(input.normal);
 			tinymath::vec3f view_dir = tinymath::normalize(cam_pos - wpos);
+			tinymath::vec3f normal = tinymath::normalize(input.normal);
 
 			tinymath::mat3x3 tbn = tinymath::kMat3x3Identity;
-
 			if (local_properties.has_texture(normal_prop))
 			{
+				// todo: calculate lighting in tangent space
 				tbn = tinymath::mat3x3(input.tangent, input.bitangent, input.normal);
-				view_dir = tinymath::normalize(tbn * view_dir);
-			}
-
-			MaterialData material_data;
-			IblData ibl_data;
-
-			setup(input, material_data);
-
-			if (local_properties.has_texture(normal_prop))
-			{
-				normal = material_data.unpacked_normal;
+				if (local_properties.has_texture(normal_prop))
+				{
+					normal = tinymath::normalize(tinymath::transpose(tbn) * material_data.unpacked_normal);
+				}
 			}
 
 			float ndv = tinymath::max(tinymath::dot(normal, view_dir), 0.0f);
@@ -513,11 +503,11 @@ namespace CpuRasterizor
 
 			tinymath::Color ret = tinymath::kColorBlack;
 
-			ret += calculate_main_light(main_light, material_data, ibl_data, wpos, view_dir, normal, ndv, albedo, ao, tbn);
+			ret += calculate_main_light(main_light, material_data, ibl_data, wpos, view_dir, normal, ndv, albedo, ao);
 
 			for (auto& light : point_lights)
 			{
-				ret += calculate_point_light(light, material_data, ibl_data, wpos, view_dir, normal, ndv, albedo, ao, tbn);
+				ret += calculate_point_light(light, material_data, ibl_data, wpos, view_dir, normal, ndv, albedo, ao);
 			}
 
 			ret *= shadow_atten;
@@ -540,7 +530,7 @@ namespace CpuRasterizor
 
 			if ((CpuRasterSharedData.debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
 			{
-				return normal;
+				return tinymath::Color(normal.x, normal.y, normal.z, 1.0f);
 			}
 
 			if (CpuRasterSharedData.color_space == ColorSpace::kLinear)

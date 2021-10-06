@@ -40,6 +40,7 @@ namespace CpuRasterizor
 		void copy(const RawBuffer<T>& other);
 	};
 
+	void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col, float& row_frac, float& col_frac);
 	void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col);
 	void pixel2uv(const size_t& w, const size_t& h, const size_t& row, const size_t& col, float& u, float& v);
 }

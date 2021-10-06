@@ -14,20 +14,21 @@ namespace CpuRasterizor
 		{
 			// shader selections
 			{
-				const char* shaders[] = { "Shader", "PBRShader" };
-				static int selected_flow = 0;
+				const char* shaders[] = { "default", "pbr_shader" };
+				static int selected_shader = 0;
 				if (ImGui::Button("Shaders.."))
 					ImGui::OpenPopup("shaders");
 				ImGui::SameLine();
-				ImGui::TextUnformatted(selected_flow == -1 ? "<None>" : shaders[selected_flow]);
+				ImGui::TextUnformatted(selected_shader == -1 ? "<None>" : shaders[selected_shader]);
 				if (ImGui::BeginPopup("shaders"))
 				{
 					ImGui::Separator();
 					for (int i = 0; i < IM_ARRAYSIZE(shaders); i++)
 						if (ImGui::Selectable(shaders[i]))
 						{
-							selected_flow = i;
-
+							selected_shader = i;
+							auto shader = ShaderLab::get_shader(shaders[selected_shader]);
+							material.target_shader = shader;
 						}
 					ImGui::EndPopup();
 				}

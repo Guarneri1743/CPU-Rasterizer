@@ -15,8 +15,6 @@
 
 namespace CpuRasterizor
 {
-	constexpr size_t kMaxPrefilteredMapCount = 4;
-
 	CubeMap::CubeMap()
 	{
 		this->wrap_mode = WrapMode::kRepeat;
@@ -44,7 +42,7 @@ namespace CpuRasterizor
 		std::shared_ptr<CubeMap> map;
 		spawn(path, map);
 		return map;
-	}	
+	}
 
 	void CubeMap::copy_from(const CubeMap& cubemap)
 	{
@@ -65,7 +63,7 @@ namespace CpuRasterizor
 		spawn(path, map);
 		return map;
 	}
-	 
+
 	bool CubeMap::sample(const tinymath::vec3f& dir, tinymath::Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
@@ -88,7 +86,7 @@ namespace CpuRasterizor
 	{
 		// todo: mipmap
 		auto uv = spherical_coord_to_uv(dir);
-		size_t mip = std::clamp((size_t)(lod * (float)kMaxPrefilteredMapCount), 0ull, kMaxPrefilteredMapCount - 1);
+		size_t mip = std::clamp((int)(lod * (float)kMaxMip), 0, kMaxMip - 1);
 		return prefiltered_maps[mip]->sample(uv.x, uv.y, ret);
 	}
 
@@ -104,9 +102,9 @@ namespace CpuRasterizor
 			precompute_irradiance_map();
 
 			prefiltered_maps.clear();
-			for (size_t mip = 0; mip < kMaxPrefilteredMapCount; mip++) 
+			for (size_t mip = 0; mip < kMaxMip; mip++)
 			{
-				precompute_prefilter_map(mip);
+				precompute_prefilter_map_fast(mip);
 			}
 
 			precompute_brdf_lut();
@@ -165,7 +163,7 @@ namespace CpuRasterizor
 			// brute force sampling (whole sphere) 
 			for (float phi = 0.0f; phi < TWO_PI; phi += step)
 			{
-				for (float theta = 0.0f; theta < PI; theta += step)
+				for (float theta = -HALF_PI; theta < HALF_PI; theta += step)
 				{
 					tinymath::vec3f w_i = radian_to_spherical_coord(theta, phi);
 					float ndl = tinymath::dot(w_i, normal);
@@ -175,26 +173,29 @@ namespace CpuRasterizor
 						sample(w_i, color);
 						irradiance += color * ndl;
 					}
+
 					samples += 1.0f;
 				}
 			}
-			
+
 			irradiance *= PI;
 			irradiance /= samples;
-			irradiance_map->write(texture->height - 1 - row, col, irradiance);
+			irradiance_map->write(row, col, irradiance);
 		});
 
 		Texture::export_image(*irradiance_map, irradiance_path);
 	}
 
-	constexpr size_t kSampleCount = 1024u;
+	constexpr size_t kSampleCount = 2048u;
 
 	void CubeMap::precompute_prefilter_map(const size_t& mip)
 	{
-		float roughness = mip / (float)(kMaxPrefilteredMapCount - 1);
 		size_t begin = texture_path.find(".hdr");
 		std::string prefilter_map_path = texture_path;
-		prefilter_map_path = prefilter_map_path.replace(begin, begin + 4, "_prefilter_" + std::to_string(mip) +".hdr");
+		if (mip > 0)
+		{
+			prefilter_map_path = prefilter_map_path.replace(begin, begin + 4, "_prefilter_" + std::to_string(mip) + ".hdr");
+		}
 
 		if (std::filesystem::exists(RES_PATH + prefilter_map_path))
 		{
@@ -205,67 +206,165 @@ namespace CpuRasterizor
 		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
 		prefilter_map->filtering = Filtering::kPoint;
 
-		std::vector<std::pair<size_t, size_t>> indexers;
-		indexers.reserve((size_t)texture->width * (size_t)texture->height);
-		for (size_t row = 0; row < texture->height; row++)
+		prefilter_map->copy(*texture);
+		prefilter_map->resize(prefilter_map->width >> mip, prefilter_map->height >> mip);
+
+		if (mip > 0)
 		{
-			for (size_t col = 0; col < texture->width; col++)
+			std::vector<std::pair<size_t, size_t>> indexers;
+			indexers.reserve((size_t)prefilter_map->width * (size_t)prefilter_map->height);
+			for (size_t row = 0; row < prefilter_map->height; row++)
 			{
-				indexers.push_back({ row, col });
-			}
-		}
-
-		float r = roughness;
-		std::for_each(
-			std::execution::par_unseq,
-			indexers.begin(),
-			indexers.end(),
-			[this, r, prefilter_map](auto&& coord)
-		{
-			size_t row = coord.first;
-			size_t col = coord.second;
-			float u, v;
-			pixel2uv(texture->width, texture->height, row, col, u, v);
-			tinymath::vec2f uv = { u, v };
-			tinymath::vec3f normal = uv_to_spherical_coord(uv);
-
-			// Epic approximation
-			tinymath::vec3f reflect_dir = normal;
-			tinymath::vec3f view_dir = reflect_dir;
-
-			float total_weight = 0.0f;
-			tinymath::Color prefilter_color = tinymath::Color(0.0f);
-
-			for (size_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
-			{
-				tinymath::vec2f random_dir = random_vec2_01(kSampleCount);
-				tinymath::vec3f half_way = importance_sampling(random_dir, normal, r);
-				tinymath::vec3f w_i = tinymath::normalize(2.0f * tinymath::max(tinymath::dot(view_dir, half_way), 0.0f) * half_way - view_dir);
-				float ndl = tinymath::dot(normal, w_i);
-				if (ndl > 0.0f)
+				for (size_t col = 0; col < prefilter_map->width; col++)
 				{
-					tinymath::Color color;
-					sample(w_i, color);
-					prefilter_color += color * ndl;
-					total_weight += ndl;
+					indexers.push_back({ row, col });
 				}
 			}
 
-			prefilter_color /= total_weight;
-			prefilter_map->write(texture->height - 1 - row, col, prefilter_color);
-		});
+			float roughness = mip / (float)(kMaxMip - 1);
+			float r = roughness;
+			std::for_each(
+				std::execution::par_unseq,
+				indexers.begin(),
+				indexers.end(),
+				[this, r, prefilter_map](auto&& coord)
+			{
+				size_t row = coord.first;
+				size_t col = coord.second;
+				float u, v;
+				pixel2uv(texture->width, texture->height, row, col, u, v);
+				tinymath::vec2f uv = { u, v };
+				tinymath::vec3f normal = uv_to_spherical_coord(uv);
+
+				// Epic approximation
+				tinymath::vec3f reflect_dir = normal;
+				tinymath::vec3f view_dir = reflect_dir;
+
+				float total_weight = 0.0f;
+				tinymath::Color prefilter_color = tinymath::Color(0.0f);
+
+				for (size_t sample_index = 0u; sample_index < kSampleCount; sample_index++)
+				{
+					tinymath::vec2f random_dir = hammersley((uint32_t)sample_index, (uint32_t)kSampleCount);
+					//tinymath::vec2f random_dir = random_vec2_01(kSampleCount);
+					tinymath::vec3f half_way = importance_sampling(random_dir, normal, r);
+					tinymath::vec3f w_i = tinymath::normalize(2.0f * tinymath::max(tinymath::dot(view_dir, half_way), 0.0f) * half_way - view_dir);
+					float ndl = tinymath::dot(normal, w_i);
+					if (ndl > 0.0f)
+					{
+						tinymath::Color color;
+						sample(w_i, color);
+						prefilter_color += color * ndl;
+						total_weight += ndl;
+					}
+				}
+
+				prefilter_color /= total_weight;
+				prefilter_map->write(row, col, prefilter_color);
+			});
+		}
 
 		prefiltered_maps.push_back(prefilter_map);
 		Texture::export_image(*prefilter_map, prefilter_map_path);
 	}
 
-	constexpr int brdf_size = 512;
+	void CubeMap::precompute_prefilter_map_fast(const size_t& mip)
+	{
+		size_t begin = texture_path.find(".hdr");
+		std::string prefilter_map_path = texture_path;
+
+		if (mip > 0)
+		{
+			prefilter_map_path = prefilter_map_path.replace(begin, begin + 4, "_prefilter_" + std::to_string(mip) + ".hdr");
+		}
+
+		if (std::filesystem::exists(RES_PATH + prefilter_map_path))
+		{
+			prefiltered_maps.push_back(Texture::load_raw(prefilter_map_path));
+			return;
+		}
+
+		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
+		prefilter_map->filtering = Filtering::kPoint;
+
+		prefilter_map->copy(*texture);
+		prefilter_map->resize(prefilter_map->width >> mip, prefilter_map->height >> mip);
+
+		bool horizontal = false;
+		float weights[5] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
+
+		if (mip > 0)
+		{
+			std::vector<std::pair<size_t, size_t>> indexers;
+			indexers.reserve((size_t)prefilter_map->width * (size_t)prefilter_map->height);
+			for (size_t row = 0; row < prefilter_map->height; row++)
+			{
+				for (size_t col = 0; col < prefilter_map->width; col++)
+				{
+					indexers.push_back({ row, col });
+				}
+			}
+
+			int iterations = 8 * (int)mip;
+			for (int i = 0; i < iterations; i++)
+			{
+				std::for_each(
+					std::execution::par_unseq,
+					indexers.begin(),
+					indexers.end(),
+					[this, &horizontal, &weights, &prefilter_map](auto&& coord)
+				{
+					int row = (int)coord.first;
+					int col = (int)coord.second;
+
+					tinymath::Color prefilter_color;
+					prefilter_map->read((size_t)row, (size_t)col, prefilter_color);
+					prefilter_color *= weights[0];
+
+					if (horizontal)
+					{
+						for (int idx = 1; idx < 5; idx++)
+						{
+							float weight = weights[idx];
+							tinymath::Color c1 = tinymath::kColorBlack;
+							tinymath::Color c2 = tinymath::kColorBlack;
+							prefilter_map->read((size_t)row, (size_t)(tinymath::min(col + idx, (int)prefilter_map->width)), c1);
+							prefilter_map->read((size_t)row, (size_t)(tinymath::max(col - idx, 0)), c2);
+							prefilter_color += c1 * weight;
+							prefilter_color += c2 * weight;
+						}
+					}
+					else
+					{
+						for (int idx = 1; idx < 5; idx++)
+						{
+							float weight = weights[idx];
+							tinymath::Color c1 = tinymath::kColorBlack;
+							tinymath::Color c2 = tinymath::kColorBlack;
+							prefilter_map->read((size_t)(tinymath::min(row + idx, (int)prefilter_map->height)), (size_t)col, c1);
+							prefilter_map->read((size_t)(tinymath::max(row - idx, 0)), (size_t)col, c2);
+							prefilter_color += c1 * weight;
+							prefilter_color += c2 * weight;
+						}
+					}
+
+					prefilter_color.a = 1.0f;
+					prefilter_map->write((size_t)row, (size_t)col, prefilter_color);
+
+					horizontal = !horizontal;
+				});
+			}
+		}
+
+		prefiltered_maps.push_back(prefilter_map);
+		Texture::export_image(*prefilter_map, prefilter_map_path);
+	}
+
+	constexpr int brdf_size = 1024;
 
 	void CubeMap::precompute_brdf_lut()
 	{
-		size_t begin = texture_path.find(".hdr");
-		std::string brdf_lut_path = texture_path;
-		brdf_lut_path = brdf_lut_path.replace(begin, begin + 4, "_brdf_lut.hdr");
+		std::string brdf_lut_path = "/hdri/brdf_lut.hdr";
 
 		if (std::filesystem::exists(RES_PATH + brdf_lut_path))
 		{
@@ -333,7 +432,7 @@ namespace CpuRasterizor
 			}
 
 			brdf /= (float)kSampleCount;
-			brdf_lut->write(size - row - 1, col, brdf);
+			brdf_lut->write(row, col, brdf);
 		});
 
 		Texture::export_image(*brdf_lut, brdf_lut_path);

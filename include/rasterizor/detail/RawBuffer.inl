@@ -1,5 +1,8 @@
 #include "tinymath.h"
-#include "..\RawBuffer.hpp"
+#include "RawBuffer.hpp"
+#include "tinymath/color/Color.h"
+#include "tinymath/color/ColorEncoding.h"
+#include <type_traits>
 
 namespace CpuRasterizor
 {
@@ -111,7 +114,7 @@ namespace CpuRasterizor
 	bool RawBuffer<T>::write(T* buf, const size_t& row, const size_t& col, const size_t& w, const size_t& h, const T& data)
 	{
 		size_t pos = row * w + col;
-		if (row >= h || col >= w || pos >= w * h)
+		if (pos >= w * h)
 		{
 			return false;
 		}
@@ -141,7 +144,7 @@ namespace CpuRasterizor
 
 				T val;
 				read(buffer, u, v, pw, ph, val);
-				write(new_buffer, u, v, w, h, val);
+				write(new_buffer, row, col, w, h, val);
 			}
 		}
 
@@ -151,18 +154,30 @@ namespace CpuRasterizor
 		buffer = new_buffer;
 	}
 
-	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col) 
+	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col, float& row_frac, float& col_frac)
+	{
+		float rowf = v * (float)h;
+		float colf = u * (float)w;
+		float row_integer = tinymath::floor(rowf - 0.5f);
+		float col_integer = tinymath::floor(colf - 0.5f);
+		row = (size_t)(row_integer);
+		col = (size_t)(col_integer);
+		row_frac = rowf - row_integer;
+		col_frac = colf - col_integer;
+	}
+
+	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col)
 	{
 		// [0.0, 1.0] -> [0, w/h - 1]
-		row = (size_t)(tinymath::floor(v * (float)(h - 1)));
-		col = (size_t)(tinymath::floor(u * (float)(w - 1)));
+		row = (size_t)(tinymath::floor(v * (float)h));
+		col = (size_t)(tinymath::floor(u * (float)w));
 	}
 
 	inline void pixel2uv(const size_t& w, const size_t& h, const size_t& row, const size_t& col, float& u, float& v)
 	{
 		//[0, w/h - 1] -> [0.0, 1.0]
-		u = (float)col / (float)(w - 1);
-		v = (float)row / (float)(h - 1);
+		u = ((float)col + 0.5f)/ (float)w;
+		v = ((float)row + 0.5f) / (float)h;
 	}
 
 	template<typename T>
