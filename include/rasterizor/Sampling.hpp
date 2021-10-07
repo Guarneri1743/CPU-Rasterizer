@@ -76,11 +76,11 @@ inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, con
     return tangent2world(w_i, normal);
 } 
 
-inline int get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)
+inline float get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)
 {
     tinymath::vec2f ddx = ddx_uv * tinymath::vec2f((float)width, (float)height);
     tinymath::vec2f ddy = ddy_uv * tinymath::vec2f((float)width, (float)height);
     float p = tinymath::max(tinymath::sqrt(tinymath::dot(ddx, ddx)), tinymath::sqrt(tinymath::dot(ddy, ddy)));
-    int level = (int)(tinymath::log2(p) + 0.5f);
-    return tinymath::clamp(level, 0, kMaxMip - 1);
+    float level = (tinymath::log2(p));
+    return tinymath::clamp(level, 0.f, (float)(kMaxMip - 1));
 }

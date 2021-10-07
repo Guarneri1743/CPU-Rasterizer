@@ -461,8 +461,8 @@ namespace CpuRasterizor
 			if ((CpuRasterSharedData.debug_flag & RenderFlag::kMipmap) != RenderFlag::kNone
 				&& local_properties.has_texture(albedo_prop))
 			{
-				int mip = get_mip_level(input.ddx.uv, input.ddy.uv, local_properties.get_texture(albedo_prop)->width, local_properties.get_texture(albedo_prop)->height);
-				return mip_colors[mip];
+				float mip = get_mip_level(input.ddx.uv, input.ddy.uv, local_properties.get_texture(albedo_prop)->width, local_properties.get_texture(albedo_prop)->height);
+				return mip_colors[(int)mip];
 			}
 
 			auto main_light = CpuRasterSharedData.main_light;

@@ -3,5 +3,5 @@
     "meta_path": "/hdri/cave_room.hdri",
     "texture_path": "/hdri/cave_room.hdr",
     "wrap_mode": 0,
-    "filtering": 0
+    "filtering": 1
 }

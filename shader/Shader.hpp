@@ -125,7 +125,7 @@ namespace CpuRasterizor
 
 			tinymath::Color ret = tinymath::kColorBlack;
 			tinymath::Color albedo = tinymath::kColorWhite;
-			if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, albedo))
+			if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, albedo))
 			{
 				if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
 				{

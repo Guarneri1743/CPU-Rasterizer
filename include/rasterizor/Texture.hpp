@@ -50,13 +50,10 @@ namespace CpuRasterizor
 		static std::shared_ptr<Texture> load_raw(const char* path);
 
 		void reload(const char* texture_path);
-		bool bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
-		bool point(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
 		void generate_mipmap(const int& mip_count, const Filtering& filtering);
 		bool sample(const float& u, const float& v, tinymath::Color& ret) const;
 		bool sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const;
-		bool sample(const float& u, const float& v, const int& mip, tinymath::Color& ret) const;
-		bool sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const;
+		bool sample(const float& u, const float& v, const float& mip, tinymath::Color& ret) const;
 		bool read(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
 		bool read(const size_t& row, const size_t& col, const size_t& mip, tinymath::Color& ret) const;
 		bool read(const float& u, const float& v, tinymath::Color& ret) const;
@@ -69,7 +66,7 @@ namespace CpuRasterizor
 		static void export_image(const Texture& tex, const std::string& path);
 
 	private:
-		//todo:
+		bool bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
 		void wrap(float& u, float& v) const;
 		void clear();
 		Texture& operator =(const Texture& other);

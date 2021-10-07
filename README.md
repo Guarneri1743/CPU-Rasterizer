@@ -280,7 +280,7 @@ Result:
 |  <img src="/gallery/Roughness.png" width = "180" height = "140" alt="Roughness" align=bottom/> | <img src="/gallery/Metallic.png" width = "180" height = "140" alt="Metallic" align=bottom/> | <img src="/gallery/IBL_Comparison.png" width = "180" height = "140" alt="MSAA" align=bottom/>  |
 
 
-| MSAA | Mipmap | Clipping | DebugView |
+| MSAA | Pixel Derivative | Clipping | DebugView |
 | ---  | --- | ---  | --- |
 | <img src="/gallery/msaa_on_4x.png" width = "180" height = "180" alt="MSAA" align=bottom/> | <img src="/gallery/mipmap.png" width = "180" height = "180" alt="Mipmap" align=bottom/> | <img src="/gallery/Clipping.png" width = "180" height = "180" alt="Clipping" align=bottom />  | <img src="/gallery/DebugView.png" width = "180" height = "180" alt="DebugView" align=bottom/> |
 
@@ -293,6 +293,9 @@ Result:
 | --- | --- |
 | <img src="/gallery/point_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/> | <img src="/gallery/bilinear_filtering.jpg" width = "180" height = "180" alt="Texture Filtering" align=bottom/>  |
 
+| Mipmap |
+| ---  |
+| <img src="/gallery/MipmapComparison.png" width = "512" height = "180" alt="MSAA" align=bottom/> | 
 
 --- 
 

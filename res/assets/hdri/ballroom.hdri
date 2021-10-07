@@ -3,5 +3,5 @@
     "meta_path": "/hdri/ballroom.hdri",
     "texture_path": "/hdri/ballroom.hdr",
     "wrap_mode": 0,
-    "filtering": 0
+    "filtering": 1
 }

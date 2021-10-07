@@ -297,11 +297,6 @@ namespace CpuRasterizor
 		return true;
 	}
 
-	bool Texture::point(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
-	{
-		return read(u, v, mip, ret);
-	}
-
 	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
 	{
 		switch (this->format)
@@ -508,30 +503,33 @@ namespace CpuRasterizor
 
 	bool Texture::sample(const float& u, const float& v, tinymath::Color& ret) const
 	{
-		return sample(u, v, 0, ret);
+		return read(u, v, ret);
 	}
 
 	bool Texture::sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const
 	{
-		int mip = get_mip_level(ddx, ddy, width, height);
+		float mip = get_mip_level(ddx, ddy, width, height);
 		return sample(u, v, mip, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const int& mip, tinymath::Color& ret) const
+	bool Texture::sample(const float& u, const float& v, const float& mip, tinymath::Color& ret) const
 	{
-		switch (this->filtering)
-		{
-		case Filtering::kBilinear:
-			return bilinear(u, v, mip, ret);
-		case Filtering::kPoint:
-			return point(u, v, mip, ret);
-		}
-		return false;
-	}
+		int mip_int = (int)tinymath::floor(mip);
+		float frac = mip - (float)mip_int;
 
-	bool Texture::sample(const float& u, const float& v, const float& lod, tinymath::Color& ret) const
-	{
-		return sample(u, v, (int)std::floor(lod * kMaxMip), ret);
+		if (mip_int < kMaxMip - 1)
+		{
+			int next_mip = mip_int + 1;
+			tinymath::Color c1, c2;
+			read(u, v, mip_int, c1);
+			read(u, v, next_mip, c2);
+			ret = c1 + (c2 - c1) * frac;
+			return true;
+		}
+		else
+		{
+			return read(u, v, mip_int, ret);
+		}
 	}
 
 	bool Texture::read(const float& u, const float& v, tinymath::Color& ret) const
