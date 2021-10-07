@@ -256,7 +256,7 @@ namespace CpuRasterizor
 		else
 		{
 			// clip in homogenous space
-			auto triangles = Clipper::cvv_clipping(CpuRasterSharedData.cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
+			auto triangles = Clipper::clip_triangle(CpuRasterSharedData.cam_near, tinymath::Frustum::homogenous_volume(), c1, c2, c3);
 
 			if (triangles.size() == 0) { statistics.culled_triangle_count++; return; }
 
@@ -407,7 +407,7 @@ namespace CpuRasterizor
 		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
 		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
-		if (CpuRasterSharedData.enable_msaa && !shader.shadow)
+		if (CpuRasterSharedData.enable_msaa)
 		{
 			// msaa on
 			get_active_rendertexture()->foreach_pixel_block(
@@ -464,10 +464,10 @@ namespace CpuRasterizor
 	{
 		Fragment frag1, frag2, frag3, frag4;
 
-		bool px1_valid = tri.barycentric_interpolate(px1.pos, frag1);
-		bool px2_valid = tri.barycentric_interpolate(px2.pos, frag2);
-		bool px3_valid = tri.barycentric_interpolate(px3.pos, frag3);
-		bool px4_valid = tri.barycentric_interpolate(px4.pos, frag4);
+		bool px1_inside = tri.barycentric_interpolate(px1.pos, frag1);
+		bool px2_inside = tri.barycentric_interpolate(px2.pos, frag2);
+		bool px3_inside = tri.barycentric_interpolate(px3.pos, frag3);
+		bool px4_inside = tri.barycentric_interpolate(px4.pos, frag4);
 
 		frag1 = Pipeline::reverse_perspective_division(frag1);
 		frag2 = Pipeline::reverse_perspective_division(frag2);
@@ -477,24 +477,24 @@ namespace CpuRasterizor
 		Fragment ddx = Pipeline::substract(frag1, frag2);
 		Fragment ddy = Pipeline::substract(frag1, frag3);
 
-		FrameBuffer& fb = (CpuRasterSharedData.enable_msaa && !shader.shadow) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+		FrameBuffer& fb = (CpuRasterSharedData.enable_msaa) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
-		if (px1_valid)
+		if (px1_inside)
 		{
 			process_fragment(fb, frag1, ddx, ddy, px1.row, px1.col, shader, p1);
 		}
 
-		if (px2_valid)
+		if (px2_inside)
 		{
 			process_fragment(fb, frag2, ddx, ddy, px2.row, px2.col, shader, p2);
 		}
 
-		if (px3_valid)
+		if (px3_inside)
 		{
 			process_fragment(fb, frag3, ddx, ddy, px3.row, px3.col, shader, p3);
 		}
 
-		if (px4_valid)
+		if (px4_inside)
 		{
 			process_fragment(fb, frag4, ddx, ddy, px4.row, px4.col, shader, p4);
 		}
@@ -573,7 +573,7 @@ namespace CpuRasterizor
 			bool enable_screen_clipping = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kScreenClipping) != CullingAndClippingFlag::kNone;
 			if (enable_screen_clipping)
 			{
-				Clipper::screen_clipping(lhs, rhs, w);
+				Clipper::clip_horizontally(lhs, rhs, w);
 			}
 
 			int left = (int)(lhs.position.x + 0.5f);
@@ -780,18 +780,30 @@ namespace CpuRasterizor
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
 
-		tinymath::vec4f n1 = Pipeline::clip2ndc(clip_start);
-		tinymath::vec4f n2 = Pipeline::clip2ndc(clip_end);
+		bool clip = true;
+		auto start_clipped = clip_start;
+		auto end_clipped = clip_end;
 
-		tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
-		tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
+		if ((Clipper::inside_cvv(clip_start) && Clipper::inside_cvv(clip_end)) || Clipper::clip_segment(CpuRasterSharedData.cam_near, clip_start, clip_end, start_clipped, end_clipped))
+		{
+			clip = false;
+		}
 
-		tinymath::mat4x4 translation = tinymath::translation(tinymath::vec3f(screen_translation));
+		if (!clip)
+		{
+			tinymath::vec4f n1 = Pipeline::clip2ndc(start_clipped);
+			tinymath::vec4f n2 = Pipeline::clip2ndc(end_clipped);
 
-		s1 = translation * s1;
-		s2 = translation * s2;
+			tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
+			tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
 
-		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+			tinymath::mat4x4 translation = tinymath::translation(tinymath::vec3f(screen_translation));
+
+			s1 = translation * s1;
+			s2 = translation * s2;
+
+			SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		}
 	}
 
 	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
@@ -803,7 +815,6 @@ namespace CpuRasterizor
 	{
 		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start.x, start.y, start.z, 1.0f);
 		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end.x, end.y, end.z, 1.0f);
-
 		draw_segment(clip_start, clip_end, col);
 	}
 
@@ -819,13 +830,25 @@ namespace CpuRasterizor
 		size_t w, h;
 		target_rendertexture->get_size(w, h);
 
-		tinymath::vec4f n1 = Pipeline::clip2ndc(clip_start);
-		tinymath::vec4f n2 = Pipeline::clip2ndc(clip_end);
+		bool clip = true;
+		auto start_clipped = clip_start;
+		auto end_clipped = clip_end;
 
-		tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
-		tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
+		if ((Clipper::inside_cvv(clip_start) && Clipper::inside_cvv(clip_end)) || Clipper::clip_segment(CpuRasterSharedData.cam_near, clip_start, clip_end, start_clipped, end_clipped))
+		{
+			clip = false;
+		}
 
-		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		if (!clip)
+		{
+			tinymath::vec4f n1 = Pipeline::clip2ndc(start_clipped);
+			tinymath::vec4f n2 = Pipeline::clip2ndc(end_clipped);
+
+			tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
+			tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
+
+			SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+		}
 	}
 
 	void GraphicsDevice::draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& offset)

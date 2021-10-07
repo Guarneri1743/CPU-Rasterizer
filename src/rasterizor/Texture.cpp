@@ -285,12 +285,12 @@ namespace CpuRasterizor
 	{
 		size_t row, col;
 		float frac_row, frac_col;
-		uv2pixel(width, height, u, v, row, col, frac_row, frac_col);
+		uv2pixel(width >> mip, height >> mip, u, v, row, col, frac_row, frac_col);
 		tinymath::Color c00, c01, c11, c10;
-		read(row, col, c00);
-		read(row + 1, col, c01);
-		read(row + 1, col + 1, c11);
-		read(row, col + 1, c10);
+		read(row, col, mip, c00);
+		read(row + 1, col, mip, c01);
+		read(row + 1, col + 1, mip, c11);
+		read(row, col + 1, mip, c10);
 		tinymath::Color  a = c00 * (1.0f - frac_row) + c10 * frac_row;
 		tinymath::Color  b = c01 * (1.0f - frac_row) + c11 * frac_row;
 		ret = a * (1.0f - frac_col) + b * frac_col;

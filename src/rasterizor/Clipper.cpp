@@ -6,16 +6,53 @@
 
 namespace CpuRasterizor
 {
+	bool Clipper::clip_segment(const float& near_plane, const tinymath::vec4f& c1, const tinymath::vec4f& c2, tinymath::vec4f& out_c1, tinymath::vec4f& out_c2)
+	{
+		int c1_inside = c1.w < near_plane ? -1 : 1;
+		int c2_inside = c2.w < near_plane ? -1 : 1;
+
+		if (c1_inside * c2_inside < 0)
+		{
+			float t = (c1.w - near_plane) / (c1.w - c2.w);
+			auto interpolated = c1 + (c2 - c1) * t;
+			if (c1_inside > 0)
+			{
+				out_c1 = c1;
+				out_c2 = interpolated;
+			}
+			else
+			{
+				out_c1 = interpolated;
+				out_c2 = c2;
+			}
+
+			return true;
+		}
+		else
+		{
+			if (c1_inside < 0)
+			{
+				return false;
+			}
+			else
+			{
+				out_c1 = c1;
+				out_c2 = c2;
+				return true;
+			}
+		}
+	}
+
 	/// <summary>
-	/// clip against cvv in homogenous clip space
+	/// clip triangle in certain space
 	/// </summary>
 	/// <param name="near_plane">camera's near plane</param>
-	/// <param name="cvv">an unit cube in homogenous space</param>
-	/// <param name="c1">vertex in clip space</param>
-	/// <param name="c2">vertex in clip space</param>
-	/// <param name="c3">vertex in clip space</param>
+	/// <param name="frustum">frustum in certain space, eg. an unit cube in homogenous space</param>
+	/// <param name="c1">vertex in certain space</param>
+	/// <param name="c2">vertex in certain space</param>
+	/// <param name="c3">vertex in certain space</param>
 	/// <returns></returns>
-	std::vector<Triangle> Clipper::cvv_clipping(const float& near_plane, const tinymath::Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	std::vector<Triangle> Clipper::clip_triangle(const float& near_plane, const tinymath::Frustum& frustum, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		std::vector<Vertex> polygon = { c1, c2, c3 };
 
@@ -50,11 +87,12 @@ namespace CpuRasterizor
 			return {};
 		}
 
-		UNUSED(cvv);
-		//// clipping against rest planes
+		UNUSED(frustum);
+
+		//// clipping against rest planes is not a must
 		//for (int i = 1; i < 6; i++)
 		//{
-		//	auto& plane = cvv[i];
+		//	auto& plane = frustum[i];
 		//	if (polygon.size() >= 3)
 		//	{
 		//		std::vector<Vertex> vertices(polygon);
@@ -108,7 +146,7 @@ namespace CpuRasterizor
 	/// <param name="lhs">left screen vertex</param>
 	/// <param name="rhs">right screen vertex</param>
 	/// <param name="width">screen width</param>
-	void Clipper::screen_clipping(Vertex& lhs, Vertex& rhs, const size_t& width)
+	void Clipper::clip_horizontally(Vertex& lhs, Vertex& rhs, const size_t& width)
 	{
 		if (lhs.position.x <= 0.0f)
 		{

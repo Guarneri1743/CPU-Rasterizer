@@ -232,10 +232,13 @@ namespace CpuRasterizor
 		CpuRasterApi.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
 		if (CpuRasterSharedData.enable_shadow)
 		{
+			auto prev_enable_msaa = CpuRasterSharedData.enable_msaa;
+			CpuRasterSharedData.enable_msaa = false;
 			CpuRasterApi.set_active_rendertexture(shadowmap_id);
 			render_shadow();
 			CpuRasterApi.present();
 			CpuRasterApi.reset_active_rendertexture();
+			CpuRasterSharedData.enable_msaa = prev_enable_msaa;
 		}
 
 		render_objects();

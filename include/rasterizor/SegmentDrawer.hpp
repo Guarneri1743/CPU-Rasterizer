@@ -48,18 +48,20 @@ namespace CpuRasterizor
 		int bias = dx > dy ? dx : -dy;
 		int dx2 = 2 * dx;
 		int dy2 = 2 * dy;
-		int xi = x0;
-		int yi = y0;
-		while (buffer->write((size_t)yi, (size_t)xi, c), xi != x1 || yi != y1)
+		int col = x0;
+		int row = y0;
+		int w = (int)buffer->width;
+		int h = (int)buffer->height;
+		while (((row >= 0 && row < h &&  col >= 0 && col < w) && buffer->write((size_t)row, (size_t)col, c)), (col != x1 || row != y1))
 		{
 			int e = bias;
 			if (e > -dx2)
 			{
-				bias -= dy2; xi += sx;
+				bias -= dy2; col += sx;
 			}
 			if (e < dy2)
 			{
-				bias += dx2; yi += sy;
+				bias += dx2; row += sy;
 			}
 		}
 	}
