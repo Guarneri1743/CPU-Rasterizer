@@ -63,7 +63,6 @@ namespace CpuRasterizor
 	void InspectorEditor::draw_settings()
 	{
 		{
-			ImGui::Text("Window Size: %f, %f", tinymath::vec2f((float)Window::main()->get_width(), (float)Window::main()->get_height()));
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
 				CpuRasterApi.set_viewport(rt_size[0], rt_size[1]);
