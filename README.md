@@ -341,15 +341,21 @@ Result:
 			
 - alpha blending
 
-- segment drawer
-
 - texture sampler
 
 - cubemap sampler
 
+- pixel derivative
+
+- mipmap
+
+- segment drawer
+
 ---
 		
 #### Application
+
+- viewer
 
 - input manager
 			
@@ -390,16 +396,7 @@ Result:
 
 #### Future Works
 
-- low-level:
-	
-	- simd
-				
-	- gl/dx like api
+- simd
+			
+- decouple low level and high level features
 		 
-- features:
-
-	- specular workflow
-	
-	- skeleton-animation
-	
-	- skinning
