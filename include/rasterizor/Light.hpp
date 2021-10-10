@@ -18,12 +18,7 @@ namespace CpuRasterizor {
 		tinymath::vec3f right;
 		tinymath::vec3f up;
 		float distance;
-		float n;
-		float f;
-		float t;
-		float b;
-		float l;
-		float r;
+		tinymath::FrustumParam frustum_param;
 		tinymath::mat4x4 projection;
 
 		DirectionalLight();

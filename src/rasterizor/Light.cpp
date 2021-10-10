@@ -16,12 +16,13 @@ namespace CpuRasterizor
 		this->yaw = 0.0f;
 		this->pitch = -45.0f;
 
-		l = -20.0f;
-		r = 20.0f;
-		b = -20.0f;
-		t = 20.0f;
-		n = 0.01f;
-		f = 200.0f;
+		frustum_param.projection_mode = tinymath::Projection::kOrtho;
+		frustum_param.ortho_param.left = -20.0f;
+		frustum_param.ortho_param.right = 20.0f;
+		frustum_param.ortho_param.top = 20.0f;
+		frustum_param.ortho_param.bottom = -20.0f;
+		frustum_param.ortho_param.near = 0.1f;
+		frustum_param.ortho_param.far = 200.0f;
 
 		update_projection();
 		update_rotation();
@@ -63,7 +64,12 @@ namespace CpuRasterizor
 
 	void DirectionalLight::update_projection()
 	{
-		this->projection = tinymath::ortho(l, r, b, t, n, f);
+		this->projection = tinymath::ortho(frustum_param.ortho_param.left, 
+										   frustum_param.ortho_param.right,
+										   frustum_param.ortho_param.bottom, 
+										   frustum_param.ortho_param.top, 
+										   frustum_param.ortho_param.near,
+										   frustum_param.ortho_param.far);
 	}
 
 	PointLight::PointLight() : Light()

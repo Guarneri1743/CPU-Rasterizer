@@ -5,6 +5,7 @@
 #include <vector>
 #include <future>
 #include "Define.hpp"
+#include "RasterAttributes.hpp"
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
 #include "RasterAttributes.hpp"
@@ -87,7 +88,6 @@ namespace CpuRasterizor
 		bool multi_thread;
 
 	private:
-		std::unique_ptr<TileBasedManager> tile_based_manager;
 		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
 		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
 		std::vector<DrawCommand> draw_commands;

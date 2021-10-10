@@ -1,6 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 #include "Sampling.hpp"
+#include "CubeMap.hpp"
 
 namespace CpuRasterizor
 {

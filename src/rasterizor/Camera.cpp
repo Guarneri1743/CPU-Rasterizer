@@ -15,24 +15,20 @@ namespace CpuRasterizor
 	Camera::~Camera()
 	{}
 
-	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, float _aspect, float _fov, float _near, float _far)
+	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, const tinymath::FrustumParam& frustum)
 	{
 		auto ret = std::unique_ptr<Camera>(new Camera());
-		ret->initialize(_position, _aspect, _fov, _near, _far, Projection::kPerspective);
+		ret->initialize(_position, frustum);
 		return ret;
 	}
 
-	void Camera::initialize(const tinymath::vec3f& position, float _aspect, float _fov, float _near, float _far, Projection _proj_type)
+	void Camera::initialize(const tinymath::vec3f& position, const tinymath::FrustumParam& frustum)
 	{
-		this->aspect = _aspect > 0.0f ? _aspect : 1.0f;
-		this->fov = _fov;
-		this->near = _near;
-		this->far = _far;
+		this->frustum_param = frustum;
 		this->transform->set_world_position(position);
 		this->transform->set_world_angle(0.0f, 90.0f, 0.0f);
 		this->transform->set_local_scale(tinymath::kVec3fOne);
-		this->projection = _proj_type;
-		update_proj_mode();
+		update_projection_matrix();
 	}
 
 	tinymath::mat4x4 Camera::view_matrix() const
@@ -50,42 +46,66 @@ namespace CpuRasterizor
 		this->transform->lookat(position);
 	}
 
-	void Camera::set_near(float _near)
+	void Camera::set_near(float near)
 	{
-		near = _near;
-		update_proj_mode();
-	}
-
-	void Camera::set_far(float _far)
-	{
-		far = _far;
-		update_proj_mode();
-	}
-
-	void Camera::set_fov(float _fov)
-	{
-		fov = _fov;
-		update_proj_mode();
-	}
-
-	void Camera::set_projection(Projection proj)
-	{
-		this->projection = proj;
-		update_proj_mode();
-	}
-
-	void Camera::update_proj_mode()
-	{
-		switch (this->projection)
+		if (frustum_param.projection_mode == tinymath::Projection::kPerspective)
 		{
-		case Projection::kPerspective:
-			this->proj_matrix = tinymath::perspective(this->fov, this->aspect, this->near, this->far);
-			break;
-		case Projection::kOrtho:
-			this->proj_matrix = tinymath::ortho(-20.0f, 20.0f, -15.0f, 15.0f, this->near, this->far);
-			break;
+			frustum_param.perspective_param.near = near;
+		}
+		else
+		{
+			frustum_param.ortho_param.near = near;
+		}
+		update_projection_matrix();
+	}
+	
+	void Camera::set_far(float far)
+	{
+		if (frustum_param.projection_mode == tinymath::Projection::kPerspective)
+		{
+			frustum_param.perspective_param.far = far;
+		}
+		else
+		{
+			frustum_param.ortho_param.far = far;
+		}
+		update_projection_matrix();
+	}
+
+	void Camera::set_fov(float fov)
+	{
+		if (frustum_param.projection_mode == tinymath::Projection::kPerspective)
+		{
+			frustum_param.perspective_param.fov = fov;
+		}
+		update_projection_matrix();
+	}
+
+	void Camera::set_projection(tinymath::Projection proj)
+	{
+		frustum_param.projection_mode = proj;
+		update_projection_matrix();
+	}
+
+	void Camera::update_projection_matrix()
+	{
+		switch (this->frustum_param.projection_mode)
+		{
+		case tinymath::Projection::kPerspective:
 		default:
-			this->proj_matrix = tinymath::perspective(this->fov, this->aspect, this->near, this->far);
+			this->proj_matrix = tinymath::perspective(this->frustum_param.perspective_param.fov, 
+													  this->frustum_param.perspective_param.aspect, 
+													  this->frustum_param.perspective_param.near,
+													  this->frustum_param.perspective_param.far);
+			break;
+		case tinymath::Projection::kOrtho:
+			this->proj_matrix = tinymath::ortho(this->frustum_param.ortho_param.left, 
+												this->frustum_param.ortho_param.right, 
+												this->frustum_param.ortho_param.bottom, 
+												this->frustum_param.ortho_param.top, 
+												this->frustum_param.ortho_param.near, 
+												this->frustum_param.ortho_param.far);
+			break;
 		}
 	}
 }

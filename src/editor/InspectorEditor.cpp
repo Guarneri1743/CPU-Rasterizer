@@ -77,7 +77,7 @@ namespace CpuRasterizor
 
 		Scene& scene = *Scene::current();
 
-		light_inspector.on_gui(scene.main_light);
+		light_inspector.on_gui(*scene.main_light);
 	
 		if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 		{
@@ -85,11 +85,19 @@ namespace CpuRasterizor
 			ImGui::Text("Direction: %f, %f, %f", scene.main_cam->transform->world_euler_angles().x, scene.main_cam->transform->world_euler_angles().y, scene.main_cam->transform->world_euler_angles().z);
 
 			bool cam_update = false;
-			cam_update = ImGui::SliderFloat("Near", &scene.main_cam->near, 0.0f, 5.0f);
-			cam_update = ImGui::SliderFloat("Far", &scene.main_cam->far, 5.0f, 10000.0f) || cam_update;
-			cam_update = ImGui::SliderFloat("Fov", &scene.main_cam->fov, 0.0f, 180.0f) || cam_update;
-			cam_update = ImGui::SliderFloat("Aspect", &scene.main_cam->aspect, 0.0f, 2.0f) || cam_update;
-			if (cam_update) scene.main_cam->update_proj_mode();
+			if (scene.main_cam->frustum_param.projection_mode == tinymath::Projection::kPerspective)
+			{
+				cam_update = ImGui::SliderFloat("Near", &scene.main_cam->frustum_param.perspective_param.near, 0.0f, 5.0f);
+				cam_update = ImGui::SliderFloat("Far", &scene.main_cam->frustum_param.perspective_param.far, 5.0f, 10000.0f) || cam_update;
+				cam_update = ImGui::SliderFloat("Fov", &scene.main_cam->frustum_param.perspective_param.fov, 0.0f, 180.0f) || cam_update;
+				cam_update = ImGui::SliderFloat("Aspect", &scene.main_cam->frustum_param.perspective_param.aspect, 0.0f, 2.0f) || cam_update;
+			}
+			else
+			{
+
+			}
+			
+			if (cam_update) scene.main_cam->update_projection_matrix();
 			if (ImGui::Checkbox("MSAA", &CpuRasterSharedData.enable_msaa))
 			{
 				if (CpuRasterSharedData.enable_msaa)

@@ -7,6 +7,8 @@
 #include "Singleton.hpp"
 #include "GraphicsDevice.hpp"
 #include "Scene.hpp"
+#include "Model.hpp"
+#include "Renderer.hpp"
 #include "tinymath/primitives/Rect.h"
 
 

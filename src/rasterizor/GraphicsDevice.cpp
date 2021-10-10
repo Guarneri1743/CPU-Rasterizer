@@ -10,7 +10,6 @@
 #include "IdAllocator.hpp"
 #include "RawBuffer.hpp"
 #include "tinymath.h"
-#include "RasterAttributes.hpp"
 #include "Triangle.hpp"
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
@@ -79,15 +78,6 @@ namespace CpuRasterizor
 		else
 		{
 			target_rendertexture->resize(w, h);
-		}
-
-		if (tile_based_manager == nullptr)
-		{
-			tile_based_manager = std::make_unique<TileBasedManager>(w, h);
-		}
-		else
-		{
-			tile_based_manager->resize(w, h);
 		}
 	}
 
@@ -189,7 +179,7 @@ namespace CpuRasterizor
 
 	void GraphicsDevice::present()
 	{
-		tile_based_manager->foreach_tile(
+		get_active_rendertexture()->get_tile_based_manager()->foreach_tile(
 			[this](auto&& rect, auto&& task_queue)
 		{
 			this->rasterize_tile(rect, task_queue);
@@ -300,7 +290,7 @@ namespace CpuRasterizor
 			if (this->tile_based)
 			{
 				// push tile based draw task
-				tile_based_manager->push_draw_task(*triangle, shader);
+				get_active_rendertexture()->get_tile_based_manager()->push_draw_task(*triangle, shader);
 			}
 			else
 			{

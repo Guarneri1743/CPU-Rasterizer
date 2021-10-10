@@ -7,6 +7,41 @@ TINYMATH_NAMESPACE
 #undef near
 #undef far
 
+enum class Projection
+{
+	kPerspective = 0,
+	kOrtho = 1
+};
+
+struct OrthoParam
+{
+	float near;
+	float far;
+	float left;
+	float right;
+	float top;
+	float bottom;
+};
+
+struct PerspectiveParam
+{
+	float near;
+	float far;
+	float fov;
+	float aspect;
+};
+
+struct FrustumParam
+{
+	union
+	{
+		OrthoParam ortho_param;
+		PerspectiveParam perspective_param;
+	};
+
+	Projection projection_mode;
+};
+
 struct Frustum
 {
 public:

@@ -1,13 +1,14 @@
 #pragma once
 #include <unordered_map>
+#include <memory>
 #include "Define.hpp"
 #include "tinymath.h"
-#include "Texture.hpp"
-#include "CubeMap.hpp"
-#include "RenderTexture.hpp"
 
 namespace CpuRasterizor
 {
+	class Texture;
+	class CubeMap;
+	class RenderTexture;
 	class ShaderPropertyMap
 	{
 	public:

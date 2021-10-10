@@ -4,6 +4,10 @@
 #include "GlobalShaderParams.hpp"
 #include "Config.h"
 #include "Scene.hpp"
+#include "Model.hpp"
+#include "Material.hpp"
+#include "Transform.hpp"
+#include "Mesh.hpp"
 
 namespace CpuRasterizor
 {

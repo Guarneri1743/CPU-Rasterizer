@@ -7,6 +7,8 @@
 
 namespace CpuRasterizor
 {
+	class TileBasedManager;
+
 	struct Pixel
 	{
 		size_t row;
@@ -51,6 +53,7 @@ namespace CpuRasterizor
 
 		FrameBuffer* get_framebuffer() const  { return framebuffer.get(); };
 		FrameBuffer* get_msaa_framebuffer() const  { return msaa_framebuffer.get(); }
+		TileBasedManager* get_tile_based_manager() const { return tile_based_manager.get(); }
 
 		void set_msaa_param(bool msaa_on, uint8_t subsample_count);
 		uint8_t get_subsample_count() { return msaa_subsample_count; }
@@ -65,6 +68,7 @@ namespace CpuRasterizor
 	private:
 		std::unique_ptr<FrameBuffer> framebuffer;
 		std::unique_ptr<FrameBuffer> msaa_framebuffer;
+		std::unique_ptr<TileBasedManager> tile_based_manager;
 
 		bool has_msaa_buffer;
 		uint8_t msaa_subsample_count;

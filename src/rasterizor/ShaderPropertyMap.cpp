@@ -1,4 +1,7 @@
 #include "ShaderPropertyMap.hpp"
+#include "RenderTexture.hpp"
+#include "Texture.hpp"
+#include "CubeMap.hpp"
 
 namespace CpuRasterizor
 {

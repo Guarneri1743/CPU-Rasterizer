@@ -1,14 +1,20 @@
 #pragma once
+#include <string>
 #include <vector>
 #include <memory>
 #include "Define.hpp"
-#include "Light.hpp"
-#include "Camera.hpp"
-#include "Renderer.hpp"
-#include "SkyboxRenderer.hpp"
 
 namespace CpuRasterizor
 {
+	struct DirectionalLight;
+	struct PointLight;
+	class Camera;
+	class Renderer;
+	class SkyboxRenderer;
+	class Transform;
+	class Model;
+	class CubeMap;
+
 	class Scene
 	{
 	public:
@@ -18,7 +24,7 @@ namespace CpuRasterizor
 		Transform* selection;
 
 		// lights
-		DirectionalLight main_light;
+		std::unique_ptr<DirectionalLight> main_light;
 		std::vector<PointLight> point_lights;
 
 		// objects
@@ -38,11 +44,6 @@ namespace CpuRasterizor
 		ColorSpace color_space;
 		PBRWorkFlow work_flow;
 
-		// debug cam
-		float debug_cam_distance;
-		float debug_world_cam_distance;
-		std::unique_ptr<Camera> debug_cam;
-		std::unique_ptr<Camera> world_debug_cam;
 		std::string asset_path;
 
 	public:
@@ -52,8 +53,6 @@ namespace CpuRasterizor
 		void initialize();
 		void add(std::shared_ptr<Model> model);
 		void update();
-		void draw_camera_coords();
-		void draw_world_coords();
 		void set_main_light(const DirectionalLight& light);
 		void add_point_light(const PointLight& light);
 		void render();

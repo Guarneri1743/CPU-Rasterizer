@@ -1,4 +1,6 @@
 #include "Scene.hpp"
+#include <filesystem>
+#include <iostream>
 #include "Marcos.h"
 #include "GraphicsDevice.hpp"
 #include "Singleton.hpp"
@@ -6,11 +8,16 @@
 #include "InputManager.hpp"
 #include "tinymath.h"
 #include "Config.h"
-#include <filesystem>
-#include <iostream>
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Serialization.hpp"
+#include "Light.hpp"
+#include "Camera.hpp"
+#include "Renderer.hpp"
+#include "SkyboxRenderer.hpp"
+#include "Transform.hpp"
+#include "Model.hpp"
+#include "CubeMap.hpp"
 
 #define CAMERA_ROTATE_SPEED 0.25f
 #define CAMERA_MOVE_SPEED 0.2f
@@ -29,10 +36,11 @@ namespace CpuRasterizor
 		this->name = "default_scene";
 		selection = nullptr;
 		enable_skybox = false;
-		main_light.intensity = 1.0f;
-		main_light.diffuse = tinymath::Color(1.0f, 0.8f, 0.8f, 1.0f);
-		main_light.ambient = tinymath::Color(0.1f, 0.05f, 0.2f, 1.0f);
-		main_light.specular = tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f);
+		main_light = std::make_unique<DirectionalLight>();
+		main_light->intensity = 1.0f;
+		main_light->diffuse = tinymath::Color(1.0f, 0.8f, 0.8f, 1.0f);
+		main_light->ambient = tinymath::Color(0.1f, 0.05f, 0.2f, 1.0f);
+		main_light->specular = tinymath::Color(1.0f, 1.0f, 1.0f, 1.0f);
 		skybox = std::make_unique<SkyboxRenderer>();
 	}
 
@@ -50,13 +58,20 @@ namespace CpuRasterizor
 	void Scene::initialize()
 	{
 		float aspect = (float)CpuRasterApi.get_width() / CpuRasterApi.get_height();
-		main_cam = Camera::create(tinymath::vec3f(5.0f, 5.0f, 5.0f), aspect, 45.0f, 0.5f, 100.0f);
-		main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
+
+		if (main_cam == nullptr)
+		{
+			tinymath::FrustumParam frustum_param;
+			frustum_param.projection_mode = tinymath::Projection::kPerspective;
+			frustum_param.perspective_param.aspect = aspect;
+			frustum_param.perspective_param.near = 0.5f;
+			frustum_param.perspective_param.far = 100.0f;
+			frustum_param.perspective_param.fov = 60.0f;
+			main_cam = Camera::create(tinymath::vec3f(5.0f, 5.0f, 5.0f), frustum_param);
+			main_cam->transform->set_world_angle(33.0f, -330.0f, 0.0f);
+		}	
+
 		Camera::set_main_camera(main_cam.get());
-		debug_cam_distance = 6.0f;
-		debug_world_cam_distance = 8.0f;
-		debug_cam = std::move(Camera::create(main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
-		world_debug_cam = std::move(Camera::create(tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance, aspect, 45.0f, 0.5f, 10.0f));
 
 		InputMgr.add_on_mouse_move_evt([](tinymath::vec2f prev, tinymath::vec2f pos, void* data)
 		{
@@ -112,11 +127,11 @@ namespace CpuRasterizor
 
 	void Scene::update()
 	{
-		CpuRasterSharedData.cam_far = main_cam->far;
-		CpuRasterSharedData.cam_near = main_cam->near;
+		CpuRasterSharedData.cam_far = main_cam->frustum_param.perspective_param.far;
+		CpuRasterSharedData.cam_near = main_cam->frustum_param.perspective_param.near;
 		CpuRasterSharedData.view_matrix = main_cam->view_matrix();
 		CpuRasterSharedData.proj_matrix = main_cam->projection_matrix();
-		CpuRasterSharedData.main_light = main_light;
+		CpuRasterSharedData.main_light = *main_light.get();
 		CpuRasterSharedData.point_lights = point_lights;
 		CpuRasterSharedData.camera_pos = main_cam->transform->world_position();
 		if (InputMgr.is_key_down(KeyCode::W)) {
@@ -189,37 +204,9 @@ namespace CpuRasterizor
 		}
 	}
 
-	void Scene::draw_camera_coords()
-	{
-		tinymath::vec2f offset = tinymath::vec2f(-(CpuRasterApi.get_width() / 2.0f - 50.0f), -(CpuRasterApi.get_height() / 2.0f - 50.0f));
-		tinymath::vec3f pos = main_cam->transform->world_position();
-		tinymath::vec3f forward = main_cam->transform->forward();
-		tinymath::vec3f right = main_cam->transform->right();
-		tinymath::vec3f up = main_cam->transform->up();
-		CpuRasterApi.draw_coordinates(pos, forward, up, right, debug_cam->view_matrix(), debug_cam->projection_matrix(), offset);
-		debug_cam->transform->set_world_position((main_cam->transform->world_position() + tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_cam_distance));
-		debug_cam->transform->lookat(main_cam->transform->world_position());
-	}
-
-	void Scene::draw_world_coords()
-	{
-		tinymath::vec2f offset = tinymath::vec2f(-(CpuRasterApi.get_width() / 2.0f - 150.0f), -(CpuRasterApi.get_height() / 2.0f - 150.0f));
-		CpuRasterApi.draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-		CpuRasterApi.draw_coordinates(tinymath::kVec3fZero, tinymath::kVec3fForward * 3.0f, tinymath::kVec3fUp * 3.0f, tinymath::kVec3fRight * 3.0f, main_cam->view_matrix(), main_cam->projection_matrix());
-
-		tinymath::vec3f pos = main_cam->transform->world_position();
-		tinymath::vec3f forward = main_cam->transform->forward();
-		tinymath::vec3f right = main_cam->transform->right();
-		tinymath::vec3f up = main_cam->transform->up();
-		CpuRasterApi.draw_coordinates(pos, forward, up, right, world_debug_cam->view_matrix(), world_debug_cam->projection_matrix(), offset);
-
-		world_debug_cam->transform->set_world_position((tinymath::vec3f(1.0f, 1.0f, -1.0f) * debug_world_cam_distance));
-		world_debug_cam->transform->lookat(tinymath::kVec3fZero);
-	}
-
 	void Scene::set_main_light(const DirectionalLight& light)
 	{
-		main_light = light;
+		*main_light.get() = light;
 	}
 
 	void Scene::add_point_light(const PointLight& light)
@@ -300,9 +287,6 @@ namespace CpuRasterizor
 		{
 			obj->draw_gizmos();
 		}
-
-		draw_camera_coords();
-		//draw_world_coords();
 
 		debug_scene();
 	}

@@ -1,5 +1,6 @@
 #include "RenderTexture.hpp"
 #include "Sampling.hpp"
+#include "TileBasedManager.hpp"
 
 namespace CpuRasterizor
 {
@@ -9,6 +10,7 @@ namespace CpuRasterizor
 		multi_sample_frequency(MultiSampleFrequency::kPixelFrequency)
 	{
 		framebuffer = std::make_unique<FrameBuffer>(w, h, flag & ~FrameContent::kCoverage);
+		tile_based_manager = std::make_unique<TileBasedManager>(w, h);
 		reset_msaa_buffer();
 	}
 
@@ -99,6 +101,7 @@ namespace CpuRasterizor
 	void RenderTexture::resize(size_t w, size_t h)
 	{
 		framebuffer->resize(w, h);
+		tile_based_manager->resize(w, h);
 		reset_msaa_buffer();
 	}
 

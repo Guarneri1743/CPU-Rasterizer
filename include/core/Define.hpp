@@ -104,12 +104,6 @@ enum class PBRWorkFlow
 	kSpecular = 1
 };
 
-enum class Projection
-{
-	kPerspective = 0,
-	kOrtho = 1
-};
-
 enum class CompareFunc
 {
 	kNever = 0,

@@ -4,6 +4,7 @@
 #include "Singleton.hpp"
 #include "Light.hpp"
 #include "GlobalShaderParams.hpp"
+#include "Texture.hpp"
 #include "ShaderPropertyMap.hpp"
 #include "RasterAttributes.hpp"
 

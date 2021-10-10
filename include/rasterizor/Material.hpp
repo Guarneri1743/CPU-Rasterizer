@@ -2,11 +2,14 @@
 #include <memory>
 #include <string>
 #include "tinymath.h"
+#include "Define.hpp"
 #include "Object.hpp"
-#include "Shader.hpp"
+#include "ShaderPropertyMap.hpp"
 
 namespace CpuRasterizor
 {
+	class Shader;
+
 	class Material : public Object
 	{
 	public:

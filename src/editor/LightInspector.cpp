@@ -7,7 +7,7 @@ namespace CpuRasterizor
 	{
 		if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			if (ImGui::InputFloat("Position", &distance))
+			if (ImGui::InputFloat("distance", &distance))
 			{
 				light.distance = distance;
 			}
@@ -18,62 +18,62 @@ namespace CpuRasterizor
 
 			if (ImGui::InputFloat("near", &n))
 			{
-				light.n = n;
+				light.frustum_param.ortho_param.near = n;
 				light.update_projection();
 			}
 			else
 			{
-				n = light.n;
+				n = light.frustum_param.ortho_param.near;
 			}
 
 			if (ImGui::InputFloat("far", &f))
 			{
-				light.f = f; 
+				light.frustum_param.ortho_param. far = f;
 				light.update_projection();
 			}
 			else
 			{
-				f = light.f;
+				f = light.frustum_param.ortho_param.far;
 			}
 
 			if (ImGui::InputFloat("light", &l))
 			{
-				light.l = l;
+				light.frustum_param.ortho_param.left = l;
 				light.update_projection();
 			}
 			else
 			{
-				l = light.l;
+				l = light.frustum_param.ortho_param.left;
 			}
 
 			if (ImGui::InputFloat("right", &r))
 			{
-				light.r = r;
+				light.frustum_param.ortho_param.right = r;
 				light.update_projection();
 			}
 			else
 			{
-				r = light.r;
+				r = light.frustum_param.ortho_param.right;
 			}
 
 			if (ImGui::InputFloat("bottom", &b))
 			{
-				light.b = b;
+				light.frustum_param.ortho_param.bottom = b;
 				light.update_projection();
 			}
 			else
 			{
-				b = light.b;
+				b = light.frustum_param.ortho_param.bottom;
 			}
 
 			if (ImGui::InputFloat("top", &t))
 			{
-				light.t = t;
+				light.frustum_param.ortho_param.top = t;
 				light.update_projection();
 			}
 			else
 			{
-				t = light.t;
+				t = light.frustum_param.ortho_param.top;
 			}
 
 			if (ImGui::SliderFloat("Yaw", &light.yaw, -180.0f, 180.0f))

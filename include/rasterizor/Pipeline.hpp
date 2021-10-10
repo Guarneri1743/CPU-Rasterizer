@@ -1,6 +1,6 @@
 #pragma once
-#include "RasterAttributes.hpp"
 #include "tinymath.h"
+#include "RasterAttributes.hpp"
 
 namespace CpuRasterizor{
 	class Pipeline

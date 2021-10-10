@@ -9,6 +9,7 @@
 #undef ERROR
 #undef FATAL
 
+constexpr bool kLogToCommandLine = true;
 constexpr char* kSpecifier = "{}";
 constexpr int kSpecifierLength = 2;
 constexpr int kConsoleLogMaxNum = 100;
@@ -43,6 +44,12 @@ public:
 		std::string line = read_and_flush(console_buffer, severity);
 		console_log_buffer.emplace_back(line);
 		try_resize_console_logs();
+
+		if (kLogToCommandLine)
+		{
+			write(terminal_buffer, str);
+			print_and_flush(terminal_buffer, severity);
+		}
 	}
 
 	template<typename Arg, typename... Args>

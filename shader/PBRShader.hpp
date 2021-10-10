@@ -2,6 +2,8 @@
 #include "Shader.hpp"
 #include "PBR.hpp"
 #include "Sampling.hpp"
+#include "RenderTexture.hpp"
+#include "CubeMap.hpp"
 
 namespace CpuRasterizor
 {

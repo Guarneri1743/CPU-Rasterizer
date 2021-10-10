@@ -9,6 +9,7 @@
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/filereadstream.h"
 #include "tinymath.h"
+#include "Mesh.hpp"
 #include "Transform.hpp"
 #include "Camera.hpp"
 #include "CubeMap.hpp"
@@ -20,11 +21,14 @@
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "RasterAttributes.hpp"
+#include "Renderer.hpp"
 
 #undef GetObject
 
 namespace CpuRasterizor
 {
+	// TODO: support forward compatibility 
+	// solution: add a version number ?
 	class Serializer
 	{
 	public:
@@ -235,6 +239,58 @@ namespace CpuRasterizor
 		// Transform
 		//====================================================================================
 
+		//====================================================================================
+		// FrustumParam
+		static rapidjson::Value serialize(rapidjson::Document& doc, const tinymath::FrustumParam& frustum_param)
+		{
+			rapidjson::Value v;
+			v.SetObject();
+			if (frustum_param.projection_mode == tinymath::Projection::kPerspective)
+			{
+				v.AddMember("fov", frustum_param.perspective_param.fov, doc.GetAllocator());
+				v.AddMember("aspect", frustum_param.perspective_param.aspect, doc.GetAllocator());
+				v.AddMember("near", frustum_param.perspective_param.near, doc.GetAllocator());
+				v.AddMember("far", frustum_param.perspective_param.far, doc.GetAllocator());
+				v.AddMember("projection", (int32_t)frustum_param.projection_mode, doc.GetAllocator());
+			}
+			else
+			{
+				v.AddMember("near", frustum_param.ortho_param.near, doc.GetAllocator());
+				v.AddMember("far", frustum_param.ortho_param.far, doc.GetAllocator());
+				v.AddMember("left", frustum_param.ortho_param.left, doc.GetAllocator());
+				v.AddMember("right", frustum_param.ortho_param.right, doc.GetAllocator());
+				v.AddMember("top", frustum_param.ortho_param.top, doc.GetAllocator());
+				v.AddMember("bottom", frustum_param.ortho_param.bottom, doc.GetAllocator());
+				v.AddMember("projection", (int32_t)frustum_param.projection_mode, doc.GetAllocator());
+			}
+
+			return v;
+		}
+
+		static void deserialize(const rapidjson::Value& v, tinymath::FrustumParam& frustum_param)
+		{
+			auto proj = (tinymath::Projection)v["projection"].GetInt();
+			if (proj == tinymath::Projection::kPerspective)
+			{
+				frustum_param.perspective_param.fov = v["fov"].GetFloat();
+				frustum_param.perspective_param.aspect = v["aspect"].GetFloat();
+				frustum_param.perspective_param.near = v["near"].GetFloat();
+				frustum_param.perspective_param.far = v["far"].GetFloat();
+			}
+			else
+			{
+				frustum_param.ortho_param.near = v["near"].GetFloat();
+				frustum_param.ortho_param.far = v["far"].GetFloat();
+				frustum_param.ortho_param.left = v["left"].GetFloat();
+				frustum_param.ortho_param.right = v["right"].GetFloat();
+				frustum_param.ortho_param.top = v["top"].GetFloat();
+				frustum_param.ortho_param.bottom = v["bottom"].GetFloat();
+			}
+
+			frustum_param.projection_mode = proj;
+		}
+		// Frustum
+		//====================================================================================
 
 		//====================================================================================
 		// Camera
@@ -242,29 +298,21 @@ namespace CpuRasterizor
 		{
 			rapidjson::Value v;
 			v.SetObject();
-			v.AddMember("fov", cam.fov, doc.GetAllocator());
-			v.AddMember("aspect", cam.aspect, doc.GetAllocator());
-			v.AddMember("near", cam.near, doc.GetAllocator());
-			v.AddMember("far", cam.far, doc.GetAllocator());
 			v.AddMember("enable_msaa", cam.enable_msaa, doc.GetAllocator());
 			v.AddMember("transform", Serializer::serialize(doc, *cam.transform), doc.GetAllocator());
-			v.AddMember("projection", (int32_t)cam.projection, doc.GetAllocator());
-			v.AddMember("proj_matrix", Serializer::serialize(doc, cam.proj_matrix), doc.GetAllocator()); // ??????????
+			auto frustum_param_value = serialize(doc, cam.frustum_param);
+			v.AddMember("frustum_param", frustum_param_value, doc.GetAllocator());
 			return v;
 		}
 
 		static void deserialize(const rapidjson::Value& v, Camera& cam)
 		{
-			cam.fov = v["fov"].GetFloat();
-			cam.aspect = v["aspect"].GetFloat();
-			cam.near = v["near"].GetFloat();
-			cam.far = v["far"].GetFloat();
+			deserialize(v["frustum_param"], cam.frustum_param);
 			cam.enable_msaa = v["enable_msaa"].GetBool();
-			Serializer::deserialize(v["proj_matrix"].GetObject(), cam.proj_matrix);
 			Transform* deserialized_transform = new Transform();
 			Serializer::deserialize(v["transform"].GetObject(), *deserialized_transform);
 			cam.transform = std::unique_ptr<Transform>(deserialized_transform);
-			cam.projection = (Projection)v["projection"].GetInt();
+			cam.update_projection_matrix();
 		}
 		// Camera
 		//====================================================================================
@@ -832,7 +880,7 @@ namespace CpuRasterizor
 		// Model
 		//====================================================================================
 
-
+		
 		//====================================================================================
 		// Light
 		static rapidjson::Value serialize(rapidjson::Document& doc, const DirectionalLight& light)
@@ -846,13 +894,15 @@ namespace CpuRasterizor
 			rapidjson::Value yaw; yaw.SetFloat(light.yaw);
 			rapidjson::Value pitch; pitch.SetFloat(light.pitch);
 			rapidjson::Value distance; distance.SetFloat(light.distance);
-			serialized_light.AddMember("ambient", ambient, doc.GetAllocator());
+			serialized_light.AddMember("ambient", ambient, doc.GetAllocator()); 
 			serialized_light.AddMember("diffuse", diffuse, doc.GetAllocator());
 			serialized_light.AddMember("specular", specular, doc.GetAllocator());
 			serialized_light.AddMember("intensity", intensity, doc.GetAllocator());
 			serialized_light.AddMember("yaw", yaw, doc.GetAllocator());
 			serialized_light.AddMember("pitch", pitch, doc.GetAllocator());
-			serialized_light.AddMember("position", distance, doc.GetAllocator());
+			serialized_light.AddMember("distance", distance, doc.GetAllocator());
+			auto frustum_val = Serializer::serialize(doc, light.frustum_param);
+			serialized_light.AddMember("frustum_param", frustum_val, doc.GetAllocator());
 			return serialized_light;
 		}
 
@@ -865,6 +915,9 @@ namespace CpuRasterizor
 			light.yaw = v["yaw"].GetFloat();
 			light.pitch = v["pitch"].GetFloat(); 
 			light.distance = v["distance"].GetFloat();
+			deserialize(v["frustum_param"], light.frustum_param);
+			light.update_projection();
+			light.update_rotation();
 		}
 
 		static rapidjson::Value serialize(rapidjson::Document& doc, const PointLight& light)
@@ -916,7 +969,7 @@ namespace CpuRasterizor
 			rapidjson::Value name;
 			name.SetString(scene.name.c_str(), doc.GetAllocator());
 			doc.AddMember("name", name, doc.GetAllocator());
-			doc.AddMember("main_light", Serializer::serialize(doc, scene.main_light), doc.GetAllocator());
+			doc.AddMember("main_light", Serializer::serialize(doc, *scene.main_light), doc.GetAllocator());
 
 			rapidjson::Value point_lights;
 			point_lights.SetArray();
@@ -932,14 +985,36 @@ namespace CpuRasterizor
 			{
 				rapidjson::Value meta_path;
 				meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
-				models.PushBack(meta_path, doc.GetAllocator());
+			
+				rapidjson::Value transform;
+				transform = serialize(doc, *obj->target->transform.get());
+
+				rapidjson::Value model_instance;
+				model_instance.SetArray();
+
+				model_instance.PushBack(meta_path, doc.GetAllocator());
+				model_instance.PushBack(transform, doc.GetAllocator());
+
+				models.PushBack(model_instance, doc.GetAllocator());
 			}
+
 			for (auto& obj : scene.transparent_objects)
 			{
 				rapidjson::Value meta_path;
 				meta_path.SetString(obj->target->meta_path.c_str(), doc.GetAllocator());
-				models.PushBack(meta_path, doc.GetAllocator());
+
+				rapidjson::Value transform;
+				transform = serialize(doc, *obj->target->transform.get());
+
+				rapidjson::Value model_instance;
+				model_instance.SetArray();
+
+				model_instance.PushBack(meta_path, doc.GetAllocator());
+				model_instance.PushBack(transform, doc.GetAllocator());
+
+				models.PushBack(model_instance, doc.GetAllocator());
 			}
+
 			doc.AddMember("models", models, doc.GetAllocator());
 			doc.AddMember("enable_ibl", scene.enable_skybox, doc.GetAllocator());
 			doc.AddMember("enable_shadow", scene.enable_shadow, doc.GetAllocator());
@@ -948,9 +1023,12 @@ namespace CpuRasterizor
 			doc.AddMember("color_space", (int32_t)scene.color_space, doc.GetAllocator());
 			doc.AddMember("work_flow", (int32_t)scene.work_flow, doc.GetAllocator());
 
-			rapidjson::Value cubemap_path;
-			cubemap_path.SetString(scene.cubemap->meta_path.c_str(), doc.GetAllocator());
-			doc.AddMember("hdri_path", cubemap_path, doc.GetAllocator());
+			if (scene.cubemap != nullptr)
+			{
+				rapidjson::Value cubemap_path;
+				cubemap_path.SetString(scene.cubemap->meta_path.c_str(), doc.GetAllocator());
+				doc.AddMember("hdri_path", cubemap_path, doc.GetAllocator());
+			}
 
 			rapidjson::Value main_cam = Serializer::serialize(doc, *scene.main_cam).GetObject();
 			doc.AddMember("main_cam", main_cam, doc.GetAllocator());
@@ -1002,7 +1080,7 @@ namespace CpuRasterizor
 					nice_name = nice_name.replace(nice_name.begin(), nice_name.begin() + last_slash + 1, "");
 					scene.name = nice_name;
 				}
-				Serializer::deserialize(doc["main_light"].GetObject(), scene.main_light);
+				Serializer::deserialize(doc["main_light"].GetObject(), *scene.main_light);
 				auto point_lights = doc["point_lights"].GetArray();
 				for (rapidjson::SizeType idx = 0; idx < point_lights.Size(); idx++)
 				{
@@ -1014,9 +1092,14 @@ namespace CpuRasterizor
 				auto models = doc["models"].GetArray();
 				for (rapidjson::SizeType idx = 0; idx < models.Size(); idx++)
 				{
-					const char* model_path = models[idx].GetString();
+					auto pair = models[idx].GetArray();
+					const char* model_path = pair[0].GetString();
+					rapidjson::Value model_transform = pair[1].GetObject();
+					Transform* transform = new Transform();
+					deserialize(model_transform, *transform);
 					Model* model = new Model();
 					Serializer::deserialize(model_path, *model);
+					model->set_transform(transform);
 					scene.add(std::shared_ptr<Model>(model));
 				}
 
@@ -1037,7 +1120,6 @@ namespace CpuRasterizor
 				Serializer::deserialize(doc["main_cam"].GetObject(), *camera);
 				scene.main_cam = std::unique_ptr<Camera>(camera);
 				Camera::set_main_camera(scene.main_cam.get());
-
 				fclose(fd);
 			}
 			else

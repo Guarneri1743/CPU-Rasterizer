@@ -1,10 +1,14 @@
 #include "Model.hpp"
 #include <filesystem>
 #include <iostream>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+#include "assimp/Scene.h"
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "Mesh.hpp"
+#include "Material.hpp"
+#include "Transform.hpp"
 
 namespace CpuRasterizor
 {
@@ -40,7 +44,7 @@ namespace CpuRasterizor
 	Model::~Model()
 	{}
 
-	Model& Model::operator=(const Model & other)
+	Model& Model::operator=(const Model& other)
 	{
 		this->meshes = other.meshes;
 		this->transform = std::unique_ptr<Transform>(new Transform(*other.transform));
@@ -81,6 +85,16 @@ namespace CpuRasterizor
 		reload_mesh(Scene->mRootNode, Scene);
 		LOG("load model: {}, mesh count: {}", abs_path, meshes.size());
 		importer.FreeScene();
+	}
+
+	const Transform* Model::get_transform() const 
+	{ 
+		return transform.get(); 
+	}
+
+	void Model::set_transform(Transform* _transform)
+	{
+		transform.reset();  transform = std::unique_ptr<Transform>(_transform); transform->set_model(this);
 	}
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)

@@ -5,10 +5,12 @@
 #include <stdint.h>
 #include "Object.hpp"
 #include "tinymath.h"
-#include "Model.hpp"
+#include "Define.hpp"
 
 namespace CpuRasterizor
 {
+	class Model;
+
 	class Renderer : public Object
 	{
 	public:

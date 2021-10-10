@@ -4,6 +4,7 @@
 #include "Singleton.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
+#include "Shader.hpp"
 
 namespace CpuRasterizor
 {

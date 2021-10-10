@@ -4,17 +4,19 @@
 #include <memory>
 #include <stdint.h>
 #include <vector>
-
-#include "assimp/Scene.h"
-
-#include "Mesh.hpp"
+#include "Object.hpp"
 #include "RasterAttributes.hpp"
-#include "Material.hpp"
-#include "Transform.hpp"
 
+struct aiScene;
+struct aiNode;
+struct aiMesh;
 
 namespace CpuRasterizor
 {
+	class Mesh;
+	class Material;
+	class Transform;
+
 	class Model : public Object
 	{
 	public:
@@ -32,7 +34,8 @@ namespace CpuRasterizor
 		~Model();
 
 		void load_raw(std::string path, bool flip_uv);
-		const Transform* get_transform() const { return transform.get(); }
+		const Transform* get_transform() const;
+		void set_transform(Transform* _transform);
 
 		Model& operator= (const Model& other);
 		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
