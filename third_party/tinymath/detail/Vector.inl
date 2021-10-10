@@ -164,8 +164,8 @@ struct Vector
 {
 	Component data[N];
 	Vector<Component, N>() {}
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 };
 
 #define COMPONENT_WWISE_FUNC(func)\
@@ -383,8 +383,8 @@ struct Vector<Component, 2>
 	constexpr Vector<Component, 2>(const Component& c1, const Component& c2) : x(c1), y(c2) {}
 	constexpr Vector<Component, 2>(const Vector<Component, 2>& v) : x(v.x), y(v.y) {}
 
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 };
 
 template <typename Component>
@@ -405,8 +405,8 @@ struct Vector<Component, 3>
 	constexpr Vector<Component, 3>(const Vector<Component, 2>& v) : x(v.data[0]), y(v.data[1]), z(0.0f) {}
 	constexpr Vector<Component, 3>(const Component& c1, const Component& c2, const Component& c3) : x(c1), y(c2), z(c3) { }
 
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 };
 
 template <typename Component>
@@ -428,8 +428,8 @@ struct Vector<Component, 4>
 	constexpr Vector<Component, 4>(const Vector<Component, 3>& v) : x(v.data[0]), y(v.data[1]), z(v.data[2]), w(0.0f) {}
 	constexpr Vector<Component, 4>(const Component& c1, const Component& c2, const Component& c3, const Component& c4) : x(c1), y(c2), z(c3), w(c4) {}
 
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 };
 
 constexpr Vector<float, 2> kVec2fZero = Vector<float, 2>(0.f);

@@ -10,9 +10,9 @@ namespace CpuRasterizor
 	class Clipper
 	{
 	public:
-		static bool clip_segment(const float& near_plane, const tinymath::vec4f& c1, const tinymath::vec4f& c2, tinymath::vec4f& out_c1, tinymath::vec4f& out_c2);
-		static std::vector<Triangle> clip_triangle(const float& near_plane, const tinymath::Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3);
-		static void clip_horizontally(Vertex& lhs, Vertex& rhs, const size_t& width);
+		static bool clip_segment(float near_plane, const tinymath::vec4f& c1, const tinymath::vec4f& c2, tinymath::vec4f& out_c1, tinymath::vec4f& out_c2);
+		static std::vector<Triangle> clip_triangle(float near_plane, const tinymath::Frustum& cvv, const Vertex& c1, const Vertex& c2, const Vertex& c3);
+		static void clip_horizontally(Vertex& lhs, Vertex& rhs, size_t width);
 		static bool inside_cvv(const tinymath::vec4f& c1, const tinymath::vec4f& c2, const tinymath::vec4f& c3);
 		static bool inside_cvv(const tinymath::vec4f& v);
 		static bool backface_culling_ndc(const tinymath::vec3f& c1, const tinymath::vec3f& c2, const tinymath::vec3f& c3);

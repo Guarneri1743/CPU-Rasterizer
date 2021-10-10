@@ -22,11 +22,11 @@ public:
 	TMATH_INLINE void set_min_max(const tinymath::vec3f& min, const tinymath::vec3f& max);
 	TMATH_INLINE void set_min(const tinymath::vec3f& m);
 	TMATH_INLINE void set_max(const tinymath::vec3f& m);
-	TMATH_INLINE tinymath::vec3f corner(const int& n) const;
+	TMATH_INLINE tinymath::vec3f corner(int n) const;
 	TMATH_INLINE bool contains(const tinymath::vec3f& pos) const;
 	TMATH_INLINE int maximum_extent() const;
 	TMATH_INLINE float surface() const;
-	TMATH_INLINE float approx(const float& a, const float& b) const;
+	TMATH_INLINE float approx(float a, float b) const;
 	TMATH_INLINE tinymath::vec3f get_normal(const tinymath::vec3f& hit_position) const;
 	TMATH_INLINE void expand(const tinymath::vec3f& p);
 	TMATH_INLINE void expand(const AxisAlignedBoundingBox& p);
@@ -90,7 +90,7 @@ void AxisAlignedBoundingBox::set_max(const tinymath::vec3f& m)
 	set_min_max(this->min(), m);
 }
 
-tinymath::vec3f AxisAlignedBoundingBox::corner(const int& n) const
+tinymath::vec3f AxisAlignedBoundingBox::corner(int n) const
 {
 	tinymath::vec3f p;
 	p.x = ((n & 1) ? max().x : min().x);
@@ -145,7 +145,7 @@ float AxisAlignedBoundingBox::surface() const
 	return 2 * (d.x * d.y + d.x * d.z + d.y * d.z);
 }
 
-float AxisAlignedBoundingBox::approx(const float& a, const float& b) const
+float AxisAlignedBoundingBox::approx(float a, float b) const
 {
 	return std::abs(a - b) < 1e-5f;
 }

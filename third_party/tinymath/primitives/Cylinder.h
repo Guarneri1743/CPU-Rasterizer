@@ -14,7 +14,7 @@ public:
 
 public:
 	TMATH_INLINE Cylinder();
-	TMATH_INLINE Cylinder(const Line& axis_t, const float& _radius, const float& _height);
+	TMATH_INLINE Cylinder(const Line& axis_t, float _radius, float _height);
 	TMATH_INLINE Cylinder(const Cylinder& other);
 };
 
@@ -26,7 +26,7 @@ Cylinder::Cylinder()
 	height = 0;
 }
 
-Cylinder::Cylinder(const Line& axis_t, const float& _radius, const float& _height)
+Cylinder::Cylinder(const Line& axis_t, float _radius, float _height)
 {
 	this->axis = axis_t;
 	this->radius = _radius;

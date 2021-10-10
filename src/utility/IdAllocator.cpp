@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "Marcos.h"
 
-IdAllocator::IdAllocator(const uint32_t& _lhs, const uint32_t& _rhs)
+IdAllocator::IdAllocator(uint32_t _lhs, uint32_t _rhs)
 {
 	assert(_lhs > kInvalidID);
 	assert(_lhs <= _rhs);
@@ -32,7 +32,7 @@ bool IdAllocator::alloc(uint32_t& id)
 	return false;
 }
 
-void IdAllocator::free(const uint32_t& id)
+void IdAllocator::free(uint32_t id)
 {
 	UNUSED(id);
 }

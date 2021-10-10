@@ -39,7 +39,7 @@ namespace CpuRasterizor
 	protected:
 		bool show;
 		ImGuiWindowFlags get_window_flag();
-		void draw_space(const int& count);
+		void draw_space(int count);
 		
 		static void initialize_imgui();
 		static bool imgui_initialized;

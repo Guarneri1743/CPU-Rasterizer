@@ -130,7 +130,7 @@ namespace CpuRasterizor
 		local_position = local_pos;
 	}
 
-	void Transform::set_world_angle(const float& pitch, const float& yaw, const float& roll)
+	void Transform::set_world_angle(float pitch, float yaw, float roll)
 	{
 		set_world_rotation({ DEGREE2RAD(pitch), DEGREE2RAD(yaw), DEGREE2RAD(roll) });
 	}
@@ -166,49 +166,49 @@ namespace CpuRasterizor
 		sync();
 	}
 
-	void Transform::move_forward(const float& distance)
+	void Transform::move_forward(float distance)
 	{
 		tinymath::vec3f delta = distance * this->forward();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::move_backward(const float& distance)
+	void Transform::move_backward(float distance)
 	{
 		tinymath::vec3f delta = -distance * this->forward();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::move_left(const float& distance)
+	void Transform::move_left(float distance)
 	{
 		tinymath::vec3f delta = -distance * this->right();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::move_right(const float& distance)
+	void Transform::move_right(float distance)
 	{
 		tinymath::vec3f delta = distance * this->right();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::move_ascend(const float& distance)
+	void Transform::move_ascend(float distance)
 	{
 		tinymath::vec3f delta = distance * this->up();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::move_descend(const float& distance)
+	void Transform::move_descend(float distance)
 	{
 		tinymath::vec3f delta = -distance * this->up();
 		this->local_position += delta;
 		sync();
 	}
 
-	void Transform::rotate(const float& pitch_offset, const float& yaw_offset, const float& roll_offset)
+	void Transform::rotate(float pitch_offset, float yaw_offset, float roll_offset)
 	{
 		this->local_rotation.x += DEGREE2RAD(pitch_offset);
 		this->local_rotation.y += DEGREE2RAD(yaw_offset);
@@ -216,14 +216,14 @@ namespace CpuRasterizor
 		sync();
 	}
 
-	void Transform::rotate(const tinymath::vec3f& axis, const float& angle)
+	void Transform::rotate(const tinymath::vec3f& axis, float angle)
 	{
 		//todo
 		UNUSED(axis);
 		UNUSED(angle);
 	}
 
-	void Transform::rotate_self(const float& yaw_offset, const float& pitch_offset, const float& roll_offset)
+	void Transform::rotate_self(float yaw_offset, float pitch_offset, float roll_offset)
 	{
 		this->local_rotation.y -= yaw_offset;
 		this->local_rotation.x -= pitch_offset;

@@ -150,7 +150,7 @@ namespace CpuRasterizor
 		return window_flags;
 	}
 
-	void BaseEditor::draw_space(const int& count)
+	void BaseEditor::draw_space(int count)
 	{
 		if (count <= 0) return;
 		int total = count;

@@ -15,14 +15,14 @@ namespace CpuRasterizor
 	Camera::~Camera()
 	{}
 
-	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far)
+	std::unique_ptr<Camera> Camera::create(const tinymath::vec3f& _position, float _aspect, float _fov, float _near, float _far)
 	{
 		auto ret = std::unique_ptr<Camera>(new Camera());
 		ret->initialize(_position, _aspect, _fov, _near, _far, Projection::kPerspective);
 		return ret;
 	}
 
-	void Camera::initialize(const tinymath::vec3f& position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type)
+	void Camera::initialize(const tinymath::vec3f& position, float _aspect, float _fov, float _near, float _far, Projection _proj_type)
 	{
 		this->aspect = _aspect > 0.0f ? _aspect : 1.0f;
 		this->fov = _fov;
@@ -50,25 +50,25 @@ namespace CpuRasterizor
 		this->transform->lookat(position);
 	}
 
-	void Camera::set_near(const float& _near)
+	void Camera::set_near(float _near)
 	{
 		near = _near;
 		update_proj_mode();
 	}
 
-	void Camera::set_far(const float& _far)
+	void Camera::set_far(float _far)
 	{
 		far = _far;
 		update_proj_mode();
 	}
 
-	void Camera::set_fov(const float& _fov)
+	void Camera::set_fov(float _fov)
 	{
 		fov = _fov;
 		update_proj_mode();
 	}
 
-	void Camera::set_projection(const Projection& proj)
+	void Camera::set_projection(Projection proj)
 	{
 		this->projection = proj;
 		update_proj_mode();

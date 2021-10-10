@@ -2,7 +2,7 @@
 
 namespace CpuRasterizor
 {
-	Vertex Pipeline::barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, const float& w0, const float& w1, const float& w2)
+	Vertex Pipeline::barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, float w0, float w1, float w2)
 	{
 		Vertex ret;
 		ret.position = v0.position * w0 + v1.position * w1 + v2.position * w2;
@@ -17,21 +17,21 @@ namespace CpuRasterizor
 		return ret;
 	}
 
-	Vertex Pipeline::interpolate_screen_space(const Vertex& lhs, const Vertex& rhs, const float& t)
+	Vertex Pipeline::interpolate_screen_space(const Vertex& lhs, const Vertex& rhs, float t)
 	{
 		Vertex ret = interpolate_attributes(lhs, rhs, t);
 		ret.rhw = lhs.rhw + (rhs.rhw - lhs.rhw) * t;
 		return ret;
 	}
 
-	Vertex Pipeline::interpolate_clip_space(const Vertex& lhs, const Vertex& rhs, const float& t)
+	Vertex Pipeline::interpolate_clip_space(const Vertex& lhs, const Vertex& rhs, float t)
 	{
 		Vertex ret = interpolate_attributes(lhs, rhs, t);
 		ret.rhw = 1.0f / ret.position.w;
 		return ret;
 	}
 
-	Vertex Pipeline::interpolate_attributes(const Vertex& lhs, const Vertex& rhs, const float& t)
+	Vertex Pipeline::interpolate_attributes(const Vertex& lhs, const Vertex& rhs, float t)
 	{
 		Vertex ret;
 		ret.position = lhs.position + (rhs.position - lhs.position) * t;
@@ -121,7 +121,7 @@ namespace CpuRasterizor
 		return ret;
 	}
 
-	Vertex Pipeline::ndc2screen(const size_t& width, const size_t& height, const Vertex& ndc)
+	Vertex Pipeline::ndc2screen(size_t width, size_t height, const Vertex& ndc)
 	{
 		Vertex screen = ndc;
 		screen.position = ndc2screen(width, height, ndc.position);
@@ -135,7 +135,7 @@ namespace CpuRasterizor
 		return ndc;
 	}
 
-	tinymath::vec4f Pipeline::ndc2screen(const size_t& width, const size_t& height, const tinymath::vec4f& ndc)
+	tinymath::vec4f Pipeline::ndc2screen(size_t width, size_t height, const tinymath::vec4f& ndc)
 	{
 		tinymath::vec4f screen = ndc;
 		screen.x = (ndc.x + 1.0f) * width * 0.5f;

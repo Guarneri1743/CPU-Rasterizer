@@ -4,7 +4,7 @@
 
 namespace CpuRasterizor
 {
-	FrameBuffer::FrameBuffer(const size_t& w, const size_t& h, const FrameContent& flag) : 
+	FrameBuffer::FrameBuffer(size_t w, size_t h, FrameContent flag) : 
 		content_flag(flag),
 		width(w), height(h)
 	{
@@ -12,11 +12,11 @@ namespace CpuRasterizor
 		resize(w, h);
 	}
 
-	bool FrameBuffer::perform_stencil_test(const uint8_t& ref_val,
-										   const uint8_t& read_mask, 
-										   const CompareFunc& func,
-										   const size_t& row, 
-										   const size_t& col) const
+	bool FrameBuffer::perform_stencil_test(uint8_t ref_val,
+										   uint8_t read_mask, 
+										   CompareFunc func,
+										   size_t row, 
+										   size_t col) const
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -58,13 +58,13 @@ namespace CpuRasterizor
 		return pass;
 	}
 
-	void FrameBuffer::update_stencil_buffer(const size_t& row, 
-											const size_t& col,
+	void FrameBuffer::update_stencil_buffer(size_t row, 
+											size_t col,
 											const PerSampleOperation& op_pass,
-											const StencilOp& stencil_pass_op, 
-											const StencilOp& stencil_fail_op, 
-											const StencilOp& stencil_zfail_op, 
-											const uint8_t& ref_val) const
+											StencilOp stencil_pass_op, 
+											StencilOp stencil_fail_op, 
+											StencilOp stencil_zfail_op, 
+											uint8_t ref_val) const
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -112,10 +112,10 @@ namespace CpuRasterizor
 		}
 	}
 
-	bool FrameBuffer::perform_depth_test(const CompareFunc& func,
-										 const size_t& row, 
-										 const size_t& col, 
-										 const float& z) const
+	bool FrameBuffer::perform_depth_test(CompareFunc func,
+										 size_t row, 
+										 size_t col, 
+										 float z) const
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
@@ -161,8 +161,8 @@ namespace CpuRasterizor
 	// todo: alpha factor
 	tinymath::Color FrameBuffer::blend(const tinymath::Color& src_color,
 									   const tinymath::Color& dst_color,
-									   const BlendFactor& src_factor, 
-									   const BlendFactor& dst_factor, 
+									   BlendFactor src_factor, 
+									   BlendFactor dst_factor, 
 									   const BlendOp& op)
 	{
 		tinymath::Color lhs, rhs;
@@ -238,7 +238,7 @@ namespace CpuRasterizor
 		return lhs + rhs;
 	}
 
-	void FrameBuffer::write_color(const size_t& row, const size_t& col, const tinymath::color_rgba& color)
+	void FrameBuffer::write_color(size_t row, size_t col, const tinymath::color_rgba& color)
 	{
 		if ((content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
@@ -246,7 +246,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_depth(const size_t & row, const size_t & col, const float& depth)
+	void FrameBuffer::write_depth(size_t row, size_t col, float depth)
 	{
 		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
@@ -254,7 +254,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_stencil(const size_t & row, const size_t & col, const uint8_t & stencil)
+	void FrameBuffer::write_stencil(size_t row, size_t col, uint8_t stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
@@ -262,7 +262,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_coverage(const size_t & row, const size_t & col, const uint8_t & coverage)
+	void FrameBuffer::write_coverage(size_t row, size_t col, uint8_t coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
@@ -270,7 +270,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	bool FrameBuffer::read_color(const size_t & row, const size_t & col, tinymath::color_rgba & color)
+	bool FrameBuffer::read_color(size_t row, size_t col, tinymath::color_rgba & color)
 	{
 		if ((content_flag & FrameContent::kColor) == FrameContent::kNone)
 		{
@@ -280,7 +280,7 @@ namespace CpuRasterizor
 		return color_buffer->read(row, col, color);
 	}
 
-	bool FrameBuffer::read_depth(const size_t& row, const size_t& col, float& depth)
+	bool FrameBuffer::read_depth(size_t row, size_t col, float& depth)
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
@@ -290,7 +290,7 @@ namespace CpuRasterizor
 		return depth_buffer->read(row, col, depth);
 	}
 
-	bool FrameBuffer::read_stencil(const size_t& row, const size_t& col, uint8_t& stencil)
+	bool FrameBuffer::read_stencil(size_t row, size_t col, uint8_t& stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -300,7 +300,7 @@ namespace CpuRasterizor
 		return stencil_buffer->read(row, col, stencil);
 	}
 
-	bool FrameBuffer::read_coverage(const size_t& row, const size_t& col, uint8_t& coverage)
+	bool FrameBuffer::read_coverage(size_t row, size_t col, uint8_t& coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
@@ -312,7 +312,7 @@ namespace CpuRasterizor
 
 
 
-	void FrameBuffer::write_color(const float& u, const float& v, const tinymath::color_rgba& color)
+	void FrameBuffer::write_color(float u, float v, const tinymath::color_rgba& color)
 	{
 		if ((content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
@@ -320,7 +320,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_depth(const float& u, const float& v, const float& depth)
+	void FrameBuffer::write_depth(float u, float v, float depth)
 	{
 		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
@@ -328,7 +328,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_stencil(const float& u, const float& v, const uint8_t& stencil)
+	void FrameBuffer::write_stencil(float u, float v, uint8_t stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
@@ -336,7 +336,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_coverage(const float& u, const float& v, const uint8_t& coverage)
+	void FrameBuffer::write_coverage(float u, float v, uint8_t coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
@@ -344,7 +344,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	bool FrameBuffer::read_color(const float& u, const float& v, tinymath::color_rgba& color)
+	bool FrameBuffer::read_color(float u, float v, tinymath::color_rgba& color)
 	{
 		if ((content_flag & FrameContent::kColor) == FrameContent::kNone)
 		{
@@ -354,7 +354,7 @@ namespace CpuRasterizor
 		return color_buffer->read(u, v, color);
 	}
 
-	bool FrameBuffer::read_depth(const float& u, const float& v, float& depth)
+	bool FrameBuffer::read_depth(float u, float v, float& depth)
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
@@ -364,7 +364,7 @@ namespace CpuRasterizor
 		return depth_buffer->read(u, v, depth);
 	}
 
-	bool FrameBuffer::read_stencil(const float& u, const float& v, uint8_t& stencil)
+	bool FrameBuffer::read_stencil(float u, float v, uint8_t& stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -374,7 +374,7 @@ namespace CpuRasterizor
 		return stencil_buffer->read(u, v, stencil);
 	}
 
-	bool FrameBuffer::read_coverage(const float& u, const float& v, uint8_t& coverage)
+	bool FrameBuffer::read_coverage(float u, float v, uint8_t& coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
@@ -384,7 +384,7 @@ namespace CpuRasterizor
 		return coverage_buffer->read(u, v, coverage);
 	}
 
-	void FrameBuffer::clear(const FrameContent& flag)
+	void FrameBuffer::clear(FrameContent flag)
 	{
 		if ((flag & content_flag & FrameContent::kColor) != FrameContent::kNone)
 		{
@@ -412,7 +412,7 @@ namespace CpuRasterizor
 		clear_color = color;
 	}
 
-	void FrameBuffer::resize(const size_t& w, const size_t& h)
+	void FrameBuffer::resize(size_t w, size_t h)
 	{
 		this->width = w;
 		this->height = h;
@@ -466,12 +466,12 @@ namespace CpuRasterizor
 		}
 	}
 
-	RawBuffer<tinymath::color_rgba>* FrameBuffer::get_color_raw_buffer() const noexcept 
+	RawBuffer<tinymath::color_rgba>* FrameBuffer::get_color_raw_buffer() const  
 	{
 		return color_buffer.get(); 
 	}
 
-	tinymath::color_rgba* FrameBuffer::get_color_buffer_ptr() const noexcept
+	tinymath::color_rgba* FrameBuffer::get_color_buffer_ptr() const 
 	{ 
 		size_t size;  return color_buffer->get_ptr(size); 
 	}

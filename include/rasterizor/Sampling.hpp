@@ -33,17 +33,17 @@ inline float radical_inverse_vdc(uint32_t bits)
     return float(bits) * 2.3283064365386963e-10f;
 }
 
-inline tinymath::vec2f hammersley(const uint32_t& i, const uint32_t& N)
+inline tinymath::vec2f hammersley(uint32_t i, uint32_t N)
 {
     return tinymath::vec2f(float(i) / float(N), radical_inverse_vdc(i));
 }
 
-inline tinymath::vec2f random_vec2_01(const uint32_t& N)
+inline tinymath::vec2f random_vec2_01(uint32_t N)
 {
     return tinymath::vec2f((float)(rand() % N) / (float)N, (float)(rand() % N) / (float)N);
 }
 
-inline tinymath::vec3f radian_to_spherical_coord(const float& theta, const float& phi)
+inline tinymath::vec3f radian_to_spherical_coord(float theta, float phi)
 {
     float x = cos(theta) * cos(phi);
     float y = sin(theta);
@@ -60,7 +60,7 @@ inline tinymath::vec3f tangent2world(const tinymath::vec3f& vec, const tinymath:
     return tinymath::normalize(vec.x * tangent + vec.y * normal + vec.z * bitangent);
 }
 
-inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, const tinymath::vec3f& normal, const float& roughness)
+inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, const tinymath::vec3f& normal, float roughness)
 {
     float a = roughness * roughness;
     float phi = TWO_PI * random_01.x;
@@ -76,7 +76,7 @@ inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, con
     return tangent2world(w_i, normal);
 } 
 
-inline float get_mip_level(const tinymath::vec2f ddx_uv, const tinymath::vec2f ddy_uv, const size_t& width, const size_t& height)
+inline float get_mip_level(const tinymath::vec2f& ddx_uv, const tinymath::vec2f& ddy_uv, size_t width, size_t height)
 {
     tinymath::vec2f ddx = ddx_uv * tinymath::vec2f((float)width, (float)height);
     tinymath::vec2f ddy = ddy_uv * tinymath::vec2f((float)width, (float)height);

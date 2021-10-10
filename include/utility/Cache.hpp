@@ -15,11 +15,11 @@ public:
 	Cache();
 	~Cache<T>();
 	void put(const std::string& path, const std::shared_ptr<T>& res);
-	void put(const uint32_t& id, const std::shared_ptr<T>& res);
+	void put(uint32_t id, const std::shared_ptr<T>& res);
 	void free(const std::string& path);
-	void free(const uint32_t& id);
+	void free(uint32_t id);
 	bool get(const std::string& path, std::shared_ptr<T>& res);
-	bool get(const uint32_t& id, std::shared_ptr<T>& res);
+	bool get(uint32_t id, std::shared_ptr<T>& res);
 
 private:
 	bool destructed;

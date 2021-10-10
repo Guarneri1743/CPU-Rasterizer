@@ -221,7 +221,7 @@ namespace CpuRasterizor
 			material_data.roughness = tinymath::max(material_data.roughness, EPSILON); // brdf lut bug (baking error)
 		}
 
-		void setup(const float& ndv, const float& roughness, const tinymath::vec3f& normal, const tinymath::vec3f& view_dir, IblData& ibl_data) const
+		void setup(float ndv, float roughness, const tinymath::vec3f& normal, const tinymath::vec3f& view_dir, IblData& ibl_data) const
 		{
 			ibl_data.irradiance = tinymath::kColorBlack;
 			ibl_data.prefiltered = tinymath::kColorBlack;
@@ -289,10 +289,10 @@ namespace CpuRasterizor
 
 		tinymath::vec3f metallic_workflow(const tinymath::vec3f& f0, 
 										  const tinymath::vec3f& albedo, 
-										  const float& intensity, 
-										  const float& metallic, 
-										  const float& roughness, 
-										  const float& light_distance,
+										  float intensity, 
+										  float metallic, 
+										  float roughness, 
+										  float light_distance,
 										  const tinymath::vec3f& halfway, 
 										  const tinymath::vec3f& light_dir, 
 										  const tinymath::vec3f& view_dir,
@@ -329,9 +329,9 @@ namespace CpuRasterizor
 														const tinymath::vec3f& wpos,
 														const tinymath::vec3f& view_dir,
 														const tinymath::vec3f& normal,
-														const float& ndv,
+														float ndv,
 														const tinymath::Color& albedo,
-														const float& ao) const
+														float ao) const
 		{
 			UNUSED(wpos);
 			auto light_ambient = light.ambient;
@@ -433,9 +433,9 @@ namespace CpuRasterizor
 														 const tinymath::vec3f& wpos,
 														 const tinymath::vec3f& view_dir,
 														 const tinymath::vec3f& normal,
-														 const float& ndv,
+														 float ndv,
 														 const tinymath::Color& albedo,
-														 const float& ao) const
+														 float ao) const
 		{
 			UNUSED(light);
 			UNUSED(material_data);

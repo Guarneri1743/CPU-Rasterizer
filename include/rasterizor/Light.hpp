@@ -30,7 +30,7 @@ namespace CpuRasterizor {
 		tinymath::mat4x4 light_space() const;
 		tinymath::mat4x4 view_matrix() const;
 		tinymath::mat4x4 projection_matrix() const;
-		void rotate(const float& yaw_offset, const float& pitch_offset);
+		void rotate(float yaw_offset, float pitch_offset);
 		void update_rotation();
 		void update_projection();
 	};

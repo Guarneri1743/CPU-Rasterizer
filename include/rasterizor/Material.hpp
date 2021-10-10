@@ -39,7 +39,7 @@ namespace CpuRasterizor
 		Material(const Material& other);
 		~Material();
 
-		Shader* get_shader(const RenderPass& pass) const;
+		Shader* get_shader(RenderPass pass) const;
 		void sync(Shader* shader);
 		void sync();
 		

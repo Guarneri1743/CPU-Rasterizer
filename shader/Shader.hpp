@@ -166,7 +166,7 @@ namespace CpuRasterizor
 			return tinymath::Color(ret.r, ret.g, ret.b, 1.0f);
 		}
 
-		static inline float linearize_depth(const float& depth, const float& near, const float& far)
+		static inline float linearize_depth(float depth, float near, float far)
 		{
 		#ifdef GL_LIKE
 			float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
@@ -189,7 +189,7 @@ namespace CpuRasterizor
 		#endif
 		}
 
-		static inline float linearize_01depth(const float& depth, const float& near, const float& far)
+		static inline float linearize_01depth(float depth, float near, float far)
 		{
 			return (linearize_depth(depth, near, far) - near) / (far - near);
 		}

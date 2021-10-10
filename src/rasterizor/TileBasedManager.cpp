@@ -4,7 +4,7 @@
 
 namespace CpuRasterizor
 {
-	TileBasedManager::TileBasedManager(const size_t& w, const size_t& h) :
+	TileBasedManager::TileBasedManager(size_t w, size_t h) :
 		width(w), height(h), tile_tasks(nullptr),
 		row_tile_resolution(0), col_tile_resolution(0), last_row_tile_size(0), last_col_tile_size(0)
 	{
@@ -19,7 +19,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void TileBasedManager::resize(const size_t& w, const size_t& h)
+	void TileBasedManager::resize(size_t w, size_t h)
 	{
 		bool size_changed = width != w || height != h;
 		if (size_changed || tiles.size() == 0)
@@ -47,17 +47,17 @@ namespace CpuRasterizor
 	}
 
 	size_t TileBasedManager::coord2index(
-		const size_t& row,
-		const size_t& col,
-		const size_t& col_tile_count)
+		size_t row,
+		size_t col,
+		size_t col_tile_count)
 	{
 		return row * col_tile_count + col;
 	}
 
 	void TileBasedManager::pixel2tile(
-		const size_t& prow, const size_t& pcol,
+		size_t prow, size_t pcol,
 		size_t& trow, size_t& tcol,
-		const size_t& tile_size)
+		size_t tile_size)
 	{
 		assert(tile_size != 0);
 		trow = prow / tile_size;
@@ -65,10 +65,10 @@ namespace CpuRasterizor
 	}
 
 	void TileBasedManager::rebuild_tiles(
-		const size_t& row_res,
-		const size_t& col_res,
-		const size_t& last_row_size,
-		const size_t& last_col_size)
+		size_t row_res,
+		size_t col_res,
+		size_t last_row_size,
+		size_t last_col_size)
 	{
 		size_t length = row_res * col_res;
 		tiles.resize(length);

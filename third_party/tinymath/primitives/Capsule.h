@@ -14,9 +14,9 @@ public:
 
 public:
 	TMATH_INLINE Capsule();
-	TMATH_INLINE Capsule(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent, const float& radius_t);
-	TMATH_INLINE Capsule(const tinymath::vec3f& start, const tinymath::vec3f& end, const float& radius);
-	TMATH_INLINE Capsule(const Segment& Segment, const float& radius);
+	TMATH_INLINE Capsule(const tinymath::vec3f& center, const tinymath::vec3f& dir, float extent, float radius_t);
+	TMATH_INLINE Capsule(const tinymath::vec3f& start, const tinymath::vec3f& end, float radius);
+	TMATH_INLINE Capsule(const Segment& Segment, float radius);
 	TMATH_INLINE Capsule(const Capsule& other);
 };
 
@@ -27,19 +27,19 @@ Capsule::Capsule()
 	radius = 0;
 }
 
-Capsule::Capsule(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent, const float& radius_t)
+Capsule::Capsule(const tinymath::vec3f& center, const tinymath::vec3f& dir, float extent, float radius_t)
 {
 	this->segment = Segment::Segment(center, dir, extent);
 	this->radius = radius_t;
 }
 
-Capsule::Capsule(const tinymath::vec3f& start, const tinymath::vec3f& end, const float& radius)
+Capsule::Capsule(const tinymath::vec3f& start, const tinymath::vec3f& end, float radius)
 {
 	this->segment = Segment::Segment(start, end);
 	this->radius = radius;
 }
 
-Capsule::Capsule(const Segment& Segment, const float& radius)
+Capsule::Capsule(const Segment& Segment, float radius)
 {
 	this->segment = Segment;
 	this->radius = radius;

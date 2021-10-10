@@ -28,9 +28,9 @@ public:
 	TMATH_INLINE void set_min_max(const tinymath::vec2i& min, const tinymath::vec2i& max);
 	TMATH_INLINE void set_min(const tinymath::vec2i& m);
 	TMATH_INLINE void set_max(const tinymath::vec2i& m);
-	TMATH_INLINE tinymath::vec2i corner(const int& n) const;
+	TMATH_INLINE tinymath::vec2i corner(int n) const;
 	TMATH_INLINE bool contains(const tinymath::vec2i& pos) const;
-	TMATH_INLINE int approx(const int& a, const int& b) const;
+	TMATH_INLINE int approx(int a, int b) const;
 	TMATH_INLINE void expand(const tinymath::vec2i& p);
 	TMATH_INLINE void expand(const Rect& p);
 	TMATH_INLINE tinymath::vec2i offset(const tinymath::vec2i& p) const;
@@ -155,7 +155,7 @@ void Rect::set_max(const tinymath::vec2i& m)
 	set_min_max(this->min(), m);
 }
 
-tinymath::vec2i Rect::corner(const int& n) const
+tinymath::vec2i Rect::corner(int n) const
 {
 	tinymath::vec2i p;
 	p.x = ((n & 1) ? max().x : min().x);
@@ -184,7 +184,7 @@ bool Rect::contains(const tinymath::vec2i& pos) const
 	return true;
 }
 
-int Rect::approx(const int& a, const int& b) const
+int Rect::approx(int a, int b) const
 {
 	return tinymath::abs(a - b) < 1e-5f;
 }

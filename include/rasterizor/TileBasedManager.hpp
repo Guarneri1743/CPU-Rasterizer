@@ -27,22 +27,22 @@ namespace CpuRasterizor
 	class TileBasedManager
 	{
 	public:
-		TileBasedManager(const size_t& w, const size_t& h);
+		TileBasedManager(size_t w, size_t h);
 		~TileBasedManager();
 
-		void resize(const size_t& w, const size_t& h);
+		void resize(size_t w, size_t h);
 		void foreach_tile(std::function<void(tinymath::Rect& tile, SafeQueue<TileTask>& task_queue)> func);
 		void push_draw_task(const Triangle& tri, const Shader& shader);
 
 	private:
 		void rebuild_tiles(
-			const size_t& row_tile_count,
-			const size_t& col_tile_count,
-			const size_t& row_rest,
-			const size_t& col_rest);
+			size_t row_tile_count,
+			size_t col_tile_count,
+			size_t row_rest,
+			size_t col_rest);
 
-		static size_t coord2index(const size_t& row, const size_t& col, const size_t& col_tile_count);
-		static void pixel2tile(const size_t& prow, const size_t& pcol, size_t& trow, size_t& tcol, const size_t& tile_size);
+		static size_t coord2index(size_t row, size_t col, size_t col_tile_count);
+		static void pixel2tile(size_t prow, size_t pcol, size_t& trow, size_t& tcol, size_t tile_size);
 
 	private:
 		// tile based

@@ -112,7 +112,7 @@ namespace CpuRasterizor {
 		Vertex(tinymath::vec4f(1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f))
 	};
 
-	tinymath::vec3f sphere_parametric_equation(const float& radius, const float& alpha, const float& phi)
+	tinymath::vec3f sphere_parametric_equation(float radius, float alpha, float phi)
 	{
 		tinymath::vec3f p;
 		p.x = radius * std::sin(alpha * PI / 180.0f) * std::cos(phi * PI / 180.0f);

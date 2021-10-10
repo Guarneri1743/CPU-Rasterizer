@@ -48,7 +48,7 @@ namespace CpuRasterizor
 	Material::~Material()
 	{}
 
-	Shader* Material::get_shader(const RenderPass& pass) const
+	Shader* Material::get_shader(RenderPass pass) const
 	{
 		if (pass == RenderPass::kShadow)
 		{

@@ -20,8 +20,8 @@ public:
 public:
 	TMATH_INLINE Frustum(const tinymath::Plane& l, const tinymath::Plane& r, const tinymath::Plane& t, const tinymath::Plane& b, const tinymath::Plane& n, const tinymath::Plane& f);
 	TMATH_INLINE ~Frustum();
-	TMATH_INLINE const tinymath::Plane& operator[](const int& index) const;
-	TMATH_INLINE tinymath::Plane& operator[](const int& index);
+	TMATH_INLINE const tinymath::Plane& operator[](int index) const;
+	TMATH_INLINE tinymath::Plane& operator[](int index);
 
 	TMATH_INLINE static Frustum create(const tinymath::mat4x4& mat);
 	TMATH_INLINE static Frustum homogenous_volume();
@@ -103,7 +103,7 @@ Frustum Frustum::homogenous_volume()
 	return Frustum(left, right, top, bottom, near, far);
 }
 
-const tinymath::Plane& Frustum::operator[](const int& index) const
+const tinymath::Plane& Frustum::operator[](int index) const
 {
 	assert(index >= 0 && index <= 5);
 	switch (index)
@@ -124,7 +124,7 @@ const tinymath::Plane& Frustum::operator[](const int& index) const
 	return near;
 }
 
-tinymath::Plane& Frustum::operator[](const int& index)
+tinymath::Plane& Frustum::operator[](int index)
 {
 	assert(index >= 0 && index <= 5);
 	switch (index)

@@ -39,8 +39,8 @@ namespace CpuRasterizor
 		std::vector< std::shared_ptr<RawBuffer<tinymath::color_rgba16f>>> rgba16f_mipmaps;
 
 	public:
-		Texture(const size_t& _width, const size_t& _height, const TextureFormat& _fmt);
-		Texture(void* tex_buffer, const size_t& _width, const size_t& _height, const TextureFormat& _fmt);
+		Texture(size_t _width, size_t _height, TextureFormat _fmt);
+		Texture(void* tex_buffer, size_t _width, size_t _height, TextureFormat _fmt);
 		Texture(const Texture& other);
 		~Texture();
 
@@ -50,23 +50,23 @@ namespace CpuRasterizor
 		static std::shared_ptr<Texture> load_raw(const char* path);
 
 		void reload(const char* texture_path);
-		void generate_mipmap(const int& mip_count, const Filtering& filtering);
-		bool sample(const float& u, const float& v, tinymath::Color& ret) const;
-		bool sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const;
-		bool sample(const float& u, const float& v, const float& mip, tinymath::Color& ret) const;
-		bool read(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
-		bool read(const size_t& row, const size_t& col, const size_t& mip, tinymath::Color& ret) const;
-		bool read(const float& u, const float& v, tinymath::Color& ret) const;
-		bool read(const size_t& row, const size_t& col, tinymath::Color& ret) const;
-		bool write(const size_t& x, const size_t& y, const tinymath::Color& data);
-		bool write(const float& u, const float& v, const tinymath::Color& data);
-		void resize(const size_t& w, const size_t& h);
+		void generate_mipmap(int mip_count, Filtering filtering);
+		bool sample(float u, float v, tinymath::Color& ret) const;
+		bool sample(float u, float v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const;
+		bool sample(float u, float v, float mip, tinymath::Color& ret) const;
+		bool read(float u, float v, size_t mip, tinymath::Color& ret) const;
+		bool read(size_t row, size_t col, size_t mip, tinymath::Color& ret) const;
+		bool read(float u, float v, tinymath::Color& ret) const;
+		bool read(size_t row, size_t col, tinymath::Color& ret) const;
+		bool write(size_t x, size_t y, const tinymath::Color& data);
+		bool write(float u, float v, const tinymath::Color& data);
+		void resize(size_t w, size_t h);
 		void release();
 		void copy(const Texture& other);
 		static void export_image(const Texture& tex, const std::string& path);
 
 	private:
-		bool bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const;
+		bool bilinear(float u, float v, size_t mip, tinymath::Color& ret) const;
 		void wrap(float& u, float& v) const;
 		void clear();
 		Texture& operator =(const Texture& other);

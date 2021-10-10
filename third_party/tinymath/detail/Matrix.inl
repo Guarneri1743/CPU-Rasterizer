@@ -146,9 +146,9 @@ struct Matrix<Component, 3, 3>
 		m20(row2.x), m21(row2.y), m22(row2.z)
 	{}
 
-	constexpr Matrix<Component, 3, 3>(const float& _m00, const float& _m01, const float& _m02,
-									  const float& _m10, const float& _m11, const float& _m12,
-									  const float& _m20, const float& _m21, const float& _m22) :
+	constexpr Matrix<Component, 3, 3>(float _m00, float _m01, float _m02,
+									  float _m10, float _m11, float _m12,
+									  float _m20, float _m21, float _m22) :
 		m00(_m00), m01(_m01), m02(_m02),
 		m10(_m10), m11(_m11), m12(_m12),
 		m20(_m20), m21(_m21), m22(_m22)
@@ -160,11 +160,11 @@ struct Matrix<Component, 3, 3>
 		m20(m.m20), m21(m.m21), m22(m.m22)
 	{}
 
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 
-	Component& at(const size_t& r, const size_t& c) { return data[rc2index(r, c, 3)]; }
-	const Component& at(const size_t& r, const size_t& c) const { return data[rc2index(r, c, 3)]; }
+	Component& at(size_t r, size_t c) { return data[rc2index(r, c, 3)]; }
+	const Component& at(size_t r, size_t c) const { return data[rc2index(r, c, 3)]; }
 
 	Vector<Component, 3> forward() const
 	{
@@ -193,7 +193,7 @@ struct Matrix<Component, 3, 3>
 		return normaliz(u);
 	}
 
-	Vector<Component, 3> row(const int& index) const
+	Vector<Component, 3> row(int index) const
 	{
 		assert(index >= 0 && index <= 2);
 		Vector<Component, 3> ret;
@@ -212,7 +212,7 @@ struct Matrix<Component, 3, 3>
 		return ret;
 	}
 
-	Vector<Component, 3> column(const int& index) const
+	Vector<Component, 3> column(int index) const
 	{
 		assert(index >= 0 && index <= 2);
 		Vector<Component, 3> ret;
@@ -275,10 +275,10 @@ struct Matrix<Component, 4, 4>
 		m30(row3.x), m31(row3.y), m32(row3.z), m33(row3.w)
 	{}
 
-	constexpr Matrix<Component, 4, 4>(const float& _m00, const float& _m01, const float& _m02, const float& _m03,
-									  const float& _m10, const float& _m11, const float& _m12, const float& _m13,
-									  const float& _m20, const float& _m21, const float& _m22, const float& _m23,
-									  const float& _m30, const float& _m31, const float& _m32, const float& _m33) :
+	constexpr Matrix<Component, 4, 4>(float _m00, float _m01, float _m02, float _m03,
+									  float _m10, float _m11, float _m12, float _m13,
+									  float _m20, float _m21, float _m22, float _m23,
+									  float _m30, float _m31, float _m32, float _m33) :
 		m00(_m00), m01(_m01), m02(_m02), m03(_m03),
 		m10(_m10), m11(_m11), m12(_m12), m13(_m13),
 		m20(_m20), m21(_m21), m22(_m22), m23(_m23),
@@ -292,11 +292,11 @@ struct Matrix<Component, 4, 4>
 		m30(m.m30), m31(m.m31), m32(m.m32), m33(m.m33)
 	{}
 
-	Component& operator[](const size_t& index) { return data[index]; }
-	const Component& operator[](const size_t& index) const { return data[index]; }
+	Component& operator[](size_t index) { return data[index]; }
+	const Component& operator[](size_t index) const { return data[index]; }
 
-	Component& at(const size_t& r, const size_t& c) { return data[rc2index(r, c, 4)]; }
-	const Component& at(const size_t& r, const size_t& c) const { return data[rc2index(r, c, 4)]; }
+	Component& at(size_t r, size_t c) { return data[rc2index(r, c, 4)]; }
+	const Component& at(size_t r, size_t c) const { return data[rc2index(r, c, 4)]; }
 
 	Vector<Component, 3> forward() const
 	{
@@ -376,7 +376,7 @@ struct Matrix<Component, 4, 4>
 		return euler;
 	}
 
-	Vector<Component, 4> row(const int& index) const
+	Vector<Component, 4> row(int index) const
 	{
 		assert(index >= 0 && index <= 3);
 		Vector<Component, 4> ret;
@@ -398,7 +398,7 @@ struct Matrix<Component, 4, 4>
 		return ret;
 	}
 
-	Vector<Component, 4> column(const int& index) const
+	Vector<Component, 4> column(int index) const
 	{
 		assert(index >= 0 && index <= 3);
 		Vector<Component, 4> ret;
@@ -620,7 +620,7 @@ TMATH_INLINE Matrix<Component, 4, 4> scale(const Vector<Component, 3>& scale)
 }
 
 template <typename Component>
-TMATH_INLINE Matrix<Component, 4, 4> viewport(const int& x, const int& y, const int& w, const int& h)
+TMATH_INLINE Matrix<Component, 4, 4> viewport(int x, int y, int w, int h)
 {
 	Matrix<Component, 4, 4> ret = kMat4x4Identity;
 	ret.at(0, 0) = w * 0.5f;

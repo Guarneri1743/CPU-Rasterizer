@@ -18,7 +18,7 @@ namespace CpuRasterizor
 	SkyboxRenderer::~SkyboxRenderer()
 	{}
 
-	tinymath::mat4x4 SkyboxRenderer::view_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 SkyboxRenderer::view_matrix(RenderPass render_pass) const
 	{
 		UNUSED(render_pass);
 		auto view = CpuRasterSharedData.view_matrix;
@@ -27,7 +27,7 @@ namespace CpuRasterizor
 		return view4x4;
 	}
 
-	tinymath::mat4x4 SkyboxRenderer::projection_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 SkyboxRenderer::projection_matrix(RenderPass render_pass) const
 	{
 		UNUSED(render_pass);
 		return CpuRasterSharedData.proj_matrix;

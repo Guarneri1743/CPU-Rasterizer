@@ -7,13 +7,13 @@ namespace CpuRasterizor
 	{
 	public:
 		template<typename T>
-		static void dda(RawBuffer<T>* buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c);
+		static void dda(RawBuffer<T>* buffer, int x0, int y0, int x1, int y1, const T& c);
 		template<typename T>
-		static void bresenham(RawBuffer<T>* buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c);
+		static void bresenham(RawBuffer<T>* buffer, int x0, int y0, int x1, int y1, const T& c);
 	};
 
 	template<typename T>
-	void SegmentDrawer::dda(RawBuffer<T>* buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c)
+	void SegmentDrawer::dda(RawBuffer<T>* buffer, int x0, int y0, int x1, int y1, const T& c)
 	{
 		assert(buffer != nullptr);
 		int dx = std::abs(x1 - x0);
@@ -38,7 +38,7 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	void SegmentDrawer::bresenham(RawBuffer<T>* buffer, const int& x0, const int& y0, const int& x1, const int& y1, const T& c)
+	void SegmentDrawer::bresenham(RawBuffer<T>* buffer, int x0, int y0, int x1, int y1, const T& c)
 	{
 		assert(buffer != nullptr);
 		int dx = std::abs(x1 - x0);

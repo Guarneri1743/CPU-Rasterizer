@@ -29,16 +29,16 @@ namespace CpuRasterizor
 		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void fence_draw_commands();
 		void present();
-		void clear_buffer(const FrameContent& flag);
+		void clear_buffer(FrameContent flag);
 		void set_clear_color(const tinymath::Color color);
-		void set_subsample_count(const uint8_t& multiplier);
-		RenderTexture* get_active_rendertexture() const noexcept;
-		tinymath::color_rgba* get_target_color_buffer() const noexcept { return target_rendertexture->get_color_buffer_ptr(); }
+		void set_subsample_count(uint8_t multiplier);
+		RenderTexture* get_active_rendertexture() const ;
+		tinymath::color_rgba* get_target_color_buffer() const  { return target_rendertexture->get_color_buffer_ptr(); }
 		void set_active_rendertexture(uint32_t& id);
-		void reset_active_rendertexture() noexcept;
-		uint32_t create_buffer(const size_t& width, const size_t& height, const FrameContent& content) noexcept;
+		void reset_active_rendertexture() ;
+		uint32_t create_buffer(size_t width, size_t height, FrameContent content) ;
 		bool try_alloc_id(uint32_t& id);
-		bool get_buffer(const uint32_t& id, std::shared_ptr<RenderTexture>& buffer) const noexcept;
+		bool get_buffer(uint32_t id, std::shared_ptr<RenderTexture>& buffer) const ;
 		uint8_t get_subsample_count() { return target_rendertexture->get_subsample_count(); }
 		size_t get_width() { return target_rendertexture->get_width(); }
 		size_t get_height() { return target_rendertexture->get_height(); }
@@ -71,13 +71,13 @@ namespace CpuRasterizor
 								   SubsampleParam& p2,
 								   SubsampleParam& p3,
 								   SubsampleParam& p4);
-		void rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy);
+		void rasterize(const Triangle& tri, const Shader& shader, RasterizerStrategy strategy);
 		void scanblock(const Triangle& tri, const Shader& shader);
 		void scanline(const Triangle& tri, const Shader& shader);
 		v2f process_vertex(const Shader& shader, const Vertex& vert) const;
-		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader);
-		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param);
-		bool validate_fragment(const PerSampleOperation& op_pass) const;
+		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader);
+		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader, SubsampleParam& subsample_param);
+		bool validate_fragment(PerSampleOperation op_pass) const;
 		void process_commands();
 		void resize(size_t w, size_t h);
 

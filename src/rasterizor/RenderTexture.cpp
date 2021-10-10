@@ -3,7 +3,7 @@
 
 namespace CpuRasterizor
 {
-	RenderTexture::RenderTexture(const size_t& w, const size_t& h, const FrameContent& flag, bool msaa_on, uint8_t subsample_count) :
+	RenderTexture::RenderTexture(size_t w, size_t h, FrameContent flag, bool msaa_on, uint8_t subsample_count) :
 		has_msaa_buffer(msaa_on),
 		msaa_subsample_count(tinymath::round_up_to_power_of_two(subsample_count)),
 		multi_sample_frequency(MultiSampleFrequency::kPixelFrequency)
@@ -12,7 +12,7 @@ namespace CpuRasterizor
 		reset_msaa_buffer();
 	}
 
-	RenderTexture::RenderTexture(const size_t& w, const size_t& h, const FrameContent& flag) : RenderTexture(w, h, flag, false, 0) {}
+	RenderTexture::RenderTexture(size_t w, size_t h, FrameContent flag) : RenderTexture(w, h, flag, false, 0) {}
 
 	void RenderTexture::foreach_pixel(const tinymath::Rect& rect, std::function<void(RenderTexture& buffer, const Pixel& pixel)> pixel_func)
 	{
@@ -67,7 +67,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	Pixel RenderTexture::get_subpixel(const size_t& row, const size_t& col, const uint8_t& x_subsample_idx, const uint8_t& y_subsample_idx)
+	Pixel RenderTexture::get_subpixel(size_t row, size_t col, uint8_t x_subsample_idx, uint8_t y_subsample_idx)
 	{
 		uint8_t index = x_subsample_idx * subsamples_per_axis + y_subsample_idx;
 		size_t subsample_row = (size_t)(row * subsamples_per_axis + x_subsample_idx);
@@ -78,7 +78,7 @@ namespace CpuRasterizor
 		return subpixel;
 	}
 
-	void RenderTexture::clear(const FrameContent& flag)
+	void RenderTexture::clear(FrameContent flag)
 	{
 		framebuffer->clear(flag & ~FrameContent::kCoverage);
 		if (has_msaa_buffer)
@@ -96,7 +96,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void RenderTexture::resize(const size_t& w, const size_t& h)
+	void RenderTexture::resize(size_t w, size_t h)
 	{
 		framebuffer->resize(w, h);
 		reset_msaa_buffer();

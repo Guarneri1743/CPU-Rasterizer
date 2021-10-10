@@ -59,31 +59,31 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(const float& u, const float& v, T& out) const
+	bool RawBuffer<T>::read(float u, float v, T& out) const
 	{
 		return read(buffer, u, v, width, height, out);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(const size_t& row, const size_t& col, T& out) const
+	bool RawBuffer<T>::read(size_t row, size_t col, T& out) const
 	{
 		return read(buffer, row, col, width, height, out);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::write(const float& u, const float& v, const T& data)
+	bool RawBuffer<T>::write(float u, float v, const T& data)
 	{
 		return write(buffer, u, v, width, height, data);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::write(const size_t& row, const size_t& col, const T& data)
+	bool RawBuffer<T>::write(size_t row, size_t col, const T& data)
 	{
 		return write(buffer, row, col, width, height, data);
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(T* buf, const float& u, const float& v, const size_t& w, const size_t& h, T& out) const
+	bool RawBuffer<T>::read(T* buf, float u, float v, size_t w, size_t h, T& out) const
 	{
 		size_t row, col;
 		uv2pixel(w, h, u, v, row, col);
@@ -91,7 +91,7 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(T* buf, const size_t& row, const size_t& col, const size_t& w, const size_t& h, T& out) const
+	bool RawBuffer<T>::read(T* buf, size_t row, size_t col, size_t w, size_t h, T& out) const
 	{
 		size_t pos = row * w + col;
 		if (row >= h || col >= w || pos >= w * h)
@@ -103,7 +103,7 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::write(T* buf, const float& u, const float& v, const size_t& w, const size_t& h, const T& data)
+	bool RawBuffer<T>::write(T* buf, float u, float v, size_t w, size_t h, const T& data)
 	{
 		size_t row, col;
 		uv2pixel(w, h, u, v, row, col);
@@ -111,7 +111,7 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::write(T* buf, const size_t& row, const size_t& col, const size_t& w, const size_t& h, const T& data)
+	bool RawBuffer<T>::write(T* buf, size_t row, size_t col, size_t w, size_t h, const T& data)
 	{
 		size_t pos = row * w + col;
 		if (pos >= w * h)
@@ -154,7 +154,7 @@ namespace CpuRasterizor
 		buffer = new_buffer;
 	}
 
-	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col, float& row_frac, float& col_frac)
+	inline void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col, float& row_frac, float& col_frac)
 	{
 		float rowf = v * (float)h;
 		float colf = u * (float)w;
@@ -166,14 +166,14 @@ namespace CpuRasterizor
 		col_frac = colf - col_integer;
 	}
 
-	inline void uv2pixel(const size_t& w, const size_t& h, const float& u, const float& v, size_t& row, size_t& col)
+	inline void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col)
 	{
 		// [0.0, 1.0] -> [0, w/h - 1]
 		row = (size_t)(tinymath::floor(v * (float)h));
 		col = (size_t)(tinymath::floor(u * (float)w));
 	}
 
-	inline void pixel2uv(const size_t& w, const size_t& h, const size_t& row, const size_t& col, float& u, float& v)
+	inline void pixel2uv(size_t w, size_t h, size_t row, size_t col, float& u, float& v)
 	{
 		//[0, w/h - 1] -> [0.0, 1.0]
 		u = ((float)col + 0.5f)/ (float)w;

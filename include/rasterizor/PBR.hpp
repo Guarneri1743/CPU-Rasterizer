@@ -2,7 +2,7 @@
 #include "Define.hpp"
 #include "tinymath.h"
 
-inline float distribution_ggx(const tinymath::vec3f& normal, const tinymath::vec3f& half_way, const float& roughness)
+inline float distribution_ggx(const tinymath::vec3f& normal, const tinymath::vec3f& half_way, float roughness)
 {
     float a = roughness * roughness;
     float a2 = a * a;
@@ -16,7 +16,7 @@ inline float distribution_ggx(const tinymath::vec3f& normal, const tinymath::vec
     return nom / denom;
 }
 
-inline float geometry_cchlick_ggx(const float& ndv, const float& roughness)
+inline float geometry_cchlick_ggx(float ndv, float roughness)
 {
     float a = roughness;
     float k = (a * a) / 2.0f;
@@ -27,7 +27,7 @@ inline float geometry_cchlick_ggx(const float& ndv, const float& roughness)
     return nom / denom;
 }
 
-inline float geometry_smith(const tinymath::vec3f& normal, const tinymath::vec3f& view_dir, const tinymath::vec3f& light_dir, const float& roughness)
+inline float geometry_smith(const tinymath::vec3f& normal, const tinymath::vec3f& view_dir, const tinymath::vec3f& light_dir, float roughness)
 {
     float ndv = tinymath::max(tinymath::dot(normal, view_dir), 0.0f);
     float ndl = tinymath::max(tinymath::dot(normal, light_dir), 0.0f);
@@ -38,7 +38,7 @@ inline float geometry_smith(const tinymath::vec3f& normal, const tinymath::vec3f
     return ggx1 * ggx2;
 }
 
-inline tinymath::vec3f fresnel_schlick(const float& cos_theta, const tinymath::vec3f& f0)
+inline tinymath::vec3f fresnel_schlick(float cos_theta, const tinymath::vec3f& f0)
 {
     float omc = 1.0f - cos_theta;
 

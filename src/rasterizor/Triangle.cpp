@@ -59,7 +59,7 @@ namespace CpuRasterizor
 			//        \/
 			//		bottom[0]
 			//====================================================
-	void Triangle::interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const
+	void Triangle::interpolate(float screen_y, Vertex& lhs, Vertex& rhs) const
 	{
 		float len = this->vertices[0].position.y - this->vertices[2].position.y;
 		len = flip ? len : -len;

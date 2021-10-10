@@ -12,8 +12,8 @@ public:
 
 public:
 	TMATH_INLINE Plane();
-	TMATH_INLINE Plane(const tinymath::vec3f& normal, const float& constant);
-	TMATH_INLINE Plane(const float& a, const float& b, const float& c, const float& d);
+	TMATH_INLINE Plane(const tinymath::vec3f& normal, float constant);
+	TMATH_INLINE Plane(float a, float b, float c, float d);
 	TMATH_INLINE Plane(const tinymath::vec3f& normal, const tinymath::vec3f& p);
 	TMATH_INLINE Plane(const Plane& other);
 	TMATH_INLINE float distance(const tinymath::vec3f& pt) const;
@@ -27,13 +27,13 @@ Plane::Plane()
 	constant = 0;
 }
 
-Plane::Plane(const tinymath::vec3f& normal, const float& constant)
+Plane::Plane(const tinymath::vec3f& normal, float constant)
 {
 	this->normal = normal;
 	this->constant = constant;
 }
 
-Plane::Plane(const float& a, const float& b, const float& c, const float& d)
+Plane::Plane(float a, float b, float c, float d)
 {
 	this->normal = tinymath::vec3f(a, b, c);
 	this->constant = d;

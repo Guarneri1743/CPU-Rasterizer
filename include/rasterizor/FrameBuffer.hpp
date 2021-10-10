@@ -16,69 +16,69 @@ namespace CpuRasterizor
 	class FrameBuffer
 	{
 	public:
-		FrameBuffer(const size_t& w, const size_t& h, const FrameContent& flag);
+		FrameBuffer(size_t w, size_t h, FrameContent flag);
 
-		void write_color(const size_t& row, const size_t& col, const tinymath::color_rgba& color);
-		void write_depth(const size_t& row, const size_t& col, const float& depth);
-		void write_stencil(const size_t& row, const size_t& col, const uint8_t& stencil);
-		void write_coverage(const size_t& row, const size_t& col, const uint8_t& coverage);
+		void write_color(size_t row, size_t col, const tinymath::color_rgba& color);
+		void write_depth(size_t row, size_t col, float depth);
+		void write_stencil(size_t row, size_t col, uint8_t stencil);
+		void write_coverage(size_t row, size_t col, uint8_t coverage);
 
-		bool read_color(const size_t& row, const size_t& col, tinymath::color_rgba& color);
-		bool read_depth(const size_t& row, const size_t& col, float& depth);
-		bool read_stencil(const size_t& row, const size_t& col, uint8_t& stencil);
-		bool read_coverage(const size_t& row, const size_t& col, uint8_t& coverage);
+		bool read_color(size_t row, size_t col, tinymath::color_rgba& color);
+		bool read_depth(size_t row, size_t col, float& depth);
+		bool read_stencil(size_t row, size_t col, uint8_t& stencil);
+		bool read_coverage(size_t row, size_t col, uint8_t& coverage);
 
-		void write_color(const float& u, const float& v, const tinymath::color_rgba& color);
-		void write_depth(const float& u, const float& v, const float& depth);
-		void write_stencil(const float& u, const float& v, const uint8_t& stencil);
-		void write_coverage(const float& u, const float& v, const uint8_t& coverage);
+		void write_color(float u, float v, const tinymath::color_rgba& color);
+		void write_depth(float u, float v, float depth);
+		void write_stencil(float u, float v, uint8_t stencil);
+		void write_coverage(float u, float v, uint8_t coverage);
 
-		bool read_color(const float& u, const float& v, tinymath::color_rgba& color);
-		bool read_depth(const float& u, const float& v, float& depth);
-		bool read_stencil(const float& u, const float& v, uint8_t& stencil);
-		bool read_coverage(const float& u, const float& v, uint8_t& coverage);
+		bool read_color(float u, float v, tinymath::color_rgba& color);
+		bool read_depth(float u, float v, float& depth);
+		bool read_stencil(float u, float v, uint8_t& stencil);
+		bool read_coverage(float u, float v, uint8_t& coverage);
 
-		void clear(const FrameContent& flag);
+		void clear(FrameContent flag);
 		void set_clear_color(const tinymath::color_rgba& color);
 
-		void resize(const size_t& w, const size_t& h);
-		size_t get_width() const noexcept { return width; }
-		size_t get_height() const noexcept { return height; }
-		void get_size(size_t& w, size_t& h) const noexcept { w = width; h = height; }
+		void resize(size_t w, size_t h);
+		size_t get_width() const  { return width; }
+		size_t get_height() const  { return height; }
+		void get_size(size_t& w, size_t& h) const  { w = width; h = height; }
 		FrameContent get_flag() const { return content_flag; }
 
-		RawBuffer<tinymath::color_rgba>* get_color_raw_buffer() const noexcept;
-		tinymath::color_rgba* get_color_buffer_ptr() const noexcept;
+		RawBuffer<tinymath::color_rgba>* get_color_raw_buffer() const ;
+		tinymath::color_rgba* get_color_buffer_ptr() const ;
 
 
 		// Pper pixel operations
 	
 		// stencil test
-		bool perform_stencil_test(const uint8_t& ref_val,
-								  const uint8_t& read_mask,
-								  const CompareFunc& func,
-								  const size_t& row,
-								  const size_t& col) const;
+		bool perform_stencil_test(uint8_t ref_val,
+								  uint8_t read_mask,
+								  CompareFunc func,
+								  size_t row,
+								  size_t col) const;
 
-		void update_stencil_buffer(const size_t& row,
-								   const size_t& col,
+		void update_stencil_buffer(size_t row,
+								   size_t col,
 								   const PerSampleOperation& op_pass,
-								   const StencilOp& stencil_pass_op,
-								   const StencilOp& stencil_fail_op,
-								   const StencilOp& stencil_zfail_op,
-								   const uint8_t& ref_val) const;
+								   StencilOp stencil_pass_op,
+								   StencilOp stencil_fail_op,
+								   StencilOp stencil_zfail_op,
+								   uint8_t ref_val) const;
 
 		// depth test
-		bool perform_depth_test(const CompareFunc& func, 
-								const size_t& row,
-								const size_t& col, 
-								const float& z) const;
+		bool perform_depth_test(CompareFunc func, 
+								size_t row,
+								size_t col, 
+								float z) const;
 
 		// blending
 		static tinymath::Color blend(const tinymath::Color& src_color, 
 							  const tinymath::Color& dst_color, 
-							  const BlendFactor& src_factor, 
-							  const BlendFactor& dst_factor, 
+							  BlendFactor src_factor, 
+							  BlendFactor dst_factor, 
 							  const BlendOp& op);
 
 	private:

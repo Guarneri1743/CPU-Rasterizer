@@ -33,7 +33,7 @@ namespace CpuRasterizor
 		return std::make_unique<Renderer>(other);
 	}
 
-	tinymath::mat4x4 Renderer::view_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 Renderer::view_matrix(RenderPass render_pass) const
 	{
 		if (render_pass == RenderPass::kShadow)
 		{
@@ -42,7 +42,7 @@ namespace CpuRasterizor
 		return CpuRasterSharedData.view_matrix;
 	}
 
-	tinymath::mat4x4 Renderer::projection_matrix(const RenderPass& render_pass) const
+	tinymath::mat4x4 Renderer::projection_matrix(RenderPass render_pass) const
 	{
 		if (render_pass == RenderPass::kShadow)
 		{
@@ -67,7 +67,7 @@ namespace CpuRasterizor
 		render_internal(RenderPass::kObject);
 	}
 
-	void Renderer::render_internal(const RenderPass& render_pass) const
+	void Renderer::render_internal(RenderPass render_pass) const
 	{
 		if (!target->material->cast_shadow && render_pass == RenderPass::kShadow)
 		{

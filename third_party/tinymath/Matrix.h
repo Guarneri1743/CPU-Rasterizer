@@ -11,10 +11,10 @@ struct Matrix
 	Vector<Component, 3> forward() const;
 	Vector<Component, 3> up() const;
 	Vector<Component, 3> right() const;
-	Vector<Component, COL> row(const int& index) const;
-	Vector<Component, ROW> column(const int& index) const;
-	Component& at(const size_t& r, const size_t& c);
-	const Component& at(const size_t& r, const size_t& c) const;
+	Vector<Component, COL> row(int index) const;
+	Vector<Component, ROW> column(int index) const;
+	Component& at(size_t r, size_t c);
+	const Component& at(size_t r, size_t c) const;
 };
 
 template<typename Component, size_t ROW, size_t COL>
@@ -69,7 +69,7 @@ template<typename Component>
 TMATH_INLINE Matrix<Component, 4, 4> scale(const Vector<Component, 3>& scale);
 
 template<typename Component>
-TMATH_INLINE Matrix<Component, 4, 4> viewport(const int& x, const int& y, const int& w, const int& h);
+TMATH_INLINE Matrix<Component, 4, 4> viewport(int x, int y, int w, int h);
 
 template<typename Component>
 TMATH_INLINE Matrix<Component, 4, 4> from_euler(const Vector<Component, 3>& euler);

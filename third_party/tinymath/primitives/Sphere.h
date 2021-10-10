@@ -13,7 +13,7 @@ public:
 
 public:
 	TMATH_INLINE Sphere();
-	TMATH_INLINE Sphere(const tinymath::vec3f& _center, const float& _radius);
+	TMATH_INLINE Sphere(const tinymath::vec3f& _center, float _radius);
 	TMATH_INLINE Sphere(const Sphere& other);
 };
 
@@ -24,7 +24,7 @@ Sphere::Sphere()
 	radius = 0;
 }
 
-Sphere::Sphere(const tinymath::vec3f& _center, const float& _radius)
+Sphere::Sphere(const tinymath::vec3f& _center, float _radius)
 {
 	this->center = _center;
 	this->radius = _radius;

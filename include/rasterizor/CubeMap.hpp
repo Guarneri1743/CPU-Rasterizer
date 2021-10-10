@@ -15,12 +15,12 @@ namespace CpuRasterizor
 		bool sample(const tinymath::vec3f& dir, tinymath::Color& ret);
 		bool sample_irradiance_map(const tinymath::vec3f& dir, tinymath::Color& ret);
 		bool sample_prefilter_map(const tinymath::vec3f& dir, tinymath::Color& ret);
-		bool sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, tinymath::Color& ret);
+		bool sample_prefilter_map_lod(const tinymath::vec3f& dir, float lod, tinymath::Color& ret);
 		bool sample_brdf(const tinymath::vec2f& uv, tinymath::Color& ret);
 		void precompute_ibl_textures();
 		void precompute_irradiance_map();
-		void precompute_prefilter_map(const size_t& mip);
-		void precompute_prefilter_map_fast(const size_t& mip);
+		void precompute_prefilter_map(size_t mip);
+		void precompute_prefilter_map_fast(size_t mip);
 		void precompute_brdf_lut();
 
 		std::string texture_path;

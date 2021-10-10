@@ -96,7 +96,7 @@ namespace CpuRasterizor
 		resize(w, h);
 	}
 
-	void GraphicsDevice::set_subsample_count(const uint8_t& count)
+	void GraphicsDevice::set_subsample_count(uint8_t count)
 	{
 		MsaaCommand* cmd = new MsaaCommand();
 		cmd->enable = count > 0;
@@ -104,7 +104,7 @@ namespace CpuRasterizor
 		commands.push(cmd);
 	}
 
-	RenderTexture* GraphicsDevice::get_active_rendertexture() const noexcept
+	RenderTexture* GraphicsDevice::get_active_rendertexture() const 
 	{
 		if (kInvalidID == active_frame_buffer_id)
 		{
@@ -119,7 +119,7 @@ namespace CpuRasterizor
 		return target_rendertexture.get();
 	}
 
-	uint32_t GraphicsDevice::create_buffer(const size_t& w, const size_t& h, const FrameContent& content) noexcept
+	uint32_t GraphicsDevice::create_buffer(size_t w, size_t h, FrameContent content) 
 	{
 		auto buffer = std::make_shared<RenderTexture>(w, h, content);
 
@@ -146,12 +146,12 @@ namespace CpuRasterizor
 		}
 	}
 
-	void GraphicsDevice::reset_active_rendertexture() noexcept
+	void GraphicsDevice::reset_active_rendertexture() 
 	{
 		active_frame_buffer_id = kInvalidID;
 	}
 
-	bool GraphicsDevice::get_buffer(const uint32_t& id, std::shared_ptr<RenderTexture>& buffer) const noexcept
+	bool GraphicsDevice::get_buffer(uint32_t id, std::shared_ptr<RenderTexture>& buffer) const 
 	{
 		buffer = nullptr;
 		if (frame_buffer_map.count(id) > 0)
@@ -215,7 +215,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void GraphicsDevice::clear_buffer(const FrameContent& flag)
+	void GraphicsDevice::clear_buffer(FrameContent flag)
 	{
 		process_commands();
 
@@ -500,7 +500,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, const RasterizerStrategy& strategy)
+	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, RasterizerStrategy strategy)
 	{
 		if (strategy == RasterizerStrategy::kScanblock)
 		{
@@ -591,13 +591,13 @@ namespace CpuRasterizor
 		}
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, const size_t& row, const size_t& col, const Shader& shader)
+	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const Shader& shader)
 	{
 		SubsampleParam subsample_param;
 		return process_fragment(rt, frag, ddx, ddy, row, col, shader, subsample_param);
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, const size_t& row, const size_t& col, const Shader& shader, SubsampleParam& subsample_param)
+	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const Shader& shader, SubsampleParam& subsample_param)
 	{
 		tinymath::color_rgba pixel_color;
 
@@ -763,7 +763,7 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	bool GraphicsDevice::validate_fragment(const PerSampleOperation& op_pass) const
+	bool GraphicsDevice::validate_fragment(PerSampleOperation op_pass) const
 	{
 		if ((op_pass & PerSampleOperation::kScissorTest) == PerSampleOperation::kNone) return false;
 		if ((op_pass & PerSampleOperation::kAlphaTest) == PerSampleOperation::kNone) return false;

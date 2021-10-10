@@ -61,7 +61,7 @@ namespace CpuRasterizor
 		void render_objects();
 		void draw_gizmos();
 		void debug_scene();
-		void resize_shadowmap(const size_t& w, const size_t& h);
+		void resize_shadowmap(size_t w, size_t h);
 		void get_shadowmap_size(size_t& w, size_t& h);
 		void set_cubemap(std::string path);
 		std::string get_asset_path() { return asset_path; }

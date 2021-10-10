@@ -24,15 +24,15 @@ namespace CpuRasterizor
 	public:
 		Camera();
 		~Camera();
-		static std::unique_ptr<Camera> create(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far);
-		void initialize(const tinymath::vec3f& _position, const float& _aspect, const float& _fov, const float& _near, const float& _far, const Projection& _proj_type);
+		static std::unique_ptr<Camera> create(const tinymath::vec3f& _position, float _aspect, float _fov, float _near, float _far);
+		void initialize(const tinymath::vec3f& _position, float _aspect, float _fov, float _near, float _far, Projection _proj_type);
 		tinymath::mat4x4 view_matrix() const;
 		const tinymath::mat4x4 projection_matrix() const;
 		void focus(const tinymath::vec3f& position);
-		void set_near(const float& _near);
-		void set_far(const float& _far);
-		void set_fov(const float& _fov);
-		void set_projection(const Projection& proj);
+		void set_near(float _near);
+		void set_far(float _far);
+		void set_fov(float _fov);
+		void set_projection(Projection proj);
 		void update_proj_mode();
 		static Camera* get_main_camera() { return main_cam; }
 		static void set_main_camera(Camera* cam) { main_cam = cam; }

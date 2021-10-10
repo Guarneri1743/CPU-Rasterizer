@@ -19,7 +19,7 @@ namespace CpuRasterizor
 		Triangle(const Vertex verts[3]);
 		Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		Triangle(const Vertex& v1, const Vertex& v2, const Vertex& v3, const bool& flip);
-		void interpolate(const float& screen_y, Vertex& lhs, Vertex& rhs) const;
+		void interpolate(float screen_y, Vertex& lhs, Vertex& rhs) const;
 		std::vector<Triangle> horizontally_split() const;
 		tinymath::Rect get_bounds() const;
 		float area() const;

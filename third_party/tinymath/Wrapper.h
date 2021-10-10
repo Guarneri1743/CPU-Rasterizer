@@ -3,27 +3,27 @@
 
 TINYMATH_NAMESPACE
 
-TMATH_INLINE float sin(const float& rad);
-TMATH_INLINE float asin(const float& val);
-TMATH_INLINE float cos(const float& rad);
-TMATH_INLINE float acos(const float& val);
-TMATH_INLINE float tan(const float& rad);
-TMATH_INLINE float atan(const float& rad);
-TMATH_INLINE float atan2(const float& y, const float& x);
-TMATH_INLINE float cot(const float& rad);
-TMATH_INLINE float floor(const float& val);
-TMATH_INLINE float ceil(const float& val);
-TMATH_INLINE float exp(const float& val);
-TMATH_INLINE float exp2(const float& val);
-TMATH_INLINE float log(const float& val);
-TMATH_INLINE float log2(const float& val);
-TMATH_INLINE float log10(const float& val);
-TMATH_INLINE float pow(const float& val, const float& power);
-TMATH_INLINE float modf(const float& val, float* integer);
-TMATH_INLINE float trunc(const float& val);
-TMATH_INLINE float lerp(const float& lhs, const float& rhs, const float& t);
-TMATH_INLINE bool approx(const float& lhs, const float& rhs); 
-TMATH_INLINE bool is_sqrt_integer(const int& num);
+TMATH_INLINE float sin(float rad);
+TMATH_INLINE float asin(float val);
+TMATH_INLINE float cos(float rad);
+TMATH_INLINE float acos(float val);
+TMATH_INLINE float tan(float rad);
+TMATH_INLINE float atan(float rad);
+TMATH_INLINE float atan2(float y, float x);
+TMATH_INLINE float cot(float rad);
+TMATH_INLINE float floor(float val);
+TMATH_INLINE float ceil(float val);
+TMATH_INLINE float exp(float val);
+TMATH_INLINE float exp2(float val);
+TMATH_INLINE float log(float val);
+TMATH_INLINE float log2(float val);
+TMATH_INLINE float log10(float val);
+TMATH_INLINE float pow(float val, float power);
+TMATH_INLINE float modf(float val, float* integer);
+TMATH_INLINE float trunc(float val);
+TMATH_INLINE float lerp(float lhs, float rhs, float t);
+TMATH_INLINE bool approx(float lhs, float rhs); 
+TMATH_INLINE bool is_sqrt_integer(int num);
 
 template<typename T>
 TMATH_INLINE T round_up(const T& num, const T& alignment);

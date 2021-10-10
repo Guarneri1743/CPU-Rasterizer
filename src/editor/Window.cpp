@@ -269,12 +269,12 @@ namespace CpuRasterizor
 		on_resize_evts.insert(std::pair(on_resize, user_data));
 	}
 
-	void Window::glfw_error_callback(const int error, const char* const description)
+	void Window::glfw_error_callback(int error, const char* description)
 	{
 		ERROR("glfw error: {}, desc: {}", error, description);
 	}
 
-	void Window::glfw_key_callback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
+	void Window::glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		UNUSED(scancode);
 		UNUSED(mods);
@@ -293,13 +293,13 @@ namespace CpuRasterizor
 		}
 	}
 
-	void Window::glfw_cursor_pos_callback(GLFWwindow* window, const double x, const double y)
+	void Window::glfw_cursor_pos_callback(GLFWwindow* window, double x, double y)
 	{
 		UNUSED(window);
 		InputMgr.on_mouse_move(x, y);
 	}
 
-	void Window::glfw_mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods)
+	void Window::glfw_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	{
 		UNUSED(window);
 		UNUSED(mods);
@@ -317,7 +317,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void Window::glfw_scroll_callback(GLFWwindow* window, const double delta_x, const double delta_y)
+	void Window::glfw_scroll_callback(GLFWwindow* window, double delta_x, double delta_y)
 	{
 		UNUSED(window);
 		UNUSED(delta_x);

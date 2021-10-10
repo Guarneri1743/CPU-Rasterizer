@@ -82,7 +82,7 @@ namespace CpuRasterizor
 		return prefiltered_maps[0]->sample(uv.x, uv.y, ret);
 	}
 
-	bool CubeMap::sample_prefilter_map_lod(const tinymath::vec3f& dir, const float& lod, tinymath::Color& ret)
+	bool CubeMap::sample_prefilter_map_lod(const tinymath::vec3f& dir, float lod, tinymath::Color& ret)
 	{
 		auto uv = spherical_coord_to_uv(dir);
 		float mip = tinymath::clamp((lod * (float)kMaxMip), 0.f, (float)(kMaxMip - 1));
@@ -205,7 +205,7 @@ namespace CpuRasterizor
 
 	constexpr size_t kSampleCount = 2048u;
 
-	void CubeMap::precompute_prefilter_map(const size_t& mip)
+	void CubeMap::precompute_prefilter_map(size_t mip)
 	{
 		size_t begin = texture_path.find(".hdr");
 		std::string prefilter_map_path = texture_path;
@@ -289,7 +289,7 @@ namespace CpuRasterizor
 		Texture::export_image(*prefilter_map, prefilter_map_path);
 	}
 
-	void CubeMap::precompute_prefilter_map_fast(const size_t& mip)
+	void CubeMap::precompute_prefilter_map_fast(size_t mip)
 	{
 		size_t begin = texture_path.find(".hdr");
 		std::string prefilter_map_path = texture_path;

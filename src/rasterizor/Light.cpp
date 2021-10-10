@@ -44,7 +44,7 @@ namespace CpuRasterizor
 		return projection;
 	}
 
-	void DirectionalLight::rotate(const float& yaw_offset, const float& pitch_offset)
+	void DirectionalLight::rotate(float yaw_offset, float pitch_offset)
 	{
 		this->yaw -= yaw_offset;
 		this->pitch -= pitch_offset;

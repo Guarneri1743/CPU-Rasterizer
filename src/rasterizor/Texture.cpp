@@ -46,7 +46,7 @@ namespace CpuRasterizor
 		texture_cache.free(this->raw_path);
 	}
 
-	Texture::Texture(const size_t& _width, const size_t& _height, const TextureFormat& _fmt) : Texture()
+	Texture::Texture(size_t _width, size_t _height, TextureFormat _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -80,7 +80,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	Texture::Texture(void* tex_buffer, const size_t& _width, const size_t& _height, const TextureFormat& _fmt) : Texture()
+	Texture::Texture(void* tex_buffer, size_t _width, size_t _height, TextureFormat _fmt) : Texture()
 	{
 		release();
 		width = _width;
@@ -281,7 +281,7 @@ namespace CpuRasterizor
 		LOG("raw texture loaded: {}", abs_path.c_str());
 	}
 
-	bool Texture::bilinear(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
+	bool Texture::bilinear(float u, float v, size_t mip, tinymath::Color& ret) const
 	{
 		size_t row, col;
 		float frac_row, frac_col;
@@ -297,7 +297,7 @@ namespace CpuRasterizor
 		return true;
 	}
 
-	void Texture::generate_mipmap(const int& count, const Filtering& mip_filter)
+	void Texture::generate_mipmap(int count, Filtering mip_filter)
 	{
 		switch (this->format)
 		{
@@ -501,18 +501,18 @@ namespace CpuRasterizor
 		this->mip_filtering = mip_filter;
 	}
 
-	bool Texture::sample(const float& u, const float& v, tinymath::Color& ret) const
+	bool Texture::sample(float u, float v, tinymath::Color& ret) const
 	{
 		return read(u, v, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const
+	bool Texture::sample(float u, float v, const tinymath::vec2f ddx, const tinymath::vec2f ddy, tinymath::Color& ret) const
 	{
 		float mip = get_mip_level(ddx, ddy, width, height);
 		return sample(u, v, mip, ret);
 	}
 
-	bool Texture::sample(const float& u, const float& v, const float& mip, tinymath::Color& ret) const
+	bool Texture::sample(float u, float v, float mip, tinymath::Color& ret) const
 	{
 		int mip_int = (int)tinymath::floor(mip);
 		float frac = mip - (float)mip_int;
@@ -532,17 +532,17 @@ namespace CpuRasterizor
 		}
 	}
 
-	bool Texture::read(const float& u, const float& v, tinymath::Color& ret) const
+	bool Texture::read(float u, float v, tinymath::Color& ret) const
 	{
 		return read(u, v, 0, ret);
 	}
 
-	bool Texture::read(const size_t& row, const size_t& col, tinymath::Color& ret) const
+	bool Texture::read(size_t row, size_t col, tinymath::Color& ret) const
 	{
 		return read(row, col, 0, ret);
 	}
 
-	bool Texture::read(const float& u, const float& v, const size_t& mip, tinymath::Color& ret) const
+	bool Texture::read(float u, float v, size_t mip, tinymath::Color& ret) const
 	{
 		float wu = u;
 		float wv = v;
@@ -602,7 +602,7 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	bool Texture::read(const size_t& row, const size_t& col, const size_t& mip, tinymath::Color& ret) const
+	bool Texture::read(size_t row, size_t col, size_t mip, tinymath::Color& ret) const
 	{
 		switch (format)
 		{
@@ -658,7 +658,7 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	bool Texture::write(const size_t& x, const size_t& y, const tinymath::Color& data)
+	bool Texture::write(size_t x, size_t y, const tinymath::Color& data)
 	{
 		switch (format)
 		{
@@ -690,7 +690,7 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	bool Texture::write(const float& u, const float& v, const tinymath::Color& data)
+	bool Texture::write(float u, float v, const tinymath::Color& data)
 	{
 		float wu = u;
 		float wv = v;
@@ -725,7 +725,7 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	void Texture::resize(const size_t& w, const size_t& h)
+	void Texture::resize(size_t w, size_t h)
 	{
 		if (w == width && h == height)
 		{

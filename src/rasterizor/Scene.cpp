@@ -361,7 +361,7 @@ namespace CpuRasterizor
 		});
 	}
 
-	void Scene::resize_shadowmap(const size_t& w, const size_t& h)
+	void Scene::resize_shadowmap(size_t w, size_t h)
 	{
 		std::shared_ptr<RenderTexture> shadowmap;
 		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);

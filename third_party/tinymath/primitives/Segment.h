@@ -13,7 +13,7 @@ public:
 
 public:
 	TMATH_INLINE Segment();
-	TMATH_INLINE Segment(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent);
+	TMATH_INLINE Segment(const tinymath::vec3f& center, const tinymath::vec3f& dir, float extent);
 	TMATH_INLINE Segment(const tinymath::vec3f& start, const tinymath::vec3f& end);
 	TMATH_INLINE Segment(const Segment& other);
 	TMATH_INLINE tinymath::vec3f center() const;
@@ -28,7 +28,7 @@ Segment::Segment()
 	end = tinymath::kVec3fZero;
 }
 
-Segment::Segment(const tinymath::vec3f& center, const tinymath::vec3f& dir, const float& extent)
+Segment::Segment(const tinymath::vec3f& center, const tinymath::vec3f& dir, float extent)
 {
 	this->start = center - extent * dir;
 	this->end = center + extent * dir;

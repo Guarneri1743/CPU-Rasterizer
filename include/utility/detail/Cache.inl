@@ -45,7 +45,7 @@ void Cache<T>::free(const std::string& path)
 }
 
 template<typename T>
-void Cache<T>::put(const uint32_t& id, const std::shared_ptr<T>& res)
+void Cache<T>::put(uint32_t id, const std::shared_ptr<T>& res)
 {
 	if (destructed) return;
 	if (id2res.count(id) > 0)
@@ -57,7 +57,7 @@ void Cache<T>::put(const uint32_t& id, const std::shared_ptr<T>& res)
 }
 
 template<typename T>
-bool Cache<T>::get(const uint32_t& id, std::shared_ptr<T>& res)
+bool Cache<T>::get(uint32_t id, std::shared_ptr<T>& res)
 {
 	if (destructed) return false;
 	if (id2res.count(id) > 0)
@@ -69,7 +69,7 @@ bool Cache<T>::get(const uint32_t& id, std::shared_ptr<T>& res)
 }
 
 template<typename T>
-void Cache<T>::free(const uint32_t& id)
+void Cache<T>::free(uint32_t id)
 {
 	if (destructed) return;
 	if (id2res.count(id) > 0)
