@@ -59,6 +59,12 @@ public:
 		std::string line = read_and_flush(console_buffer, severity);
 		console_log_buffer.emplace_back(line);
 		try_resize_console_logs();
+
+		if (kLogToCommandLine)
+		{
+			write(terminal_buffer, fmt, arg, args...);
+			print_and_flush(terminal_buffer, severity);
+		}
 	}
 
 	static std::vector<std::string> get_console_logs()
