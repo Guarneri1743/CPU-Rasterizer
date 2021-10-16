@@ -7,76 +7,86 @@
 
 ##### Hello Triangle
 
-	#include "GraphicsApi.h"
-	#include "HelloTriangleShader.hpp"
-	
-	using namespace CpuRasterizor;
+	#include "CGL.h"
+	#include "HelloTextureShader.hpp"
 	
 	int main()
 	{
 		// initialize window
-		crWindowInit("Demo", 600, 400);
+		cglInitWindow("Demo", 600, 400);
 	
 		// set viewport
-		crApi.set_viewport(crMainWindow.get_width(), crMainWindow.get_height());
+		size_t w, h;
+		cglGetMainWindowSize(w, h);
+		cglSetViewPort(w, h);
 	
 		// resize callback
-		crMainWindow.add_on_resize_evt([](int w, int h, void* ud)
+		cglAddResizeEvent([](size_t w, size_t h, void* ud)
 		{
-			crApi.set_viewport(w, h);
+			cglSetViewPort(w, h);
 		}, nullptr);
 	
-		HelloTriangleShader shader;
+		HelloTextureShader shader;
 	
 		// a triangle 
-		crVert v1(crVec4(-0.5f, -0.5f, 0.0f, 1.0f), crVec3Zero, crVec2Zero);
-		crVert v2(crVec4(0.5f, -0.5f, 0.0f, 1.0f), crVec3Zero, crVec2Zero);
-		crVert v3(crVec4(0.0f, 0.5f, 0.0f, 1.0f), crVec3Zero, crVec2Zero);
+		cglVert v1(cglVec4(-0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.0f, 0.0f));
+		cglVert v2(cglVec4(0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(1.0f, 0.0f));
+		cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.5f, 1.0f));
 	
 		// setup shader properties
-		shader.local_properties.set_mat4x4(mat_model, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_view, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_projection, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_vp, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_mvp, crMat4Identity);
+		shader.local_properties.set_mat4x4(mat_model, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_view, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_projection, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_vp, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_mvp, cglMat4Identity);
 	
 		shader.double_face = true;
-		shader.ztest_func = CompareFunc::kAlways;
+		shader.ztest_func = cglCompareFunc::kAlways;
 		shader.transparent = false;
 	
-		// set background color
-		crApi.set_clear_color(tinymath::kColorBlue);
+		auto tex = std::make_shared<Texture>(128, 128, cglTextureFormat::kRGB);
 	
-		while (crMainWindow.is_open())
+		// generate a checkerboard texture
+		for (int r = 0; r< tex->width; r++)
 		{
-			// clear window buffer
-			crMainWindow.clear();
-	
-			// clear buffer
-			crApi.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil);
-	
-			// submit a triangle to draw
-			crApi.submit_draw_command(&shader, v1, v2, v3);
-	
-			// sync draw commands submitted
-			crApi.fence_draw_commands();
-	
-			// render all content to render texture
-			crApi.present();
-	
-			// blit render texture to screen
-			crMainWindow.blit2screen(reinterpret_cast<uint8_t*>(crApi.get_target_color_buffer()), crApi.get_width(), crApi.get_height(), true);
-	
-			// swap front/back buffer
-			crMainWindow.flush();
-	
-			Sleep(0);
+			for (int c = 0; c < tex->height; c++)
+			{
+				auto val = ((r & 0x8) == 0) ^ ((c & 0x8) == 0);
+				tex->write((size_t)r, (size_t)c, { (float)val, (float)val, (float)val, 1.0f });
+			}
 		}
 	
-		crMainWindow.close();
+		property_name prop_id = 123;
+		shader.local_properties.set_texture(prop_id, tex);
+	
+		// set background color
+		cglSetClearColor(tinymath::kColorBlue);
+	
+		while (cglIsMainWindowOpen())
+		{
+			// clear window buffer
+			cglClearMainWindow();
+	
+			// clear buffer
+			cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
+	
+			// submit primitive
+			cglSubmitPrimitive(&shader, v1, v2, v3); 
+	
+			// fence primitive tasks
+			cglFencePrimitives(); 
+	
+			// fence pixel tasks
+			cglFencePixels(); 
+	
+			cglSwapBuffer(true);
+		}
+	
+		cglCloseMainWindow();
 	
 		return 0;
 	}
+
 
 
 Shader:
@@ -115,56 +125,56 @@ Shader:
 
 Result:
 
-<img src="/gallery/HelloTriangle.png" width = "256" height = "256" alt="overview" align=bottom /> 
+<img src="/gallery/HelloTriangle.png" width = "256" height = "200" alt="overview" align=bottom /> 
 
 
 ##### Texture Mapping
 
-	#include "GraphicsApi.h"
+	#include "CGL.h"
 	#include "HelloTextureShader.hpp"
-	
-	using namespace CpuRasterizor;
 	
 	int main()
 	{
 		// initialize window
-		crWindowInit("Demo", 600, 400);
+		cglInitWindow("Demo", 600, 400);
 	
 		// set viewport
-		crApi.set_viewport(Window::main()->get_width(), Window::main()->get_height());
+		size_t w, h;
+		cglGetMainWindowSize(w, h);
+		cglSetViewPort(w, h);
 	
 		// resize callback
-		crMainWindow.add_on_resize_evt([](int w, int h, void* ud)
+		cglAddResizeEvent([](size_t w, size_t h, void* ud)
 		{
-			crApi.set_viewport(w, h);
+			cglSetViewPort(w, h);
 		}, nullptr);
 	
 		HelloTextureShader shader;
 	
 		// a triangle 
-		crVert v1(crVec4(-0.5f, -0.5f, 0.0f, 1.0f), crVec3Zero, crVec2(0.0f, 0.0f));
-		crVert v2(crVec4(0.5f, -0.5f, 0.0f, 1.0f), crVec3Zero, crVec2(1.0f, 0.0f));
-		crVert v3(crVec4(0.0f, 0.5f, 0.0f, 1.0f), crVec3Zero, crVec2(0.5f, 1.0f));
+		cglVert v1(cglVec4(-0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.0f, 0.0f));
+		cglVert v2(cglVec4(0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(1.0f, 0.0f));
+		cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.5f, 1.0f));
 	
 		// setup shader properties
-		shader.local_properties.set_mat4x4(mat_model, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_view, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_projection, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_vp, crMat4Identity);
-		shader.local_properties.set_mat4x4(mat_mvp, crMat4Identity);
+		shader.local_properties.set_mat4x4(mat_model, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_view, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_projection, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_vp, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_mvp, cglMat4Identity);
 	
 		shader.double_face = true;
-		shader.ztest_func = CompareFunc::kAlways;
+		shader.ztest_func = cglCompareFunc::kAlways;
 		shader.transparent = false;
 	
-		auto tex = std::make_shared<Texture>(128, 128, TextureFormat::kRGB);
+		auto tex = std::make_shared<Texture>(128, 128, cglTextureFormat::kRGB);
 	
 		// generate a checkerboard texture
 		for (int r = 0; r< tex->width; r++)
 		{
 			for (int c = 0; c < tex->height; c++)
 			{
-				auto val = (((r & 0x8) == 0) ^ ((c & 0x8) == 0));
+				auto val = ((r & 0x8) == 0) ^ ((c & 0x8) == 0);
 				tex->write((size_t)r, (size_t)c, { (float)val, (float)val, (float)val, 1.0f });
 			}
 		}
@@ -173,38 +183,33 @@ Result:
 		shader.local_properties.set_texture(prop_id, tex);
 	
 		// set background color
-		crApi.set_clear_color(tinymath::kColorBlue);
+		cglSetClearColor(tinymath::kColorBlue);
 	
-		while (crMainWindow.is_open())
+		while (cglIsMainWindowOpen())
 		{
 			// clear window buffer
-			crMainWindow.clear();
+			cglClearMainWindow();
 	
 			// clear buffer
-			crApi.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil);
+			cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
 	
-			// submit a triangle to draw
-			crApi.submit_draw_command(&shader, v1, v2, v3); 
+			// submit primitive
+			cglSubmitPrimitive(&shader, v1, v2, v3); 
 	
-			// sync draw commands submitted
-			crApi.fence_draw_commands(); 
+			// fence primitive tasks
+			cglFencePrimitives(); 
 	
-			// render all content to render texture
-			crApi.present(); 
+			// fence pixel tasks
+			cglFencePixels(); 
 	
-			// blit render texture to screen
-			crMainWindow.blit2screen(reinterpret_cast<uint8_t*>(crApi.get_target_color_buffer()), crApi.get_width(), crApi.get_height(), true);
-	
-			// swap front/back buffer
-			crMainWindow.flush();
-	
-			Sleep(0);
+			cglSwapBuffer(true);
 		}
 	
-		crMainWindow.close();
+		cglCloseMainWindow();
 	
 		return 0;
 	}
+
 
 
 
@@ -249,9 +254,10 @@ Shader:
 		}
 	};
 
+
 Result:
 
-<img src="/gallery/HelloTexture1.png" width = "256" height = "256" alt="overview" align=bottom /> 
+<img src="/gallery/HelloTexture1.png" width = "256" height = "200" alt="overview" align=bottom /> 
 
 UV can be visualized by:
 
@@ -262,34 +268,207 @@ UV can be visualized by:
 
 Result:
 
-<img src="/gallery/HelloTexture2.png" width = "256" height = "256" alt="overview" align=bottom /> 
+<img src="/gallery/HelloTexture2.png" width = "256" height = "200" alt="overview" align=bottom /> 
+
+
+##### Simple Lighting
+
+	#include "CGL.h"
+	#include "HelloLightingShader.hpp"
+	
+	cglVert cube_vertices[36] = {
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(0.0f,  0.0f)),
+	
+			cglVert(cglVec4(-0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(0.5f,  0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(0.5f,  0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(1.0f, 1.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(0.0f, 1.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f,  0.0f, 1.0f), cglVec2(0.0f,  0.0f)),
+	
+			cglVert(cglVec4(-0.5f,  0.5f,  0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f, -0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f,  0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f,  0.5f, 1.0f), cglVec3(-1.0f,  0.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+	
+			cglVert(cglVec4(0.5f,  0.5f,  0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(0.5f,  0.5f, -0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(0.5f, -0.5f, -0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(0.5f, -0.5f, -0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(0.5f, -0.5f,  0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(0.5f,  0.5f,  0.5f, 1.0f), cglVec3(1.0f,  0.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+	
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f,  0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f, -1.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+	
+			cglVert(cglVec4(-0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+			cglVert(cglVec4(0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(1.0f,  1.0f)),
+			cglVert(cglVec4(0.5f,  0.5f,  0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(0.5f, 0.5f,  0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(1.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f,  0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(0.0f,  0.0f)),
+			cglVert(cglVec4(-0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(0.0f,  1.0f)),
+	};
+	
+	HelloLightingShader shader;
+	
+	void draw_cube()
+	{
+		for (int i = 0; i < 36; i+= 3)
+		{
+			// submit primitive
+			cglSubmitPrimitive(&shader, cube_vertices[i], cube_vertices[i + 1], cube_vertices[i + 2]);
+		}
+	
+		// fence primitive tasks
+		cglFencePrimitives();
+	}
+	
+	int main()
+	{
+		size_t w = 1024;
+		size_t h = 768;
+		// initialize window
+		cglInitWindow("Demo", w, h);
+	
+		// set viewport
+		cglSetViewPort(w, h);
+	
+		// resize callback
+		cglAddResizeEvent([](size_t w, size_t h, void* ud)
+		{
+			cglSetViewPort(w, h);
+		}, nullptr);
+	
+		// setup shader properties
+		cglVec3 cam_pos = cglVec3(2.0f, 2.0f, 2.0f);
+		cglVec3 cube_pos = cglVec3Zero;
+		float near = 0.05f;
+		float far = 100.0f;
+	
+		float angle = 0.0f;
+	
+		cglMat4 model = cglTranslation(cube_pos) * cglRotation(cglVec3(0.0f, 1.0f, 0.0f), angle) * cglScale(cglVec3One);
+		cglMat4 view = cglLookat(cam_pos, cube_pos, cglVec3Up);
+		cglMat4 proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
+	
+		shader.local_properties.set_mat4x4(mat_model, model);
+		shader.local_properties.set_mat4x4(mat_view, view);
+		shader.local_properties.set_mat4x4(mat_projection, proj);
+		shader.local_properties.set_mat4x4(mat_vp, proj * view);
+		shader.local_properties.set_mat4x4(mat_mvp, proj * view * model);
+	
+		shader.double_face = true;
+		shader.ztest_func = cglCompareFunc::kLess;
+	
+		shader.local_properties.set_float4(albedo_prop, cglVec4(0.5f, 0.0f, 0.0f, 1.0f));
+		shader.local_properties.set_float4(light_direction, cglVec4(0.0f, 1.0f, 1.5f, 1.0f));
+		shader.local_properties.set_float4(light_diffuse, cglVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
+		shader.local_properties.set_float(light_intensity, 1.0f);
+	
+		// set background color
+		cglSetClearColor(tinymath::kColorBlue);
+	
+		while (cglIsMainWindowOpen())
+		{
+			// clear window buffer
+			cglClearMainWindow();
+	
+			// clear buffer
+			cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
+	
+			//angle += 1.0f;
+			model = cglTranslation(cube_pos) * cglRotation(cglVec3(1.0f, 1.0f, 1.0f), angle) * cglScale(cglVec3One);
+			shader.local_properties.set_mat4x4(mat_model, model);
+			draw_cube();
+	
+			// fence pixel tasks
+			cglFencePixels();
+	
+			cglSwapBuffer(true);
+		}
+	
+		cglCloseMainWindow();
+	
+		return 0;
+	}
+
+
+
+
+
+Shader:
+
+	#pragma once
+	#include "Shader.hpp"
+	
+	using namespace CpuRasterizor;
+	using namespace tinymath;
+	
+	class HelloLightingShader : public Shader
+	{
+	public:
+		HelloLightingShader() : Shader("sample_shader") {}
+	
+		v2f vertex_shader(const a2v& input) const
+		{
+			v2f o;
+			auto opos = vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
+			auto m = model();
+			auto vp = vp_matrix();
+			auto wpos = m * opos;
+			auto v = view();
+			auto p = projection();
+			auto cpos = vp * wpos;
+			o.position = cpos;
+			o.uv = input.uv;
+			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(m)));
+			o.normal = normal_matrix * input.normal;
+			return o;
+		}
+	
+		Color fragment_shader(const v2f& input) const
+		{
+			tinymath::vec4f albedo;
+			tinymath::vec4f direction;
+			tinymath::vec4f diffuse;
+			float intensity;
+	
+			albedo = local_properties.get_float4(albedo_prop);
+			direction = local_properties.get_float4(light_direction);
+			diffuse = local_properties.get_float4(light_diffuse);
+			intensity = local_properties.get_float(light_intensity);
+	
+			vec3f normal = input.normal;
+			vec3f light_dir = direction.xyz;
+			float ndl = dot(normal, light_dir);
+	
+			return albedo * diffuse * ndl * intensity;
+		}
+	};
+
+Result:
+
+<img src="/gallery/HelloLighting.png" width = "256" height = "200" alt="overview" align=bottom /> 
 
 
 ### Viewer
 
-<img src="/gallery/IBL.png" width = "512" height = "400" alt="overview" align=bottom /> 
+<img src="/gallery/IBL.png" width = "256" height = "200" alt="overview" align=bottom /> 
 
-<img src="/gallery/IBL2.png" width = "512" height = "400" alt="overview" align=bottom /> 
-
-<img src="/gallery/IBL3.png" width = "512" height = "400" alt="overview" align=bottom /> 
+<img src="/gallery/IBL2.png" width = "256" height = "200" alt="overview" align=bottom /> 
 
 ### HDRI Tool
-
-<img src="/gallery/ld1.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld2.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld3.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld4.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld5.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld6.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld7.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
-
-<img src="/gallery/ld8.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
 
 <img src="/gallery/ld9.png" width = "512" height = "300" alt="lookdev" align=bottom /> 
 

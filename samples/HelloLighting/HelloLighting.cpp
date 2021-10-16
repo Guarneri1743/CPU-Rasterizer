@@ -61,8 +61,8 @@ void draw_cube()
 
 int main()
 {
-	size_t w = 1024;
-	size_t h = 768;
+	size_t w = 600;
+	size_t h = 400;
 	// initialize window
 	cglInitWindow("Demo", w, h);
 
