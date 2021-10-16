@@ -13,6 +13,17 @@ namespace CpuRasterizor
 		ret.uv = v0.uv * w0 + v1.uv * w1 + v2.uv * w2;
 		ret.tangent = v0.tangent * w0 + v1.tangent * w1 + v2.tangent * w2;
 		ret.bitangent = v0.bitangent * w0 + v1.bitangent * w1 + v2.bitangent * w2;
+
+		ret.texcoord0 = v0.texcoord0 * w0 + v1.texcoord0 * w1 + v2.texcoord0 * w2;
+		ret.texcoord1 = v0.texcoord1 * w0 + v1.texcoord1 * w1 + v2.texcoord1 * w2;
+		ret.texcoord2 = v0.texcoord2 * w0 + v1.texcoord2 * w1 + v2.texcoord2 * w2;
+		ret.texcoord3 = v0.texcoord3 * w0 + v1.texcoord3 * w1 + v2.texcoord3 * w2;
+		ret.texcoord4 = v0.texcoord4 * w0 + v1.texcoord4 * w1 + v2.texcoord4 * w2;
+		ret.texcoord5 = v0.texcoord5 * w0 + v1.texcoord5 * w1 + v2.texcoord5 * w2;
+		ret.texcoord6 = v0.texcoord6 * w0 + v1.texcoord6 * w1 + v2.texcoord6 * w2;
+		ret.texcoord7 = v0.texcoord7 * w0 + v1.texcoord7 * w1 + v2.texcoord7 * w2;
+		ret.texcoord8 = v0.texcoord8 * w0 + v1.texcoord8 * w1 + v2.texcoord8 * w2;
+
 		ret.rhw = v0.rhw * w0 + v1.rhw * w1 + v2.rhw * w2;
 		return ret;
 	}
@@ -42,6 +53,17 @@ namespace CpuRasterizor
 		ret.uv = lhs.uv + (rhs.uv - lhs.uv) * t;
 		ret.tangent = lhs.tangent + (rhs.tangent - lhs.tangent) * t;
 		ret.bitangent = lhs.bitangent + (rhs.bitangent - lhs.bitangent) * t;
+
+		ret.texcoord0 = lhs.texcoord0 + (rhs.texcoord0 - lhs.texcoord0) * t;
+		ret.texcoord1 = lhs.texcoord1 + (rhs.texcoord1 - lhs.texcoord1) * t;
+		ret.texcoord2 = lhs.texcoord2 + (rhs.texcoord2 - lhs.texcoord2) * t;
+		ret.texcoord3 = lhs.texcoord3 + (rhs.texcoord3 - lhs.texcoord3) * t;
+		ret.texcoord4 = lhs.texcoord4 + (rhs.texcoord4 - lhs.texcoord4) * t;
+		ret.texcoord5 = lhs.texcoord5 + (rhs.texcoord5 - lhs.texcoord5) * t;
+		ret.texcoord6 = lhs.texcoord6 + (rhs.texcoord6 - lhs.texcoord6) * t;
+		ret.texcoord7 = lhs.texcoord7 + (rhs.texcoord7 - lhs.texcoord7) * t;
+		ret.texcoord8 = lhs.texcoord8 + (rhs.texcoord8 - lhs.texcoord8) * t;
+
 		return ret;
 	}
 
@@ -59,6 +81,17 @@ namespace CpuRasterizor
 		ret.tangent = (rhs.tangent - lhs.tangent) * segmentation;
 		ret.bitangent = (rhs.bitangent - lhs.bitangent) * segmentation;
 		ret.rhw = (rhs.rhw - lhs.rhw) * segmentation;
+
+		ret.texcoord0 = (rhs.texcoord0 - lhs.texcoord0) * segmentation;
+		ret.texcoord1 = (rhs.texcoord1 - lhs.texcoord1) * segmentation;
+		ret.texcoord2 = (rhs.texcoord2 - lhs.texcoord2) * segmentation;
+		ret.texcoord3 = (rhs.texcoord3 - lhs.texcoord3) * segmentation;
+		ret.texcoord4 = (rhs.texcoord4 - lhs.texcoord4) * segmentation;
+		ret.texcoord5 = (rhs.texcoord5 - lhs.texcoord5) * segmentation;
+		ret.texcoord6 = (rhs.texcoord6 - lhs.texcoord6) * segmentation;
+		ret.texcoord7 = (rhs.texcoord7 - lhs.texcoord7) * segmentation;
+		ret.texcoord8 = (rhs.texcoord8 - lhs.texcoord8) * segmentation;
+
 		return ret;
 	}
 
@@ -74,6 +107,17 @@ namespace CpuRasterizor
 		ret.tangent = (lhs.tangent + differential.tangent);
 		ret.bitangent = (lhs.bitangent + differential.bitangent);
 		ret.rhw = (lhs.rhw + differential.rhw);
+
+		ret.texcoord0 = (lhs.texcoord0 + differential.texcoord0);
+		ret.texcoord1 = (lhs.texcoord1 + differential.texcoord1);
+		ret.texcoord2 = (lhs.texcoord2 + differential.texcoord2);
+		ret.texcoord3 = (lhs.texcoord3 + differential.texcoord3);
+		ret.texcoord4 = (lhs.texcoord4 + differential.texcoord4);
+		ret.texcoord5 = (lhs.texcoord5 + differential.texcoord5);
+		ret.texcoord6 = (lhs.texcoord6 + differential.texcoord6);
+		ret.texcoord7 = (lhs.texcoord7 + differential.texcoord7);
+		ret.texcoord8 = (lhs.texcoord8 + differential.texcoord8);
+
 		return ret;
 	}
 
@@ -89,6 +133,17 @@ namespace CpuRasterizor
 		ret.tangent = (rhs.tangent - lhs.tangent);
 		ret.bitangent = (rhs.bitangent - lhs.bitangent);
 		ret.rhw = (rhs.rhw - lhs.rhw);
+
+		ret.texcoord0 = (rhs.texcoord0 - lhs.texcoord0);
+		ret.texcoord1 = (rhs.texcoord1 - lhs.texcoord1);
+		ret.texcoord2 = (rhs.texcoord2 - lhs.texcoord2);
+		ret.texcoord3 = (rhs.texcoord3 - lhs.texcoord3);
+		ret.texcoord4 = (rhs.texcoord4 - lhs.texcoord4);
+		ret.texcoord5 = (rhs.texcoord5 - lhs.texcoord5);
+		ret.texcoord6 = (rhs.texcoord6 - lhs.texcoord6);
+		ret.texcoord7 = (rhs.texcoord7 - lhs.texcoord7);
+		ret.texcoord8 = (rhs.texcoord8 - lhs.texcoord8);
+
 		return ret;
 	}
 
@@ -103,6 +158,17 @@ namespace CpuRasterizor
 		ndc.uv /= clip.position.w;
 		ndc.tangent /= clip.position.w;
 		ndc.bitangent /= clip.position.w;
+
+		ndc.texcoord0 /= clip.position.w;
+		ndc.texcoord1 /= clip.position.w;
+		ndc.texcoord2 /= clip.position.w;
+		ndc.texcoord3 /= clip.position.w;
+		ndc.texcoord4 /= clip.position.w;
+		ndc.texcoord5 /= clip.position.w;
+		ndc.texcoord6 /= clip.position.w;
+		ndc.texcoord7 /= clip.position.w;
+		ndc.texcoord8 /= clip.position.w;
+
 		return ndc;
 	}
 
@@ -118,6 +184,17 @@ namespace CpuRasterizor
 		ret.uv = v.uv * w;
 		ret.tangent = v.tangent * w;
 		ret.bitangent = v.bitangent * w;
+
+		ret.texcoord0 = v.texcoord0 * w;
+		ret.texcoord1 = v.texcoord1 * w;
+		ret.texcoord2 = v.texcoord2 * w;
+		ret.texcoord3 = v.texcoord3 * w;
+		ret.texcoord4 = v.texcoord4 * w;
+		ret.texcoord5 = v.texcoord5 * w;
+		ret.texcoord6 = v.texcoord6 * w;
+		ret.texcoord7 = v.texcoord7 * w;
+		ret.texcoord8 = v.texcoord8 * w;
+
 		return ret;
 	}
 

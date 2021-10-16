@@ -27,7 +27,7 @@ namespace CpuRasterizor
 
 	void ExplorerEditor::on_gui()
 	{
-		rect = tinymath::Rect(0, Window::main()->get_height() - kBottomHeight, Window::main()->get_width(), kBottomHeight);
+		rect = tinymath::Rect(0, (int)Window::main()->get_height() - kBottomHeight, (int)Window::main()->get_width(), kBottomHeight);
 		EditorSharedData::explorer_selection_dirty = false;
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("ExplorerBar", tab_bar_flags))

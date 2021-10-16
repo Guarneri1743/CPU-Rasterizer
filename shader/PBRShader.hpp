@@ -62,7 +62,7 @@ namespace CpuRasterizor
 			o.shadow_coord = light_space_pos;
 			
 			o.color = input.color;
-			tinymath::mat3x3 normal_matrix = tinymath::transpose(tinymath::inverse(tinymath::mat4x4_to_mat3x3(model())));
+			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(model())));
 			if (local_properties.has_texture(normal_prop))
 			{
 				tinymath::vec3f t = tinymath::normalize(normal_matrix * input.tangent);
@@ -294,13 +294,13 @@ namespace CpuRasterizor
 										  float intensity, 
 										  float metallic, 
 										  float roughness, 
-										  float light_distance,
+										  float light_dist,
 										  const tinymath::vec3f& halfway, 
 										  const tinymath::vec3f& light_dir, 
 										  const tinymath::vec3f& view_dir,
 										  const tinymath::vec3f& normal) const
 		{
-			float attenuation = 1.0f / (light_distance * light_distance);
+			float attenuation = 1.0f / (light_dist * light_dist);
 			tinymath::vec3f radiance = tinymath::vec3f(attenuation * intensity);
 
 			float ndf = distribution_ggx(normal, halfway, roughness);
@@ -336,14 +336,9 @@ namespace CpuRasterizor
 														float ao) const
 		{
 			UNUSED(wpos);
-			auto light_ambient = light.ambient;
-			auto light_spec = light.specular;
-			auto light_diffuse = light.diffuse;
 			auto intensity = light.intensity;
 			UNUSED(intensity);
-			light_diffuse *= intensity;
-			light_spec *= intensity;
-			float light_distance = 1.0f;
+			float light_dist = 1.0f;
 
 			auto light_dir = -tinymath::normalize(light.forward);
 
@@ -374,11 +369,11 @@ namespace CpuRasterizor
 				auto spec = tinymath::pow(tinymath::max(tinymath::dot(normal, half_dir), 0.0f), (material_data.roughness) * 32.0f);
 				auto ndl = tinymath::max(tinymath::dot(normal, light_dir), 0.0f);
 
-				auto diffuse = tinymath::saturate(light_diffuse * ndl * albedo);
+				auto diffuse = tinymath::saturate(light.diffuse * intensity * ndl * albedo);
 				tinymath::Color spec_tex = tinymath::kColorWhite;
 				tinymath::Color specular = material_data.specular_color;
-				specular = tinymath::saturate(light_spec * spec * spec_tex);
-				auto ambient = light_ambient;
+				specular = tinymath::saturate(light.specular * intensity * spec * spec_tex);
+				auto ambient = light.ambient;
 				auto ret = ambient + diffuse + specular;
 				return ret;
 			}
@@ -386,7 +381,7 @@ namespace CpuRasterizor
 			{
 				tinymath::vec3f f0 = 0.04f;
 				f0 = tinymath::lerp(f0, tinymath::vec3f(albedo.r, albedo.g, albedo.b), material_data.metallic);
-				auto lo = metallic_workflow(f0, tinymath::vec3f(albedo.r, albedo.g, albedo.b), intensity, material_data.metallic, material_data.roughness, light_distance, half_dir, light_dir, view_dir, normal);
+				auto lo = metallic_workflow(f0, tinymath::vec3f(albedo.r, albedo.g, albedo.b), intensity, material_data.metallic, material_data.roughness, light_dist, half_dir, light_dir, view_dir, normal);
 
 				tinymath::vec3f fresnel = fresnel_schlick_roughness(ndv, f0, material_data.roughness);
 

@@ -32,6 +32,15 @@ namespace CpuRasterizor
 		tinymath::vec4f color;
 		tinymath::vec3f normal;
 		tinymath::vec3f tangent;
+		tinymath::vec4f texcoord0;
+		tinymath::vec4f texcoord1;
+		tinymath::vec4f texcoord2;
+		tinymath::vec4f texcoord3;
+		tinymath::vec4f texcoord4;
+		tinymath::vec4f texcoord5;
+		tinymath::vec4f texcoord6;
+		tinymath::vec4f texcoord7;
+		tinymath::vec4f texcoord8;
 	};
 
 	struct v2f
@@ -44,6 +53,15 @@ namespace CpuRasterizor
 		tinymath::vec3f bitangent;
 		tinymath::vec3f normal;
 		tinymath::vec4f shadow_coord;
+		tinymath::vec4f texcoord0;
+		tinymath::vec4f texcoord1;
+		tinymath::vec4f texcoord2;
+		tinymath::vec4f texcoord3;
+		tinymath::vec4f texcoord4;
+		tinymath::vec4f texcoord5;
+		tinymath::vec4f texcoord6;
+		tinymath::vec4f texcoord7; 
+		tinymath::vec4f texcoord8;
 
 		Fragment ddx;
 		Fragment ddy;
@@ -106,7 +124,7 @@ namespace CpuRasterizor
 			o.position = cpos;
 			o.world_pos = wpos.xyz;
 			o.color = input.color;
-			tinymath::mat3x3 normal_matrix = tinymath::transpose(tinymath::inverse(tinymath::mat4x4_to_mat3x3(model())));
+			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(model())));
 			o.normal = normal_matrix * input.normal;
 			o.uv = input.uv;
 			return o;

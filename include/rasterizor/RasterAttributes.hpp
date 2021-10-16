@@ -13,6 +13,16 @@ namespace CpuRasterizor
 		tinymath::vec2f uv;
 		tinymath::vec3f tangent;
 		tinymath::vec3f bitangent;
+
+		tinymath::vec4f texcoord0;
+		tinymath::vec4f texcoord1;
+		tinymath::vec4f texcoord2;
+		tinymath::vec4f texcoord3;
+		tinymath::vec4f texcoord4;
+		tinymath::vec4f texcoord5;
+		tinymath::vec4f texcoord6;
+		tinymath::vec4f texcoord7;
+		tinymath::vec4f texcoord8;
 		float rhw;
 
 		RasterAttributes::RasterAttributes()
@@ -25,6 +35,15 @@ namespace CpuRasterizor
 			normal = tinymath::vec3f();
 			tangent = tinymath::vec3f();
 			bitangent = tinymath::vec3f();
+			texcoord0 = tinymath::kVec4fZero;
+			texcoord1 = tinymath::kVec4fZero;
+			texcoord2 = tinymath::kVec4fZero;
+			texcoord3 = tinymath::kVec4fZero;
+			texcoord4 = tinymath::kVec4fZero;
+			texcoord5 = tinymath::kVec4fZero;
+			texcoord6 = tinymath::kVec4fZero;
+			texcoord7 = tinymath::kVec4fZero;
+			texcoord8 = tinymath::kVec4fZero;
 			this->rhw = 1.0f;
 		}
 
@@ -38,6 +57,15 @@ namespace CpuRasterizor
 			this->uv = _uv;
 			this->tangent = _tangent;
 			this->bitangent = _bitangent;
+			texcoord0 = tinymath::kVec4fZero;
+			texcoord1 = tinymath::kVec4fZero;
+			texcoord2 = tinymath::kVec4fZero;
+			texcoord3 = tinymath::kVec4fZero;
+			texcoord4 = tinymath::kVec4fZero;
+			texcoord5 = tinymath::kVec4fZero;
+			texcoord6 = tinymath::kVec4fZero;
+			texcoord7 = tinymath::kVec4fZero;
+			texcoord8 = tinymath::kVec4fZero;
 			this->rhw = 1.0f / this->position.w;
 		}
 
@@ -51,6 +79,15 @@ namespace CpuRasterizor
 			this->uv = _uv;
 			this->tangent = tinymath::kVec3fZero;
 			this->bitangent = tinymath::kVec3fZero;
+			texcoord0 = tinymath::kVec4fZero;
+			texcoord1 = tinymath::kVec4fZero;
+			texcoord2 = tinymath::kVec4fZero;
+			texcoord3 = tinymath::kVec4fZero;
+			texcoord4 = tinymath::kVec4fZero;
+			texcoord5 = tinymath::kVec4fZero;
+			texcoord6 = tinymath::kVec4fZero;
+			texcoord7 = tinymath::kVec4fZero;
+			texcoord8 = tinymath::kVec4fZero;
 			this->rhw = 1.0f / this->position.w;
 		}
 	};

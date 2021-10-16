@@ -20,7 +20,7 @@ namespace CpuRasterizor
 
 	void SceneViewEditor::on_gui()
 	{
-		rect = tinymath::Rect(kLeftWidth, kTopHeight, Window::main()->get_width() - kRightWidth - kLeftWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
+		rect = tinymath::Rect(kLeftWidth, kTopHeight, (int)Window::main()->get_width() - kRightWidth - kLeftWidth, (int)Window::main()->get_height() - kTopHeight - kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("SceneView", tab_bar_flags))

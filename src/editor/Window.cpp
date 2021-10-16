@@ -17,7 +17,7 @@ namespace CpuRasterizor
 	constexpr int kDefaultWindowHeight = 1080;
 	Window* Window::main_window;
 
-	Window::Window(const char* title, int w, int h) :
+	Window::Window(const char* title, size_t w, size_t h) :
 		width(w),
 		height(h),
 		valid(false),
@@ -43,7 +43,7 @@ namespace CpuRasterizor
 		//glfwWindowHint(GLFW_DECORATED, 0);
 		glfwWindowHint(GLFW_RESIZABLE, 1);
 
-		window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+		window = glfwCreateWindow((int)width, (int)height, title, nullptr, nullptr);
 
 		if (window == nullptr)
 		{
@@ -68,7 +68,7 @@ namespace CpuRasterizor
 		glfwSetScrollCallback(window, glfw_scroll_callback);
 		glfwSetFramebufferSizeCallback(window, glfw_resize_callback);
 
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 		glEnable(GL_DEPTH_TEST);
 
 		float vertices[] = {
@@ -131,7 +131,7 @@ namespace CpuRasterizor
 		valid = false;
 	}
 
-	void Window::initialize_main_window(const char* title, int w, int h)
+	void Window::initialize_main_window(const char* title, size_t w, size_t h)
 	{
 		if (main_window == nullptr)
 		{
@@ -248,7 +248,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void Window::flush()
+	void Window::swap_buffer()
 	{
 		glfwSwapBuffers(get());
 		glfwPollEvents();
@@ -259,7 +259,7 @@ namespace CpuRasterizor
 		return !closed && valid && !glfwWindowShouldClose(get());
 	}
 
-	void Window::add_on_resize_evt(void(*on_resize)(int w, int h, void* ud), void* user_data)
+	void Window::add_on_resize_evt(void(*on_resize)(size_t w, size_t h, void* ud), void* user_data)
 	{
 		if (on_resize_evts.count(on_resize) > 0)
 		{
@@ -333,7 +333,7 @@ namespace CpuRasterizor
 		{
 			auto evt = kv.first;
 			auto user_data = kv.second;
-			evt(w, h, user_data);
+			evt((size_t)w, (size_t)h, user_data);
 		}
 	}
 }

@@ -100,11 +100,11 @@ namespace CpuRasterizor
 					auto& v0 = mesh.vertices[mesh.indices[idx]];
 					auto& v1 = mesh.vertices[mesh.indices[idx + 1]];
 					auto& v2 = mesh.vertices[mesh.indices[idx + 2]];
-					CpuRasterApi.submit_draw_command(target->material->get_shader(render_pass), v0, v1, v2);
+					CpuRasterDevice.submit_primitive(target->material->get_shader(render_pass), v0, v1, v2);
 				}
 			}
 		}
-		CpuRasterApi.fence_draw_commands();
+		CpuRasterDevice.fence_primitives();
 	}
 
 	void Renderer::draw_gizmos() const
@@ -122,7 +122,7 @@ namespace CpuRasterizor
 		auto right = tinymath::kVec3fRight;
 		auto scale = tinymath::scale(model_matrix().get_scale());
 		tinymath::mat4x4 m = model_matrix() * tinymath::inverse(scale);
-		CpuRasterApi.draw_coordinates(pos, forward, up, right, m, view, proj);
+		CpuRasterDevice.draw_coordinates(pos, forward, up, right, m, view, proj);
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

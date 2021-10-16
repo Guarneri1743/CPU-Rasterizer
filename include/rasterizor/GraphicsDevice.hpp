@@ -12,12 +12,12 @@
 #include "Shader.hpp"
 #include "Triangle.hpp"
 
-#define CpuRasterApi Singleton<CpuRasterizor::GraphicsDevice>::get()
+#define CpuRasterDevice Singleton<CpuRasterizor::GraphicsDevice>::get()
 
 namespace CpuRasterizor
 {
 	struct SubsampleParam;
-	struct DrawCommand;
+	struct RenderCommand;
 	class GraphicsCommand;
 
 	class GraphicsDevice
@@ -27,9 +27,9 @@ namespace CpuRasterizor
 		~GraphicsDevice();
 
 		void set_viewport(size_t w, size_t h);
-		void submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
-		void fence_draw_commands();
-		void present();
+		void submit_primitive(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void fence_primitives();
+		void fence_pixels();
 		void clear_buffer(FrameContent flag);
 		void set_clear_color(const tinymath::Color color);
 		void set_subsample_count(uint8_t multiplier);
@@ -55,7 +55,7 @@ namespace CpuRasterizor
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 
 	private:
-		void draw(const DrawCommand& task);
+		void draw(const RenderCommand& task);
 		void input2raster(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void clip2raster(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
@@ -79,7 +79,6 @@ namespace CpuRasterizor
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader);
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader, SubsampleParam& subsample_param);
 		bool validate_fragment(PerSampleOperation op_pass) const;
-		void process_commands();
 		void resize(size_t w, size_t h);
 
 	public:
@@ -90,8 +89,7 @@ namespace CpuRasterizor
 	private:
 		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
 		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
-		std::vector<DrawCommand> draw_commands;
-		std::queue<GraphicsCommand*> commands;
+		std::vector<RenderCommand> primitive_commands;
 		uint32_t active_frame_buffer_id;
 	};
 }

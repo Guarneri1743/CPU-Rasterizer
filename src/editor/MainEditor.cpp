@@ -68,7 +68,7 @@ namespace CpuRasterizor
 
 	void MainEditor::on_gui()
 	{
-		this->rect = tinymath::Rect(0, 0, Window::main()->get_width(), Window::main()->get_height());
+		this->rect = tinymath::Rect(0, 0, (int)Window::main()->get_width(), (int)Window::main()->get_height());
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))

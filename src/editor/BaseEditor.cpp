@@ -94,7 +94,7 @@ namespace CpuRasterizor
 	{
 		if (editor != nullptr)
 		{
-			if (rect.x() < Window::main()->get_width())
+			if (rect.x() < (int)Window::main()->get_width())
 			{
 				if (right.size() > 0)
 				{
@@ -103,7 +103,7 @@ namespace CpuRasterizor
 				}
 				else
 				{
-					editor->rect = tinymath::Rect(rect.x() + rect.w(), rect.y(), Window::main()->get_width() - rect.x(), rect.h());
+					editor->rect = tinymath::Rect(rect.x() + rect.w(), rect.y(), (int)Window::main()->get_width() - rect.x(), rect.h());
 					right.push_back(editor);
 				}
 			}
@@ -128,7 +128,7 @@ namespace CpuRasterizor
 		{
 			if (rect.y() < Window::main()->get_height())
 			{
-				editor->rect = tinymath::Rect(rect.x(), rect.y(), rect.w(), Window::main()->get_height() - rect.y());
+				editor->rect = tinymath::Rect(rect.x(), rect.y(), rect.w(), (int)Window::main()->get_height() - rect.y());
 				bottom.push_back(editor);
 			}
 		}

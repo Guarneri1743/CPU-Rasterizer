@@ -29,7 +29,7 @@ namespace CpuRasterizor
 		bool pixel_color_calculated;
 	};
 
-	struct DrawCommand
+	struct RenderCommand
 	{
 		Shader* shader;
 		Vertex v1;
@@ -88,10 +88,9 @@ namespace CpuRasterizor
 
 	void GraphicsDevice::set_subsample_count(uint8_t count)
 	{
-		MsaaCommand* cmd = new MsaaCommand();
-		cmd->enable = count > 0;
-		cmd->msaa_subsample_count = count;
-		commands.push(cmd);
+		CpuRasterSharedData.enable_msaa = count > 0;
+		CpuRasterSharedData.msaa_subsample_count = count;
+		CpuRasterSharedData.msaa_dirty = true;
 	}
 
 	RenderTexture* GraphicsDevice::get_active_rendertexture() const 
@@ -153,31 +152,31 @@ namespace CpuRasterizor
 		return false;
 	}
 
-	void GraphicsDevice::draw(const DrawCommand& task)
+	void GraphicsDevice::draw(const RenderCommand& task)
 	{
 		input2raster(*task.shader, task.v1, task.v2, task.v3);
 	}
 
-	void GraphicsDevice::submit_draw_command(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::submit_primitive(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
-		DrawCommand task = { shader, v1, v2, v3 };
-		draw_commands.emplace_back(task);
+		RenderCommand cmd = { shader, v1, v2, v3 };
+		primitive_commands.emplace_back(cmd);
 	}
 
-	void GraphicsDevice::fence_draw_commands()
+	void GraphicsDevice::fence_primitives()
 	{
 		std::for_each(
 			std::execution::par_unseq,
-			draw_commands.begin(),
-			draw_commands.end(),
+			primitive_commands.begin(),
+			primitive_commands.end(),
 			[this](auto&& cmd)
 		{
 			this->draw(cmd);
 		});
-		draw_commands.clear();
+		primitive_commands.clear();
 	}
 
-	void GraphicsDevice::present()
+	void GraphicsDevice::fence_pixels()
 	{
 		get_active_rendertexture()->get_tile_based_manager()->foreach_tile(
 			[this](auto&& rect, auto&& task_queue)
@@ -190,24 +189,13 @@ namespace CpuRasterizor
 		});
 	}
 
-	void GraphicsDevice::process_commands()
-	{
-		while (!commands.empty())
-		{
-			auto cmd = commands.front();
-			commands.pop();
-			MsaaCommand* msaa = dynamic_cast<MsaaCommand*>(cmd);
-			if (msaa != nullptr)
-			{
-				target_rendertexture->set_msaa_param(msaa->enable, msaa->msaa_subsample_count);
-				delete msaa;
-			}
-		}
-	}
-
 	void GraphicsDevice::clear_buffer(FrameContent flag)
 	{
-		process_commands();
+		if (CpuRasterSharedData.msaa_dirty)
+		{
+			target_rendertexture->set_msaa_param(CpuRasterSharedData.enable_msaa, CpuRasterSharedData.msaa_subsample_count);
+			CpuRasterSharedData.msaa_dirty = false;
+		}
 
 		get_active_rendertexture()->clear(flag);
 
@@ -236,6 +224,15 @@ namespace CpuRasterizor
 		Vertex c1(o1.position, o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
 		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
 		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
+		c1.texcoord0 = o1.texcoord0;
+		c1.texcoord1 = o1.texcoord1;
+		c1.texcoord2 = o1.texcoord2;
+		c1.texcoord3 = o1.texcoord3;
+		c1.texcoord4 = o1.texcoord4;
+		c1.texcoord5 = o1.texcoord5;
+		c1.texcoord6 = o1.texcoord6;
+		c1.texcoord7 = o1.texcoord7;
+		c1.texcoord8 = o1.texcoord8;
 
 		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
@@ -308,6 +305,15 @@ namespace CpuRasterizor
 		input.color = vert.color;
 		input.normal = vert.normal;
 		input.tangent = vert.tangent;
+		input.texcoord0 = vert.texcoord0;
+		input.texcoord1 = vert.texcoord1;
+		input.texcoord2 = vert.texcoord2;
+		input.texcoord3 = vert.texcoord3;
+		input.texcoord4 = vert.texcoord4;
+		input.texcoord5 = vert.texcoord5;
+		input.texcoord6 = vert.texcoord6;
+		input.texcoord7 = vert.texcoord7;
+		input.texcoord8 = vert.texcoord8;
 		return shader.vertex_shader(input);
 	}
 
@@ -637,14 +643,24 @@ namespace CpuRasterizor
 			CpuRasterSharedData.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
 			v2f v_out;
-			v_out.position = frag.position ;
-			v_out.world_pos = frag.world_pos ;
-			v_out.shadow_coord = frag.shadow_coord ;
-			v_out.color = frag.color ;
-			v_out.normal = frag.normal ;
-			v_out.uv = frag.uv ;
-			v_out.tangent = frag.tangent ;
-			v_out.bitangent = frag.bitangent ;
+			v_out.position = frag.position;
+			v_out.world_pos = frag.world_pos;
+			v_out.shadow_coord = frag.shadow_coord;
+			v_out.color = frag.color;
+			v_out.normal = frag.normal;
+			v_out.uv = frag.uv;
+			v_out.tangent = frag.tangent;
+			v_out.bitangent = frag.bitangent;
+
+			v_out.texcoord0 = frag.texcoord0;
+			v_out.texcoord1 = frag.texcoord1;
+			v_out.texcoord2 = frag.texcoord2;
+			v_out.texcoord3 = frag.texcoord3;
+			v_out.texcoord4 = frag.texcoord4;
+			v_out.texcoord5 = frag.texcoord5;
+			v_out.texcoord6 = frag.texcoord6;
+			v_out.texcoord7 = frag.texcoord7;
+			v_out.texcoord8 = frag.texcoord8;
 
 			v_out.ddx = ddx;
 			v_out.ddy = ddy;

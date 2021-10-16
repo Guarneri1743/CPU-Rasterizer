@@ -47,6 +47,15 @@ const property_name mat_projection = 52;
 const property_name mat_vp = 53;
 const property_name mat_mvp = 54;
 
+// light
+const property_name light_position = 80;
+const property_name light_ambient = 81;
+const property_name light_diffuse = 82;
+const property_name light_specular = 83;
+const property_name light_direction = 84;
+const property_name light_intensity = 85;
+const property_name light_distance = 86;
+
 
 // statistics
 struct GraphicsStatistic

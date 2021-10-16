@@ -63,6 +63,7 @@ namespace CpuRasterizor {
 		bool pcf_on;
 		float shadow_bias;
 		bool enable_msaa;
+		bool msaa_dirty;
 		MultiSampleFrequency multi_sample_frequency;
 		uint8_t msaa_subsample_count;
 		bool enable_gizmos;

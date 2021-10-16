@@ -65,12 +65,12 @@ namespace CpuRasterizor
 		{
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
-				CpuRasterApi.set_viewport(rt_size[0], rt_size[1]);
+				CpuRasterDevice.set_viewport(rt_size[0], rt_size[1]);
 			}
 			else
 			{
-				rt_size[0] = (int)CpuRasterApi.get_width();
-				rt_size[1] = (int)CpuRasterApi.get_height();
+				rt_size[0] = (int)CpuRasterDevice.get_width();
+				rt_size[1] = (int)CpuRasterDevice.get_height();
 			}
 			ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 		}
@@ -102,11 +102,11 @@ namespace CpuRasterizor
 			{
 				if (CpuRasterSharedData.enable_msaa)
 				{
-					CpuRasterApi.set_subsample_count((uint8_t)sub_samples);
+					CpuRasterDevice.set_subsample_count((uint8_t)sub_samples);
 				}
 				else
 				{
-					CpuRasterApi.set_subsample_count((uint8_t)0);
+					CpuRasterDevice.set_subsample_count((uint8_t)0);
 				}
 			}
 
@@ -140,11 +140,11 @@ namespace CpuRasterizor
 
 				if (ImGui::InputInt("Subsamples", &sub_samples))
 				{
-					CpuRasterApi.set_subsample_count((uint8_t)sub_samples);
+					CpuRasterDevice.set_subsample_count((uint8_t)sub_samples);
 				}
 				else
 				{
-					sub_samples = (int)CpuRasterApi.get_subsample_count();
+					sub_samples = (int)CpuRasterDevice.get_subsample_count();
 				}
 			}
 		}
@@ -316,7 +316,7 @@ namespace CpuRasterizor
 
 	void InspectorEditor::on_gui()
 	{
-		rect = tinymath::Rect(Window::main()->get_width() - kRightWidth, kTopHeight, kRightWidth, Window::main()->get_height() - kTopHeight - kBottomHeight);
+		rect = tinymath::Rect((int)Window::main()->get_width() - kRightWidth, kTopHeight, kRightWidth, (int)Window::main()->get_height() - kTopHeight - kBottomHeight);
 
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 		if (ImGui::BeginTabBar("Inspector", tab_bar_flags))

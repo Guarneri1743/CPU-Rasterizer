@@ -57,7 +57,7 @@ namespace CpuRasterizor
 
 	void Scene::initialize()
 	{
-		float aspect = (float)CpuRasterApi.get_width() / CpuRasterApi.get_height();
+		float aspect = (float)CpuRasterDevice.get_width() / CpuRasterDevice.get_height();
 
 		if (main_cam == nullptr)
 		{
@@ -104,9 +104,9 @@ namespace CpuRasterizor
 		}, this);
 
 		// setup shadowmap and cubemap
-		shadowmap_id = CpuRasterApi.create_buffer(512, 512, FrameContent::kDepth);
+		shadowmap_id = CpuRasterDevice.create_buffer(512, 512, FrameContent::kDepth);
 		std::shared_ptr<RenderTexture> shadowmap;
-		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
+		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
 
 		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
 		ShaderPropertyMap::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
@@ -216,20 +216,20 @@ namespace CpuRasterizor
 
 	void Scene::render()
 	{
-		CpuRasterApi.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
+		CpuRasterDevice.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
 		if (CpuRasterSharedData.enable_shadow)
 		{
 			auto prev_enable_msaa = CpuRasterSharedData.enable_msaa;
 			CpuRasterSharedData.enable_msaa = false;
-			CpuRasterApi.set_active_rendertexture(shadowmap_id);
+			CpuRasterDevice.set_active_rendertexture(shadowmap_id);
 			render_shadow();
-			CpuRasterApi.present();
-			CpuRasterApi.reset_active_rendertexture();
+			CpuRasterDevice.fence_pixels();
+			CpuRasterDevice.reset_active_rendertexture();
 			CpuRasterSharedData.enable_msaa = prev_enable_msaa;
 		}
 
 		render_objects();
-		CpuRasterApi.present();
+		CpuRasterDevice.fence_pixels();
 		draw_gizmos();
 	}
 
@@ -295,9 +295,9 @@ namespace CpuRasterizor
 	{
 		if (CpuRasterSharedData.debug_flag == RenderFlag::kNone) { return; }
 
-		RenderTexture* active_fbo = CpuRasterApi.get_active_rendertexture();
+		RenderTexture* active_fbo = CpuRasterDevice.get_active_rendertexture();
 		std::shared_ptr<RenderTexture> shadow_map;
-		CpuRasterApi.get_buffer(shadowmap_id, shadow_map);
+		CpuRasterDevice.get_buffer(shadowmap_id, shadow_map);
 		size_t w, h;
 		active_fbo->get_size(w, h);
 
@@ -348,14 +348,14 @@ namespace CpuRasterizor
 	void Scene::resize_shadowmap(size_t w, size_t h)
 	{
 		std::shared_ptr<RenderTexture> shadowmap;
-		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
+		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
 		shadowmap->resize(w, h);
 	}
 
 	void Scene::get_shadowmap_size(size_t & w, size_t & h)
 	{
 		std::shared_ptr<RenderTexture> shadowmap;
-		CpuRasterApi.get_buffer(shadowmap_id, shadowmap);
+		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
 		w = shadowmap->get_width();
 		h = shadowmap->get_height();
 	}

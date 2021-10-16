@@ -134,7 +134,7 @@ function setupViewerProject()
       third_party_dir .. "/tinymath/detail/*.*",
       third_party_dir .. "/tinymath/primitives/*.*",
       third_party_dir .. "/tinymath/color/*.*",
-      sample_dir .. "/ViewerSample.cpp"
+      sample_dir .. "/Viewer/Viewer.cpp"
    }
 
    filter { "configurations:Debug*" }
@@ -176,8 +176,8 @@ function setuoHelloTriangle()
       third_party_dir .. "/tinymath/detail/*.*",
       third_party_dir .. "/tinymath/primitives/*.*",
       third_party_dir .. "/tinymath/color/*.*",
-      sample_dir .. "/HelloTriangle.cpp",
-      sample_dir .. "/HelloTriangleShader.hpp"
+      sample_dir .. "/HelloTriangle/HelloTriangle.cpp",
+      sample_dir .. "/HelloTriangle/HelloTriangleShader.hpp"
    }
 
    filter { "configurations:Debug*" }
@@ -220,8 +220,52 @@ function setupTextureProject()
       third_party_dir .. "/tinymath/detail/*.*",
       third_party_dir .. "/tinymath/primitives/*.*",
       third_party_dir .. "/tinymath/color/*.*",
-      sample_dir .. "/HelloTexture.cpp",
-      sample_dir .. "/HelloTextureShader.hpp"
+      sample_dir .. "/HelloTexture/HelloTexture.cpp",
+      sample_dir .. "/HelloTexture/HelloTextureShader.hpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
+
+function setupLightingProject()
+   project "HelloLighting"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/utility/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/rasterizor/*.*",
+      src_dir .. "/editor/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/utility/*.*",
+      include_dir .. "/utility/detail/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/rasterizor/*.*",
+      include_dir .. "/rasterizor/detail/*.*",
+      include_dir .. "/editor/*.*",
+      shader_dir  .. "/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/tinymath/*.*",
+      third_party_dir .. "/tinymath/detail/*.*",
+      third_party_dir .. "/tinymath/primitives/*.*",
+      third_party_dir .. "/tinymath/color/*.*",
+      sample_dir .. "/HelloLighting/HelloLighting.cpp",
+      sample_dir .. "/HelloLighting/HelloLightingShader.hpp"
    }
 
    filter { "configurations:Debug*" }
@@ -236,3 +280,4 @@ setupSlotion()
 setupViewerProject()
 setuoHelloTriangle()
 setupTextureProject()
+setupLightingProject()
