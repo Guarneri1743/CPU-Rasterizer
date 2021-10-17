@@ -20,18 +20,19 @@ A tile based cpu rasterizer
 	
 	int main()
 	{
+		size_t w = 600;
+		size_t h = 400;
 		// initialize window
-		cglInitWindow("Demo", 600, 400);
+		cglInitWindow("Demo", w, h);
 	
 		// set viewport
-		size_t w, h;
-		cglGetMainWindowSize(w, h);
 		cglSetViewPort(w, h);
 	
 		// resize callback
-		cglAddResizeEvent([](size_t w, size_t h, void* ud)
+		cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 		{
-			cglSetViewPort(w, h);
+			UNUSED(ud);
+			cglSetViewPort(resized_w, resized_h);
 		}, nullptr);
 	
 		HelloTriangleShader shader;
@@ -128,18 +129,19 @@ Result:
 	
 	int main()
 	{
+		size_t w = 600;
+		size_t h = 400;
 		// initialize window
-		cglInitWindow("Demo", 600, 400);
+		cglInitWindow("Demo", w, h);
 	
 		// set viewport
-		size_t w, h;
-		cglGetMainWindowSize(w, h);
 		cglSetViewPort(w, h);
 	
 		// resize callback
-		cglAddResizeEvent([](size_t w, size_t h, void* ud)
+		cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 		{
-			cglSetViewPort(w, h);
+			UNUSED(ud);
+			cglSetViewPort(resized_w, resized_h);
 		}, nullptr);
 	
 		HelloTextureShader shader;
@@ -206,6 +208,7 @@ Result:
 
 
 
+
 Shader:
 
 	#pragma once
@@ -236,6 +239,9 @@ Shader:
 		{
 			UNUSED(input);
 	
+			// visualize uv
+			//return input.uv;
+	
 			// sample texture
 			Color c;
 			if (local_properties.has_texture(123))
@@ -254,7 +260,7 @@ Result:
 
 UV can be visualized by:
 
-	tinymath::Color fragment_shader(const v2f& input) const
+	Color fragment_shader(const v2f& input) const
 	{
 		return input.uv;
 	}
@@ -329,8 +335,8 @@ Result:
 	
 	int main()
 	{
-		size_t w = 1024;
-		size_t h = 768;
+		size_t w = 600;
+		size_t h = 400;
 		// initialize window
 		cglInitWindow("Demo", w, h);
 	
@@ -338,9 +344,10 @@ Result:
 		cglSetViewPort(w, h);
 	
 		// resize callback
-		cglAddResizeEvent([](size_t w, size_t h, void* ud)
+		cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 		{
-			cglSetViewPort(w, h);
+			UNUSED(ud);
+			cglSetViewPort(resized_w, resized_h);
 		}, nullptr);
 	
 		// setup shader properties
@@ -398,8 +405,6 @@ Result:
 
 
 
-
-
 Shader:
 
 	#pragma once
@@ -425,30 +430,25 @@ Shader:
 			auto cpos = vp * wpos;
 			o.position = cpos;
 			o.uv = input.uv;
-			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(m)));
+			mat3x3 normal_matrix = mat4x4_to_mat3x3(transpose(inverse(m)));
 			o.normal = normal_matrix * input.normal;
 			return o;
 		}
 	
 		Color fragment_shader(const v2f& input) const
 		{
-			tinymath::vec4f albedo;
-			tinymath::vec4f direction;
-			tinymath::vec4f diffuse;
-			float intensity;
-	
-			albedo = local_properties.get_float4(albedo_prop);
-			direction = local_properties.get_float4(light_direction);
-			diffuse = local_properties.get_float4(light_diffuse);
-			intensity = local_properties.get_float(light_intensity);
+			vec4f albedo = local_properties.get_float4(albedo_prop);
+			vec4f diffuse = local_properties.get_float4(light_diffuse);
+			float intensity = local_properties.get_float(light_intensity);
 	
 			vec3f normal = input.normal;
-			vec3f light_dir = direction.xyz;
+			vec3f light_dir = local_properties.get_float4(light_direction).xyz;
 			float ndl = dot(normal, light_dir);
 	
 			return albedo * diffuse * ndl * intensity;
 		}
 	};
+
 
 Result:
 
