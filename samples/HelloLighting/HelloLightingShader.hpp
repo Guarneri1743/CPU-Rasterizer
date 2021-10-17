@@ -21,25 +21,19 @@ public:
 		auto cpos = vp * wpos;
 		o.position = cpos;
 		o.uv = input.uv;
-		tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(m)));
+		mat3x3 normal_matrix = mat4x4_to_mat3x3(transpose(inverse(m)));
 		o.normal = normal_matrix * input.normal;
 		return o;
 	}
 
 	Color fragment_shader(const v2f& input) const
 	{
-		tinymath::vec4f albedo;
-		tinymath::vec4f direction;
-		tinymath::vec4f diffuse;
-		float intensity;
-
-		albedo = local_properties.get_float4(albedo_prop);
-		direction = local_properties.get_float4(light_direction);
-		diffuse = local_properties.get_float4(light_diffuse);
-		intensity = local_properties.get_float(light_intensity);
+		vec4f albedo = local_properties.get_float4(albedo_prop);
+		vec4f diffuse = local_properties.get_float4(light_diffuse);
+		float intensity = local_properties.get_float(light_intensity);
 
 		vec3f normal = input.normal;
-		vec3f light_dir = direction.xyz;
+		vec3f light_dir = local_properties.get_float4(light_direction).xyz;
 		float ndl = dot(normal, light_dir);
 
 		return albedo * diffuse * ndl * intensity;

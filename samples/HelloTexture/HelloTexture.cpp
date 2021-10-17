@@ -3,19 +3,19 @@
 
 int main()
 {
+	size_t w = 600;
+	size_t h = 400;
 	// initialize window
-	cglInitWindow("Demo", 600, 400);
+	cglInitWindow("Demo", w, h);
 
 	// set viewport
-	size_t w, h;
-	cglGetMainWindowSize(w, h);
 	cglSetViewPort(w, h);
 
 	// resize callback
-	cglAddResizeEvent([](size_t w, size_t h, void* ud)
+	cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 	{
 		UNUSED(ud);
-		cglSetViewPort(w, h);
+		cglSetViewPort(resized_w, resized_h);
 	}, nullptr);
 
 	HelloTextureShader shader;

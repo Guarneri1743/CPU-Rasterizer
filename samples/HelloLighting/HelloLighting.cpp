@@ -70,10 +70,10 @@ int main()
 	cglSetViewPort(w, h);
 
 	// resize callback
-	cglAddResizeEvent([](size_t w, size_t h, void* ud)
+	cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 	{
 		UNUSED(ud);
-		cglSetViewPort(w, h);
+		cglSetViewPort(resized_w, resized_h);
 	}, nullptr);
 
 	// setup shader properties
