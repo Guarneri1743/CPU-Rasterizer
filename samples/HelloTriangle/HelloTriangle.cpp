@@ -14,6 +14,7 @@ int main()
 	// resize callback
 	cglAddResizeEvent([](size_t w, size_t h, void* ud)
 	{
+		UNUSED(ud);
 		cglSetViewPort(w, h);
 	}, nullptr);
 

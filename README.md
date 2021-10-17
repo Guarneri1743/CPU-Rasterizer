@@ -1,5 +1,13 @@
 # CPU Rasterizer
 
+A tile based cpu rasterizer
+
+### Platform
+
+- [x] Windows
+- [ ] Linux
+- [ ] MacOS
+
 ### Usage
 
 1. download [zip](https://github.com/Guarneri1743/CPU-Rasterizer/archive/main.zip) or clone [CPU-Rasterizer](https://github.com/Guarneri1743/CPU-Rasterizer)
@@ -449,9 +457,9 @@ Result:
 
 ### Viewer
 
-<img src="/gallery/IBL.png" width = "256" height = "200" alt="overview" align=bottom /> 
+<img src="/gallery/IBL.png" width = "512" height = "400" alt="overview" align=bottom /> 
 
-<img src="/gallery/IBL2.png" width = "256" height = "200" alt="overview" align=bottom /> 
+<img src="/gallery/IBL2.png" width = "512" height = "400" alt="overview" align=bottom /> 
 
 ### HDRI Tool
 
@@ -568,5 +576,7 @@ Result:
 
 - simd
 			
-- decouple low level and high level features
+- premake --> cmake
+
+- cross platform
 		 
