@@ -29,13 +29,13 @@ public:
 	Color fragment_shader(const v2f& input) const
 	{
 		vec4f albedo = local_properties.get_float4(albedo_prop);
-		vec4f diffuse = local_properties.get_float4(light_diffuse);
-		float intensity = local_properties.get_float(light_intensity);
+		vec4f light_color = local_properties.get_float4(light_color_prop);
+		float intensity = local_properties.get_float(light_intensity_prop);
 
 		vec3f normal = input.normal;
-		vec3f light_dir = local_properties.get_float4(light_direction).xyz;
+		vec3f light_dir = local_properties.get_float4(light_direction_prop).xyz;
 		float ndl = dot(normal, light_dir);
 
-		return albedo * diffuse * ndl * intensity;
+		return albedo * light_color * ndl * intensity;
 	}
 };

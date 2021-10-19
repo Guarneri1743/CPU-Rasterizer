@@ -88,19 +88,19 @@ int main()
 	cglMat4 view = cglLookat(cam_pos, cube_pos, cglVec3Up);
 	cglMat4 proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
 
-	shader.local_properties.set_mat4x4(mat_model, model);
-	shader.local_properties.set_mat4x4(mat_view, view);
-	shader.local_properties.set_mat4x4(mat_projection, proj);
-	shader.local_properties.set_mat4x4(mat_vp, proj * view);
-	shader.local_properties.set_mat4x4(mat_mvp, proj * view * model);
+	shader.local_properties.set_mat4x4(mat_model_prop, model);
+	shader.local_properties.set_mat4x4(mat_view_prop, view);
+	shader.local_properties.set_mat4x4(mat_projection_prop, proj);
+	shader.local_properties.set_mat4x4(mat_vp_prop, proj * view);
+	shader.local_properties.set_mat4x4(mat_mvp_prop, proj * view * model);
 
 	shader.double_face = true;
 	shader.ztest_func = cglCompareFunc::kLess;
 
 	shader.local_properties.set_float4(albedo_prop, cglVec4(0.5f, 0.0f, 0.0f, 1.0f));
-	shader.local_properties.set_float4(light_direction, cglVec4(0.0f, 1.0f, 1.5f, 1.0f));
-	shader.local_properties.set_float4(light_diffuse, cglVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
-	shader.local_properties.set_float(light_intensity, 1.0f);
+	shader.local_properties.set_float4(light_direction_prop, cglVec4(0.0f, 1.0f, 1.5f, 1.0f));
+	shader.local_properties.set_float4(light_color_prop, cglVec4(1.0f, 1.0f, 1.0f, 1.0f));
+	shader.local_properties.set_float(light_intensity_prop, 1.0f);
 
 	// set background color
 	cglSetClearColor(tinymath::kColorBlue);
@@ -113,9 +113,7 @@ int main()
 		// clear buffer
 		cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
 
-		//angle += 1.0f;
-		model = cglTranslation(cube_pos) * cglRotation(cglVec3(1.0f, 1.0f, 1.0f), angle) * cglScale(cglVec3One);
-		shader.local_properties.set_mat4x4(mat_model, model);
+		shader.local_properties.set_mat4x4(mat_model_prop, model);
 		draw_cube();
 
 		// fence pixel tasks

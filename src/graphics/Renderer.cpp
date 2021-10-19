@@ -82,11 +82,11 @@ namespace CpuRasterizor
 		auto v = view_matrix(render_pass);
 		auto p = projection_matrix(render_pass);
 
-		target->material->local_properties.set_mat4x4(mat_model, m);
-		target->material->local_properties.set_mat4x4(mat_view, v);
-		target->material->local_properties.set_mat4x4(mat_projection, p);
-		target->material->local_properties.set_mat4x4(mat_vp, p * v);
-		target->material->local_properties.set_mat4x4(mat_mvp, p * v * m);
+		target->material->local_properties.set_mat4x4(mat_model_prop, m);
+		target->material->local_properties.set_mat4x4(mat_view_prop, v);
+		target->material->local_properties.set_mat4x4(mat_projection_prop, p);
+		target->material->local_properties.set_mat4x4(mat_vp_prop, p * v);
+		target->material->local_properties.set_mat4x4(mat_mvp_prop, p * v * m);
 
 		target->material->sync();
 

@@ -43,11 +43,11 @@ A tile based cpu rasterizer
 		cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2Zero);
 	
 		// setup shader properties
-		shader.local_properties.set_mat4x4(mat_model, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_view, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_projection, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_vp, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_mvp, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_model_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_view_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_projection_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_vp_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_mvp_prop, cglMat4Identity);
 	
 		shader.double_face = true;
 		shader.ztest_func = cglCompareFunc::kAlways;
@@ -80,6 +80,7 @@ A tile based cpu rasterizer
 	
 		return 0;
 	}
+
 
 
 
@@ -152,11 +153,11 @@ Result:
 		cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.5f, 1.0f));
 	
 		// setup shader properties
-		shader.local_properties.set_mat4x4(mat_model, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_view, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_projection, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_vp, cglMat4Identity);
-		shader.local_properties.set_mat4x4(mat_mvp, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_model_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_view_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_projection_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_vp_prop, cglMat4Identity);
+		shader.local_properties.set_mat4x4(mat_mvp_prop, cglMat4Identity);
 	
 		shader.double_face = true;
 		shader.ztest_func = cglCompareFunc::kAlways;
@@ -204,8 +205,6 @@ Result:
 	
 		return 0;
 	}
-
-
 
 
 
@@ -362,19 +361,19 @@ Result:
 		cglMat4 view = cglLookat(cam_pos, cube_pos, cglVec3Up);
 		cglMat4 proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
 	
-		shader.local_properties.set_mat4x4(mat_model, model);
-		shader.local_properties.set_mat4x4(mat_view, view);
-		shader.local_properties.set_mat4x4(mat_projection, proj);
-		shader.local_properties.set_mat4x4(mat_vp, proj * view);
-		shader.local_properties.set_mat4x4(mat_mvp, proj * view * model);
+		shader.local_properties.set_mat4x4(mat_model_prop, model);
+		shader.local_properties.set_mat4x4(mat_view_prop, view);
+		shader.local_properties.set_mat4x4(mat_projection_prop, proj);
+		shader.local_properties.set_mat4x4(mat_vp_prop, proj * view);
+		shader.local_properties.set_mat4x4(mat_mvp_prop, proj * view * model);
 	
 		shader.double_face = true;
 		shader.ztest_func = cglCompareFunc::kLess;
 	
 		shader.local_properties.set_float4(albedo_prop, cglVec4(0.5f, 0.0f, 0.0f, 1.0f));
-		shader.local_properties.set_float4(light_direction, cglVec4(0.0f, 1.0f, 1.5f, 1.0f));
-		shader.local_properties.set_float4(light_diffuse, cglVec4(1.0f, 1.0f, 1.0f, 1.0f)); 
-		shader.local_properties.set_float(light_intensity, 1.0f);
+		shader.local_properties.set_float4(light_direction_prop, cglVec4(0.0f, 1.0f, 1.5f, 1.0f));
+		shader.local_properties.set_float4(light_color_prop, cglVec4(1.0f, 1.0f, 1.0f, 1.0f));
+		shader.local_properties.set_float(light_intensity_prop, 1.0f);
 	
 		// set background color
 		cglSetClearColor(tinymath::kColorBlue);
@@ -387,9 +386,7 @@ Result:
 			// clear buffer
 			cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
 	
-			//angle += 1.0f;
-			model = cglTranslation(cube_pos) * cglRotation(cglVec3(1.0f, 1.0f, 1.0f), angle) * cglScale(cglVec3One);
-			shader.local_properties.set_mat4x4(mat_model, model);
+			shader.local_properties.set_mat4x4(mat_model_prop, model);
 			draw_cube();
 	
 			// fence pixel tasks
@@ -402,6 +399,7 @@ Result:
 	
 		return 0;
 	}
+
 
 
 
@@ -438,14 +436,14 @@ Shader:
 		Color fragment_shader(const v2f& input) const
 		{
 			vec4f albedo = local_properties.get_float4(albedo_prop);
-			vec4f diffuse = local_properties.get_float4(light_diffuse);
-			float intensity = local_properties.get_float(light_intensity);
+			vec4f light_color = local_properties.get_float4(light_color_prop);
+			float intensity = local_properties.get_float(light_intensity_prop);
 	
 			vec3f normal = input.normal;
-			vec3f light_dir = local_properties.get_float4(light_direction).xyz;
+			vec3f light_dir = local_properties.get_float4(light_direction_prop).xyz;
 			float ndl = dot(normal, light_dir);
 	
-			return albedo * diffuse * ndl * intensity;
+			return albedo * light_color * ndl * intensity;
 		}
 	};
 

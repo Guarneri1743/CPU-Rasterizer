@@ -41,20 +41,18 @@ const property_name metallic_offset_prop = 33;
 const property_name tint_color_prop = 40;
 
 // common
-const property_name mat_model = 50;
-const property_name mat_view = 51;
-const property_name mat_projection = 52;
-const property_name mat_vp = 53;
-const property_name mat_mvp = 54;
+const property_name mat_model_prop = 50;
+const property_name mat_view_prop = 51;
+const property_name mat_projection_prop = 52;
+const property_name mat_vp_prop = 53;
+const property_name mat_mvp_prop = 54;
 
 // light
-const property_name light_position = 80;
-const property_name light_ambient = 81;
-const property_name light_diffuse = 82;
-const property_name light_specular = 83;
-const property_name light_direction = 84;
-const property_name light_intensity = 85;
-const property_name light_distance = 86;
+const property_name light_position_prop = 80;
+const property_name light_color_prop = 82;
+const property_name light_direction_prop = 84;
+const property_name light_intensity_prop = 85;
+const property_name light_distance_prop = 86;
 
 
 // statistics

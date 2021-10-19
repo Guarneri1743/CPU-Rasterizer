@@ -213,10 +213,10 @@ namespace CpuRasterizor
 			return (linearize_depth(depth, near, far) - near) / (far - near);
 		}
 
-		inline tinymath::mat4x4 model() const { return local_properties.get_mat4x4(mat_model); }
-		inline tinymath::mat4x4 view() const { return local_properties.get_mat4x4(mat_view); }
-		inline tinymath::mat4x4 projection() const { return local_properties.get_mat4x4(mat_projection); }
-		inline tinymath::mat4x4 vp_matrix() const { return local_properties.get_mat4x4(mat_vp); }
-		inline tinymath::mat4x4 mvp_matrix() const { return local_properties.get_mat4x4(mat_mvp); }
+		inline tinymath::mat4x4 model() const { return local_properties.get_mat4x4(mat_model_prop); }
+		inline tinymath::mat4x4 view() const { return local_properties.get_mat4x4(mat_view_prop); }
+		inline tinymath::mat4x4 projection() const { return local_properties.get_mat4x4(mat_projection_prop); }
+		inline tinymath::mat4x4 vp_matrix() const { return local_properties.get_mat4x4(mat_vp_prop); }
+		inline tinymath::mat4x4 mvp_matrix() const { return local_properties.get_mat4x4(mat_mvp_prop); }
 	};
 }

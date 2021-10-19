@@ -26,11 +26,11 @@ int main()
 	cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2Zero);
 
 	// setup shader properties
-	shader.local_properties.set_mat4x4(mat_model, cglMat4Identity);
-	shader.local_properties.set_mat4x4(mat_view, cglMat4Identity);
-	shader.local_properties.set_mat4x4(mat_projection, cglMat4Identity);
-	shader.local_properties.set_mat4x4(mat_vp, cglMat4Identity);
-	shader.local_properties.set_mat4x4(mat_mvp, cglMat4Identity);
+	shader.local_properties.set_mat4x4(mat_model_prop, cglMat4Identity);
+	shader.local_properties.set_mat4x4(mat_view_prop, cglMat4Identity);
+	shader.local_properties.set_mat4x4(mat_projection_prop, cglMat4Identity);
+	shader.local_properties.set_mat4x4(mat_vp_prop, cglMat4Identity);
+	shader.local_properties.set_mat4x4(mat_mvp_prop, cglMat4Identity);
 
 	shader.double_face = true;
 	shader.ztest_func = cglCompareFunc::kAlways;
