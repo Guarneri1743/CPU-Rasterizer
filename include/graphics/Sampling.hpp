@@ -16,9 +16,9 @@ inline tinymath::vec3f uv_to_spherical_coord(const tinymath::vec2f& uv)
 {
     float phi = (uv.x - 0.5f) * TWO_PI;
     float theta = (uv.y - 0.5f) * PI;
-    float x = cos(theta) * cos(phi);
-    float y = sin(theta);
-    float z = cos(theta) * sin(phi);
+    float x = tinymath::cos(theta) * tinymath::cos(phi);
+    float y = tinymath::sin(theta);
+    float z = tinymath::cos(theta) * tinymath::sin(phi);
     return tinymath::normalize(tinymath::vec3f(x, y, z));
 }
 
@@ -44,9 +44,9 @@ inline tinymath::vec2f random_vec2_01(uint32_t N)
 
 inline tinymath::vec3f radian_to_spherical_coord(float theta, float phi)
 {
-    float x = cos(theta) * cos(phi);
-    float y = sin(theta);
-    float z = cos(theta) * sin(phi);
+    float x = tinymath::cos(theta) * tinymath::cos(phi);
+    float y = tinymath::sin(theta);
+    float z = tinymath::cos(theta) * tinymath::sin(phi);
     return tinymath::normalize(tinymath::vec3f(x, y, z));
 }
 
@@ -66,9 +66,9 @@ inline tinymath::vec3f importance_sampling(const tinymath::vec2f& random_01, con
     float cos_theta = sqrt((1.0f - random_01.y) / (1.0f + (a * a - 1.0f) * random_01.y));
     float sin_theta = sqrt(1 - cos_theta * cos_theta);
         
-    float x = sin_theta * cos(phi);
+    float x = sin_theta * tinymath::cos(phi);
     float y = cos_theta; 
-    float z = sin_theta * sin(phi);
+    float z = sin_theta * tinymath::sin(phi);
 
     tinymath::vec3f w_i = tinymath::normalize(tinymath::vec3f(x, y, z));
 

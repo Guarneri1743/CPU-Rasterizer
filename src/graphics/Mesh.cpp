@@ -10,7 +10,7 @@ namespace CpuRasterizor
 		this->indices = other.indices;
 	}
 
-	Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices)
+	Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<size_t>& _indices)
 	{
 		this->vertices = _vertices;
 		this->indices = _indices;

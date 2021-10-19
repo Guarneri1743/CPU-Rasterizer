@@ -1,5 +1,6 @@
 #include "PrimitiveFactory.hpp"
 #include "Material.hpp"
+#include "Sampling.hpp"
 
 namespace CpuRasterizor {
 	Vertex cube_vertices[36] = {
@@ -112,16 +113,7 @@ namespace CpuRasterizor {
 		Vertex(tinymath::vec4f(1.0f, -1.0f,  1.0f, 1.0f), tinymath::kVec3fUp, tinymath::vec2f(0.0f, 0.0f))
 	};
 
-	tinymath::vec3f sphere_parametric_equation(float radius, float alpha, float phi)
-	{
-		tinymath::vec3f p;
-		p.x = radius * std::sin(alpha * PI / 180.0f) * std::cos(phi * PI / 180.0f);
-		p.y = radius * std::sin(alpha * PI / 180.0f) * std::sin(phi * PI / 180.0f);
-		p.z = radius * std::cos(alpha * PI / 180.0f);
-		return p;
-	}
-
-	tinymath::vec3f PrimitiveFactory::cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	inline tinymath::vec3f cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		auto edge1 = v2.position - v1.position;
 		auto edge2 = v3.position - v1.position;
@@ -135,6 +127,64 @@ namespace CpuRasterizor {
 		return tinymath::normalize(tangent);
 	}
 
+	constexpr float kDefaultSpherePrecision = 32.0f;
+	constexpr float kDefaultPhiStep = TWO_PI / kDefaultSpherePrecision;
+	constexpr float kDefaultThetaStep = PI / kDefaultSpherePrecision;
+
+	std::shared_ptr<Model> PrimitiveFactory::sphere(std::shared_ptr<Material> material)
+	{
+		std::vector<Vertex> vert;
+		std::vector<size_t> ind;
+
+		for (float phi = 0.0f; phi < TWO_PI; phi += kDefaultPhiStep)
+		{
+			for (float theta = -HALF_PI; theta < HALF_PI; theta += kDefaultThetaStep)
+			{
+				float phi0 = phi;
+				float phi1 = phi + kDefaultPhiStep;
+
+				float theta0 = theta;
+				float theta1 = theta + kDefaultThetaStep;
+
+				auto pos0 = radian_to_spherical_coord(theta0, phi0);
+				auto uv0 = spherical_coord_to_uv(pos0);
+
+				auto pos1 = radian_to_spherical_coord(theta1, phi0);
+				auto uv1 = spherical_coord_to_uv(pos1);
+
+				auto pos2 = radian_to_spherical_coord(theta1, phi1);
+				auto uv2 = spherical_coord_to_uv(pos2);
+
+				auto pos3 = radian_to_spherical_coord(theta0, phi1);
+				auto uv3 = spherical_coord_to_uv(pos3);
+
+				auto v0 = Vertex(pos0, pos0, uv0);
+				v0.color = tinymath::kColorBlack;
+				auto v1 = Vertex(pos1, pos1, uv1);
+				v1.color = tinymath::kColorRed;
+				auto v2 = Vertex(pos2, pos2, uv2);
+				v2.color = tinymath::kColorGreen;
+				auto v3 = Vertex(pos3, pos3, uv3);
+				v3.color = tinymath::kColorBlue;
+
+				ind.push_back(vert.size());
+				vert.push_back(v0);
+				ind.push_back(vert.size());
+				vert.push_back(v1);	
+				ind.push_back(vert.size());
+				vert.push_back(v2);
+				ind.push_back(vert.size());
+				vert.push_back(v0);
+				ind.push_back(vert.size());
+				vert.push_back(v2);
+				ind.push_back(vert.size());
+				vert.push_back(v3);
+			}
+		}
+
+		return Model::load_raw(vert, ind, material);
+	}
+
 	std::shared_ptr<Model> PrimitiveFactory::plane(std::shared_ptr<Material> material)
 	{
 		auto tangent1 = cal_tangent(plane_vertices[0], plane_vertices[1], plane_vertices[2]);
@@ -146,21 +196,21 @@ namespace CpuRasterizor {
 		plane_vertices[4].tangent = tangent2;
 		plane_vertices[5].tangent = tangent2;
 		const std::vector<Vertex> vert(plane_vertices, plane_vertices + 6);
-		const std::vector<uint32_t> ind(plane_indices, plane_indices + 6);
+		const std::vector<size_t> ind(plane_indices, plane_indices + 6);
 		return Model::load_raw(vert, ind, material);
 	}
 
 	std::shared_ptr<Model> PrimitiveFactory::cube(std::shared_ptr<Material> material)
 	{
 		const std::vector<Vertex> vert(cube_vertices, cube_vertices + 36);
-		const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
+		const std::vector<size_t> ind(cube_indices, cube_indices + 36);
 		return Model::load_raw(vert, ind, material);
 	}
 
 	std::shared_ptr<Model> PrimitiveFactory::skybox(std::shared_ptr<Material> material)
 	{
 		const std::vector<Vertex> vert(sky_box_vertices, sky_box_vertices + 36);
-		const std::vector<uint32_t> ind(cube_indices, cube_indices + 36);
+		const std::vector<size_t> ind(cube_indices, cube_indices + 36);
 		return Model::load_raw(vert, ind, material);
 	}
 }

@@ -43,6 +43,7 @@
 #define cglExp2 tinymath::exp2
 #define cglTrunc tinymath::trunc
 #define cglSqrt tinymath::sqrt
+#define cglFromEuler tinymath::from_euler
 #define cglRotation tinymath::rotation
 #define cglDet tinymath::determinant
 #define cglInverse tinymath::inverse

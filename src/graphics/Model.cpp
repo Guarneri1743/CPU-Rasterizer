@@ -21,12 +21,19 @@ namespace CpuRasterizor
 		flip_uv = false;
 	}
 
-	Model::Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material) : Model()
+	Model::Model(const std::vector<Vertex>& vertices, const std::vector<size_t>& indices, std::shared_ptr<Material> _material) : Model()
 	{
 		assert(vertices.size() != 0 && indices.size() != 0);
 		assert(indices.size() % 3 == 0);
 		meshes.emplace_back(Mesh(vertices, indices));
-		this->material = material;
+		if (_material == nullptr)
+		{
+			material = std::make_shared<Material>();
+		}
+		else
+		{
+			this->material = _material;
+		}
 	}
 
 
@@ -56,7 +63,7 @@ namespace CpuRasterizor
 		return *this;
 	}
 
-	std::shared_ptr<Model> Model::load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material)
+	std::shared_ptr<Model> Model::load_raw(const std::vector<Vertex>& vertices, const std::vector<size_t>& indices, std::shared_ptr<Material> material)
 	{
 		return std::shared_ptr<Model>(new Model(vertices, indices, material));
 	}
@@ -99,12 +106,12 @@ namespace CpuRasterizor
 
 	void Model::reload_mesh(aiNode* node, const aiScene* Scene)
 	{
-		for (uint32_t i = 0; i < node->mNumMeshes; i++)
+		for (size_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* Mesh = Scene->mMeshes[node->mMeshes[i]];
 			load_vertices(Mesh);
 		}
-		for (uint32_t i = 0; i < node->mNumChildren; i++)
+		for (size_t i = 0; i < node->mNumChildren; i++)
 		{
 			reload_mesh(node->mChildren[i], Scene);
 		}
@@ -113,9 +120,9 @@ namespace CpuRasterizor
 	void Model::load_vertices(aiMesh* ai_mesh)
 	{
 		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
+		std::vector<size_t> indices;
 
-		for (uint32_t i = 0; i < ai_mesh->mNumVertices; i++)
+		for (size_t i = 0; i < ai_mesh->mNumVertices; i++)
 		{
 			Vertex Vertex;
 			tinymath::vec3f vector;
@@ -158,10 +165,10 @@ namespace CpuRasterizor
 			vertices.emplace_back(Vertex);
 		}
 
-		for (uint32_t i = 0; i < ai_mesh->mNumFaces; i++)
+		for (size_t i = 0; i < ai_mesh->mNumFaces; i++)
 		{
 			aiFace face = ai_mesh->mFaces[i];
-			for (uint32_t j = 0; j < face.mNumIndices; j++)
+			for (size_t j = 0; j < face.mNumIndices; j++)
 				indices.emplace_back(face.mIndices[j]);
 		}
 

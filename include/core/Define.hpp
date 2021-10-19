@@ -47,12 +47,14 @@ const property_name mat_projection_prop = 52;
 const property_name mat_vp_prop = 53;
 const property_name mat_mvp_prop = 54;
 
-// light
+// lighting
 const property_name light_position_prop = 80;
 const property_name light_color_prop = 82;
 const property_name light_direction_prop = 84;
 const property_name light_intensity_prop = 85;
 const property_name light_distance_prop = 86;
+
+const property_name cam_position_prop = 90;
 
 
 // statistics

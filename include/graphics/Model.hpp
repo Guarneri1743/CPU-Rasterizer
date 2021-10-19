@@ -6,6 +6,7 @@
 #include <vector>
 #include "Object.hpp"
 #include "RasterAttributes.hpp"
+#include "Mesh.hpp"
 
 struct aiScene;
 struct aiNode;
@@ -13,7 +14,6 @@ struct aiMesh;
 
 namespace CpuRasterizor
 {
-	class Mesh;
 	class Material;
 	class Transform;
 
@@ -38,10 +38,10 @@ namespace CpuRasterizor
 		void set_transform(Transform* _transform);
 
 		Model& operator= (const Model& other);
-		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
+		static std::shared_ptr<Model> load_raw(const std::vector<Vertex>& vertices, const std::vector<size_t>& indices, std::shared_ptr<Material> material);
 	
 	private:
-		Model(const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices, std::shared_ptr<Material> material);
+		Model(const std::vector<Vertex>& vertices, const std::vector<size_t>& indices, std::shared_ptr<Material> material);
 		void load_vertices(aiMesh* ai_mesh);
 		void reload_mesh(aiNode* node, const aiScene* Scene);	
 	};

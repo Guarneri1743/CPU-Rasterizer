@@ -8,7 +8,12 @@
 namespace CpuRasterizor {
 	class PrimitiveFactory {
 	public:
-		static tinymath::vec3f cal_tangent(const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		static std::shared_ptr<Model> sphere() { return sphere(nullptr); }
+		static std::shared_ptr<Model> plane() { return plane(nullptr); }
+		static std::shared_ptr<Model> cube() { return cube(nullptr); }
+		static std::shared_ptr<Model> skybox() { return skybox(nullptr); }
+
+		static std::shared_ptr<Model> sphere(std::shared_ptr<Material> material);
 		static std::shared_ptr<Model> plane(std::shared_ptr<Material> material);
 		static std::shared_ptr<Model> cube(std::shared_ptr<Material> material);
 		static std::shared_ptr<Model> skybox(std::shared_ptr<Material> material);
