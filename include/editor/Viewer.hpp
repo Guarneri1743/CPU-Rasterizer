@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Scene;
 	class BaseEditor;

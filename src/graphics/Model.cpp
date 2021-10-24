@@ -10,7 +10,7 @@
 #include "Material.hpp"
 #include "Transform.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Model::Model()
 	{

@@ -5,7 +5,7 @@
 #include "Shader.hpp"
 #include "Window.hpp"
 
-using namespace CpuRasterizor;
+using namespace CpuRasterizer;
 
 
 void cglInitWindow(const char* title, size_t w, size_t h)
@@ -74,6 +74,11 @@ void cglClearBuffer(cglFrameContent content)
 void cglSubmitPrimitive(cglShader* shader, cglVert v1, cglVert v2, cglVert v3)
 {
 	CpuRasterDevice.submit_primitive(shader, v1, v2, v3);
+}
+
+void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col)
+{
+	CpuRasterDevice.draw_segment(start, end, col, mvp);
 }
 
 void cglFencePrimitives()

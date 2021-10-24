@@ -7,7 +7,7 @@
 #include "tinymath.h"
 #include "Define.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Model;
 

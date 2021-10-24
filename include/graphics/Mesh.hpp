@@ -3,7 +3,7 @@
 #include "Object.hpp"
 #include "RasterAttributes.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Mesh : public Object
 	{

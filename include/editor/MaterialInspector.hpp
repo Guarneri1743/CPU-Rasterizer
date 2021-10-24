@@ -4,7 +4,7 @@
 #include "BaseInspector.hpp"
 #include "Material.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class MaterialInspector : public BaseInspector
 	{

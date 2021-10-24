@@ -92,6 +92,12 @@ namespace ColorEncoding
 		return ret;
 	}
 
+
+	TMATH_INLINE tinymath::color_rg encode_rg(const tinymath::Color& c)
+	{
+		return encode_rg(c.r, c.g);
+	}
+
 	TMATH_INLINE tinymath::color_rgb encode_rgb(const tinymath::Color& c)
 	{
 		return encode_rgb(c.r, c.g, c.b);

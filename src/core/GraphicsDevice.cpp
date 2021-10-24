@@ -19,7 +19,7 @@
 #include "Sampling.hpp"
 #include "Shader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
 
@@ -221,18 +221,10 @@ namespace CpuRasterizor
 		v2f o1 = process_vertex(shader, v1);
 		v2f o2 = process_vertex(shader, v2);
 		v2f o3 = process_vertex(shader, v3);
-		Vertex c1(o1.position, o1.world_pos, o1.shadow_coord, o1.color, o1.normal, o1.uv, o1.tangent, o1.bitangent);
-		Vertex c2(o2.position, o2.world_pos, o2.shadow_coord, o2.color, o2.normal, o2.uv, o2.tangent, o2.bitangent);
-		Vertex c3(o3.position, o3.world_pos, o3.shadow_coord, o3.color, o3.normal, o3.uv, o3.tangent, o3.bitangent);
-		c1.texcoord0 = o1.texcoord0;
-		c1.texcoord1 = o1.texcoord1;
-		c1.texcoord2 = o1.texcoord2;
-		c1.texcoord3 = o1.texcoord3;
-		c1.texcoord4 = o1.texcoord4;
-		c1.texcoord5 = o1.texcoord5;
-		c1.texcoord6 = o1.texcoord6;
-		c1.texcoord7 = o1.texcoord7;
-		c1.texcoord8 = o1.texcoord8;
+
+		Vertex c1 = v2f_to_vertex(o1);
+		Vertex c2 = v2f_to_vertex(o2);
+		Vertex c3 = v2f_to_vertex(o3);
 
 		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
@@ -267,9 +259,15 @@ namespace CpuRasterizor
 		// backface culling
 		bool double_face = shader.double_face;
 		bool enable_backface_culling = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kBackFaceCulling) != CullingAndClippingFlag::kNone;
-		if (!double_face && enable_backface_culling && !shader.skybox)
+		if (!double_face && enable_backface_culling)
 		{
-			if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+			if ((ndc1.mask & ndc2.mask & ndc3.mask & kNormalMask) != 0)
+			{
+				if (Clipper::backface_culling_ndc(ndc1.normal)) { statistics.culled_backface_triangle_count++; return; }
+			}
+			else {
+				if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+			}
 		}
 
 		size_t w, h;
@@ -299,22 +297,7 @@ namespace CpuRasterizor
 
 	v2f GraphicsDevice::process_vertex(const Shader& shader, const Vertex& vert) const
 	{
-		a2v input;
-		input.position = vert.position;
-		input.uv = vert.uv;
-		input.color = vert.color;
-		input.normal = vert.normal;
-		input.tangent = vert.tangent;
-		input.texcoord0 = vert.texcoord0;
-		input.texcoord1 = vert.texcoord1;
-		input.texcoord2 = vert.texcoord2;
-		input.texcoord3 = vert.texcoord3;
-		input.texcoord4 = vert.texcoord4;
-		input.texcoord5 = vert.texcoord5;
-		input.texcoord6 = vert.texcoord6;
-		input.texcoord7 = vert.texcoord7;
-		input.texcoord8 = vert.texcoord8;
-		return shader.vertex_shader(input);
+		return shader.vertex_shader(vertex_to_a2v(vert));
 	}
 
 	void GraphicsDevice::rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue)
@@ -642,25 +625,7 @@ namespace CpuRasterizor
 			!subsample_param.pixel_color_calculated ||
 			CpuRasterSharedData.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
-			v2f v_out;
-			v_out.position = frag.position;
-			v_out.world_pos = frag.world_pos;
-			v_out.shadow_coord = frag.shadow_coord;
-			v_out.color = frag.color;
-			v_out.normal = frag.normal;
-			v_out.uv = frag.uv;
-			v_out.tangent = frag.tangent;
-			v_out.bitangent = frag.bitangent;
-
-			v_out.texcoord0 = frag.texcoord0;
-			v_out.texcoord1 = frag.texcoord1;
-			v_out.texcoord2 = frag.texcoord2;
-			v_out.texcoord3 = frag.texcoord3;
-			v_out.texcoord4 = frag.texcoord4;
-			v_out.texcoord5 = frag.texcoord5;
-			v_out.texcoord6 = frag.texcoord6;
-			v_out.texcoord7 = frag.texcoord7;
-			v_out.texcoord8 = frag.texcoord8;
+			v2f v_out = frag_to_v2f(frag);
 
 			v_out.ddx = ddx;
 			v_out.ddy = ddy;
@@ -821,6 +786,13 @@ namespace CpuRasterizor
 	{
 		tinymath::vec4f clip_start = p * v * m * tinymath::vec4f(start.x, start.y, start.z, 1.0f);
 		tinymath::vec4f clip_end = p * v * m * tinymath::vec4f(end.x, end.y, end.z, 1.0f);
+		draw_segment(clip_start, clip_end, col);
+	}
+
+	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& mvp)
+	{
+		tinymath::vec4f clip_start = mvp * tinymath::vec4f(start.x, start.y, start.z, 1.0f);
+		tinymath::vec4f clip_end = mvp * tinymath::vec4f(end.x, end.y, end.z, 1.0f);
 		draw_segment(clip_start, clip_end, col);
 	}
 

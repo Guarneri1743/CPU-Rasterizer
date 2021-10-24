@@ -5,7 +5,7 @@
 #include "Model.hpp"
 #include "RasterAttributes.hpp"
 
-namespace CpuRasterizor {
+namespace CpuRasterizer {
 	class PrimitiveFactory {
 	public:
 		static std::shared_ptr<Model> sphere() { return sphere(nullptr); }

@@ -1,7 +1,7 @@
 #pragma once
 #include "RawBuffer.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class SegmentDrawer
 	{
@@ -50,8 +50,8 @@ namespace CpuRasterizor
 		int dy2 = 2 * dy;
 		int col = x0;
 		int row = y0;
-		int w = (int)buffer->width;
-		int h = (int)buffer->height;
+		int w = (int)buffer->get_width();
+		int h = (int)buffer->get_height();
 		while (((row >= 0 && row < h &&  col >= 0 && col < w) && buffer->write((size_t)row, (size_t)col, c)), (col != x1 || row != y1))
 		{
 			int e = bias;

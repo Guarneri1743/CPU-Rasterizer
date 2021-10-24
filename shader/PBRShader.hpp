@@ -5,7 +5,7 @@
 #include "RenderTexture.hpp"
 #include "CubeMap.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	struct MaterialData
 	{
@@ -59,7 +59,7 @@ namespace CpuRasterizor
 			o.world_pos = wpos.xyz;
 			
 			auto light_space_pos = CpuRasterSharedData.main_light.light_space() * tinymath::vec4f(wpos.x, wpos.y, wpos.z, 1.0f);
-			o.shadow_coord = light_space_pos;
+			o.texcoord0 = light_space_pos;
 			
 			o.color = input.color;
 			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(model())));
@@ -247,10 +247,10 @@ namespace CpuRasterizor
 
 			auto shadowmap = ShaderPropertyMap::global_shader_properties.get_framebuffer(shadowmap_prop);
 
-			tinymath::vec3f proj_shadow_coord = light_space_pos.xyz;
-			proj_shadow_coord = proj_shadow_coord * 0.5f + 0.5f;
+			tinymath::vec3f proj_light_space_pos = light_space_pos.xyz;
+			proj_light_space_pos = proj_light_space_pos * 0.5f + 0.5f;
 
-			if (proj_shadow_coord.z > 1.0f)
+			if (proj_light_space_pos.z > 1.0f)
 			{
 				return 0.0f;
 			}
@@ -268,9 +268,9 @@ namespace CpuRasterizor
 					for (int y = -kernel_size; y <= kernel_size; y++)
 					{
 						float depth;
-						if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x + (float)x * texel_size.x, proj_shadow_coord.y + (float)y * texel_size.y, depth))
+						if (shadowmap->get_framebuffer()->read_depth(proj_light_space_pos.x + (float)x * texel_size.x, proj_light_space_pos.y + (float)y * texel_size.y, depth))
 						{
-							shadow_atten += (proj_shadow_coord.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
+							shadow_atten += (proj_light_space_pos.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
 						}
 					}
 				}
@@ -280,9 +280,9 @@ namespace CpuRasterizor
 			else
 			{
 				float depth;
-				if (shadowmap->get_framebuffer()->read_depth(proj_shadow_coord.x, proj_shadow_coord.y, depth))
+				if (shadowmap->get_framebuffer()->read_depth(proj_light_space_pos.x, proj_light_space_pos.y, depth))
 				{
-					shadow_atten = (proj_shadow_coord.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
+					shadow_atten = (proj_light_space_pos.z - CpuRasterSharedData.shadow_bias) > depth ? 1.0f : 0.0f;
 				}
 			}
 
@@ -488,7 +488,7 @@ namespace CpuRasterizor
 			setup(ndv, material_data.roughness, normal, view_dir, ibl_data);
 
 			//shadow
-			float shadow_atten = 1.0f - get_shadow_atten(input.shadow_coord);
+			float shadow_atten = 1.0f - get_shadow_atten(input.texcoord0);
 
 			tinymath::Color albedo = material_data.albedo_color;
 			float ao = material_data.ao;

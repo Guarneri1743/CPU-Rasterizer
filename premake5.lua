@@ -232,6 +232,50 @@ function setupTextureProject()
 end
 
 
+
+function setupTexture3DProject()
+   project "HelloTexture3D"
+   kind "ConsoleApp"
+   language "C++"
+
+   files { 
+      src_dir .. "/*.*", 
+      src_dir .. "/util/*.*",
+      src_dir .. "/core/*.*",
+      src_dir .. "/graphics/*.*",
+      src_dir .. "/editor/*.*",
+      include_dir .. "/*.*", 
+      include_dir .. "/detail/*.*", 
+      include_dir .. "/util/*.*",
+      include_dir .. "/util/detail/*.*",
+      include_dir .. "/core/*.*",
+      include_dir .. "/graphics/*.*",
+      include_dir .. "/core/detail/*.*",
+      include_dir .. "/editor/*.*",
+      shader_dir  .. "/*.*",
+      third_party_dir .. "/*.*",
+      third_party_dir .. "/assimp/*.*",
+      third_party_dir .. "/stb_image/*.*",
+      third_party_dir .. "/rapidjson/*.*",
+      third_party_dir .. "/imgui/*.*",
+      third_party_dir .. "/imgui/backends/*.*",
+      third_party_dir .. "/gl3w/GL/*.*",
+      third_party_dir .. "/glfw/GLFW/*.*",
+      third_party_dir .. "/tinymath/*.*",
+      third_party_dir .. "/tinymath/detail/*.*",
+      third_party_dir .. "/tinymath/primitives/*.*",
+      third_party_dir .. "/tinymath/color/*.*",
+      sample_dir .. "/HelloTexture3D/HelloTexture3D.cpp",
+      sample_dir .. "/HelloTexture3D/HelloTexture3DShader.hpp"
+   }
+
+   filter { "configurations:Debug*" }
+      targetdir (solution_dir .. "/bin/Debug")
+
+   filter { "configurations:Release*" }
+      targetdir (solution_dir .. "/bin/release")
+end
+
 function setupLightingProject()
    project "HelloLighting"
    kind "ConsoleApp"
@@ -280,4 +324,5 @@ setupSlotion()
 setupViewerProject()
 setuoHelloTriangle()
 setupTextureProject()
+setupTexture3DProject()
 setupLightingProject()

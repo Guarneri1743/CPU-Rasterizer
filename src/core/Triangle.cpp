@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "Pipeline.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Triangle::Triangle()
 	{

@@ -6,7 +6,7 @@
 #include "Object.hpp"
 #include "ShaderPropertyMap.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Shader;
 

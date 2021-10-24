@@ -13,12 +13,10 @@
 #include "Serialization.hpp"
 #include "Texture.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	CubeMap::CubeMap()
 	{
-		this->wrap_mode = WrapMode::kRepeat;
-		this->filtering = Filtering::kBilinear;
 	}
 
 	CubeMap::CubeMap(const char* path)
@@ -32,8 +30,6 @@ namespace CpuRasterizor
 	{
 		texture_path = path;
 		texture = Texture::load_raw(path);
-		texture->wrap_mode = this->wrap_mode;
-		texture->filtering = this->filtering;
 		precompute_ibl_textures();
 	}
 
@@ -50,8 +46,6 @@ namespace CpuRasterizor
 		this->meta_path = cubemap.meta_path;
 		this->texture_path = cubemap.texture_path;
 		this->texture = cubemap.texture;
-		this->filtering = cubemap.filtering;
-		this->wrap_mode = cubemap.wrap_mode;
 		this->irradiance_map = cubemap.irradiance_map;
 		this->prefiltered_maps = cubemap.prefiltered_maps;
 		this->brdf_lut = cubemap.brdf_lut;
@@ -141,14 +135,10 @@ namespace CpuRasterizor
 		if (std::filesystem::exists(abs_path))
 		{
 			irradiance_map = Texture::load_raw(irradiance_path);
-			irradiance_map->filtering = filtering;
-			irradiance_map->wrap_mode = wrap_mode;
 			return;
 		}
 
 		irradiance_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
-		irradiance_map->filtering = filtering;
-		irradiance_map->wrap_mode = wrap_mode;
 
 		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)texture->width * (size_t)texture->height);
@@ -217,15 +207,11 @@ namespace CpuRasterizor
 		if (std::filesystem::exists(RES_PATH + prefilter_map_path))
 		{
 			auto tex = Texture::load_raw(prefilter_map_path);
-			tex->filtering = filtering;
-			tex->wrap_mode = wrap_mode;
 			prefiltered_maps.push_back(tex);
 			return;
 		}
 
 		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
-		prefilter_map->filtering = filtering;
-		prefilter_map->wrap_mode = wrap_mode;
 
 		prefilter_map->copy(*texture);
 		prefilter_map->resize(prefilter_map->width >> mip, prefilter_map->height >> mip);
@@ -302,15 +288,11 @@ namespace CpuRasterizor
 		if (std::filesystem::exists(RES_PATH + prefilter_map_path))
 		{
 			auto tex = Texture::load_raw(prefilter_map_path);
-			tex->filtering = filtering;
-			tex->wrap_mode = wrap_mode;
 			prefiltered_maps.push_back(tex);
 			return;
 		}
 
 		auto prefilter_map = std::make_shared<Texture>(texture->width, texture->height, TextureFormat::kRGB16);
-		prefilter_map->filtering = filtering;
-		prefilter_map->wrap_mode = wrap_mode;
 
 		prefilter_map->copy(*texture);
 
@@ -402,14 +384,10 @@ namespace CpuRasterizor
 		if (std::filesystem::exists(RES_PATH + brdf_lut_path))
 		{
 			brdf_lut = Texture::load_raw(brdf_lut_path);		
-			brdf_lut->filtering = filtering;
-			brdf_lut->wrap_mode = wrap_mode;
 			return;
 		}
 
 		brdf_lut = std::make_shared<Texture>(brdf_size, brdf_size, TextureFormat::kRGB16);
-		brdf_lut->filtering = filtering;
-		brdf_lut->wrap_mode = wrap_mode;
 
 		std::vector<std::pair<size_t, size_t>> indexers;
 		indexers.reserve((size_t)(brdf_size) * (size_t)(brdf_size));
@@ -473,54 +451,6 @@ namespace CpuRasterizor
 
 		Texture::export_image(*brdf_lut, brdf_lut_path);
 	}
-
-	//tinymath::vec2f CubeMap::sample(const tinymath::vec3f& dir, int& index)
-	//{
-	//	tinymath::vec3f abs_dir = tinymath::vec3f::abs(dir);
-	//	float max_axis = tinymath::max(tinymath::max(abs_dir.x, abs_dir.y), abs_dir.z);
-	//	if (abs_dir.x > abs_dir.y && abs_dir.x > abs_dir.z)
-	//	{
-	//		// x is the max axis 
-	//		if (dir.x > 0)
-	//		{
-	//			index = 0;
-	//			return tinymath::vec2f(1.0f - (dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
-	//		}
-	//		else 
-	//		{
-	//			index = 1;
-	//			return tinymath::vec2f((dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
-	//		}
-	//	}
-	//	else if (abs_dir.y > abs_dir.x && abs_dir.y > abs_dir.z)
-	//	{
-	//		// y is the max axis
-	//		if (dir.y > 0)
-	//		{
-	//			index = 2;
-	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, 1.0f - (dir.z + 1.0f) / 2.0f);
-	//		}
-	//		else 
-	//		{
-	//			index = 3;
-	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.z + 1.0f) / 2.0f);
-	//		}
-	//	}
-	//	else 
-	//	{
-	//		// z is the max axis
-	//		if (dir.z > 0)
-	//		{
-	//			index = 4;
-	//			return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
-	//		}
-	//		else 
-	//		{
-	//			index = 5;
-	//			return tinymath::vec2f(1.0f - (dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
-	//		}
-	//	}
-	//}
 
 	void CubeMap::spawn(std::string path, std::shared_ptr<CubeMap>& cubemap)
 	{

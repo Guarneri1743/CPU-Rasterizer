@@ -1,23 +1,23 @@
 #pragma once
 #include "Shader.hpp"
+#include "Sampling.hpp"
 
 using namespace CpuRasterizer;
 using namespace tinymath;
 
-class HelloTextureShader : public Shader
+class HelloTexture3DShader : public Shader
 {
 public:
-	HelloTextureShader() : Shader("sample_shader") {}
+	HelloTexture3DShader() : Shader("sample_shader") {}
 
 	v2f vertex_shader(const a2v& input) const
 	{
 		v2f o;
 		auto opos = vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
-		auto m = model();
-		auto vp = vp_matrix();
-		auto wpos = m * opos;
-		auto cpos = vp * wpos;
+		auto wpos = model() * opos;
+		auto cpos = mvp_matrix() * opos;
 		o.position = cpos;
+		o.texcoord0 = opos;
 		o.uv = input.uv;
 		return o;
 	}
@@ -26,14 +26,13 @@ public:
 	{
 		UNUSED(input);
 
-		// visualize uv
-		//return input.uv;
-
 		// sample texture
 		Color c;
 		if (local_properties.has_texture(123))
 		{
-			local_properties.get_texture(123)->sample(input.uv.x, input.uv.y, c);
+			auto uvw = input.texcoord0;
+			uvw = uvw  * 0.5f + 0.5f;
+			local_properties.get_texture(123)->sample(uvw.x, uvw.y, uvw.x, c);
 		}
 
 		return c;

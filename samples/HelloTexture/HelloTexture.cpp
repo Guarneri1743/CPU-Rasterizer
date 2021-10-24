@@ -39,12 +39,12 @@ int main()
 	auto tex = std::make_shared<Texture>(128, 128, cglTextureFormat::kRGB);
 
 	// generate a checkerboard texture
-	for (int r = 0; r< tex->width; r++)
+	for (size_t r = 0; r< tex->height; ++r)
 	{
-		for (int c = 0; c < tex->height; c++)
+		for (size_t c = 0; c < tex->width; ++c)
 		{
 			auto val = ((r & 0x8) == 0) ^ ((c & 0x8) == 0);
-			tex->write((size_t)r, (size_t)c, { (float)val, (float)val, (float)val, 1.0f });
+			tex->write(r, c, { (float)val, (float)val, (float)val, 1.0f });
 		}
 	}
 

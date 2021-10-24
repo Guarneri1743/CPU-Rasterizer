@@ -3,7 +3,7 @@
 #include <iostream>
 #include "Transform.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Camera* Camera::main_cam;
 

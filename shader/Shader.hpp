@@ -11,7 +11,7 @@
 #undef near
 #undef far
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	static tinymath::Color mip_colors[kMaxMip] =
 	{
@@ -52,7 +52,6 @@ namespace CpuRasterizor
 		tinymath::vec3f tangent;
 		tinymath::vec3f bitangent;
 		tinymath::vec3f normal;
-		tinymath::vec4f shadow_coord;
 		tinymath::vec4f texcoord0;
 		tinymath::vec4f texcoord1;
 		tinymath::vec4f texcoord2;
@@ -66,6 +65,93 @@ namespace CpuRasterizor
 		Fragment ddx;
 		Fragment ddy;
 	};
+
+	inline a2v vertex_to_a2v(const Vertex& vert)
+	{
+		a2v ret;
+		ret.position = vert.position;
+		ret.uv = vert.uv;
+		ret.color = vert.color;
+		ret.tangent = vert.tangent;
+		ret.normal = vert.normal;
+		ret.texcoord0 = vert.texcoord0;
+		ret.texcoord1 = vert.texcoord1;
+		ret.texcoord2 = vert.texcoord2;
+		ret.texcoord3 = vert.texcoord3;
+		ret.texcoord4 = vert.texcoord4;
+		ret.texcoord5 = vert.texcoord5;
+		ret.texcoord6 = vert.texcoord6;
+		ret.texcoord7 = vert.texcoord7;
+		ret.texcoord8 = vert.texcoord8;
+		return ret;
+	}
+
+	inline Vertex v2f_to_vertex(const v2f& vert)
+	{
+		Vertex ret;
+		ret.position = vert.position;
+		ret.world_pos = vert.world_pos;
+		ret.uv = vert.uv;
+		ret.color = vert.color;
+		ret.tangent = vert.tangent;
+		ret.bitangent = vert.bitangent;
+		ret.normal = vert.normal;
+		ret.texcoord0 = vert.texcoord0;
+		ret.texcoord1 = vert.texcoord1;
+		ret.texcoord2 = vert.texcoord2;
+		ret.texcoord3 = vert.texcoord3;
+		ret.texcoord4 = vert.texcoord4;
+		ret.texcoord5 = vert.texcoord5;
+		ret.texcoord6 = vert.texcoord6;
+		ret.texcoord7 = vert.texcoord7;
+		ret.texcoord8 = vert.texcoord8;
+		ret.rhw = 1.0f / vert.position.w;
+		return ret;
+	}
+
+	inline v2f frag_to_v2f(const Fragment& frag)
+	{
+		v2f ret;
+		ret.position = frag.position;
+		ret.world_pos = frag.world_pos;
+		ret.uv = frag.uv;
+		ret.color = frag.color;
+		ret.tangent = frag.tangent;
+		ret.bitangent = frag.bitangent;
+		ret.normal = frag.normal;
+		ret.texcoord0 = frag.texcoord0;
+		ret.texcoord1 = frag.texcoord1;
+		ret.texcoord2 = frag.texcoord2;
+		ret.texcoord3 = frag.texcoord3;
+		ret.texcoord4 = frag.texcoord4;
+		ret.texcoord5 = frag.texcoord5;
+		ret.texcoord6 = frag.texcoord6;
+		ret.texcoord7 = frag.texcoord7;
+		ret.texcoord8 = frag.texcoord8;
+		return ret;
+	}
+
+	inline v2f vertex_to_v2f(const Vertex& vert)
+	{
+		v2f ret;
+		ret.position = vert.position;
+		ret.world_pos = vert.world_pos;
+		ret.uv = vert.uv;
+		ret.color = vert.color;
+		ret.tangent = vert.tangent;
+		ret.bitangent = vert.bitangent;
+		ret.normal = vert.normal;
+		ret.texcoord0 = vert.texcoord0;
+		ret.texcoord1 = vert.texcoord1;
+		ret.texcoord2 = vert.texcoord2;
+		ret.texcoord3 = vert.texcoord3;
+		ret.texcoord4 = vert.texcoord4;
+		ret.texcoord5 = vert.texcoord5;
+		ret.texcoord6 = vert.texcoord6;
+		ret.texcoord7 = vert.texcoord7;
+		ret.texcoord8 = vert.texcoord8;
+		return ret;
+	}
 
 	class Shader
 	{
@@ -85,7 +171,6 @@ namespace CpuRasterizor
 		BlendOp blend_op;
 		bool transparent;
 		bool double_face;
-		bool skybox;
 		bool shadow;
 		bool discarded = false;
 		std::string name;
@@ -110,7 +195,6 @@ namespace CpuRasterizor
 			this->blend_op = BlendOp::kAdd;
 			this->transparent = false;
 			this->double_face = false;
-			this->skybox = false;
 			this->shadow = false;
 			this->name = name;
 		}

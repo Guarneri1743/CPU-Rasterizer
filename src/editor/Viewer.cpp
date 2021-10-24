@@ -10,7 +10,7 @@
 #include "Time.hpp"
 #include "Scene.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	bool Viewer::playing = false;
 	std::vector<std::unique_ptr<BaseEditor>> Viewer::editors;
@@ -34,7 +34,7 @@ namespace CpuRasterizor
 		editors.emplace_back(std::move(explorer));
 		CpuRasterDevice.set_viewport(600, 400);
 		Time::start();
-		CpuRasterizor::Scene::open_scene("/scenes/default_scene.scene");
+		CpuRasterizer::Scene::open_scene("/scenes/default_scene.scene");
 		playing = true;
 	}
 

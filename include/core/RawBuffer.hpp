@@ -1,48 +1,71 @@
 #pragma once
 #include <stdint.h>
 #include <memory>
+#include <functional>
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	template<typename T>
 	class RawBuffer
 	{
+	public:
+		RawBuffer();
+		RawBuffer(size_t width, size_t height, size_t layer_count);
+		RawBuffer(size_t width, size_t height);
+		RawBuffer(void* _buffer, size_t width, size_t height, size_t layer_count, void (*deletor)(T* ptr));
+		RawBuffer(void* _buffer, size_t width, size_t height, void (*deletor)(T* ptr));
+		~RawBuffer();
+
+		static std::shared_ptr<RawBuffer> create(size_t width, size_t height, size_t layer_count);
+		static std::shared_ptr<RawBuffer> create(size_t width, size_t height);
+		static std::shared_ptr<RawBuffer> create(void* _buffer, size_t width, size_t height, size_t layer_count, void (*deletor)(T* ptr));
+		static std::shared_ptr<RawBuffer> create(void* _buffer, size_t width, size_t height, void (*deletor)(T* ptr));
+		static std::shared_ptr<RawBuffer> create(const RawBuffer<T>& other);
+
+		bool read(float u, float v, T& out) const;
+		bool write(float u, float v, const T& data);
+
+		bool read(float u, float v, float w, T& out) const;
+		bool write(float u, float v, float w, const T& data);
+
+		bool read(size_t row, size_t col, T& out) const;
+		bool write(size_t row, size_t col, const T& data);
+
+		bool read(size_t row, size_t col, size_t layer, T& out) const;
+		bool write(size_t row, size_t col, size_t layer, const T& data);
+
+		static bool read(T* buf, float u, float v, size_t width, size_t height, T& out);
+		static bool write(T* buf, float u, float v, size_t width, size_t height, const T& data);
+
+		static bool read(T* buf, size_t row, size_t col, size_t width, size_t height, T& out);
+		static bool write(T* buf, size_t row, size_t col, size_t width, size_t height, const T& data);
+
+		static bool read(T* buf, float u, float v, float w, size_t width, size_t height, size_t layer_count, T& out);
+		static bool write(T* buf, float u, float v, float w, size_t width, size_t height, size_t layer_count, const T& data);
+
+		static bool read(T* buf, size_t row, size_t col, size_t layer, size_t width, size_t height, size_t layer_count, T& out);
+		static bool write(T* buf, size_t row, size_t col, size_t layer, size_t width, size_t height, size_t layer_count, const T& data);
+
+		void reallocate(size_t width, size_t height, size_t layer_count);
+		void reallocate(size_t width, size_t height);
+
+		inline size_t get_width() const { return width; }
+		inline size_t get_height() const { return height; }
+
+		void clear(const T& val);
+		T* get_ptr(size_t& size);
+
+		RawBuffer(const RawBuffer<T>& other);
+		RawBuffer<T>& operator = (const RawBuffer<T>& other);
+
 	private:
 		T* buffer;
 		void (*deletor)(T* ptr);
-
-	public:
 		size_t width;
 		size_t height;
-
-	public:
-		RawBuffer(size_t w, size_t h);
-		RawBuffer(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr));
-		RawBuffer(const RawBuffer<T>& other);
-		~RawBuffer();
-		static std::shared_ptr<RawBuffer> create(size_t w, size_t h);
-		static std::shared_ptr<RawBuffer> create(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr));
-		static std::shared_ptr<RawBuffer> create(const RawBuffer<T>& other);
-		bool read(float u, float v, T& out) const;
-		bool read(size_t row, size_t col, T& out) const;
-		bool write(float u, float v, const T& data);
-		bool write(size_t row, size_t col, const T& data);
-
-		bool read(T* buf, float u, float v, size_t w, size_t h, T& out) const;
-		bool read(T* buf, size_t row, size_t col, size_t w, size_t h, T& out) const;
-		bool write(T* buf, float u, float v, size_t w, size_t h, const T& data);
-		bool write(T* buf, size_t row, size_t col, size_t w, size_t h, const T& data);
-
-		void resize(size_t w, size_t h);
-		void clear(const T& val);
-		T* get_ptr(size_t& size);
-		RawBuffer<T>& operator = (const RawBuffer<T>& other);
-		void copy(const RawBuffer<T>& other);
+		size_t layer_count;
+		size_t buffer_length;
 	};
-
-	void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col, float& row_frac, float& col_frac);
-	void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col);
-	void pixel2uv(size_t w, size_t h, size_t row, size_t col, float& u, float& v);
 }
 
 #include "detail/RawBuffer.inl"

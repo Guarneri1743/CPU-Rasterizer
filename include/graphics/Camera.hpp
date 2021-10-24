@@ -6,7 +6,7 @@
 #undef near
 #undef far
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Transform;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class ShadowShader : public Shader
 	{
@@ -17,7 +17,7 @@ namespace CpuRasterizor
 		{
 			v2f o;
 			o.position = CpuRasterSharedData.main_light.light_space() * model() * tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
-			o.shadow_coord = o.position;
+			o.texcoord0 = o.position;
 			return o;
 		}
 

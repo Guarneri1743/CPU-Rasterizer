@@ -8,7 +8,7 @@
 #include "Triangle.hpp"
 #include "Shader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	constexpr size_t kTileSize = 16;
 

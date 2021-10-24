@@ -2,7 +2,7 @@
 #include "imgui/imgui.h"
 #include "tinymath/tinymath.h"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	void TransformInspector::on_gui(Transform& transform)
 	{

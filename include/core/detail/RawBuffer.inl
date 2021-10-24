@@ -1,38 +1,53 @@
 #include "tinymath.h"
-#include "RawBuffer.hpp"
-#include "tinymath/color/Color.h"
-#include "tinymath/color/ColorEncoding.h"
 #include <type_traits>
+#include "RawBuffer.hpp"
+#include "ImageUtil.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	template<typename T>
-	RawBuffer<T>::RawBuffer(size_t w, size_t h)
+	RawBuffer<T>::RawBuffer()
+	{
+		this->width = 0;
+		this->height = 0;
+		this->layer_count = 0;
+		this->buffer_length = 0;
+		this->buffer = nullptr;
+		this->deletor = nullptr;
+	}
+
+	template<typename T>
+	RawBuffer<T>::RawBuffer(size_t w, size_t h, size_t lc)
 	{
 		this->width = w;
 		this->height = h;
+		this->layer_count = lc;
 		this->deletor = [](T* ptr)
 		{
 			delete[] ptr;
 		};
-		int buf_size = static_cast<int>(static_cast<long>(width) * static_cast<long>(height));
-		this->buffer = new T[buf_size];
+		buffer_length = w * h * lc;
+		this->buffer = new T[buffer_length];
 	}
 
 	template<typename T>
-	RawBuffer<T>::RawBuffer(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr))
+	RawBuffer<T>::RawBuffer(size_t w, size_t h) : RawBuffer(w, h, 1ull)
+	{}
+
+	template<typename T>
+	RawBuffer<T>::RawBuffer(void* _buffer, size_t w, size_t h, size_t lc, void (*deletor)(T* ptr))
 	{
 		this->width = w;
 		this->height = h;
+		this->layer_count = lc;
+		this->buffer_length = w * h * lc;
 		this->deletor = deletor;
 		this->buffer = (T*)_buffer;
 	}
 
 	template<typename T>
-	RawBuffer<T>::RawBuffer(const RawBuffer<T>& other)
-	{
-		copy(other);
-	}
+	RawBuffer<T>::RawBuffer(void* _buffer, size_t w, size_t h, void (*deletor)(T* ptr)) : RawBuffer(_buffer, w, h, 1ull, deletor)
+	{}
 
 	template<typename T>
 	RawBuffer<T>::~RawBuffer()
@@ -41,9 +56,21 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(size_t w, size_t h, size_t lc)
+	{
+		return std::make_shared<RawBuffer>(w, h, lc);
+	}	
+	
+	template<typename T>
 	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(size_t w, size_t h)
 	{
 		return std::make_shared<RawBuffer>(w, h);
+	}
+
+	template<typename T>
+	std::shared_ptr<RawBuffer<T>> RawBuffer<T>::create(void* _buffer, size_t w, size_t h, size_t lc, void (*deletor)(T* ptr))
+	{
+		return std::make_shared<RawBuffer>(_buffer, w, h, lc, deletor);
 	}
 
 	template<typename T>
@@ -71,9 +98,27 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
+	bool RawBuffer<T>::read(size_t row, size_t col, size_t layer, T& out) const
+	{
+		return read(buffer, row, col, layer, width, height, layer_count, out);
+	}
+
+	template<typename T>
 	bool RawBuffer<T>::write(float u, float v, const T& data)
 	{
 		return write(buffer, u, v, width, height, data);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::read(float u, float v, float w, T& out) const
+	{
+		return read(buffer, u, v, w, width, height, layer_count, out);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::write(float u, float v, float w, const T& data)
+	{
+		return write(buffer, u, v, w, width, height, layer_count, data);
 	}
 
 	template<typename T>
@@ -83,7 +128,13 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(T* buf, float u, float v, size_t w, size_t h, T& out) const
+	bool RawBuffer<T>::write(size_t row, size_t col, size_t layer, const T& data)
+	{
+		return write(buffer, row, col, layer, width, height, layer_count, data);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::read(T* buf, float u, float v, size_t w, size_t h, T& out)
 	{
 		size_t row, col;
 		uv2pixel(w, h, u, v, row, col);
@@ -91,10 +142,10 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	bool RawBuffer<T>::read(T* buf, size_t row, size_t col, size_t w, size_t h, T& out) const
+	bool RawBuffer<T>::read(T* buf, size_t row, size_t col, size_t w, size_t h, T& out)
 	{
 		size_t pos = row * w + col;
-		if (row >= h || col >= w || pos >= w * h)
+		if (row >= h || col >= w)
 		{
 			return false;
 		}
@@ -114,7 +165,7 @@ namespace CpuRasterizor
 	bool RawBuffer<T>::write(T* buf, size_t row, size_t col, size_t w, size_t h, const T& data)
 	{
 		size_t pos = row * w + col;
-		if (pos >= w * h)
+		if (row >= h || col >= w)
 		{
 			return false;
 		}
@@ -123,61 +174,61 @@ namespace CpuRasterizor
 	}
 
 	template<typename T>
-	void RawBuffer<T>::resize(size_t w, size_t h)
+	bool RawBuffer<T>::read(T* buf, float u, float v, float w, size_t width, size_t height, size_t layer_count, T& out)
 	{
-		if (w == width && h == height)
+		size_t row, col, layer;
+		uv2pixel(width, height, layer_count, u, v, w, row, col, layer);
+		return read(buf, row, col, layer, width, height, layer_count, out);
+	}
+
+	template<typename T>
+	bool RawBuffer<T>::read(T* buf, size_t row, size_t col, size_t layer, size_t width, size_t height, size_t layer_count, T& out) 
+	{
+		size_t pos = row * width * layer_count + col * layer_count + layer;
+		if (row >= height || col >= width || layer >= layer_count)
 		{
-			return;
+			return false;
 		}
+		out = buf[pos];
+		return true;
+	}
 
-		size_t pw = width;
-		size_t ph = height;
+	template<typename T>
+	bool RawBuffer<T>::write(T* buf, float u, float v, float w, size_t width, size_t height, size_t layer_count, const T& data)
+	{
+		size_t row, col, layer;
+		uv2pixel(width, height, layer_count, u, v, w, row, col, layer);
+		return write(buf, row, col, layer, width, height, layer_count, data);
 
-		T* new_buffer = new T[w * h];
+	}
 
-		for (size_t row = 0; row < h; ++row)
+	template<typename T>
+	bool RawBuffer<T>::write(T* buf, size_t row, size_t col, size_t layer, size_t width, size_t height, size_t layer_count, const T& data)
+	{
+		size_t pos = row * width * layer_count + col * layer_count + layer;
+		if (row >= height || col >= width || layer >= layer_count)
 		{
-			for (size_t col = 0; col < w; ++col)
-			{
-				float u, v;
-				pixel2uv(w, h, row, col, u, v);
-
-				T val;
-				read(buffer, u, v, pw, ph, val);
-				write(new_buffer, row, col, w, h, val);
-			}
+			return false;
 		}
+		buf[pos] = data;
+		return true;
+	}
 
+	template<typename T>
+	void RawBuffer<T>::reallocate(size_t w, size_t h, size_t lc)
+	{
+		this->width = w;
+		this->height = h;
+		this->layer_count = lc;
+		this->buffer_length = w * h * lc;
 		delete[] buffer;
-		width = w;
-		height = h;
-		buffer = new_buffer;
+		buffer = new T[buffer_length];
 	}
 
-	inline void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col, float& row_frac, float& col_frac)
+	template<typename T>
+	void RawBuffer<T>::reallocate(size_t w, size_t h)
 	{
-		float rowf = v * (float)h;
-		float colf = u * (float)w;
-		float row_integer = tinymath::floor(rowf - 0.5f);
-		float col_integer = tinymath::floor(colf - 0.5f);
-		row = (size_t)(row_integer);
-		col = (size_t)(col_integer);
-		row_frac = rowf - row_integer;
-		col_frac = colf - col_integer;
-	}
-
-	inline void uv2pixel(size_t w, size_t h, float u, float v, size_t& row, size_t& col)
-	{
-		// [0.0, 1.0] -> [0, w/h - 1]
-		row = (size_t)(tinymath::floor(v * (float)h));
-		col = (size_t)(tinymath::floor(u * (float)w));
-	}
-
-	inline void pixel2uv(size_t w, size_t h, size_t row, size_t col, float& u, float& v)
-	{
-		//[0, w/h - 1] -> [0.0, 1.0]
-		u = ((float)col + 0.5f)/ (float)w;
-		v = ((float)row + 0.5f) / (float)h;
+		reallocate(w, h, 1ull);
 	}
 
 	template<typename T>
@@ -190,22 +241,43 @@ namespace CpuRasterizor
 	template<typename T>
 	T* RawBuffer<T>::get_ptr(size_t& size)
 	{
-		size = (size_t)width * (size_t)height * sizeof(T);
+		size = (size_t)width * (size_t)height * (size_t)layer_count * sizeof(T);
 		return buffer;
 	}
 
 	template<typename T>
 	RawBuffer<T>& RawBuffer<T>::operator = (const RawBuffer<T>& other)
 	{
-		copy(other);
-		return *this;
+		this->buffer_length = other.width * other.height * other.layer_count;
+		if (width == other.width && height == other.height && layer_count == other.layer_count)
+		{
+			// copy
+			memcpy(buffer, other.buffer, buffer_length * sizeof(T));
+			this->deletor = other.deletor;
+			return *this;
+		}
+		else
+		{
+			// reallocate and copy
+			delete[] buffer;
+			buffer = new T[buffer_length];
+			memcpy(buffer, other.buffer, buffer_length * sizeof(T));
+			this->width = other.width;
+			this->height = other.height;
+			this->layer_count = other.layer_count;
+			this->deletor = other.deletor;
+		}
 	}
 
 	template<typename T>
-	void RawBuffer<T>::copy(const RawBuffer<T>& other)
+	RawBuffer<T>::RawBuffer(const RawBuffer<T>& other) 
 	{
-		this->buffer = other.buffer;
+		this->buffer_length = other.width * other.height * other.layer_count;
+		buffer = new T[buffer_length];
+		memcpy(buffer, other.buffer, buffer_length * sizeof(T));
 		this->width = other.width;
 		this->height = other.height;
+		this->layer_count = other.layer_count;
+		this->deletor = other.deletor;
 	}
 }

@@ -7,6 +7,10 @@
 constexpr int kMaxMip = 8;
 constexpr int kBoundsPadding = 1;
 
+typedef float depth_t;
+typedef uint8_t stencil_t;
+typedef uint8_t coverage_t;
+
 typedef uint32_t property_name;
 
 // pbr

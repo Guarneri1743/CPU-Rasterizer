@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Mesh::Mesh() {}
 

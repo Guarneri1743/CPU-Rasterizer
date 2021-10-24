@@ -8,7 +8,7 @@
 #include "ShadowShader.hpp"
 #include "LightShader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	static std::unordered_map<std::string, std::shared_ptr<Shader>> name2shaders;
 

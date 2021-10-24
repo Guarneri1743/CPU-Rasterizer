@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class LightShader : public Shader
 	{

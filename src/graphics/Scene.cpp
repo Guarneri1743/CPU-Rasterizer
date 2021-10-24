@@ -27,7 +27,7 @@
 #undef far
 #undef GetObject
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Scene* Scene::current_scene;
 

@@ -4,7 +4,7 @@
 #include "TransformInspector.hpp"
 #include "LightInspector.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class InspectorEditor : public BaseEditor
 	{

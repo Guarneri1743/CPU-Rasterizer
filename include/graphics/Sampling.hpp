@@ -4,6 +4,54 @@
 
 #define USE_LOW_DISCREPANCY_SEQUENCE
 
+inline tinymath::vec2f dir_to_uv(const tinymath::vec3f& dir, int& index)
+	{
+		tinymath::vec3f abs_dir = tinymath::abs(dir);
+		if (abs_dir.x > abs_dir.y && abs_dir.x > abs_dir.z)
+		{
+			// x is the max axis 
+			if (dir.x > 0)
+			{
+				index = 0;
+				return tinymath::vec2f(1.0f - (dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+			}
+			else 
+			{
+				index = 1;
+				return tinymath::vec2f((dir.z + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+			}
+		}
+		else if (abs_dir.y > abs_dir.x && abs_dir.y > abs_dir.z)
+		{
+			// y is the max axis
+			if (dir.y > 0)
+			{
+				index = 2;
+				return tinymath::vec2f((dir.x + 1.0f) / 2.0f, 1.0f - (dir.z + 1.0f) / 2.0f);
+			}
+			else 
+			{
+				index = 3;
+				return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.z + 1.0f) / 2.0f);
+			}
+		}
+		else 
+		{
+			// z is the max axis
+			if (dir.z > 0)
+			{
+				index = 4;
+				return tinymath::vec2f((dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+			}
+			else 
+			{
+				index = 5;
+				return tinymath::vec2f(1.0f - (dir.x + 1.0f) / 2.0f, (dir.y + 1.0f) / 2.0f);
+			}
+		}
+	}
+
+
 inline tinymath::vec2f spherical_coord_to_uv(const tinymath::vec3f& coord)
 {
     auto direction = tinymath::normalize(coord);

@@ -2,7 +2,7 @@
 #include "imgui/imgui.h"
 #include "Window.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	SceneViewEditor::SceneViewEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{

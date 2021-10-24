@@ -3,7 +3,7 @@
 #include "BaseInspector.hpp"
 #include "Transform.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class TransformInspector : public BaseInspector
 	{

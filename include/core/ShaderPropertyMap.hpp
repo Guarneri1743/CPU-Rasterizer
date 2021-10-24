@@ -4,7 +4,7 @@
 #include "Define.hpp"
 #include "tinymath.h"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Texture;
 	class CubeMap;

@@ -4,7 +4,7 @@
 #include "Logger.hpp"
 #include "Pipeline.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	bool Clipper::clip_segment(float near_plane, const tinymath::vec4f& c1, const tinymath::vec4f& c2, tinymath::vec4f& out_c1, tinymath::vec4f& out_c2)
 	{
@@ -191,6 +191,12 @@ namespace CpuRasterizor
 		if (z < 0.0f) return false;
 		if (z > w) return false;
 		return true;
+	}
+
+	bool Clipper::backface_culling_ndc(const tinymath::vec3f& normal)
+	{
+		float ndv = tinymath::dot(normal, tinymath::kVec3fBack);
+		return ndv < 0.0f;
 	}
 
 	bool Clipper::backface_culling_ndc(const tinymath::vec3f& c1, const tinymath::vec3f& c2, const tinymath::vec3f& c3)

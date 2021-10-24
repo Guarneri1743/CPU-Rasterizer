@@ -87,10 +87,15 @@ int main()
 
 			auto pos3 = spherical_coord(theta0, phi1);
 
-			auto v0 = Vertex(pos0, pos0, {});
-			auto v1 = Vertex(pos1, pos1, {});
-			auto v2 = Vertex(pos2, pos2, {});
-			auto v3 = Vertex(pos3, pos3, {});
+			Vertex v0, v1, v2, v3;
+			v0.position = pos0;
+			v0.normal = pos0;
+			v1.position = pos1;
+			v1.normal = pos1;
+			v2.position = pos2;
+			v2.normal = pos2;
+			v3.position = pos3;
+			v3.normal = pos3;
 
 			ind.push_back(vert.size());
 			vert.push_back(v0);

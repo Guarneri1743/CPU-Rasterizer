@@ -4,7 +4,7 @@
 #include "Define.hpp"
 #include "IdAllocator.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	IdAllocator idalloc(kInvalidID + 1, kMaxID);
 

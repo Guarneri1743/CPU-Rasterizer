@@ -1,13 +1,12 @@
 #include "Pipeline.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Vertex Pipeline::barycentric_interpolate(const Vertex& v0, const Vertex& v1, const Vertex& v2, float w0, float w1, float w2)
 	{
 		Vertex ret;
 		ret.position = v0.position * w0 + v1.position * w1 + v2.position * w2;
 		ret.world_pos = v0.world_pos * w0 + v1.world_pos * w1 + v2.world_pos * w2;
-		ret.shadow_coord = v0.shadow_coord * w0 + v1.shadow_coord * w1 + v2.shadow_coord * w2;
 		ret.color = v0.color * w0 + v1.color * w1 + v2.color * w2;
 		ret.normal = v0.normal * w0 + v1.normal * w1 + v2.normal * w2;
 		ret.uv = v0.uv * w0 + v1.uv * w1 + v2.uv * w2;
@@ -47,7 +46,6 @@ namespace CpuRasterizor
 		Vertex ret;
 		ret.position = lhs.position + (rhs.position - lhs.position) * t;
 		ret.world_pos = lhs.world_pos + (rhs.world_pos - lhs.world_pos) * t;
-		ret.shadow_coord = lhs.shadow_coord + (rhs.shadow_coord - lhs.shadow_coord) * t;
 		ret.color = lhs.color + (rhs.color - lhs.color) * t;
 		ret.normal = lhs.normal + (rhs.normal - lhs.normal) * t;
 		ret.uv = lhs.uv + (rhs.uv - lhs.uv) * t;
@@ -74,7 +72,6 @@ namespace CpuRasterizor
 		Vertex ret;
 		ret.position = (rhs.position - lhs.position) * segmentation;
 		ret.world_pos = (rhs.world_pos - lhs.world_pos) * segmentation;
-		ret.shadow_coord = (rhs.shadow_coord - lhs.shadow_coord) * segmentation;
 		ret.color = (rhs.color - lhs.color) * segmentation;
 		ret.uv = (rhs.uv - lhs.uv) * segmentation;
 		ret.normal = (rhs.normal - lhs.normal) * segmentation;
@@ -100,7 +97,6 @@ namespace CpuRasterizor
 		Vertex ret;
 		ret.position = (lhs.position + differential.position);
 		ret.world_pos = (lhs.world_pos + differential.world_pos);
-		ret.shadow_coord = (lhs.shadow_coord + differential.shadow_coord);
 		ret.color = (lhs.color + differential.color);
 		ret.normal = (lhs.normal + differential.normal);
 		ret.uv = (lhs.uv + differential.uv);
@@ -126,7 +122,6 @@ namespace CpuRasterizor
 		Vertex ret;
 		ret.position = (rhs.position - lhs.position);
 		ret.world_pos = (rhs.world_pos - lhs.world_pos);
-		ret.shadow_coord = (rhs.shadow_coord - lhs.shadow_coord);
 		ret.color = (rhs.color - lhs.color);
 		ret.uv = (rhs.uv - lhs.uv);
 		ret.normal = (rhs.normal - lhs.normal);
@@ -152,7 +147,6 @@ namespace CpuRasterizor
 		Vertex ndc = clip;
 		ndc.position /= clip.position.w;
 		ndc.world_pos /= clip.position.w;
-		ndc.shadow_coord /= clip.position.w;
 		ndc.color /= clip.position.w;
 		ndc.normal /= clip.position.w;
 		ndc.uv /= clip.position.w;
@@ -178,7 +172,6 @@ namespace CpuRasterizor
 		float w = 1.0f / v.rhw;
 		ret.position = v.position * w;
 		ret.world_pos = v.world_pos * w;
-		ret.shadow_coord = v.shadow_coord * w;
 		ret.color = v.color * w;
 		ret.normal = v.normal * w;
 		ret.uv = v.uv * w;

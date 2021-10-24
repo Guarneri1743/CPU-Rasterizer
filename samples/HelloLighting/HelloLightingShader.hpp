@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.hpp"
 
-using namespace CpuRasterizor;
+using namespace CpuRasterizer;
 using namespace tinymath;
 
 class HelloLightingShader : public Shader

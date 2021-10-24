@@ -12,7 +12,7 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Material;
 	class Transform;

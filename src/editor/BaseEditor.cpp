@@ -17,7 +17,7 @@
 #undef near
 #undef far
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	bool BaseEditor::imgui_initialized = false;
 

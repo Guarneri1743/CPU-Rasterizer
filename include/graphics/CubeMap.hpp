@@ -5,7 +5,7 @@
 #include "Define.hpp"
 #include "tinymath.h"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Texture;
 	class CubeMap {
@@ -26,8 +26,6 @@ namespace CpuRasterizor
 		std::string texture_path;
 		std::string meta_path;
 		std::string name;
-		WrapMode wrap_mode;
-		Filtering filtering;
 		void copy_from(const CubeMap& cubemap);
 
 		static std::shared_ptr<CubeMap> load_asset(const char* path);

@@ -25,7 +25,7 @@
 
 #undef GetObject
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	// TODO: support forward compatibility 
 	// solution: add a version number ?
@@ -337,7 +337,6 @@ namespace CpuRasterizor
 			doc.AddMember("width", (uint32_t)tex.width, doc.GetAllocator());
 			doc.AddMember("height", (uint32_t)tex.height, doc.GetAllocator());
 			doc.AddMember("mip_count", (uint32_t)tex.mip_count, doc.GetAllocator());
-			doc.AddMember("mip_filtering", (int32_t)tex.mip_filtering, doc.GetAllocator());
 			doc.AddMember("enable_mip", (int32_t)tex.enable_mip, doc.GetAllocator());
 
 			std::filesystem::path abs_path(ASSETS_PATH + path);
@@ -384,7 +383,6 @@ namespace CpuRasterizor
 				tex.width = doc["width"].GetUint();
 				tex.height = doc["height"].GetUint();
 				tex.mip_count = doc["mip_count"].GetUint();
-				tex.mip_filtering = (Filtering)doc["mip_filtering"].GetInt();
 				//tex.enable_mip = doc["enable_mip"].GetBool();
 				tex.enable_mip = true; // force enable mip, todo: serialize it
 				tex.reload(tex.raw_path.c_str());
@@ -418,10 +416,6 @@ namespace CpuRasterizor
 			rapidjson::Value right;
 			right.SetString(cube_map.texture_path.c_str(), doc.GetAllocator());
 			doc.AddMember("hdr_texture", right, doc.GetAllocator());
-
-			doc.AddMember("wrap_mode", (int32_t)cube_map.wrap_mode, doc.GetAllocator());
-
-			doc.AddMember("filtering", (int32_t)cube_map.filtering, doc.GetAllocator());
 
 			std::filesystem::path abs_path(ASSETS_PATH + path);
 			if (!std::filesystem::exists(abs_path.parent_path()))
@@ -459,8 +453,6 @@ namespace CpuRasterizor
 				fclose(fd);
 				cubemap.name = doc["name"].GetString();
 				cubemap.meta_path = doc["meta_path"].GetString();
-				cubemap.wrap_mode = (WrapMode)doc["wrap_mode"].GetInt();
-				cubemap.filtering = (Filtering)doc["filtering"].GetInt();
 				cubemap.reload(texture_path);
 			}
 			else

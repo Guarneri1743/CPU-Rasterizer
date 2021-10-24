@@ -2,7 +2,7 @@
 
 int main()
 {
-	CpuRasterizor::Viewer::initialize();
-	CpuRasterizor::Viewer::run();
+	CpuRasterizer::Viewer::initialize();
+	CpuRasterizer::Viewer::run();
 	return 0;
 }

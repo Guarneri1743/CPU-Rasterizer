@@ -4,7 +4,7 @@
 #include "Object.hpp"
 #include "tinymath.h"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class Model;
 	class Transform : public Object

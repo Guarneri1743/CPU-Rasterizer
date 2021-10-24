@@ -2,7 +2,7 @@
 #include "BaseEditor.hpp"
 #include "Transform.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class HierarchyEditor : public BaseEditor
 	{

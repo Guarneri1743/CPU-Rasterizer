@@ -1,19 +1,20 @@
 #include "FrameBuffer.hpp"
 #include <execution>
 #include <algorithm>
+#include "ImageUtil.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	FrameBuffer::FrameBuffer(size_t w, size_t h, FrameContent flag) : 
 		content_flag(flag),
-		width(w), height(h)
+		width(w), height(h), filtering(Filtering::kBilinear)
 	{
 		clear_color = {0, 0, 0, 0};
 		resize(w, h);
 	}
 
-	bool FrameBuffer::perform_stencil_test(uint8_t ref_val,
-										   uint8_t read_mask, 
+	bool FrameBuffer::perform_stencil_test(stencil_t ref_val,
+										   stencil_t read_mask,
 										   CompareFunc func,
 										   size_t row, 
 										   size_t col) const
@@ -24,7 +25,7 @@ namespace CpuRasterizor
 		}
 
 		bool pass = false;
-		uint8_t stencil;
+		stencil_t stencil;
 		if (stencil_buffer->read(row, col, stencil))
 		{
 			switch (func)
@@ -60,11 +61,11 @@ namespace CpuRasterizor
 
 	void FrameBuffer::update_stencil_buffer(size_t row, 
 											size_t col,
-											const PerSampleOperation& op_pass,
+											PerSampleOperation op_pass,
 											StencilOp stencil_pass_op, 
 											StencilOp stencil_fail_op, 
 											StencilOp stencil_zfail_op, 
-											uint8_t ref_val) const
+											stencil_t ref_val) const
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -73,7 +74,7 @@ namespace CpuRasterizor
 
 		bool stencil_pass = (op_pass & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
 		bool z_pass = (op_pass & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
-		uint8_t stencil;
+		stencil_t stencil;
 		stencil_buffer->read(row, col, stencil);
 		StencilOp stencil_op;
 		if (stencil_pass)
@@ -95,10 +96,10 @@ namespace CpuRasterizor
 			stencil_buffer->write(row, col, ref_val);
 			break;
 		case StencilOp::kIncrement:
-			stencil_buffer->write(row, col, std::clamp((uint8_t)(stencil + 1), (uint8_t)0, (uint8_t)255));
+			stencil_buffer->write(row, col, std::clamp((stencil_t)(stencil + 1), (stencil_t)0, (stencil_t)255));
 			break;
 		case StencilOp::kDecrement:
-			stencil_buffer->write(row, col, std::clamp((uint8_t)(stencil - 1), (uint8_t)0, (uint8_t)255));
+			stencil_buffer->write(row, col, std::clamp((stencil_t)(stencil - 1), (stencil_t)0, (stencil_t)255));
 			break;
 		case StencilOp::kIncrementWrap:
 			stencil_buffer->write(row, col, stencil + 1);
@@ -115,14 +116,14 @@ namespace CpuRasterizor
 	bool FrameBuffer::perform_depth_test(CompareFunc func,
 										 size_t row, 
 										 size_t col, 
-										 float z) const
+										 depth_t z) const
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
 			return false;
 		}
 
-		float depth;
+		depth_t depth;
 		bool pass = false;
 		if (depth_buffer->read(row, col, depth))
 		{
@@ -246,7 +247,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_depth(size_t row, size_t col, float depth)
+	void FrameBuffer::write_depth(size_t row, size_t col, depth_t depth)
 	{
 		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
@@ -254,7 +255,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_stencil(size_t row, size_t col, uint8_t stencil)
+	void FrameBuffer::write_stencil(size_t row, size_t col, stencil_t stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
@@ -262,7 +263,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_coverage(size_t row, size_t col, uint8_t coverage)
+	void FrameBuffer::write_coverage(size_t row, size_t col, coverage_t coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
@@ -280,7 +281,7 @@ namespace CpuRasterizor
 		return color_buffer->read(row, col, color);
 	}
 
-	bool FrameBuffer::read_depth(size_t row, size_t col, float& depth)
+	bool FrameBuffer::read_depth(size_t row, size_t col, depth_t& depth)
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
@@ -290,7 +291,7 @@ namespace CpuRasterizor
 		return depth_buffer->read(row, col, depth);
 	}
 
-	bool FrameBuffer::read_stencil(size_t row, size_t col, uint8_t& stencil)
+	bool FrameBuffer::read_stencil(size_t row, size_t col, stencil_t& stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -300,7 +301,7 @@ namespace CpuRasterizor
 		return stencil_buffer->read(row, col, stencil);
 	}
 
-	bool FrameBuffer::read_coverage(size_t row, size_t col, uint8_t& coverage)
+	bool FrameBuffer::read_coverage(size_t row, size_t col, coverage_t& coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
@@ -320,7 +321,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_depth(float u, float v, float depth)
+	void FrameBuffer::write_depth(float u, float v, depth_t depth)
 	{
 		if ((content_flag & FrameContent::kDepth) != FrameContent::kNone)
 		{
@@ -328,7 +329,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_stencil(float u, float v, uint8_t stencil)
+	void FrameBuffer::write_stencil(float u, float v, stencil_t stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) != FrameContent::kNone)
 		{
@@ -336,7 +337,7 @@ namespace CpuRasterizor
 		}
 	}
 
-	void FrameBuffer::write_coverage(float u, float v, uint8_t coverage)
+	void FrameBuffer::write_coverage(float u, float v, coverage_t coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
@@ -354,7 +355,7 @@ namespace CpuRasterizor
 		return color_buffer->read(u, v, color);
 	}
 
-	bool FrameBuffer::read_depth(float u, float v, float& depth)
+	bool FrameBuffer::read_depth(float u, float v, depth_t& depth)
 	{
 		if ((content_flag & FrameContent::kDepth) == FrameContent::kNone)
 		{
@@ -364,7 +365,7 @@ namespace CpuRasterizor
 		return depth_buffer->read(u, v, depth);
 	}
 
-	bool FrameBuffer::read_stencil(float u, float v, uint8_t& stencil)
+	bool FrameBuffer::read_stencil(float u, float v, stencil_t& stencil)
 	{
 		if ((content_flag & FrameContent::kStencil) == FrameContent::kNone)
 		{
@@ -374,7 +375,7 @@ namespace CpuRasterizor
 		return stencil_buffer->read(u, v, stencil);
 	}
 
-	bool FrameBuffer::read_coverage(float u, float v, uint8_t& coverage)
+	bool FrameBuffer::read_coverage(float u, float v, coverage_t& coverage)
 	{
 		if ((content_flag & FrameContent::kCoverage) == FrameContent::kNone)
 		{
@@ -403,7 +404,7 @@ namespace CpuRasterizor
 
 		if ((flag & content_flag & FrameContent::kCoverage) != FrameContent::kNone)
 		{
-			coverage_buffer->clear((uint8_t)0);
+			coverage_buffer->clear((coverage_t)0);
 		}
 	}
 
@@ -425,7 +426,7 @@ namespace CpuRasterizor
 			}
 			else
 			{
-				color_buffer->resize(w, h);
+				ImageUtil::resize(*color_buffer.get(), w, h, filtering);
 			}
 		}
 
@@ -433,11 +434,11 @@ namespace CpuRasterizor
 		{
 			if (depth_buffer == nullptr)
 			{
-				depth_buffer = std::make_unique<RawBuffer<float>>(w, h);
+				depth_buffer = std::make_unique<RawBuffer<depth_t>>(w, h);
 			}
 			else
 			{
-				depth_buffer->resize(w, h);
+				ImageUtil::resize(*depth_buffer.get(), w, h, filtering);
 			}
 		}
 
@@ -445,11 +446,11 @@ namespace CpuRasterizor
 		{
 			if (stencil_buffer == nullptr)
 			{
-				stencil_buffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
+				stencil_buffer = std::make_unique<RawBuffer<stencil_t>>(w, h);
 			}
 			else
 			{
-				stencil_buffer->resize(w, h);
+				ImageUtil::resize(*stencil_buffer.get(), w, h, filtering);
 			}
 		}
 
@@ -457,11 +458,11 @@ namespace CpuRasterizor
 		{
 			if (coverage_buffer == nullptr)
 			{
-				coverage_buffer = std::make_unique<RawBuffer<uint8_t>>(w, h);
+				coverage_buffer = std::make_unique<RawBuffer<coverage_t>>(w, h);
 			}
 			else
 			{
-				coverage_buffer->resize(w, h);
+				ImageUtil::resize(*coverage_buffer.get(), w, h, filtering);
 			}
 		}
 	}

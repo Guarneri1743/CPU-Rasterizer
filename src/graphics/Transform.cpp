@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Marcos.h"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Transform::Transform()
 	{

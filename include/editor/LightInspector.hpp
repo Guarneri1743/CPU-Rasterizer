@@ -3,7 +3,7 @@
 #include "BaseInspector.hpp"
 #include "Light.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class LightInspector : public BaseInspector
 	{

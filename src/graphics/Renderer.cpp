@@ -9,7 +9,7 @@
 #include "Transform.hpp"
 #include "Mesh.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Renderer::Renderer() : gizmos(true)
 	{}

@@ -75,8 +75,8 @@
 #define cglMat4Identity tinymath::kMat4x4Identity
 #define cglMat3Zero tinymath::kMat3x3Zero
 #define cglMat4Zero tinymath::kMat4x4Zero
-#define cglVert CpuRasterizor::Vertex
-#define cglShader CpuRasterizor::Shader // todo: abstract shader
+#define cglVert CpuRasterizer::Vertex
+#define cglShader CpuRasterizer::Shader // todo: abstract shader
 #define cglPrint(...) Logger::log(Logger::Severity::kLog, __VA_ARGS__)
 #define cglError(...) Logger::log(Logger::Severity::kError, __VA_ARGS__)
 
@@ -125,6 +125,7 @@ extern "C" {
 	CGL_EXTERN void cglSetClearColor(cglColor clear_color);
 	CGL_EXTERN void cglClearBuffer(cglFrameContent content);
 	CGL_EXTERN void cglSubmitPrimitive(cglShader* shader, cglVert v1, cglVert v2, cglVert v3);
+	CGL_EXTERN void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col);
 	CGL_EXTERN void cglFencePrimitives();
 	CGL_EXTERN void cglFencePixels();
 	CGL_EXTERN int cglGenId(uint32_t&);

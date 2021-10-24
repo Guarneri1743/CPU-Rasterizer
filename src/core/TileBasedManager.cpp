@@ -2,7 +2,7 @@
 #include <execution>
 #include <algorithm>
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	TileBasedManager::TileBasedManager(size_t w, size_t h) :
 		width(w), height(h), tile_tasks(nullptr),

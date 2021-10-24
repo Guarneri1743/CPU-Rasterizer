@@ -4,7 +4,7 @@
 #include <memory>
 #include "Define.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	struct DirectionalLight;
 	struct PointLight;

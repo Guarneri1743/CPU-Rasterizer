@@ -5,10 +5,10 @@
 #include "tinymath.h"
 #include "RawBuffer.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
-	constexpr float kFarZ = 1.0f;
-	constexpr uint8_t kDefaultStencil = 0x00;
+	constexpr depth_t kFarZ = 1.0f;
+	constexpr stencil_t kDefaultStencil = 0x00;
 
 	template<typename T>
 	class RawBuffer;
@@ -19,24 +19,24 @@ namespace CpuRasterizor
 		FrameBuffer(size_t w, size_t h, FrameContent flag);
 
 		void write_color(size_t row, size_t col, const tinymath::color_rgba& color);
-		void write_depth(size_t row, size_t col, float depth);
-		void write_stencil(size_t row, size_t col, uint8_t stencil);
-		void write_coverage(size_t row, size_t col, uint8_t coverage);
+		void write_depth(size_t row, size_t col, depth_t depth);
+		void write_stencil(size_t row, size_t col, stencil_t stencil);
+		void write_coverage(size_t row, size_t col, coverage_t coverage);
 
 		bool read_color(size_t row, size_t col, tinymath::color_rgba& color);
-		bool read_depth(size_t row, size_t col, float& depth);
-		bool read_stencil(size_t row, size_t col, uint8_t& stencil);
-		bool read_coverage(size_t row, size_t col, uint8_t& coverage);
+		bool read_depth(size_t row, size_t col, depth_t& depth);
+		bool read_stencil(size_t row, size_t col, stencil_t& stencil);
+		bool read_coverage(size_t row, size_t col, coverage_t& coverage);
 
 		void write_color(float u, float v, const tinymath::color_rgba& color);
-		void write_depth(float u, float v, float depth);
-		void write_stencil(float u, float v, uint8_t stencil);
-		void write_coverage(float u, float v, uint8_t coverage);
+		void write_depth(float u, float v, depth_t depth);
+		void write_stencil(float u, float v, stencil_t stencil);
+		void write_coverage(float u, float v, coverage_t coverage);
 
 		bool read_color(float u, float v, tinymath::color_rgba& color);
-		bool read_depth(float u, float v, float& depth);
-		bool read_stencil(float u, float v, uint8_t& stencil);
-		bool read_coverage(float u, float v, uint8_t& coverage);
+		bool read_depth(float u, float v, depth_t& depth);
+		bool read_stencil(float u, float v, stencil_t& stencil);
+		bool read_coverage(float u, float v, coverage_t& coverage);
 
 		void clear(FrameContent flag);
 		void set_clear_color(const tinymath::color_rgba& color);
@@ -54,25 +54,25 @@ namespace CpuRasterizor
 		// Pper pixel operations
 	
 		// stencil test
-		bool perform_stencil_test(uint8_t ref_val,
-								  uint8_t read_mask,
+		bool perform_stencil_test(stencil_t ref_val,
+								  stencil_t read_mask,
 								  CompareFunc func,
 								  size_t row,
 								  size_t col) const;
 
 		void update_stencil_buffer(size_t row,
 								   size_t col,
-								   const PerSampleOperation& op_pass,
+								   PerSampleOperation op_pass,
 								   StencilOp stencil_pass_op,
 								   StencilOp stencil_fail_op,
 								   StencilOp stencil_zfail_op,
-								   uint8_t ref_val) const;
+								   stencil_t ref_val) const;
 
 		// depth test
 		bool perform_depth_test(CompareFunc func, 
 								size_t row,
 								size_t col, 
-								float z) const;
+								depth_t z) const;
 
 		// blending
 		static tinymath::Color blend(const tinymath::Color& src_color, 
@@ -85,16 +85,17 @@ namespace CpuRasterizor
 		FrameContent content_flag;
 		size_t width;
 		size_t height;
+		Filtering filtering;
 
 		tinymath::color_rgba clear_color;
 
-		// use 32 bits zbuffer here, for convenience 
-		std::unique_ptr<RawBuffer<float>> depth_buffer;
-		// 32 bits rgba framebuffer, 8-bit per channel
+		// use 32-bit zbuffer here, for convenience 
+		std::unique_ptr<RawBuffer<depth_t>> depth_buffer;
+		// 32-bit rgba framebuffer, 8-bit per channel
 		std::unique_ptr<RawBuffer<tinymath::color_rgba>> color_buffer;
-		// 8 bits stencil buffer
-		std::unique_ptr<RawBuffer<uint8_t>> stencil_buffer;
-		// coverage buffer
-		std::unique_ptr<RawBuffer<uint8_t>> coverage_buffer;
+		// 8-bit stencil buffer
+		std::unique_ptr<RawBuffer<stencil_t>> stencil_buffer;
+		// 8-bit coverage buffer
+		std::unique_ptr<RawBuffer<coverage_t>> coverage_buffer;
 	};
 }

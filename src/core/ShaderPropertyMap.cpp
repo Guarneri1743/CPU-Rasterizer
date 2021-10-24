@@ -3,7 +3,7 @@
 #include "Texture.hpp"
 #include "CubeMap.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	ShaderPropertyMap ShaderPropertyMap::global_shader_properties;
 

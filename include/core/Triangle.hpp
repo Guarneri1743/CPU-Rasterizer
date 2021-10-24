@@ -5,7 +5,7 @@
 #include "tinymath/primitives/Rect.h"
 #include "RasterAttributes.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	struct Triangle
 	{

@@ -2,7 +2,7 @@
 #include "tinymath.h"
 #include "RasterAttributes.hpp"
 
-namespace CpuRasterizor{
+namespace CpuRasterizer{
 	class Pipeline
 	{
 	public:

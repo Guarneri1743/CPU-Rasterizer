@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseEditor.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	class SceneViewEditor : public BaseEditor
 	{

@@ -41,5 +41,4 @@ typedef struct
 	uint8_t gray;
 }color_gray;
 
-
 END_NAMESPACE

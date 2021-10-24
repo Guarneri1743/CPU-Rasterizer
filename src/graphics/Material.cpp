@@ -6,7 +6,7 @@
 #include "Logger.hpp"
 #include "Shader.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	Material::Material()
 	{

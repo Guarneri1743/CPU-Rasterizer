@@ -10,7 +10,7 @@
 #include "Serialization.hpp"
 #include "EditorSharedData.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	ExplorerEditor::ExplorerEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{

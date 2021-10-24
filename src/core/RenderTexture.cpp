@@ -2,7 +2,7 @@
 #include "Sampling.hpp"
 #include "TileBasedManager.hpp"
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	RenderTexture::RenderTexture(size_t w, size_t h, FrameContent flag, bool msaa_on, uint8_t subsample_count) :
 		has_msaa_buffer(msaa_on),

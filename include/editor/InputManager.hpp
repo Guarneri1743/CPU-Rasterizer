@@ -4,9 +4,9 @@
 #include "tinymath.h"
 #include "Singleton.hpp"
 
-#define InputMgr Singleton<CpuRasterizor::InputManager>::get()
+#define InputMgr Singleton<CpuRasterizer::InputManager>::get()
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	enum class MouseButton
 	{

@@ -17,7 +17,7 @@
 #undef near
 #undef far
 
-namespace CpuRasterizor
+namespace CpuRasterizer
 {
 	bool show = true;	
 	int rt_size[2];
