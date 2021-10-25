@@ -1,12 +1,12 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 namespace CpuRasterizer
 {
-	class ShadowShader : public Shader
+	class ShadowShader : public ShaderProgram
 	{
 	public:
-		ShadowShader() : Shader("shadow_shader")
+		ShadowShader() : ShaderProgram("shadow_shader")
 		{}
 
 		~ShadowShader()

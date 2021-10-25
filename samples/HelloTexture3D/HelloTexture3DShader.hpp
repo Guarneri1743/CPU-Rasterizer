@@ -1,14 +1,14 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "Sampling.hpp"
 
 using namespace CpuRasterizer;
 using namespace tinymath;
 
-class HelloTexture3DShader : public Shader
+class HelloTexture3DShader : public ShaderProgram
 {
 public:
-	HelloTexture3DShader() : Shader("sample_shader") {}
+	HelloTexture3DShader() : ShaderProgram("sample_shader") {}
 
 	v2f vertex_shader(const a2v& input) const
 	{
@@ -31,12 +31,11 @@ public:
 		
 		// todo: strinify the key
 		property_name tex_prop = 123;
-		if (local_properties.has_int(tex_prop))
+		if (local_properties.has_texture(tex_prop))
 		{
-			auto tex_id = local_properties.get_int(tex_prop);
 			auto uvw = input.texcoord0;
 			uvw = uvw  * 0.5f + 0.5f;
-			local_properties.get_texture(tex_id)->sample(uvw.x, uvw.y, uvw.x, c);
+			local_properties.get_texture(tex_prop)->sample(uvw.x, uvw.y, uvw.x, c);
 		}
 
 		return c;

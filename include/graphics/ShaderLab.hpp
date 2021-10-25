@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "PBRShader.hpp"
 #include "SkyboxShader.hpp"
 #include "ShadowShader.hpp"
@@ -10,7 +10,7 @@
 
 namespace CpuRasterizer
 {
-	static std::unordered_map<std::string, std::shared_ptr<Shader>> name2shaders;
+	static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> name2shaders;
 
 	class ShaderLab
 	{
@@ -18,11 +18,12 @@ namespace CpuRasterizer
 		void ShaderLab::initialize()
 		{}
 
-		static std::shared_ptr<Shader> get_shader(std::string name)
+		// todo
+		static std::shared_ptr<ShaderProgram> get_shader(std::string name)
 		{
 			if (name == "pbr_shader")
 			{
-				return  std::make_shared<PBRShader>(name);
+				return  std::make_shared<PBRShader>();
 			}
 			else if (name == "skybox_shader")
 			{
@@ -38,7 +39,7 @@ namespace CpuRasterizer
 			}
 			else
 			{
-				return  std::make_shared<Shader>(name);
+				return  std::make_shared<PBRShader>();
 			}
 		}
 	};

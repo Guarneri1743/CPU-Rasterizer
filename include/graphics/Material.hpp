@@ -8,7 +8,7 @@
 
 namespace CpuRasterizer
 {
-	class Shader;
+	class ShaderProgram;
 
 	class Material : public Object
 	{
@@ -27,24 +27,26 @@ namespace CpuRasterizer
 		bool zwrite_on;
 		BlendFactor src_factor;
 		BlendFactor dst_factor;
-		BlendOp blend_op;
+		BlendFunc blend_op;
 		bool double_face;
 		bool transparent;
 		bool cast_shadow;
-		std::shared_ptr<Shader> target_shader;
-		std::shared_ptr<Shader> shadow_caster;
+		std::shared_ptr<ShaderProgram> target_shader;
+		std::shared_ptr<ShaderProgram> shadow_caster;
+		uint32_t target_shader_id;
+		uint32_t shadow_caster_id;
 		ShaderPropertyMap local_properties;
 
 	public:
 		Material();
 		Material(std::string name);
-		Material(std::string name, std::shared_ptr<Shader> shader);
+		Material(std::string name, std::shared_ptr<ShaderProgram> shader);
 		Material(const Material& other);
 		~Material();
-
-		Shader* get_shader(RenderPass pass) const;
-		void sync(Shader* shader);
-		void sync();
+		
+		void initialize();
+		uint32_t get_shader(RenderPass pass) const;
+		void use(RenderPass pass);
 		
 		Material& operator =(const Material& other);
 		void copy(const Material& other);

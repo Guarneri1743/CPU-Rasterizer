@@ -61,7 +61,7 @@ namespace CpuRasterizer
 
 	void FrameBuffer::update_stencil_buffer(size_t row, 
 											size_t col,
-											RasterFlag op_pass,
+											PipelineFeature op_pass,
 											StencilOp stencil_pass_op, 
 											StencilOp stencil_fail_op, 
 											StencilOp stencil_zfail_op, 
@@ -72,8 +72,8 @@ namespace CpuRasterizer
 			return;
 		}
 
-		bool stencil_pass = (op_pass & RasterFlag::kStencilTest) != RasterFlag::kNone;
-		bool z_pass = (op_pass & RasterFlag::kDepthTest) != RasterFlag::kNone;
+		bool stencil_pass = (op_pass & PipelineFeature::kStencilTest) != PipelineFeature::kNone;
+		bool z_pass = (op_pass & PipelineFeature::kDepthTest) != PipelineFeature::kNone;
 		stencil_t stencil;
 		stencil_buffer->read(row, col, stencil);
 		StencilOp stencil_op;
@@ -164,7 +164,7 @@ namespace CpuRasterizer
 									   const tinymath::Color& dst_color,
 									   BlendFactor src_factor, 
 									   BlendFactor dst_factor, 
-									   const BlendOp& op)
+									   const BlendFunc& op)
 	{
 		tinymath::Color lhs, rhs;
 		switch (src_factor)
@@ -231,9 +231,9 @@ namespace CpuRasterizer
 
 		switch (op)
 		{
-		case BlendOp::kAdd:
+		case BlendFunc::kAdd:
 			return lhs + rhs;
-		case BlendOp::kSub:
+		case BlendFunc::kSub:
 			return lhs - rhs;
 		}
 		return lhs + rhs;

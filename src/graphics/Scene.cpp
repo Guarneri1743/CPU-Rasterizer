@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <iostream>
 #include "Marcos.h"
-#include "GraphicsDevice.hpp"
 #include "Singleton.hpp"
 #include "GlobalShaderParams.hpp"
 #include "InputManager.hpp"
@@ -18,6 +17,9 @@
 #include "Transform.hpp"
 #include "Model.hpp"
 #include "CubeMap.hpp"
+#include "Pipeline.hpp"
+#include "CGL.h"
+#include "GraphicsDevice.hpp"
 
 #define CAMERA_ROTATE_SPEED 0.25f
 #define CAMERA_MOVE_SPEED 0.2f
@@ -57,7 +59,9 @@ namespace CpuRasterizer
 
 	void Scene::initialize()
 	{
-		float aspect = (float)CpuRasterDevice.get_width() / CpuRasterDevice.get_height();
+		size_t x, y, w, h;
+		cglGetViewport(x, y, w, h);
+		float aspect = (float)w / h;
 
 		if (main_cam == nullptr)
 		{
@@ -104,12 +108,14 @@ namespace CpuRasterizer
 		}, this);
 
 		// setup shadowmap and cubemap
-		shadowmap_id = CpuRasterDevice.create_buffer(512, 512, FrameContent::kDepth);
+
+		shadowmap_id = cglCreateBuffer(512, 512, FrameContent::kDepth);
 		std::shared_ptr<RenderTexture> shadowmap;
+		// todo
 		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
 
 		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
-		ShaderPropertyMap::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
+		ShaderPropertyMap::global_shader_properties.set_rendertexture(shadowmap_prop, shadowmap);
 	}
 
 
@@ -216,20 +222,25 @@ namespace CpuRasterizer
 
 	void Scene::render()
 	{
-		CpuRasterDevice.clear_buffer(FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil | FrameContent::kCoverage);
+		cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil | cglFrameContent::kCoverage);
 		if (CpuRasterSharedData.enable_shadow)
 		{
-			auto prev_enable_msaa = CpuRasterSharedData.enable_msaa;
-			CpuRasterSharedData.enable_msaa = false;
-			CpuRasterDevice.set_active_rendertexture(shadowmap_id);
+			auto prev_enable_msaa = CpuRasterDevice.is_flag_enabled(PipelineFeature::kMSAA);
+			cglDisable(PipelineFeature::kMSAA);
+			cglSetActiveRenderTarget(shadowmap_id);
 			render_shadow();
-			CpuRasterDevice.fence_pixels();
-			CpuRasterDevice.reset_active_rendertexture();
-			CpuRasterSharedData.enable_msaa = prev_enable_msaa;
+			cglFencePixels();
+			cglResetActiveRenderTarget();
+			if (prev_enable_msaa)
+			{
+				cglEnable(PipelineFeature::kMSAA);
+			}
 		}
 
 		render_objects();
-		CpuRasterDevice.fence_pixels();
+
+		cglFencePixels();
+
 		draw_gizmos();
 	}
 
@@ -289,6 +300,7 @@ namespace CpuRasterizer
 	{
 		if (CpuRasterSharedData.debug_flag == RenderFlag::kNone) { return; }
 
+		// todo
 		RenderTexture* active_fbo = CpuRasterDevice.get_active_rendertexture();
 		std::shared_ptr<RenderTexture> shadow_map;
 		CpuRasterDevice.get_buffer(shadowmap_id, shadow_map);
@@ -314,7 +326,7 @@ namespace CpuRasterizer
 				float cur_depth;
 				if (buffer.get_framebuffer()->read_depth(pixel.row, pixel.col, cur_depth))
 				{
-					float linear_depth = Shader::linearize_01depth(cur_depth, CpuRasterSharedData.cam_near, CpuRasterSharedData.cam_far);
+					float linear_depth = Pipeline::linearize_01depth(cur_depth, CpuRasterSharedData.cam_near, CpuRasterSharedData.cam_far);
 					tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
 					depth_color.a = 1.0f;
 					tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);

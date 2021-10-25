@@ -100,7 +100,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void TileBasedManager::push_draw_task(const Triangle& tri, const Shader& shader)
+	void TileBasedManager::push_draw_task(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		auto bounds = tri.get_bounds();
 		int padding = kBoundsPadding;
@@ -133,7 +133,7 @@ namespace CpuRasterizer
 			for (size_t col = tile_col_start; col <= tile_col_end; col++)
 			{
 				size_t tile_idx = coord2index(row, col, col_tile_resolution);
-				tile_tasks[tile_idx].produce({ tri, &shader });
+				tile_tasks[tile_idx].produce({ tri, &shader, ctx });
 			}
 		}
 	}

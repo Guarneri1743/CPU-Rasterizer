@@ -154,7 +154,7 @@ enum class BlendFactor
 	kOneMinusDstColor = 8
 };
 
-enum class BlendOp
+enum class BlendFunc
 {
 	kAdd = 0,
 	kSub = 1
@@ -182,7 +182,14 @@ enum class VertexOrder
 	CW
 };
 
-enum class RasterFlag
+enum class TextureType
+{
+	Texture,
+	Cubemap,
+	RenderTexture
+};
+
+enum class PipelineFeature
 {
 	kNone = 0,
 	kScissorTest = 1 << 0,
@@ -191,7 +198,8 @@ enum class RasterFlag
 	kDepthTest = 1 << 3,
 	kBlending = 1 << 4,
 	kFaceCulling = 1 << 5,
-	kZWrite = 1 << 6
+	kZWrite = 1 << 6,
+	kMSAA = 1 << 7
 };
 
 enum class BufferFlag
@@ -325,7 +333,7 @@ template<>
 struct support_bitwise_enum<BufferFlag> : std::true_type {};
 
 template<>
-struct support_bitwise_enum<RasterFlag> : std::true_type {};
+struct support_bitwise_enum<PipelineFeature> : std::true_type {};
 
 template<>
 struct support_bitwise_enum<ColorMask> : std::true_type {};

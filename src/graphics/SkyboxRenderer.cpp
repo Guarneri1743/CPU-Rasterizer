@@ -4,6 +4,7 @@
 #include "Material.hpp"
 #include "Singleton.hpp"
 #include "Serialization.hpp"
+#include "CGL.h"
 
 namespace CpuRasterizer
 {
@@ -42,8 +43,8 @@ namespace CpuRasterizer
 
 	void SkyboxRenderer::before_render() const
 	{
-		CpuRasterSharedData.ztest_func = CompareFunc::kAlways;
-		CpuRasterSharedData.raster_flag &= ~RasterFlag::kFaceCulling;
+		cglDepthFunc(CompareFunc::kAlways);
+		cglDisable(PipelineFeature::kFaceCulling);
 	}
 
 	void SkyboxRenderer::draw_gizmos() const

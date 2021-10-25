@@ -20,13 +20,13 @@ int main()
 	cglInitWindow("Demo", w, h);
 
 	// set viewport
-	cglSetViewPort(w, h);
+	cglSetViewPort(0, 0, w, h);
 
 	// resize callback
 	cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 	{
 		UNUSED(ud);
-		cglSetViewPort(resized_w, resized_h);
+		cglSetViewPort(0, 0, resized_w, resized_h);
 	}, nullptr);
 
 	// setup shader properties
@@ -48,21 +48,24 @@ int main()
 	cglMat4 view = cglLookat(cam_pos, cube_pos, cglVec3Up);
 	cglMat4 proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
 
-	shader.local_properties.set_mat4x4(mat_model_prop, model);
-	shader.local_properties.set_mat4x4(mat_view_prop, view);
-	shader.local_properties.set_mat4x4(mat_projection_prop, proj);
-	shader.local_properties.set_mat4x4(mat_vp_prop, proj * view);
-	shader.local_properties.set_mat4x4(mat_mvp_prop, proj * view * model);
+	uint32_t shader_id;
+	cglCreateProgram(&shader, shader_id);
 
-	shader.local_properties.set_float4(cam_position_prop, cam_pos);
+	cglUniformMatrix4fv(shader_id, mat_model_prop, model);
+	cglUniformMatrix4fv(shader_id, mat_view_prop, view);
+	cglUniformMatrix4fv(shader_id, mat_projection_prop, proj);
+	cglUniformMatrix4fv(shader_id, mat_vp_prop, proj * view);
+	cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
+	cglUniform4fv(shader_id, cam_position_prop, cam_pos);
+	cglUniform4fv(shader_id, albedo_prop, cglVec4(0.5f, 0.0f, 0.0f, 1.0f));
+	cglUniform4fv(shader_id, light_direction_prop, light_direction);
+	cglUniform4fv(shader_id, light_color_prop, cglVec4(1.0f, 1.0f, 1.0f, 1.0f));
+	cglUniform1f(shader_id, light_intensity_prop, 1.0f);
 
-	shader.double_face = false;
-	shader.ztest_func = cglCompareFunc::kLess;
-
-	shader.local_properties.set_float4(albedo_prop, cglVec4(0.5f, 0.0f, 0.0f, 1.0f));
-	shader.local_properties.set_float4(light_direction_prop, light_direction);
-	shader.local_properties.set_float4(light_color_prop, cglVec4(1.0f, 1.0f, 1.0f, 1.0f));
-	shader.local_properties.set_float(light_intensity_prop, 1.0f);
+	cglDisable(cglPipelineFeature::kBlending);
+	cglEnable(cglPipelineFeature::kFaceCulling);
+	cglCullFace(cglFaceCulling::Back);
+	cglDepthFunc(cglCompareFunc::kLess);
 
 	std::vector<Vertex> vert;
 	std::vector<size_t> ind;
@@ -133,6 +136,8 @@ int main()
 
 		shader.local_properties.set_float4(light_direction_prop, light_direction);
 
+		cglUseProgram(shader_id);
+
 		for (int i = 0; i < ind.size(); i += 3)
 		{
 			size_t index = ind[i];
@@ -140,7 +145,7 @@ int main()
 			auto& v2 = vert[index + 1];
 			auto& v3 = vert[index + 2];
 			// submit primitive
-			cglSubmitPrimitive(&shader, v1, v2, v3);
+			cglSubmitPrimitive(v1, v2, v3);
 		}
 
 		// fence primitive tasks

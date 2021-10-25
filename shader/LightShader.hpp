@@ -1,12 +1,12 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 namespace CpuRasterizer
 {
-	class LightShader : public Shader
+	class LightShader : public ShaderProgram
 	{
 	public:
-		LightShader() : Shader("light_shader") {}
+		LightShader() : ShaderProgram("light_shader") {}
 
 		v2f LightShader::vertex_shader(const a2v& input) const
 		{

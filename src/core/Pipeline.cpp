@@ -214,4 +214,32 @@ namespace CpuRasterizer
 		screen.w = ndc.w;
 		return screen;
 	}
+
+	float Pipeline::linearize_depth(float depth, float near, float far)
+	{
+#ifdef GL_LIKE
+		float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
+#else
+		float ndc_z = depth; // [0, 1] (DX)
+#endif
+
+#ifdef LEFT_HANDED 
+#ifdef GL_LIKE
+		return (2.0f * near * far) / (far + near - ndc_z * (far - near));
+#else
+		return (far * near) / (far - (far - near) * ndc_z);
+#endif
+#else
+#ifdef GL_LIKE
+		return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
+#else
+		return (far * near) / (-far - (far - near) * ndc_z);
+#endif
+#endif
+	}
+
+	float Pipeline::linearize_01depth(float depth, float near, float far)
+	{
+		return (linearize_depth(depth, near, far) - near) / (far - near);
+	}
 }

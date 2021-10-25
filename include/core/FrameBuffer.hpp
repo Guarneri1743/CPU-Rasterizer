@@ -62,7 +62,7 @@ namespace CpuRasterizer
 
 		void update_stencil_buffer(size_t row,
 								   size_t col,
-								   RasterFlag op_pass,
+								   PipelineFeature op_pass,
 								   StencilOp stencil_pass_op,
 								   StencilOp stencil_fail_op,
 								   StencilOp stencil_zfail_op,
@@ -79,7 +79,7 @@ namespace CpuRasterizer
 							  const tinymath::Color& dst_color, 
 							  BlendFactor src_factor, 
 							  BlendFactor dst_factor, 
-							  const BlendOp& op);
+							  const BlendFunc& op);
 
 	private:
 		FrameContent content_flag;

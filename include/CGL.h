@@ -3,9 +3,9 @@
 #include "tinymath.h"
 #include "Define.hpp"
 #include "RasterAttributes.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
-#define BUILD_CGL // todo
+#define BUILD_CGL // todo: put it in makefile
 
 #define cglVec2 tinymath::vec2f
 #define cglVec3 tinymath::vec3f
@@ -85,13 +85,15 @@
 #define cglMultisampleFrequency MultiSampleFrequency
 #define cglTextureFormat TextureFormat
 #define cglFiltering Filtering
-#define cglBlendOp BlendOp
+#define cglBlendOp BlendFunc
 #define cglWrapMode WrapMode
-#define cglZWrite ZWrite
 #define cglStencilOp StencilOp
+#define cglBlendFunc BlendFunc
 #define cglBlendFactor BlendFactor
 #define cglColorMask ColorMask
 #define cglPointer void*
+#define cglTextureType TextureType
+#define cglStencilValue stencil_t
 
 // colors
 #define cglColorGray tinymath::color_gray
@@ -109,7 +111,7 @@
 #define cglEncodeRgba16 ColorEncoding::encode_rgba16f
 #define cglDecode ColorEncoding::decode
 
-#define cglRasterFlag RasterFlag
+#define cglPipelineFeature PipelineFeature
 #define cglFaceCulling FaceCulling
 #define cglVertexOrder VertexOrder
 #define cglCompareFunc CompareFunc
@@ -141,18 +143,24 @@ extern "C" {
 	CGL_EXTERN void cglCloseMainWindow();
 	CGL_EXTERN void cglClearMainWindow();
 
-	// misc
-	CGL_EXTERN void cglEnable(cglRasterFlag op);
-	CGL_EXTERN void cglDisable(cglRasterFlag op);
+	// context state
+	CGL_EXTERN void cglEnable(cglPipelineFeature flag);
+	CGL_EXTERN void cglDisable(cglPipelineFeature flag);
 	CGL_EXTERN void cglCullFace(cglFaceCulling face);
 	CGL_EXTERN void cglFrontFace(cglVertexOrder order);
-	CGL_EXTERN void cglFrontFace(cglVertexOrder order);
 	CGL_EXTERN void cglDepthFunc(cglCompareFunc func);	
-	CGL_EXTERN void cglSetViewPort(size_t w, size_t h);
+	CGL_EXTERN void cglSetBlendFunc(cglBlendFunc func);
+	CGL_EXTERN void cglSetStencilFunc(cglCompareFunc func);
+	CGL_EXTERN void cglStencilMask(cglStencilValue ref_val, cglStencilValue write_mask, cglStencilValue read_mask);
+	CGL_EXTERN void cglSetStencilOp(cglStencilOp pass_op, cglStencilOp fail_op, cglStencilOp zfail_op);
+	CGL_EXTERN void cglSetBlendFactor(cglBlendFactor src_factor, cglBlendFactor dst_factor);
+	CGL_EXTERN void cglSetColorMask(cglColorMask mask);
+
+	// misc
+	CGL_EXTERN void cglSetViewPort(size_t x, size_t y, size_t width, size_t height);
+	CGL_EXTERN void cglGetViewport(size_t& x, size_t& y, size_t& width, size_t& height);
 	CGL_EXTERN void cglSetSubSampleCount(uint8_t count);
 	CGL_EXTERN uint8_t cglGetSubSampleCount();
-	CGL_EXTERN int cglSetMSAAEnabled(int enabled);
-	CGL_EXTERN int cglIsMSAAEnabled();
 	CGL_EXTERN void cglSetMultisampleFrequency(cglMultisampleFrequency frequency);
 	CGL_EXTERN void cglSetClearColor(cglColor clear_color);
 	CGL_EXTERN void cglClearBuffer(cglFrameContent content);
@@ -160,22 +168,29 @@ extern "C" {
 	CGL_EXTERN void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col);
 	CGL_EXTERN void cglFencePrimitives();
 	CGL_EXTERN void cglFencePixels();
+	CGL_EXTERN void cglSetActiveRenderTarget(uint32_t id);
+	CGL_EXTERN void cglResetActiveRenderTarget();
+	CGL_EXTERN void* cglGetTargetColorBuffer();
 	CGL_EXTERN int cglGenId(uint32_t& id);
+	CGL_EXTERN uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
 
-	// texture
+	// todo: texture
+	// decouple cpu resource and 'gpu' resource
 	CGL_EXTERN bool cglGenTexture(uint32_t& id);
+	CGL_EXTERN void cglBindTexture(cglTextureType type, uint32_t id);
 	CGL_EXTERN bool cglActivateTexture(uint32_t id);
-	CGL_EXTERN void cglTexImage2D(uint32_t id, size_t width, size_t height, cglTextureFormat fmt, cglPointer data);
-	CGL_EXTERN void cglTexImage3D(uint32_t id, size_t width, size_t height, size_t layer_count, cglTextureFormat fmt, cglPointer data);
 	CGL_EXTERN void cglGenerateMipmap();
 
 	// shader
-	CGL_EXTERN bool cglCreateProgram(CpuRasterizer::Shader* shader, uint32_t& id);
-	CGL_EXTERN bool cglUseProgram(uint32_t& id);
+	CGL_EXTERN bool cglCreateProgram(CpuRasterizer::ShaderProgram* shader, uint32_t& id);
+	CGL_EXTERN bool cglUseProgram(uint32_t id);
 	CGL_EXTERN void cglUniform1i(uint32_t id, property_name prop_id, int v);
 	CGL_EXTERN void cglUniform1f(uint32_t id, property_name prop_id, float v);
 	CGL_EXTERN void cglUniform4fv(uint32_t id, property_name prop_id, cglVec4 v);
 	CGL_EXTERN void cglUniformMatrix4fv(uint32_t id, property_name prop_id, cglMat4 mat);
+
+	// tools
+	CGL_EXTERN void cglDrawCoordinates(const cglVec3& pos, const cglVec3& forward, const cglVec3& up, const cglVec3& right, const cglMat4& m, const cglMat4& v, const cglMat4& p);
 
 #ifdef __cplusplus
 }

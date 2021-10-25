@@ -1,13 +1,13 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 using namespace CpuRasterizer;
 using namespace tinymath;
 
-class HelloTextureShader : public Shader
+class HelloTextureShader : public ShaderProgram
 {
 public:
-	HelloTextureShader() : Shader("sample_shader") {}
+	HelloTextureShader() : ShaderProgram("sample_shader") {}
 
 	v2f vertex_shader(const a2v& input) const
 	{
@@ -26,14 +26,12 @@ public:
 	{
 		UNUSED(input);
 
-		// visualize uv
-		//return input.uv;
-
 		// sample texture
 		Color c;
-		if (local_properties.has_texture(123))
+		property_name tex_prop = 123;
+		if (local_properties.has_texture(tex_prop))
 		{
-			local_properties.get_texture(123)->sample(input.uv.x, input.uv.y, c);
+			local_properties.get_texture(tex_prop)->sample(input.uv.x, input.uv.y, c);
 		}
 
 		return c;

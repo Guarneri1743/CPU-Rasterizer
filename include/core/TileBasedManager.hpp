@@ -6,7 +6,8 @@
 #include "RawBuffer.hpp"
 #include "SafeQueue.hpp"
 #include "Triangle.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
+#include "GraphicsContext.hpp"
 
 namespace CpuRasterizer
 {
@@ -15,7 +16,8 @@ namespace CpuRasterizer
 	struct TileTask
 	{
 		Triangle triangle;
-		const Shader* shader;
+		const ShaderProgram* shader;
+		GraphicsContext context;
 	};
 
 	struct Tile
@@ -27,12 +29,12 @@ namespace CpuRasterizer
 	class TileBasedManager
 	{
 	public:
-		TileBasedManager(size_t w, size_t h);
+		TileBasedManager(size_t width, size_t height);
 		~TileBasedManager();
 
-		void resize(size_t w, size_t h);
+		void resize(size_t width, size_t height);
 		void foreach_tile(std::function<void(tinymath::Rect& tile, SafeQueue<TileTask>& task_queue)> func);
-		void push_draw_task(const Triangle& tri, const Shader& shader);
+		void push_draw_task(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
 
 	private:
 		void rebuild_tiles(

@@ -1,9 +1,9 @@
 #pragma once
-#include <unordered_map>
-#include "tinymath.h"
+#include <string>
 #include "Singleton.hpp"
-#include "Light.hpp"
 #include "GlobalShaderParams.hpp"
+#include "Light.hpp"
+#include "tinymath.h"
 #include "Texture.hpp"
 #include "ShaderPropertyMap.hpp"
 #include "RasterAttributes.hpp"
@@ -153,7 +153,7 @@ namespace CpuRasterizer
 		return ret;
 	}
 
-	class Shader
+	class ShaderProgram
 	{
 	public:
 		bool discarded = false;
@@ -161,109 +161,11 @@ namespace CpuRasterizer
 		ShaderPropertyMap local_properties;
 
 	public:
-		virtual ~Shader() {}
+		ShaderProgram(std::string _name) : name(_name) {}
+		virtual ~ShaderProgram() {}
 
-		Shader(std::string name) {
-			this->name = name;
-		}
-
-		virtual v2f vertex_shader(const a2v& input) const
-		{
-			v2f o;
-			auto opos = tinymath::vec4f(input.position.x, input.position.y, input.position.z, 1.0f);
-			auto wpos = model() * opos;
-			auto cpos = vp_matrix() * wpos;
-			o.position = cpos;
-			o.world_pos = wpos.xyz;
-			o.color = input.color;
-			tinymath::mat3x3 normal_matrix = tinymath::mat4x4_to_mat3x3(tinymath::transpose(tinymath::inverse(model())));
-			o.normal = normal_matrix * input.normal;
-			o.uv = input.uv;
-			return o;
-		}
-
-		virtual tinymath::Color fragment_shader(const v2f& input) const
-		{
-			auto main_light = CpuRasterSharedData.main_light;
-			auto point_lights = CpuRasterSharedData.point_lights;
-
-			tinymath::vec3f cam_pos = CpuRasterSharedData.camera_pos;
-			tinymath::vec3f wpos = input.world_pos;
-			tinymath::vec4f screen_pos = input.position;
-
-			tinymath::vec3f normal = tinymath::normalize(input.normal);
-			tinymath::vec3f view_dir = tinymath::normalize(cam_pos - wpos);
-
-			tinymath::Color ret = tinymath::kColorBlack;
-			tinymath::Color albedo = tinymath::kColorWhite;
-			if (local_properties.has_texture(albedo_prop) && local_properties.get_texture(albedo_prop)->sample(input.uv.x, input.uv.y, input.ddx.uv, input.ddy.uv, albedo))
-			{
-				if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
-				{
-					albedo = tinymath::pow(albedo, 2.2f);
-				}
-			}
-
-			if (local_properties.has_float4(tint_color_prop))
-			{
-				albedo *= tinymath::Color(local_properties.get_float4(tint_color_prop));
-			}
-
-			float ndl = tinymath::dot(normal, -tinymath::normalize(main_light.forward));
-
-			ret += ndl * albedo;
-
-			if ((CpuRasterSharedData.debug_flag & RenderFlag::kUV) != RenderFlag::kNone)
-			{
-				return tinymath::Color(input.uv.x, input.uv.y, 0.0f, 1.0f);
-			}
-
-			if ((CpuRasterSharedData.debug_flag & RenderFlag::kVertexColor) != RenderFlag::kNone)
-			{
-				return input.color;
-			}
-
-			if ((CpuRasterSharedData.debug_flag & RenderFlag::kNormal) != RenderFlag::kNone)
-			{
-				return normal;
-			}
-
-			if (CpuRasterSharedData.color_space == ColorSpace::kLinear)
-			{
-				ret = ret / (ret + tinymath::kColorWhite);
-				ret = tinymath::pow(ret, 1.0f / 2.2f);
-			}
-
-			return tinymath::Color(ret.r, ret.g, ret.b, 1.0f);
-		}
-
-		static inline float linearize_depth(float depth, float near, float far)
-		{
-		#ifdef GL_LIKE
-			float ndc_z = depth * 2.0f - 1.0f;  // [0, 1] -> [-1, 1] (GL)
-		#else
-			float ndc_z = depth; // [0, 1] (DX)
-		#endif
-
-		#ifdef LEFT_HANDED 
-		#ifdef GL_LIKE
-			return (2.0f * near * far) / (far + near - ndc_z * (far - near));
-		#else
-			return (far * near) / (far - (far - near) * ndc_z);
-		#endif
-		#else
-		#ifdef GL_LIKE
-			return (2.0f * near * far) / (-(far + near) - ndc_z * (far - near));
-		#else
-			return (far * near) / (-far - (far - near) * ndc_z);
-		#endif
-		#endif
-		}
-
-		static inline float linearize_01depth(float depth, float near, float far)
-		{
-			return (linearize_depth(depth, near, far) - near) / (far - near);
-		}
+		virtual v2f vertex_shader(const a2v& input) const = 0;
+		virtual tinymath::Color fragment_shader(const v2f& input) const = 0;
 
 		inline tinymath::mat4x4 model() const { return local_properties.get_mat4x4(mat_model_prop); }
 		inline tinymath::mat4x4 view() const { return local_properties.get_mat4x4(mat_view_prop); }

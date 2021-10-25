@@ -43,9 +43,9 @@ namespace CpuRasterizer
 		return name2cubemap.count(name) > 0;
 	}
 
-	bool ShaderPropertyMap::has_framebuffer(property_name name) const
+	bool ShaderPropertyMap::has_rendertexture(property_name name) const
 	{
-		return name2framebuffer.count(name) > 0;
+		return name2rendertexture.count(name) > 0;
 	}
 
 	bool ShaderPropertyMap::has_mat4x4(property_name name) const
@@ -91,13 +91,13 @@ namespace CpuRasterizer
 		name2cubemap[name] = cubemap;
 	}
 
-	void ShaderPropertyMap::set_framebuffer(property_name name, std::shared_ptr<RenderTexture> buffer)
+	void ShaderPropertyMap::set_rendertexture(property_name name, std::shared_ptr<RenderTexture> buffer)
 	{
 		if (buffer == nullptr)
 		{
 			return;
 		}
-		name2framebuffer[name] = buffer;
+		name2rendertexture[name] = buffer;
 	}
 
 	int ShaderPropertyMap::get_int(property_name name) const
@@ -156,9 +156,9 @@ namespace CpuRasterizer
 
 	std::shared_ptr<RenderTexture> ShaderPropertyMap::get_framebuffer(property_name name) const
 	{
-		if (name2framebuffer.count(name) > 0)
+		if (name2rendertexture.count(name) > 0)
 		{
-			return name2framebuffer.at(name);
+			return name2rendertexture.at(name);
 		}
 		return nullptr;
 	}
@@ -171,7 +171,7 @@ namespace CpuRasterizer
 		this->name2int = other.name2int;
 		this->name2tex = other.name2tex;
 		this->name2cubemap = other.name2cubemap;
-		this->name2framebuffer = other.name2framebuffer;
+		this->name2rendertexture = other.name2rendertexture;
 		this->keywords = other.keywords;
 	}
 }
