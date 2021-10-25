@@ -129,12 +129,6 @@ enum class CompareFunc
 	kNotEqual = 7
 };
 
-enum class ZWrite
-{
-	kOff = 0,
-	kOn = 1
-};
-
 enum class StencilOp
 {
 	kKeep = 0,
@@ -175,23 +169,29 @@ enum class ColorMask
 	kAlpha = 1 << 3
 };
 
-enum class CullingAndClippingFlag
+enum class FaceCulling
 {
-	kNone = 0,
-	kAppFrustumCulling = 1 << 0,
-	kNearPlaneClipping = 1 << 1,
-	kScreenClipping = 1 << 2,
-	kBackFaceCulling = 1 << 3
+	None,
+	Back,
+	Front
 };
 
-enum class PerSampleOperation
+enum class VertexOrder
+{
+	CCW,
+	CW
+};
+
+enum class RasterFlag
 {
 	kNone = 0,
 	kScissorTest = 1 << 0,
 	kAlphaTest = 1 << 1,
 	kStencilTest = 1 << 2,
 	kDepthTest = 1 << 3,
-	kBlending = 1 << 4
+	kBlending = 1 << 4,
+	kFaceCulling = 1 << 5,
+	kZWrite = 1 << 6
 };
 
 enum class BufferFlag
@@ -325,10 +325,7 @@ template<>
 struct support_bitwise_enum<BufferFlag> : std::true_type {};
 
 template<>
-struct support_bitwise_enum<PerSampleOperation> : std::true_type {};
-
-template<>
-struct support_bitwise_enum<CullingAndClippingFlag> : std::true_type {};
+struct support_bitwise_enum<RasterFlag> : std::true_type {};
 
 template<>
 struct support_bitwise_enum<ColorMask> : std::true_type {};

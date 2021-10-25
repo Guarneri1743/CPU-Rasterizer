@@ -79,7 +79,7 @@ namespace CpuRasterizer
 		v2f process_vertex(const Shader& shader, const Vertex& vert) const;
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader);
 		bool process_fragment(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const Shader& shader, SubsampleParam& subsample_param);
-		bool validate_fragment(PerSampleOperation op_pass) const;
+		bool validate_fragment(RasterFlag op_pass) const;
 		void resize(size_t w, size_t h);
 
 	public:

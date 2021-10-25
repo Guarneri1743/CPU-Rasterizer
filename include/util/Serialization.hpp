@@ -576,7 +576,7 @@ namespace CpuRasterizer
 			doc.AddMember("src_factor", (int32_t)material.src_factor, doc.GetAllocator());
 			doc.AddMember("dst_factor", (int32_t)material.dst_factor, doc.GetAllocator());
 			doc.AddMember("ztest_func", (int32_t)material.ztest_func, doc.GetAllocator());
-			doc.AddMember("zwrite_mode", (int32_t)material.zwrite_mode, doc.GetAllocator());
+			doc.AddMember("zwrite_on", material.zwrite_on, doc.GetAllocator());
 			doc.AddMember("stencil_fail_op", (int32_t)material.stencil_fail_op, doc.GetAllocator());
 			doc.AddMember("stencil_func", (int32_t)material.stencil_func, doc.GetAllocator());
 			doc.AddMember("stencil_pass_op", (int32_t)material.stencil_pass_op, doc.GetAllocator());
@@ -626,7 +626,14 @@ namespace CpuRasterizer
 				material.src_factor = (BlendFactor)doc["src_factor"].GetInt();
 				material.dst_factor = (BlendFactor)doc["dst_factor"].GetInt();
 				material.ztest_func = (CompareFunc)doc["ztest_func"].GetInt();
-				material.zwrite_mode = (ZWrite)doc["zwrite_mode"].GetInt();
+				if (doc.HasMember("zwrite_on"))
+				{
+					material.zwrite_on = doc["zwrite_on"].GetBool();
+				}
+				else if(doc.HasMember("zwrite_mode"))
+				{
+					material.zwrite_on = doc["zwrite_mode"].GetInt() == 1 ? true : false;
+				}
 				material.stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
 				material.stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
 				material.stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();

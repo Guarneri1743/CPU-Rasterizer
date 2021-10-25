@@ -62,7 +62,7 @@ namespace CpuRasterizer
 
 		void update_stencil_buffer(size_t row,
 								   size_t col,
-								   PerSampleOperation op_pass,
+								   RasterFlag op_pass,
 								   StencilOp stencil_pass_op,
 								   StencilOp stencil_fail_op,
 								   StencilOp stencil_zfail_op,

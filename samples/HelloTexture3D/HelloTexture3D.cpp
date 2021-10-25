@@ -45,24 +45,6 @@ cglVert cube_vertices[36] = {
 		cglVert(cglVec4(-0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f, 1.0f,  0.0f), cglVec2(0.0f,  1.0f)),
 };
 
-HelloTexture3DShader shader_;
-cglMat4 model_;
-cglMat4 view_;
-cglMat4 proj_;
-
-void draw_cube()
-{
-	for (int i = 0; i < 36; i += 3)
-	{
-		cube_vertices[i].mask |= kNormalMask;
-		cube_vertices[i + 1].mask |= kNormalMask;
-		cube_vertices[i + 2].mask |= kNormalMask;
-		 
-		// submit primitive
-		cglSubmitPrimitive(&shader_, cube_vertices[i], cube_vertices[i + 1], cube_vertices[i + 2]);
-	}
-}
-
 int main()
 {
 	size_t w = 600;
@@ -80,7 +62,29 @@ int main()
 		cglSetViewPort(resized_w, resized_h);
 	}, nullptr);
 
-	// setup shader_ properties
+	// create a 3d texture
+	cglColorRgb* tex_buf = new cglColorRgb[64 * 64 * 64 * sizeof(cglColorRgb)];
+
+	for (size_t r = 0; r < 64; ++r)
+	{
+		for (size_t c = 0; c < 64; ++c)
+		{
+			for (size_t l = 0; l < 64; ++l)
+			{
+				tex_buf[r * 64 * 64 + c * 64 + l] = cglEncodeRgb((float)r / (float)64, (float)c / (float)64, (float)l / (float)64);
+			}
+		}
+	}
+
+	uint32_t tex_id;
+	cglGenTexture(tex_id);
+	cglTexImage3D(tex_id, 64, 64, 64, cglTextureFormat::kRGB, tex_buf);
+
+	uint32_t shader_id;
+	HelloTexture3DShader shader;
+	cglCreateProgram(&shader, shader_id);
+
+	// setup shader properties
 	cglVec3 cam_pos = cglVec3(1.5f, 1.5f, 1.5f);
 	cglVec3 cube_pos = cglVec3Zero;
 	float angle = 0.0f;
@@ -88,37 +92,25 @@ int main()
 	float near = 0.05f;
 	float far = 100.0f;
 
-	model_ = cglTranslation(cube_pos) * cglRotation(cglVec3Up, angle);
-	view_ = cglLookat(cam_pos, cube_pos, cglVec3Up);
-	proj_ = cglPerspective(60.0f, (float)w / (float)h, near, far);
+	cglMat4 model;
+	cglMat4 view;
+	cglMat4 proj;
 
-	shader_.local_properties.set_mat4x4(mat_model_prop, model_);
-	shader_.local_properties.set_mat4x4(mat_view_prop, view_);
-	shader_.local_properties.set_mat4x4(mat_projection_prop, proj_);
-	shader_.local_properties.set_mat4x4(mat_vp_prop, proj_ * view_);
-	shader_.local_properties.set_mat4x4(mat_mvp_prop, proj_ * view_ * model_);
+	model = cglTranslation(cube_pos) * cglRotation(cglVec3Up, angle);
+	view = cglLookat(cam_pos, cube_pos, cglVec3Up);
+	proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
 
-	shader_.ztest_func = cglCompareFunc::kLess;
-	shader_.double_face = true;
+	cglUniformMatrix4fv(shader_id, mat_model_prop, model);
+	cglUniformMatrix4fv(shader_id, mat_view_prop, view);
+	cglUniformMatrix4fv(shader_id, mat_projection_prop, proj);
+	cglUniformMatrix4fv(shader_id, mat_vp_prop, proj * view);
+	cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
 
-	// create a 3d texture
-	auto tex = std::make_shared<Texture>(128, 128, 128, cglTextureFormat::kRGB);
-	tex->filtering = cglFiltering::kPoint;
-	tex->wrap_mode = cglWrapMode::kRepeat;
+	cglEnable(cglRasterFlag::kDepthTest);
+	cglDepthFunc(cglCompareFunc::kLess);
 
-	for (size_t r = 0; r < tex->height; ++r)
-	{
-		for (size_t c = 0; c < tex->width; ++c)
-		{
-			for (size_t l = 0; l < tex->layer_count; ++l)
-			{
-				tex->write(r, c, l, { (float)r / (float)tex->width, (float)c / (float)tex->height, (float)l / (float)tex->layer_count, 1.0f });
-			}
-		}
-	}
-
-	property_name prop_id = 123;
-	shader_.local_properties.set_texture(prop_id, tex);
+	cglDisable(cglRasterFlag::kFaceCulling);
+	cglCullFace(cglFaceCulling::None);
 
 	// set background color
 	cglSetClearColor(tinymath::kColorBlue);
@@ -132,14 +124,31 @@ int main()
 		cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
 
 		angle += 2.0f;
-		model_ = cglTranslation(cube_pos) * cglRotation(cglVec3Up, angle);
-		shader_.local_properties.set_mat4x4(mat_model_prop, model_);
-		shader_.local_properties.set_mat4x4(mat_view_prop, view_);
-		shader_.local_properties.set_mat4x4(mat_projection_prop, proj_);
-		shader_.local_properties.set_mat4x4(mat_vp_prop, proj_ * view_);
-		shader_.local_properties.set_mat4x4(mat_mvp_prop, proj_ * view_ * model_);
+		model = cglTranslation(cube_pos) * cglRotation(cglVec3Up, angle);
+
+		cglUniformMatrix4fv(shader_id, mat_model_prop, model);
+		cglUniformMatrix4fv(shader_id, mat_view_prop, view);
+		cglUniformMatrix4fv(shader_id, mat_projection_prop, proj);
+		cglUniformMatrix4fv(shader_id, mat_vp_prop, proj * view);
+		cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
+
+		cglActivateTexture(tex_id);
+
+		// todo: strinify the key
+		property_name tex_prop = 123;
+		cglUniform1i(shader_id, tex_prop, tex_id);
+
 		// submit primitive
-		draw_cube();
+		for (int i = 0; i < 36; i += 3)
+		{
+			cube_vertices[i].mask |= kNormalMask;
+			cube_vertices[i + 1].mask |= kNormalMask;
+			cube_vertices[i + 2].mask |= kNormalMask;
+
+			cglUseProgram(shader_id);
+			// submit primitive
+			cglSubmitPrimitive(cube_vertices[i], cube_vertices[i + 1], cube_vertices[i + 2]);
+		}
 
 		// fence primitive tasks
 		cglFencePrimitives();

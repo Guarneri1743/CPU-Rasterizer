@@ -12,6 +12,8 @@ namespace CpuRasterizer
 		gizmos = false;
 		Material* mat = new Material();
 		Serializer::deserialize("/materials/skybox.material", *mat);
+		mat->double_face = true;
+		mat->ztest_func = CompareFunc::kAlways;
 		target = PrimitiveFactory::skybox(std::shared_ptr<Material>(mat));
 	}
 
@@ -36,6 +38,12 @@ namespace CpuRasterizer
 	tinymath::mat4x4 SkyboxRenderer::model_matrix() const
 	{
 		return target->transform->world_trs;
+	}
+
+	void SkyboxRenderer::before_render() const
+	{
+		CpuRasterSharedData.ztest_func = CompareFunc::kAlways;
+		CpuRasterSharedData.raster_flag &= ~RasterFlag::kFaceCulling;
 	}
 
 	void SkyboxRenderer::draw_gizmos() const

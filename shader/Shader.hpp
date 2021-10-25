@@ -156,22 +156,6 @@ namespace CpuRasterizer
 	class Shader
 	{
 	public:
-		ColorMask color_mask;
-		CompareFunc stencil_func;
-		StencilOp stencil_pass_op;
-		StencilOp stencil_fail_op;
-		StencilOp stencil_zfail_op;
-		uint8_t stencil_ref_val;
-		uint8_t stencil_write_mask;
-		uint8_t stencil_read_mask;
-		CompareFunc ztest_func;
-		ZWrite zwrite_mode;
-		BlendFactor src_factor;
-		BlendFactor dst_factor;
-		BlendOp blend_op;
-		bool transparent;
-		bool double_face;
-		bool shadow;
 		bool discarded = false;
 		std::string name;
 		ShaderPropertyMap local_properties;
@@ -180,22 +164,6 @@ namespace CpuRasterizer
 		virtual ~Shader() {}
 
 		Shader(std::string name) {
-			this->color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
-			this->stencil_func = CompareFunc::kAlways;
-			this->stencil_pass_op = StencilOp::kKeep;
-			this->stencil_fail_op = StencilOp::kKeep;
-			this->stencil_zfail_op = StencilOp::kKeep;
-			this->stencil_read_mask = 0xFF;
-			this->stencil_write_mask = 0xFF;
-			this->stencil_ref_val = 0;
-			this->ztest_func = CompareFunc::kLEqual;
-			this->zwrite_mode = ZWrite::kOn;
-			this->src_factor = BlendFactor::kSrcAlpha;
-			this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
-			this->blend_op = BlendOp::kAdd;
-			this->transparent = false;
-			this->double_face = false;
-			this->shadow = false;
 			this->name = name;
 		}
 

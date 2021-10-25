@@ -61,7 +61,7 @@ namespace CpuRasterizer
 
 	void FrameBuffer::update_stencil_buffer(size_t row, 
 											size_t col,
-											PerSampleOperation op_pass,
+											RasterFlag op_pass,
 											StencilOp stencil_pass_op, 
 											StencilOp stencil_fail_op, 
 											StencilOp stencil_zfail_op, 
@@ -72,8 +72,8 @@ namespace CpuRasterizer
 			return;
 		}
 
-		bool stencil_pass = (op_pass & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
-		bool z_pass = (op_pass & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
+		bool stencil_pass = (op_pass & RasterFlag::kStencilTest) != RasterFlag::kNone;
+		bool z_pass = (op_pass & RasterFlag::kDepthTest) != RasterFlag::kNone;
 		stencil_t stencil;
 		stencil_buffer->read(row, col, stencil);
 		StencilOp stencil_op;

@@ -256,17 +256,24 @@ namespace CpuRasterizer
 		Vertex ndc2 = Pipeline::clip2ndc(c2);
 		Vertex ndc3 = Pipeline::clip2ndc(c3);
 
-		// backface culling
-		bool double_face = shader.double_face;
-		bool enable_backface_culling = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kBackFaceCulling) != CullingAndClippingFlag::kNone;
-		if (!double_face && enable_backface_culling)
+		// face culling
+		bool double_face = CpuRasterSharedData.face_culling == FaceCulling::None;
+		bool enable_face_culling = (CpuRasterSharedData.raster_flag & RasterFlag::kFaceCulling) != RasterFlag::kNone;
+		if (!double_face && enable_face_culling)
 		{
 			if ((ndc1.mask & ndc2.mask & ndc3.mask & kNormalMask) != 0)
 			{
 				if (Clipper::backface_culling_ndc(ndc1.normal)) { statistics.culled_backface_triangle_count++; return; }
 			}
 			else {
-				if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+				if (CpuRasterSharedData.vert_order == VertexOrder::CCW)
+				{
+					if (Clipper::backface_culling_ndc(ndc3.position.xyz, ndc2.position.xyz, ndc1.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+				}
+				else
+				{
+					if (Clipper::backface_culling_ndc(ndc1.position.xyz, ndc2.position.xyz, ndc3.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
+				}
 			}
 		}
 
@@ -549,12 +556,8 @@ namespace CpuRasterizer
 			tri.interpolate((float)row + 0.5f, lhs, rhs);
 
 			// screen space clipping
-			bool enable_screen_clipping = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kScreenClipping) != CullingAndClippingFlag::kNone;
-			if (enable_screen_clipping)
-			{
-				Clipper::clip_horizontally(lhs, rhs, w);
-			}
-
+			Clipper::clip_horizontally(lhs, rhs, w);
+			
 			int left = (int)(lhs.position.x + 0.5f);
 			left = tinymath::clamp(left, 0, (int)w);
 			int right = (int)(rhs.position.x + 0.5f);
@@ -580,39 +583,38 @@ namespace CpuRasterizer
 	{
 		tinymath::color_rgba pixel_color;
 
-		bool enable_scissor_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kScissorTest) != PerSampleOperation::kNone;
-		bool enable_alpha_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kAlphaTest) != PerSampleOperation::kNone;
-		bool enable_stencil_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kStencilTest) != PerSampleOperation::kNone;
-		bool enable_depth_test = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone;
+		bool enable_scissor_test = (CpuRasterSharedData.raster_flag & RasterFlag::kScissorTest) != RasterFlag::kNone;
+		bool enable_alpha_test = (CpuRasterSharedData.raster_flag & RasterFlag::kAlphaTest) != RasterFlag::kNone;
+		bool enable_stencil_test = (CpuRasterSharedData.raster_flag & RasterFlag::kStencilTest) != RasterFlag::kNone;
+		bool enable_depth_test = (CpuRasterSharedData.raster_flag & RasterFlag::kDepthTest) != RasterFlag::kNone;
 
-		PerSampleOperation op_pass = PerSampleOperation::kScissorTest | PerSampleOperation::kAlphaTest | PerSampleOperation::kStencilTest | PerSampleOperation::kDepthTest;
+		RasterFlag op_pass = RasterFlag::kScissorTest | RasterFlag::kAlphaTest | RasterFlag::kStencilTest | RasterFlag::kDepthTest;
 
 		float z = frag.position.z / frag.position.w;
 
-		ColorMask color_mask = shader.color_mask;
-		CompareFunc stencil_func = shader.stencil_func;
-		StencilOp stencil_pass_op = shader.stencil_pass_op;
-		StencilOp stencil_fail_op = shader.stencil_fail_op;
-		StencilOp stencil_zfail_op = shader.stencil_zfail_op;
-		uint8_t stencil_read_mask = shader.stencil_read_mask;
-		uint8_t stencil_write_mask = shader.stencil_write_mask;
-		uint8_t stencil_ref_val = shader.stencil_ref_val;
-		CompareFunc ztest_func = shader.ztest_func;
-		ZWrite zwrite_mode = shader.zwrite_mode;
-		BlendFactor src_factor = shader.src_factor;
-		BlendFactor dst_factor = shader.dst_factor;
-		BlendOp blend_op = shader.blend_op;
+		ColorMask color_mask = CpuRasterSharedData.color_mask;
+		CompareFunc stencil_func = CpuRasterSharedData.stencil_func;
+		StencilOp stencil_pass_op = CpuRasterSharedData.stencil_pass_op;
+		StencilOp stencil_fail_op = CpuRasterSharedData.stencil_fail_op;
+		StencilOp stencil_zfail_op = CpuRasterSharedData.stencil_zfail_op;
+		uint8_t stencil_read_mask = CpuRasterSharedData.stencil_read_mask;
+		uint8_t stencil_write_mask = CpuRasterSharedData.stencil_write_mask;
+		uint8_t stencil_ref_val = CpuRasterSharedData.stencil_ref_val;
+		CompareFunc ztest_func = CpuRasterSharedData.ztest_func;
+		bool zwrite_on = (CpuRasterSharedData.raster_flag & RasterFlag::kZWrite) != RasterFlag::kNone;
+		BlendFactor src_factor = CpuRasterSharedData.src_factor;
+		BlendFactor dst_factor = CpuRasterSharedData.dst_factor;
+		BlendOp blend_op = CpuRasterSharedData.blend_op;
+		bool enable_blending = (CpuRasterSharedData.raster_flag & RasterFlag::kBlending) != RasterFlag::kNone;
 
 		UNUSED(stencil_write_mask);
-
-		bool enable_blending = (CpuRasterSharedData.persample_op_flag & PerSampleOperation::kBlending) != PerSampleOperation::kNone && shader.transparent;
 
 		// early-z
 		if (enable_depth_test && !enable_alpha_test)
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~PerSampleOperation::kDepthTest;
+				op_pass &= ~RasterFlag::kDepthTest;
 				statistics.earlyz_optimized++;
 				return false; // here we can assume fragment shader will not modify depth (cuz modifying depth in fragment shader is not implemented yet)
 			}
@@ -660,7 +662,7 @@ namespace CpuRasterizer
 		{
 			if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col))
 			{
-				op_pass &= ~PerSampleOperation::kStencilTest;
+				op_pass &= ~RasterFlag::kStencilTest;
 			}
 			buffer.update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 		}
@@ -670,18 +672,18 @@ namespace CpuRasterizer
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~PerSampleOperation::kDepthTest;
+				op_pass &= ~RasterFlag::kDepthTest;
 			}
 		}
 
 		// write depth
-		if (zwrite_mode == ZWrite::kOn && (op_pass & PerSampleOperation::kDepthTest) != PerSampleOperation::kNone)
+		if (zwrite_on && (op_pass & RasterFlag::kDepthTest) != RasterFlag::kNone)
 		{
 			buffer.write_depth(row, col, z);
 		}
 
 		// blending
-		if (enable_blending && shader.transparent)
+		if (enable_blending)
 		{
 			tinymath::color_rgba dst;
 			if (buffer.read_color(row, col, dst))
@@ -734,12 +736,12 @@ namespace CpuRasterizer
 		return false;
 	}
 
-	bool GraphicsDevice::validate_fragment(PerSampleOperation op_pass) const
+	bool GraphicsDevice::validate_fragment(RasterFlag op_pass) const
 	{
-		if ((op_pass & PerSampleOperation::kScissorTest) == PerSampleOperation::kNone) return false;
-		if ((op_pass & PerSampleOperation::kAlphaTest) == PerSampleOperation::kNone) return false;
-		if ((op_pass & PerSampleOperation::kStencilTest) == PerSampleOperation::kNone) return false;
-		if ((op_pass & PerSampleOperation::kDepthTest) == PerSampleOperation::kNone) return false;
+		if ((op_pass & RasterFlag::kScissorTest) == RasterFlag::kNone) return false;
+		if ((op_pass & RasterFlag::kAlphaTest) == RasterFlag::kNone) return false;
+		if ((op_pass & RasterFlag::kStencilTest) == RasterFlag::kNone) return false;
+		if ((op_pass & RasterFlag::kDepthTest) == RasterFlag::kNone) return false;
 		return true;
 	}
 

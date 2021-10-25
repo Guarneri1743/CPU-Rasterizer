@@ -28,11 +28,15 @@ public:
 
 		// sample texture
 		Color c;
-		if (local_properties.has_texture(123))
+		
+		// todo: strinify the key
+		property_name tex_prop = 123;
+		if (local_properties.has_int(tex_prop))
 		{
+			auto tex_id = local_properties.get_int(tex_prop);
 			auto uvw = input.texcoord0;
 			uvw = uvw  * 0.5f + 0.5f;
-			local_properties.get_texture(123)->sample(uvw.x, uvw.y, uvw.x, c);
+			local_properties.get_texture(tex_id)->sample(uvw.x, uvw.y, uvw.x, c);
 		}
 
 		return c;

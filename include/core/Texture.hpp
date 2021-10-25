@@ -14,6 +14,8 @@ namespace CpuRasterizer
 	class Texture
 	{
 	public:
+		Texture();
+
 		// 3d ctor
 		Texture(size_t width, size_t height, size_t layer_count, TextureFormat fmt);
 		Texture(void* raw_buffer, size_t width, size_t height, size_t layer_count, TextureFormat fmt);
@@ -99,7 +101,6 @@ namespace CpuRasterizer
 		void wrap(float& u, float& v) const;
 		void wrap(float& u, float& v, float& w) const;
 		void clear();
-		Texture();
 
 	public:
 		WrapMode wrap_mode;

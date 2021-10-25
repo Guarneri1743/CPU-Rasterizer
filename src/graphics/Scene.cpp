@@ -253,12 +253,6 @@ namespace CpuRasterizer
 			return;
 		}
 
-		bool enable_frustum_culling = (CpuRasterSharedData.culling_clipping_flag & CullingAndClippingFlag::kAppFrustumCulling) != CullingAndClippingFlag::kNone;
-		if (enable_frustum_culling)
-		{
-			// todo: CPU Frustum Culling
-		}
-
 		if (enable_skybox && CpuRasterSharedData.enable_ibl)
 		{
 			skybox->render();

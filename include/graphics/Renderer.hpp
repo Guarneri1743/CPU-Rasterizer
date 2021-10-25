@@ -28,6 +28,7 @@ namespace CpuRasterizer
 		virtual tinymath::mat4x4 model_matrix() const;
 		virtual void render_shadow() const;
 		virtual void render() const;
+		virtual void before_render() const {};
 		void render_internal(RenderPass render_pass) const;
 		virtual void draw_gizmos() const;
 		Renderer& operator =(const Renderer& other);

@@ -9,10 +9,7 @@ namespace CpuRasterizer
 	{
 	public:
 		SkyboxShader::SkyboxShader() : Shader("skybox_shader")
-		{
-			this->double_face = true;
-			this->ztest_func = CompareFunc::kAlways;
-		}
+		{}
 
 		SkyboxShader::~SkyboxShader()
 		{}

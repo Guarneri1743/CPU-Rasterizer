@@ -78,6 +78,8 @@ namespace CpuRasterizer
 			return;
 		}
 
+		before_render();
+
 		auto m = model_matrix();
 		auto v = view_matrix(render_pass);
 		auto p = projection_matrix(render_pass);
@@ -104,6 +106,7 @@ namespace CpuRasterizer
 				}
 			}
 		}
+
 		CpuRasterDevice.fence_primitives();
 	}
 

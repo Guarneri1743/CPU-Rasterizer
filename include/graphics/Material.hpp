@@ -24,7 +24,7 @@ namespace CpuRasterizer
 		uint8_t stencil_write_mask;
 		uint8_t stencil_read_mask;
 		CompareFunc ztest_func;
-		ZWrite zwrite_mode;
+		bool zwrite_on;
 		BlendFactor src_factor;
 		BlendFactor dst_factor;
 		BlendOp blend_op;

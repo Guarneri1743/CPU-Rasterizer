@@ -22,7 +22,7 @@ namespace CpuRasterizer
 		this->stencil_write_mask = 0xFF;
 		this->stencil_ref_val = 0;
 		this->ztest_func = CompareFunc::kLess;
-		this->zwrite_mode = ZWrite::kOn;
+		this->zwrite_on = true;
 		this->src_factor = BlendFactor::kSrcAlpha;
 		this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
 		this->blend_op = BlendOp::kAdd;
@@ -60,21 +60,46 @@ namespace CpuRasterizer
 
 	void Material::sync(Shader* shader)
 	{
-		shader->ztest_func = ztest_func;
-		shader->zwrite_mode = zwrite_mode;
-		shader->src_factor = src_factor;
-		shader->dst_factor = dst_factor;
-		shader->blend_op = blend_op;
-		shader->transparent = transparent;
-		shader->stencil_func = stencil_func;
-		shader->stencil_pass_op = stencil_pass_op;
-		shader->stencil_fail_op = stencil_fail_op;
-		shader->stencil_zfail_op = stencil_zfail_op;
-		shader->stencil_read_mask = stencil_read_mask;
-		shader->stencil_write_mask = stencil_write_mask;
-		shader->stencil_ref_val = stencil_ref_val;
-		shader->color_mask = color_mask;
-		shader->double_face = double_face;
+		CpuRasterSharedData.ztest_func = ztest_func;
+		CpuRasterSharedData.src_factor = src_factor;
+		CpuRasterSharedData.dst_factor = dst_factor;
+		CpuRasterSharedData.blend_op = blend_op;
+		if (zwrite_on)
+		{
+			CpuRasterSharedData.raster_flag |= RasterFlag::kZWrite;
+		}
+		else
+		{
+			CpuRasterSharedData.raster_flag &= ~RasterFlag::kZWrite;
+		}
+
+		if (transparent)
+		{
+			CpuRasterSharedData.raster_flag |= RasterFlag::kBlending;
+		}
+		else
+		{
+			CpuRasterSharedData.raster_flag &= ~RasterFlag::kBlending;
+		}
+		
+		CpuRasterSharedData.stencil_func = stencil_func;
+		CpuRasterSharedData.stencil_pass_op = stencil_pass_op;
+		CpuRasterSharedData.stencil_fail_op = stencil_fail_op;
+		CpuRasterSharedData.stencil_zfail_op = stencil_zfail_op;
+		CpuRasterSharedData.stencil_read_mask = stencil_read_mask;
+		CpuRasterSharedData.stencil_write_mask = stencil_write_mask;
+		CpuRasterSharedData.stencil_ref_val = stencil_ref_val;
+		CpuRasterSharedData.color_mask = color_mask;
+		if (!double_face)
+		{
+			CpuRasterSharedData.raster_flag |= RasterFlag::kFaceCulling;
+		}
+		else
+		{
+			CpuRasterSharedData.raster_flag &= ~RasterFlag::kFaceCulling;
+		}
+		CpuRasterSharedData.face_culling = double_face ? FaceCulling::None : FaceCulling::Back;
+
 		shader->local_properties = local_properties;
 	}
 
@@ -98,7 +123,7 @@ namespace CpuRasterizer
 		this->material_name = other.material_name;
 		this->target_shader = other.target_shader;
 		this->ztest_func = other.ztest_func;
-		this->zwrite_mode = other.zwrite_mode;
+		this->zwrite_on = other.zwrite_on;
 		this->stencil_func = other.stencil_func;
 		this->stencil_pass_op = other.stencil_pass_op;
 		this->stencil_fail_op = other.stencil_fail_op;
