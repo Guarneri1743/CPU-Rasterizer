@@ -17,6 +17,7 @@ namespace CpuRasterizer
 	Renderer::Renderer(std::shared_ptr<Model> model) : Renderer()
 	{
 		this->target = model;
+		upload_mesh();
 	}
 
 	Renderer::Renderer(const Renderer& other)
@@ -26,6 +27,25 @@ namespace CpuRasterizer
 
 	Renderer::~Renderer()
 	{}
+
+	void Renderer::upload_mesh()
+	{
+		if (target != nullptr)
+		{
+			std::vector<Vertex> vertices;
+			std::vector<size_t> indices;
+			for (auto& mesh : target->meshes)
+			{
+				vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
+				indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+			}
+
+			auto vid = cglBindVertexBuffer(vertices);
+			auto iid = cglBindIndexBuffer(indices);
+			vertex_buffer_ids.emplace_back(vid);
+			index_buffer_ids.emplace_back(iid);
+		}
+	}
 
 	std::unique_ptr<Renderer> Renderer::create(std::shared_ptr<Model> model)
 	{
@@ -92,21 +112,15 @@ namespace CpuRasterizer
 
 		target->material->use(render_pass);
 
-		if (target != nullptr)
+		for(size_t i = 0; i < index_buffer_ids.size(); ++i)
 		{
-			for (auto& mesh : target->meshes)
-			{
-				assert(mesh.indices.size() % 3 == 0);
-				for (size_t idx = 0; idx < mesh.indices.size(); idx += 3)
-				{
-					auto& v0 = mesh.vertices[mesh.indices[idx]];
-					auto& v1 = mesh.vertices[mesh.indices[idx + 1]];
-					auto& v2 = mesh.vertices[mesh.indices[idx + 2]];
-					cglSubmitPrimitive(v0, v1, v2);
-				}
-			}
+			auto iid = index_buffer_ids[i];
+			auto vid = vertex_buffer_ids[i];
+			cglUseVertexBuffer(vid);
+			cglUseIndexBuffer(iid);
+			cglDrawPrimitive();
 		}
-
+		
 		cglFencePrimitives();
 	}
 

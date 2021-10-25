@@ -18,7 +18,6 @@
 namespace CpuRasterizer
 {
 	struct SubsampleParam;
-	struct GraphicsCommand;
 
 	class GraphicsDevice
 	{
@@ -28,7 +27,8 @@ namespace CpuRasterizer
 
 		// misc
 		void set_viewport(size_t x, size_t y, size_t w, size_t h);
-		void submit_primitive(ShaderProgram* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void use_shader(ShaderProgram* shader);
+		void draw_primitive();
 		void fence_primitives();
 		void fence_pixels();
 		void clear_buffer(FrameContent flag);
@@ -36,6 +36,14 @@ namespace CpuRasterizer
 		bool try_alloc_id(uint32_t& id);
 		uint32_t create_buffer(size_t width, size_t height, FrameContent content);
 		bool get_buffer(uint32_t id, std::shared_ptr<RenderTexture>& buffer) const;
+
+		// VB/IB
+		size_t bind_vertex_buffer(const std::vector<Vertex>& buffer);
+		size_t bind_index_buffer(const std::vector<size_t>& buffer);
+		void free_vertex_buffer(size_t id);
+		void free_index_buffer(size_t id);
+		void use_vertex_buffer(size_t id); 
+		void use_index_buffer(size_t id);
 
 		// rt
 		RenderTexture* get_active_rendertexture() const ;
@@ -89,14 +97,12 @@ namespace CpuRasterizer
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 
 	private:
-		void draw(const GraphicsCommand& task);
-		void input2raster(const ShaderProgram& shader, const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
-		void clip2raster(const ShaderProgram& shader, const GraphicsContext& context, const Vertex& c1, const Vertex& c2, const Vertex& c3);
+		void input2raster(const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void clip2raster(const GraphicsContext& context, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
 		void resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
-		void rasterize(const tinymath::Rect& rect, const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
+		void rasterize(const tinymath::Rect& rect, const GraphicsContext& context, const Triangle& tri);
 		void rasterize_pixel_block(const Triangle& tri, 
-								   const ShaderProgram& shader, 
 								   const GraphicsContext& context,
 								   const RenderTexture& rt, 
 								   const Pixel& px1,
@@ -107,15 +113,14 @@ namespace CpuRasterizer
 								   SubsampleParam& p2,
 								   SubsampleParam& p3,
 								   SubsampleParam& p4);
-		void rasterize(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context, RasterizerStrategy strategy);
-		void scanblock(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
-		void scanline(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
-		bool fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, 
-							  const ShaderProgram& shader, const GraphicsContext& context);
-		bool multisample_fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col,
-							  const ShaderProgram& shader, const GraphicsContext& context, SubsampleParam& subsample_param);
+		void rasterize(const Triangle& tri, const GraphicsContext& context, RasterizerStrategy strategy);
+		void scanblock(const Triangle& tri, const GraphicsContext& context);
+		void scanline(const Triangle& tri, const GraphicsContext& context);
 		bool validate_fragment(PipelineFeature op_pass) const;
 		void resize(size_t w, size_t h);
+
+		bool fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const GraphicsContext& context);
+		bool multisample_fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, const GraphicsContext& context, SubsampleParam& subsample_param);
 
 	public:
 		GraphicsStatistic statistics;
@@ -125,9 +130,16 @@ namespace CpuRasterizer
 	private:
 		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
 		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
-		std::vector<GraphicsCommand> primitive_commands;
+		std::vector<GraphicsContext> contexts;
+		
 		GraphicsContext context;
 		uint32_t active_frame_buffer_id;
+
+		// VB/IB
+		std::vector<std::vector<Vertex>> vertex_buffer_table;
+		std::vector<std::vector<size_t>> index_buffer_table;
+		size_t current_vertex_buffer_id;
+		size_t current_index_buffer_id;
 
 		bool msaa_dirty;
 	};

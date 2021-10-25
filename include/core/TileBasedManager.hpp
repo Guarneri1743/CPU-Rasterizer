@@ -16,7 +16,6 @@ namespace CpuRasterizer
 	struct TileTask
 	{
 		Triangle triangle;
-		const ShaderProgram* shader;
 		GraphicsContext context;
 	};
 
@@ -34,7 +33,7 @@ namespace CpuRasterizer
 
 		void resize(size_t width, size_t height);
 		void foreach_tile(std::function<void(tinymath::Rect& tile, SafeQueue<TileTask>& task_queue)> func);
-		void push_draw_task(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
+		void push_draw_task(const Triangle& tri, const GraphicsContext& context);
 
 	private:
 		void rebuild_tiles(

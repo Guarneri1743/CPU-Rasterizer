@@ -7,11 +7,9 @@
 #include "ShaderProgram.hpp"
 #include "RenderTexture.hpp"
 #include "Window.hpp"
-#include "IdAllocator.hpp"
 
 using namespace CpuRasterizer;
 
-IdAllocator id_allocator(1, kMaxID);
 constexpr int kMaxMipmap = 8;
 constexpr int kMaxShaderNum = 128;
 constexpr int kMaxTextureNum = 128;
@@ -125,12 +123,42 @@ uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content)
 	return CpuRasterDevice.create_buffer(width, height, content);
 }
 
-bool cglGenTexture(uint32_t& id)
+size_t cglBindVertexBuffer(const std::vector<cglVert>& buffer)
 {
-	return id_allocator.alloc(id);
+	return CpuRasterDevice.bind_vertex_buffer(buffer);
 }
 
-CGL_EXTERN void cglBindTexture(cglTextureType type, uint32_t id)
+size_t cglBindIndexBuffer(const std::vector<size_t>& buffer)
+{
+	return CpuRasterDevice.bind_index_buffer(buffer);
+}
+
+void cglUseVertexBuffer(size_t id)
+{
+	CpuRasterDevice.use_vertex_buffer(id);
+}
+
+void cglUseIndexBuffer(size_t id)
+{
+	CpuRasterDevice.use_index_buffer(id);
+}
+
+void cglFreeVertexBuffer(size_t id)
+{
+	CpuRasterDevice.free_vertex_buffer(id);
+}
+
+void cglFreeIndexBuffer(size_t id)
+{
+	CpuRasterDevice.free_index_buffer(id);
+}
+
+bool cglGenTexture(uint32_t& id)
+{
+	return CpuRasterDevice.try_alloc_id(id);
+}
+
+void cglBindTexture(cglTextureType type, uint32_t id)
 {
 	// to be implement
 	UNUSED(type);
@@ -151,7 +179,7 @@ void cglGenerateMipmap()
 
 bool cglCreateProgram(ShaderProgram* shader, uint32_t& id)
 {
-	if (id_allocator.alloc(id))
+	if (CpuRasterDevice.try_alloc_id(id))
 	{
 		id2shader[id] = shader;
 		return true;
@@ -165,6 +193,7 @@ bool cglUseProgram(uint32_t id)
 	if (id2shader.count(id) > 0)
 	{
 		current_shader = id;
+		CpuRasterDevice.use_shader(id2shader[current_shader]);
 		return true;
 	}
 
@@ -236,12 +265,9 @@ void cglClearBuffer(cglFrameContent content)
 	CpuRasterDevice.clear_buffer(content);
 }
 
-void cglSubmitPrimitive(cglVert v1, cglVert v2, cglVert v3)
+void cglDrawPrimitive()
 {
-	if (id2shader.count(current_shader) > 0)
-	{
-		CpuRasterDevice.submit_primitive(id2shader[current_shader], v1, v2, v3);
-	}
+	CpuRasterDevice.draw_primitive();
 }
 
 void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col)

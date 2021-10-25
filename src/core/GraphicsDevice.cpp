@@ -29,15 +29,6 @@ namespace CpuRasterizer
 		bool pixel_color_calculated;
 	};
 
-	struct GraphicsCommand
-	{
-		GraphicsContext context;
-		ShaderProgram* shader;
-		Vertex v1;
-		Vertex v2;
-		Vertex v3;
-	};
-
 	GraphicsDevice::GraphicsDevice()
 	{
 		active_frame_buffer_id = kInvalidID;
@@ -70,6 +61,8 @@ namespace CpuRasterizer
 		context.src_factor = BlendFactor::kSrcAlpha;
 		context.dst_factor = BlendFactor::kOneMinusSrcAlpha;
 		context.blend_op = BlendFunc::kAdd;
+		vertex_buffer_table.push_back(std::vector<Vertex>()); // dummy buffer
+		index_buffer_table.push_back(std::vector<size_t>()); // dummy buffer
 	}
 
 	GraphicsDevice::~GraphicsDevice()
@@ -156,6 +149,42 @@ namespace CpuRasterizer
 		}
 
 		return false;
+	}
+
+	size_t GraphicsDevice::bind_vertex_buffer(const std::vector<Vertex>& buffer)
+	{
+		size_t id = vertex_buffer_table.size();
+		vertex_buffer_table.emplace_back(buffer);
+		return id;
+	}
+
+	size_t GraphicsDevice::bind_index_buffer(const std::vector<size_t>& buffer)
+	{
+		size_t id = index_buffer_table.size();
+		index_buffer_table.emplace_back(buffer);
+		return id;
+	}
+
+	void GraphicsDevice::free_vertex_buffer(size_t id)
+	{
+		vertex_buffer_table[id] = vertex_buffer_table[vertex_buffer_table.size() - 1];
+		vertex_buffer_table.erase(vertex_buffer_table.end());
+	}
+
+	void GraphicsDevice::free_index_buffer(size_t id)
+	{
+		index_buffer_table[id] = index_buffer_table[index_buffer_table.size() - 1];
+		index_buffer_table.erase(index_buffer_table.end());
+	}
+
+	void GraphicsDevice::use_vertex_buffer(size_t id)
+	{
+		context.current_vertex_buffer_id = id;
+	}
+
+	void GraphicsDevice::use_index_buffer(size_t id)
+	{
+		context.current_index_buffer_id = id;
 	}
 
 	void GraphicsDevice::enable_flag(PipelineFeature flag)
@@ -248,28 +277,37 @@ namespace CpuRasterizer
 		context.color_mask = mask;
 	}
 
-	void GraphicsDevice::draw(const GraphicsCommand& task)
+	void GraphicsDevice::use_shader(ShaderProgram* shader)
 	{
-		input2raster(*task.shader, task.context, task.v1, task.v2, task.v3);
+		context.shader = shader;
 	}
 
-	void GraphicsDevice::submit_primitive(ShaderProgram* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::draw_primitive()
 	{
-		GraphicsCommand cmd = { context, shader, v1, v2, v3 };
-		primitive_commands.emplace_back(cmd);
+		for (size_t index = 0; index < index_buffer_table[context.current_index_buffer_id].size(); index += 3)
+		{
+			context.indices[0] = index;
+			context.indices[1] = index + 1;
+			context.indices[2] = index + 2;
+			contexts.emplace_back(context);
+		}
 	}
 
 	void GraphicsDevice::fence_primitives()
 	{
 		std::for_each(
 			std::execution::par_unseq,
-			primitive_commands.begin(),
-			primitive_commands.end(),
-			[this](auto&& cmd)
+			contexts.begin(),
+			contexts.end(),
+			[this](auto&& ctx)
 		{
-			this->draw(cmd);
+			auto& v1 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[0]];
+			auto& v2 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[1]];
+			auto& v3 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[2]];
+			input2raster(ctx, v1, v2, v3);
 		});
-		primitive_commands.clear();
+
+		contexts.clear();
 	}
 
 	void GraphicsDevice::fence_pixels()
@@ -311,8 +349,10 @@ namespace CpuRasterizer
 		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
-	void GraphicsDevice::input2raster(const ShaderProgram& shader, const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2raster(const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
+		auto& shader = *ctx.shader;
+
 		// vertex stage
 		v2f o1 = shader.vertex_shader(vertex_to_a2v(v1)); 
 		v2f o2 = shader.vertex_shader(vertex_to_a2v(v2));
@@ -325,7 +365,7 @@ namespace CpuRasterizer
 		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
 			// all in cvv, rasterize directly
-			clip2raster(shader, ctx, c1, c2, c3);
+			clip2raster(ctx, c1, c2, c3);
 			statistics.triangle_count++;
 		}
 		else
@@ -338,14 +378,14 @@ namespace CpuRasterizer
 			for (size_t idx = 0; idx < triangles.size(); idx++)
 			{
 				Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
-				clip2raster(shader, ctx, clip1, clip2, clip3);
+				clip2raster(ctx, clip1, clip2, clip3);
 			}
 
 			statistics.triangle_count += triangles.size();
 		}
 	}
 
-	void GraphicsDevice::clip2raster(const ShaderProgram& shader, const GraphicsContext& ctx, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	void GraphicsDevice::clip2raster(const GraphicsContext& ctx, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		// clip space to ndc (perspective division)
 		Vertex ndc1 = Pipeline::clip2ndc(c1);
@@ -388,12 +428,12 @@ namespace CpuRasterizer
 			if (this->tile_based)
 			{
 				// push rasterization task
-				get_active_rendertexture()->get_tile_based_manager()->push_draw_task(*triangle, shader, ctx);
+				get_active_rendertexture()->get_tile_based_manager()->push_draw_task(*triangle, ctx);
 			}
 			else
 			{
 				// rasterize triangle directly
-				rasterize(*triangle, shader, ctx, RasterizerStrategy::kScanline);
+				rasterize(*triangle, ctx, RasterizerStrategy::kScanline);
 			}
 		}
 	}
@@ -405,7 +445,7 @@ namespace CpuRasterizer
 			TileTask task;
 			if (task_queue.try_consume(task))
 			{
-				rasterize(rect, task.triangle, *task.shader, task.context);
+				rasterize(rect, task.context, task.triangle);
 
 				// wireframe
 				if ((CpuRasterSharedData.debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
@@ -470,7 +510,7 @@ namespace CpuRasterizer
 		);
 	}
 
-	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const GraphicsContext& ctx, const Triangle& tri)
 	{
 		auto bounds = tri.get_bounds();
 		int padding = kBoundsPadding;
@@ -489,7 +529,7 @@ namespace CpuRasterizer
 			// msaa on
 			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, tri, &shader, &ctx](auto&& buffer, auto&& block)
+				[this, tri, &ctx](auto&& buffer, auto&& block)
 			{
 				SubsampleParam sp1 = { {0, 0, 0, 1}, false };
 				SubsampleParam sp2 = { {0, 0, 0, 1}, false };
@@ -504,7 +544,7 @@ namespace CpuRasterizer
 						auto px2 = buffer.get_subpixel(block.top_right.row, block.top_right.col, x_subsample_idx, y_subsample_idx);
 						auto px3 = buffer.get_subpixel(block.bottom_left.row, block.bottom_left.col, x_subsample_idx, y_subsample_idx);
 						auto px4 = buffer.get_subpixel(block.bottom_right.row, block.bottom_right.col, x_subsample_idx, y_subsample_idx);
-						rasterize_pixel_block(tri, shader, ctx, buffer, px1, px2, px3, px4, sp1, sp2, sp3, sp4);
+						rasterize_pixel_block(tri, ctx, buffer, px1, px2, px3, px4, sp1, sp2, sp3, sp4);
 					}
 				}
 			});
@@ -514,7 +554,7 @@ namespace CpuRasterizer
 			// msaa off
 			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, &tri, &shader, &ctx](auto&& buffer, auto&& block)
+				[this, &tri, &ctx](auto&& buffer, auto&& block)
 			{
 				SubsampleParam sp;
 				Pixel p1, p2, p3, p4;
@@ -522,13 +562,12 @@ namespace CpuRasterizer
 				p2 = block.top_right;
 				p3 = block.bottom_left;
 				p4 = block.bottom_right;
-				rasterize_pixel_block(tri, shader, ctx, buffer, p1, p2, p3, p4, sp, sp, sp, sp);
+				rasterize_pixel_block(tri, ctx, buffer, p1, p2, p3, p4, sp, sp, sp, sp);
 			});
 		}
 	}
 
 	void GraphicsDevice::rasterize_pixel_block(const Triangle& tri,
-											   const ShaderProgram& shader, 
 											   const GraphicsContext& ctx,
 											   const RenderTexture& rt, 
 											   const Pixel& px1,
@@ -559,34 +598,34 @@ namespace CpuRasterizer
 
 		if (px1_inside)
 		{
-			multisample_fragment_stage(fb, frag1, ddx, ddy, px1.row, px1.col, shader, ctx, p1);
+			multisample_fragment_stage(fb, frag1, ddx, ddy, px1.row, px1.col, ctx, p1);
 		}
 
 		if (px2_inside)
 		{
-			multisample_fragment_stage(fb, frag2, ddx, ddy, px2.row, px2.col, shader, ctx, p2);
+			multisample_fragment_stage(fb, frag2, ddx, ddy, px2.row, px2.col, ctx, p2);
 		}
 
 		if (px3_inside)
 		{
-			multisample_fragment_stage(fb, frag3, ddx, ddy, px3.row, px3.col, shader, ctx, p3);
+			multisample_fragment_stage(fb, frag3, ddx, ddy, px3.row, px3.col, ctx, p3);
 		}
 
 		if (px4_inside)
 		{
-			multisample_fragment_stage(fb, frag4, ddx, ddy, px4.row, px4.col, shader, ctx, p4);
+			multisample_fragment_stage(fb, frag4, ddx, ddy, px4.row, px4.col, ctx, p4);
 		}
 	}
 
-	void GraphicsDevice::rasterize(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx, RasterizerStrategy strategy)
+	void GraphicsDevice::rasterize(const Triangle& tri, const GraphicsContext& ctx, RasterizerStrategy strategy)
 	{
 		if (strategy == RasterizerStrategy::kScanblock)
 		{
-			scanblock(tri, shader, ctx);
+			scanblock(tri, ctx);
 		}
 		else
 		{
-			scanline(tri, shader, ctx);
+			scanline(tri, ctx);
 		}
 
 		// wireframe
@@ -598,7 +637,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::scanblock(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::scanblock(const Triangle& tri, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -618,17 +657,17 @@ namespace CpuRasterizer
 
 		get_active_rendertexture()->foreach_pixel(
 			rect,
-			[this, &tri, &shader, &ctx](auto&& buffer, auto&& pixel)
+			[this, &tri, &ctx](auto&& buffer, auto&& pixel)
 		{
 			Fragment frag;
 			if (tri.barycentric_interpolate(pixel.pos, frag))
 			{
-				fragment_stage(*buffer.get_framebuffer(), frag, Fragment(), Fragment(), pixel.row, pixel.col, shader, ctx);
+				fragment_stage(*buffer.get_framebuffer(), frag, Fragment(), Fragment(), pixel.row, pixel.col, ctx);
 			}
 		});
 	}
 
-	void GraphicsDevice::scanline(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::scanline(const Triangle& tri, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -658,23 +697,23 @@ namespace CpuRasterizer
 			assert(right >= left);
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				fragment_stage(*get_active_rendertexture()->get_framebuffer(), lhs, Fragment(), Fragment(), row, col, shader, ctx);
+				fragment_stage(*get_active_rendertexture()->get_framebuffer(), lhs, Fragment(), Fragment(), row, col, ctx);
 				auto dx = Pipeline::differential(lhs, rhs);
 				lhs = Pipeline::intagral(lhs, dx);
 			}
 		}
 	}
 
-	bool GraphicsDevice::fragment_stage(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
-										  const ShaderProgram& shader, const GraphicsContext& ctx)
+	bool GraphicsDevice::fragment_stage(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const GraphicsContext& ctx)
 	{
 		SubsampleParam subsample_param;
-		return multisample_fragment_stage(rt, frag, ddx, ddy, row, col, shader, ctx, subsample_param);
+		return multisample_fragment_stage(rt, frag, ddx, ddy, row, col, ctx, subsample_param);
 	}
 
-	bool GraphicsDevice::multisample_fragment_stage(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
-										  const ShaderProgram& shader, const GraphicsContext& ctx, SubsampleParam& subsample_param)
+	bool GraphicsDevice::multisample_fragment_stage(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const GraphicsContext& ctx, SubsampleParam& subsample_param)
 	{
+		auto& shader = *ctx.shader;
+
 		tinymath::color_rgba pixel_color;
 
 		bool enable_scissor_test = is_flag_enabled(ctx, PipelineFeature::kScissorTest);

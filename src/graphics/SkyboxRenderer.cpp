@@ -16,6 +16,7 @@ namespace CpuRasterizer
 		mat->double_face = true;
 		mat->ztest_func = CompareFunc::kAlways;
 		target = PrimitiveFactory::skybox(std::shared_ptr<Material>(mat));
+		upload_mesh();
 	}
 
 	SkyboxRenderer::~SkyboxRenderer()

@@ -164,7 +164,7 @@ extern "C" {
 	CGL_EXTERN void cglSetMultisampleFrequency(cglMultisampleFrequency frequency);
 	CGL_EXTERN void cglSetClearColor(cglColor clear_color);
 	CGL_EXTERN void cglClearBuffer(cglFrameContent content);
-	CGL_EXTERN void cglSubmitPrimitive(cglVert v1, cglVert v2, cglVert v3);
+	CGL_EXTERN void cglDrawPrimitive();
 	CGL_EXTERN void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col);
 	CGL_EXTERN void cglFencePrimitives();
 	CGL_EXTERN void cglFencePixels();
@@ -173,6 +173,14 @@ extern "C" {
 	CGL_EXTERN void* cglGetTargetColorBuffer();
 	CGL_EXTERN int cglGenId(uint32_t& id);
 	CGL_EXTERN uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
+
+	// IB/VB
+	CGL_EXTERN size_t cglBindVertexBuffer(const std::vector<cglVert>& buffer);
+	CGL_EXTERN size_t cglBindIndexBuffer(const std::vector<size_t>& buffer);
+	CGL_EXTERN void cglUseVertexBuffer(size_t id); 
+	CGL_EXTERN void cglUseIndexBuffer(size_t id);
+	CGL_EXTERN void cglFreeVertexBuffer(size_t id);
+	CGL_EXTERN void cglFreeIndexBuffer(size_t id);
 
 	// todo: texture
 	// decouple cpu resource and 'gpu' resource

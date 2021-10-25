@@ -35,6 +35,13 @@ namespace CpuRasterizer
 		void copy(const Renderer& other);
 
 	protected:
+		void upload_mesh();
+
+	protected:
+		std::vector<size_t> vertex_buffer_ids;
+		std::vector<size_t> index_buffer_ids;
+
+	protected:
 		bool gizmos;
 	};
 }
