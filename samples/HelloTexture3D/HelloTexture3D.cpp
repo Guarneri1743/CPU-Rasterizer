@@ -1,7 +1,7 @@
 #include "CGL.h"
 #include "HelloTexture3DShader.hpp"
 
-cglVert cube_vertices[36] = {
+std::vector<cglVert> cube_vertices = {
 		cglVert(cglVec4(-0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(0.0f,  0.0f)),
 		cglVert(cglVec4(0.5f, -0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(1.0f,  0.0f)),
 		cglVert(cglVec4(0.5f,  0.5f, -0.5f, 1.0f), cglVec3(0.0f,  0.0f, -1.0f), cglVec2(1.0f,  1.0f)),
@@ -80,6 +80,22 @@ int main()
 	uint32_t shader_id;
 	cglCreateProgram(&shader, shader_id);
 
+	std::vector<size_t> index_buffer = 
+	{ 
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 
+		9, 10, 11, 12, 13, 14, 15, 16, 17, 
+		18, 19, 20, 21, 22, 23, 24, 25, 26, 
+		27, 28, 29, 30, 31, 32, 33, 34, 35
+	};
+
+	for (int i = 0; i < cube_vertices.size(); i++)
+	{
+		cube_vertices[i].mask |= kNormalMask;
+	}
+
+	auto vid = cglBindVertexBuffer(cube_vertices);
+	auto iid = cglBindIndexBuffer(index_buffer);
+
 	// todo: strinify the key
 	shader.local_properties.set_texture(123, tex);
 
@@ -132,16 +148,12 @@ int main()
 		cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
 
 		// submit primitive
-		for (int i = 0; i < 36; i += 3)
-		{
-			cube_vertices[i].mask |= kNormalMask;
-			cube_vertices[i + 1].mask |= kNormalMask;
-			cube_vertices[i + 2].mask |= kNormalMask;
+		cglUseProgram(shader_id);
+		cglUseVertexBuffer(vid);
+		cglUseIndexBuffer(iid);
 
-			cglUseProgram(shader_id);
-			// submit primitive
-			cglSubmitPrimitive(cube_vertices[i], cube_vertices[i + 1], cube_vertices[i + 2]);
-		}
+		// draw primitive
+		cglDrawPrimitive();
 
 		// fence primitive tasks
 		cglFencePrimitives();

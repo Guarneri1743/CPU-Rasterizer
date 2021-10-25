@@ -27,6 +27,12 @@ int main()
 	cglVert v2(cglVec4(0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(1.0f, 0.0f));
 	cglVert v3(cglVec4(0.0f, 0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2(0.5f, 1.0f));
 
+	std::vector<cglVert> vertex_buffer = { v1, v2, v3 };
+	std::vector<size_t> index_buffer = { 0, 1, 2 };
+
+	auto vid = cglBindVertexBuffer(vertex_buffer);
+	auto iid = cglBindIndexBuffer(index_buffer);
+
 	// setup shader properties
 	cglUniformMatrix4fv(shader_id, mat_model_prop, cglMat4Identity);
 	cglUniformMatrix4fv(shader_id, mat_view_prop, cglMat4Identity);
@@ -66,8 +72,11 @@ int main()
 
 		cglUseProgram(shader_id);
 
-		// submit primitive
-		cglSubmitPrimitive(v1, v2, v3); 
+		cglUseVertexBuffer(vid);
+		cglUseIndexBuffer(iid);
+
+		// draw primitive
+		cglDrawPrimitive();
 
 		// fence primitive tasks
 		cglFencePrimitives(); 

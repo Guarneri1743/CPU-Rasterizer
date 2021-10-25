@@ -115,6 +115,9 @@ int main()
 		}
 	}
 
+	auto vid = cglBindVertexBuffer(vert);
+	auto iid = cglBindIndexBuffer(ind);
+
 	// set background color
 	cglSetClearColor(tinymath::kColorBlue);
 
@@ -138,15 +141,11 @@ int main()
 
 		cglUseProgram(shader_id);
 
-		for (int i = 0; i < ind.size(); i += 3)
-		{
-			size_t index = ind[i];
-			auto& v1 = vert[index];
-			auto& v2 = vert[index + 1];
-			auto& v3 = vert[index + 2];
-			// submit primitive
-			cglSubmitPrimitive(v1, v2, v3);
-		}
+		cglUseVertexBuffer(vid);
+		cglUseIndexBuffer(iid);
+
+		// draw primitive
+		cglDrawPrimitive();
 
 		// fence primitive tasks
 		cglFencePrimitives();
