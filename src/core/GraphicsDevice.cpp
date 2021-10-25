@@ -47,14 +47,12 @@ namespace CpuRasterizer
 		statistics.triangle_count = 0;
 		multi_thread = true;
 		tile_based = true;
+		msaa_dirty = false;
 		context = GraphicsContext();
 		context.msaa_subsample_count = 4;
 		context.multi_sample_frequency = MultiSampleFrequency::kPixelFrequency;
 		context.pipeline_feature_flag =
-			PipelineFeature::kScissorTest |
-			PipelineFeature::kStencilTest |
 			PipelineFeature::kDepthTest |
-			PipelineFeature::kBlending |
 			PipelineFeature::kFaceCulling |
 			PipelineFeature::kZWrite;
 
@@ -389,8 +387,8 @@ namespace CpuRasterizer
 		{
 			if (this->tile_based)
 			{
-				// push tile based draw task
-				get_active_rendertexture()->get_tile_based_manager()->push_draw_task(*triangle, shader);
+				// push rasterization task
+				get_active_rendertexture()->get_tile_based_manager()->push_draw_task(*triangle, shader, ctx);
 			}
 			else
 			{

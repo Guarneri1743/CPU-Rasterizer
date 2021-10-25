@@ -63,8 +63,7 @@ namespace CpuRasterizer
 				cglGetViewport(x, y, w, h);
 
 				// blit framebuffer to screen
-				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(cglGetTargetColorBuffer()),
-											w, h, false);
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(cglGetTargetColorBuffer()), w, h, false);
 
 				// render editors
 				BaseEditor::pre_render();

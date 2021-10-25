@@ -56,7 +56,7 @@ namespace CpuRasterizer
 	{
 		if (target_shader != nullptr)
 		{
-			cglCreateProgram(shadow_caster.get(), target_shader_id);
+			cglCreateProgram(target_shader.get(), target_shader_id);
 		}
 
 		if (shadow_caster != nullptr)

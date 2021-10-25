@@ -26,14 +26,13 @@ public:
 	{
 		UNUSED(input);
 
-		// visualize uv
-		//return input.uv;
-
 		// sample texture
 		Color c;
-		if (local_properties.has_texture(123))
+		property_name tex_prop = 123;
+		if (local_properties.has_int(tex_prop))
 		{
-			local_properties.get_texture(123)->sample(input.uv.x, input.uv.y, c);
+			auto tex_id = local_properties.get_int(tex_prop);
+			local_properties.get_texture(tex_id)->sample(input.uv.x, input.uv.y, c);
 		}
 
 		return c;
