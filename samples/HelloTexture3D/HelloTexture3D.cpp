@@ -53,13 +53,13 @@ int main()
 	cglInitWindow("Demo", w, h);
 
 	// set viewport
-	cglSetViewPort(w, h);
+	cglSetViewPort(0, 0, w, h);
 
 	// resize callback
 	cglAddResizeEvent([](size_t resized_w, size_t resized_h, void* ud)
 	{
 		UNUSED(ud);
-		cglSetViewPort(resized_w, resized_h);
+		cglSetViewPort(0, 0, resized_w, resized_h);
 	}, nullptr);
 
 	// create a 3d texture
@@ -80,8 +80,9 @@ int main()
 	cglGenTexture(tex_id);
 	cglTexImage3D(tex_id, 64, 64, 64, cglTextureFormat::kRGB, tex_buf);
 
-	uint32_t shader_id;
+
 	HelloTexture3DShader shader;
+	uint32_t shader_id;
 	cglCreateProgram(&shader, shader_id);
 
 	// setup shader properties
@@ -106,10 +107,10 @@ int main()
 	cglUniformMatrix4fv(shader_id, mat_vp_prop, proj * view);
 	cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
 
-	cglEnable(cglRasterFlag::kDepthTest);
+	cglEnable(cglPipelineFeature::kDepthTest);
 	cglDepthFunc(cglCompareFunc::kLess);
 
-	cglDisable(cglRasterFlag::kFaceCulling);
+	cglDisable(cglPipelineFeature::kFaceCulling);
 	cglCullFace(cglFaceCulling::None);
 
 	// set background color
