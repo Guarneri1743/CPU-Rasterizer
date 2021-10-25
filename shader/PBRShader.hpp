@@ -1,5 +1,5 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "PBR.hpp"
 #include "Sampling.hpp"
 #include "RenderTexture.hpp"
@@ -38,10 +38,10 @@ namespace CpuRasterizer
 		float ao;
 	};
 
-	class PBRShader : public Shader
+	class PBRShader : public ShaderProgram
 	{
 	public:
-		PBRShader(std::string name) : Shader(name) {}
+		PBRShader() : ShaderProgram("PBRShader") {}
 
 		tinymath::vec3f reflect(const tinymath::vec3f& n, const tinymath::vec3f& light_out_dir) const
 		{
@@ -240,7 +240,7 @@ namespace CpuRasterizer
 
 		float get_shadow_atten(const tinymath::vec4f& light_space_pos) const
 		{
-			if (!ShaderPropertyMap::global_shader_properties.has_framebuffer(shadowmap_prop))
+			if (!ShaderPropertyMap::global_shader_properties.has_rendertexture(shadowmap_prop))
 			{
 				return 0.0f;
 			}

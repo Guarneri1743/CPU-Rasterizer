@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #include "tinymath.h"
 #include "RasterAttributes.hpp"
 
@@ -18,5 +19,7 @@ namespace CpuRasterizer{
 		static tinymath::vec4f clip2ndc(const tinymath::vec4f& v);
 		static Vertex ndc2screen(size_t width, size_t height, const Vertex& v);
 		static tinymath::vec4f ndc2screen(size_t width, size_t height, const tinymath::vec4f& v);
+		static float linearize_depth(float depth, float near, float far);
+		static float linearize_01depth(float depth, float near, float far);
 	};
 }

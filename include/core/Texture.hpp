@@ -91,6 +91,8 @@ namespace CpuRasterizer
 		void release();
 		void copy(const Texture& other);
 
+		void* get_ptr();
+
 		// save to disk
 		static void export_image(const Texture& tex, const std::string& path);
 

@@ -4,7 +4,7 @@
 #include "Serialization.hpp"
 #include "imgui/imgui.h"
 #include "tinymath/tinymath.h"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 namespace CpuRasterizer
 {

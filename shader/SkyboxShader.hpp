@@ -1,14 +1,14 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "Sampling.hpp"
 #include "CubeMap.hpp"
 
 namespace CpuRasterizer
 {
-	class SkyboxShader : public Shader
+	class SkyboxShader : public ShaderProgram
 	{
 	public:
-		SkyboxShader::SkyboxShader() : Shader("skybox_shader")
+		SkyboxShader::SkyboxShader() : ShaderProgram("skybox_shader")
 		{}
 
 		SkyboxShader::~SkyboxShader()

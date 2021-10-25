@@ -63,7 +63,7 @@ int main()
 	}, nullptr);
 
 	// create a 3d texture
-	cglColorRgb* tex_buf = new cglColorRgb[64 * 64 * 64 * sizeof(cglColorRgb)];
+	auto tex = std::make_shared<Texture>(64, 64, 64, cglTextureFormat::kRGB);
 
 	for (size_t r = 0; r < 64; ++r)
 	{
@@ -71,18 +71,17 @@ int main()
 		{
 			for (size_t l = 0; l < 64; ++l)
 			{
-				tex_buf[r * 64 * 64 + c * 64 + l] = cglEncodeRgb((float)r / (float)64, (float)c / (float)64, (float)l / (float)64);
+				tex->write(r, c, l, { (float)r / (float)64, (float)c / (float)64, (float)l / (float)64 , 1.0f});
 			}
 		}
 	}
 
-	uint32_t tex_id;
-	cglGenTexture(tex_id);
-	cglTexImage3D(tex_id, 64, 64, 64, cglTextureFormat::kRGB, tex_buf);
-
 	HelloTexture3DShader shader;
 	uint32_t shader_id;
 	cglCreateProgram(&shader, shader_id);
+
+	// todo: strinify the key
+	shader.local_properties.set_texture(123, tex);
 
 	// setup shader properties
 	cglVec3 cam_pos = cglVec3(1.5f, 1.5f, 1.5f);
@@ -131,12 +130,6 @@ int main()
 		cglUniformMatrix4fv(shader_id, mat_projection_prop, proj);
 		cglUniformMatrix4fv(shader_id, mat_vp_prop, proj * view);
 		cglUniformMatrix4fv(shader_id, mat_mvp_prop, proj * view * model);
-
-		cglActivateTexture(tex_id);
-
-		// todo: strinify the key
-		property_name tex_prop = 123;
-		cglUniform1i(shader_id, tex_prop, tex_id);
 
 		// submit primitive
 		for (int i = 0; i < 36; i += 3)

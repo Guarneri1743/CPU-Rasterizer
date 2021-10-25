@@ -8,7 +8,7 @@
 
 namespace CpuRasterizer
 {
-	class Shader;
+	class ShaderProgram;
 
 	class Material : public Object
 	{
@@ -31,8 +31,8 @@ namespace CpuRasterizer
 		bool double_face;
 		bool transparent;
 		bool cast_shadow;
-		std::shared_ptr<Shader> target_shader;
-		std::shared_ptr<Shader> shadow_caster;
+		std::shared_ptr<ShaderProgram> target_shader;
+		std::shared_ptr<ShaderProgram> shadow_caster;
 		uint32_t target_shader_id;
 		uint32_t shadow_caster_id;
 		ShaderPropertyMap local_properties;
@@ -40,7 +40,7 @@ namespace CpuRasterizer
 	public:
 		Material();
 		Material(std::string name);
-		Material(std::string name, std::shared_ptr<Shader> shader);
+		Material(std::string name, std::shared_ptr<ShaderProgram> shader);
 		Material(const Material& other);
 		~Material();
 		

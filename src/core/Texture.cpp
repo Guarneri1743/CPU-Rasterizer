@@ -1342,4 +1342,26 @@ namespace CpuRasterizer
 		this->rgb16f_mipmaps = other.rgb16f_mipmaps;
 		this->rgba16f_mipmaps = other.rgba16f_mipmaps;
 	}
+
+	void* Texture::get_ptr()
+	{
+		size_t size;
+		switch (format)
+		{
+		case TextureFormat::kRGB:
+			return rgb_buffer->get_ptr(size);
+		case TextureFormat::kRGBA:
+			return rgba_buffer->get_ptr(size);
+		case TextureFormat::kRG:
+			return rg_buffer->get_ptr(size);
+		case TextureFormat::kGray:
+			return gray_buffer->get_ptr(size);
+		case TextureFormat::kRGB16:
+			return rgb16f_buffer->get_ptr(size);
+		case TextureFormat::kRGBA16:
+			return rgba16f_buffer->get_ptr(size);
+		}
+
+		return (void*)nullptr;
+	}
 }

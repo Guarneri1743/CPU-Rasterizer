@@ -1,13 +1,13 @@
 #pragma once
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 using namespace CpuRasterizer;
 using namespace tinymath;
 
-class HelloTriangleShader : public Shader
+class HelloTriangleShader : public ShaderProgram
 {
 public:
-	HelloTriangleShader() : Shader("sample_shader") {}
+	HelloTriangleShader() : ShaderProgram("sample_shader") {}
 
 	v2f vertex_shader(const a2v& input) const
 	{

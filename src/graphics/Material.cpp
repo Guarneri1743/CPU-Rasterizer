@@ -4,7 +4,7 @@
 #include "Singleton.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "CGL.h"
 
 namespace CpuRasterizer
@@ -12,8 +12,8 @@ namespace CpuRasterizer
 	Material::Material()
 	{
 		this->material_name = "default_material";
-		this->target_shader = std::make_shared<Shader>("pbr_shader");
-		this->shadow_caster = std::dynamic_pointer_cast<Shader>(std::make_shared<ShadowShader>());
+		this->target_shader = std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<PBRShader>()); 
+		this->shadow_caster = std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<ShadowShader>());
 		this->color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
 		this->stencil_func = CompareFunc::kAlways;
 		this->stencil_pass_op = StencilOp::kKeep;
@@ -38,7 +38,7 @@ namespace CpuRasterizer
 		this->material_name = name;
 	}
 
-	Material::Material(std::string name, std::shared_ptr<Shader> shader) : Material(name)
+	Material::Material(std::string name, std::shared_ptr<ShaderProgram> shader) : Material(name)
 	{
 		this->target_shader = shader;
 		initialize();
@@ -102,6 +102,7 @@ namespace CpuRasterizer
 		cglStencilMask(stencil_ref_val, stencil_write_mask, stencil_read_mask);
 		cglSetStencilOp(stencil_pass_op, stencil_fail_op, stencil_zfail_op);
 		cglSetColorMask(color_mask);
+
 		if (!double_face)
 		{
 			cglEnable(PipelineFeature::kFaceCulling);

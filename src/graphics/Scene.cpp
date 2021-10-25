@@ -17,6 +17,7 @@
 #include "Transform.hpp"
 #include "Model.hpp"
 #include "CubeMap.hpp"
+#include "Pipeline.hpp"
 #include "CGL.h"
 #include "GraphicsDevice.hpp"
 
@@ -114,7 +115,7 @@ namespace CpuRasterizer
 		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
 
 		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
-		ShaderPropertyMap::global_shader_properties.set_framebuffer(shadowmap_prop, shadowmap);
+		ShaderPropertyMap::global_shader_properties.set_rendertexture(shadowmap_prop, shadowmap);
 	}
 
 
@@ -325,7 +326,7 @@ namespace CpuRasterizer
 				float cur_depth;
 				if (buffer.get_framebuffer()->read_depth(pixel.row, pixel.col, cur_depth))
 				{
-					float linear_depth = Shader::linearize_01depth(cur_depth, CpuRasterSharedData.cam_near, CpuRasterSharedData.cam_far);
+					float linear_depth = Pipeline::linearize_01depth(cur_depth, CpuRasterSharedData.cam_near, CpuRasterSharedData.cam_far);
 					tinymath::Color depth_color = tinymath::kColorWhite * linear_depth;
 					depth_color.a = 1.0f;
 					tinymath::color_rgba c = ColorEncoding::encode_rgba(depth_color);

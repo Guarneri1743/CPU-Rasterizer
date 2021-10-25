@@ -182,6 +182,13 @@ enum class VertexOrder
 	CW
 };
 
+enum class TextureType
+{
+	Texture,
+	Cubemap,
+	RenderTexture
+};
+
 enum class PipelineFeature
 {
 	kNone = 0,

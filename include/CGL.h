@@ -3,9 +3,9 @@
 #include "tinymath.h"
 #include "Define.hpp"
 #include "RasterAttributes.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
-#define BUILD_CGL // todo
+#define BUILD_CGL // todo: put it in makefile
 
 #define cglVec2 tinymath::vec2f
 #define cglVec3 tinymath::vec3f
@@ -92,7 +92,7 @@
 #define cglBlendFactor BlendFactor
 #define cglColorMask ColorMask
 #define cglPointer void*
-
+#define cglTextureType TextureType
 #define cglStencilValue stencil_t
 
 // colors
@@ -174,15 +174,15 @@ extern "C" {
 	CGL_EXTERN int cglGenId(uint32_t& id);
 	CGL_EXTERN uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
 
-	// texture
+	// todo: texture
+	// decouple cpu resource and 'gpu' resource
 	CGL_EXTERN bool cglGenTexture(uint32_t& id);
+	CGL_EXTERN void cglBindTexture(cglTextureType type, uint32_t id);
 	CGL_EXTERN bool cglActivateTexture(uint32_t id);
-	CGL_EXTERN void cglTexImage2D(uint32_t id, size_t width, size_t height, cglTextureFormat fmt, cglPointer data);
-	CGL_EXTERN void cglTexImage3D(uint32_t id, size_t width, size_t height, size_t layer_count, cglTextureFormat fmt, cglPointer data);
 	CGL_EXTERN void cglGenerateMipmap();
 
 	// shader
-	CGL_EXTERN bool cglCreateProgram(CpuRasterizer::Shader* shader, uint32_t& id);
+	CGL_EXTERN bool cglCreateProgram(CpuRasterizer::ShaderProgram* shader, uint32_t& id);
 	CGL_EXTERN bool cglUseProgram(uint32_t id);
 	CGL_EXTERN void cglUniform1i(uint32_t id, property_name prop_id, int v);
 	CGL_EXTERN void cglUniform1f(uint32_t id, property_name prop_id, float v);

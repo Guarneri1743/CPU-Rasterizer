@@ -9,7 +9,7 @@
 #include "RenderTexture.hpp"
 #include "TileBasedManager.hpp"
 #include "RasterAttributes.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 #include "Triangle.hpp"
 #include "GraphicsContext.hpp"
 
@@ -28,7 +28,7 @@ namespace CpuRasterizer
 
 		// misc
 		void set_viewport(size_t x, size_t y, size_t w, size_t h);
-		void submit_primitive(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void submit_primitive(ShaderProgram* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void fence_primitives();
 		void fence_pixels();
 		void clear_buffer(FrameContent flag);
@@ -90,13 +90,13 @@ namespace CpuRasterizer
 
 	private:
 		void draw(const GraphicsCommand& task);
-		void input2raster(const Shader& shader, const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
-		void clip2raster(const Shader& shader, const GraphicsContext& context, const Vertex& c1, const Vertex& c2, const Vertex& c3);
+		void input2raster(const ShaderProgram& shader, const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void clip2raster(const ShaderProgram& shader, const GraphicsContext& context, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
 		void resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
-		void rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader, const GraphicsContext& context);
+		void rasterize(const tinymath::Rect& rect, const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
 		void rasterize_pixel_block(const Triangle& tri, 
-								   const Shader& shader, 
+								   const ShaderProgram& shader, 
 								   const GraphicsContext& context,
 								   const RenderTexture& rt, 
 								   const Pixel& px1,
@@ -107,13 +107,13 @@ namespace CpuRasterizer
 								   SubsampleParam& p2,
 								   SubsampleParam& p3,
 								   SubsampleParam& p4);
-		void rasterize(const Triangle& tri, const Shader& shader, const GraphicsContext& context, RasterizerStrategy strategy);
-		void scanblock(const Triangle& tri, const Shader& shader, const GraphicsContext& context);
-		void scanline(const Triangle& tri, const Shader& shader, const GraphicsContext& context);
+		void rasterize(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context, RasterizerStrategy strategy);
+		void scanblock(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
+		void scanline(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& context);
 		bool fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col, 
-							  const Shader& shader, const GraphicsContext& context);
+							  const ShaderProgram& shader, const GraphicsContext& context);
 		bool multisample_fragment_stage(FrameBuffer& rt, const Vertex& v, const Vertex& ddx, const Vertex& ddy, size_t row, size_t col,
-							  const Shader& shader, const GraphicsContext& context, SubsampleParam& subsample_param);
+							  const ShaderProgram& shader, const GraphicsContext& context, SubsampleParam& subsample_param);
 		bool validate_fragment(PipelineFeature op_pass) const;
 		void resize(size_t w, size_t h);
 

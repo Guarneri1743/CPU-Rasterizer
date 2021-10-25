@@ -17,7 +17,7 @@
 #include "tinymath/primitives/Rect.h"
 #include "SegmentDrawer.hpp"
 #include "Sampling.hpp"
-#include "Shader.hpp"
+#include "ShaderProgram.hpp"
 
 namespace CpuRasterizer
 {
@@ -32,7 +32,7 @@ namespace CpuRasterizer
 	struct GraphicsCommand
 	{
 		GraphicsContext context;
-		Shader* shader;
+		ShaderProgram* shader;
 		Vertex v1;
 		Vertex v2;
 		Vertex v3;
@@ -253,7 +253,7 @@ namespace CpuRasterizer
 		input2raster(*task.shader, task.context, task.v1, task.v2, task.v3);
 	}
 
-	void GraphicsDevice::submit_primitive(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::submit_primitive(ShaderProgram* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		GraphicsCommand cmd = { context, shader, v1, v2, v3 };
 		primitive_commands.emplace_back(cmd);
@@ -311,7 +311,7 @@ namespace CpuRasterizer
 		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
-	void GraphicsDevice::input2raster(const Shader& shader, const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2raster(const ShaderProgram& shader, const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		// vertex stage
 		v2f o1 = shader.vertex_shader(vertex_to_a2v(v1)); 
@@ -345,7 +345,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::clip2raster(const Shader& shader, const GraphicsContext& ctx, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	void GraphicsDevice::clip2raster(const ShaderProgram& shader, const GraphicsContext& ctx, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		// clip space to ndc (perspective division)
 		Vertex ndc1 = Pipeline::clip2ndc(c1);
@@ -470,7 +470,7 @@ namespace CpuRasterizer
 		);
 	}
 
-	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		auto bounds = tri.get_bounds();
 		int padding = kBoundsPadding;
@@ -528,7 +528,7 @@ namespace CpuRasterizer
 	}
 
 	void GraphicsDevice::rasterize_pixel_block(const Triangle& tri,
-											   const Shader& shader, 
+											   const ShaderProgram& shader, 
 											   const GraphicsContext& ctx,
 											   const RenderTexture& rt, 
 											   const Pixel& px1,
@@ -578,7 +578,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx, RasterizerStrategy strategy)
+	void GraphicsDevice::rasterize(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx, RasterizerStrategy strategy)
 	{
 		if (strategy == RasterizerStrategy::kScanblock)
 		{
@@ -598,7 +598,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::scanblock(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -628,7 +628,7 @@ namespace CpuRasterizer
 		});
 	}
 
-	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
+	void GraphicsDevice::scanline(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -666,14 +666,14 @@ namespace CpuRasterizer
 	}
 
 	bool GraphicsDevice::fragment_stage(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
-										  const Shader& shader, const GraphicsContext& ctx)
+										  const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		SubsampleParam subsample_param;
 		return multisample_fragment_stage(rt, frag, ddx, ddy, row, col, shader, ctx, subsample_param);
 	}
 
 	bool GraphicsDevice::multisample_fragment_stage(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
-										  const Shader& shader, const GraphicsContext& ctx, SubsampleParam& subsample_param)
+										  const ShaderProgram& shader, const GraphicsContext& ctx, SubsampleParam& subsample_param)
 	{
 		tinymath::color_rgba pixel_color;
 

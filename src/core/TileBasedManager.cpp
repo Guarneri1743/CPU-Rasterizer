@@ -100,7 +100,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void TileBasedManager::push_draw_task(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
+	void TileBasedManager::push_draw_task(const Triangle& tri, const ShaderProgram& shader, const GraphicsContext& ctx)
 	{
 		auto bounds = tri.get_bounds();
 		int padding = kBoundsPadding;
