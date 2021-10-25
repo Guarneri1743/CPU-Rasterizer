@@ -29,27 +29,13 @@ namespace CpuRasterizer
 		bool pixel_color_calculated;
 	};
 
-	struct RenderCommand
+	struct GraphicsCommand
 	{
+		GraphicsContext context;
 		Shader* shader;
 		Vertex v1;
 		Vertex v2;
 		Vertex v3;
-	};
-
-	class GraphicsCommand
-	{
-		virtual void execute() = 0;
-	};
-
-	class MsaaCommand : public GraphicsCommand
-	{
-	public:
-		bool enable;
-		uint8_t msaa_subsample_count;
-
-	public:
-		void execute() {}
 	};
 
 	GraphicsDevice::GraphicsDevice()
@@ -61,6 +47,31 @@ namespace CpuRasterizer
 		statistics.triangle_count = 0;
 		multi_thread = true;
 		tile_based = true;
+		context = GraphicsContext();
+		context.msaa_subsample_count = 4;
+		context.multi_sample_frequency = MultiSampleFrequency::kPixelFrequency;
+		context.pipeline_feature_flag =
+			PipelineFeature::kScissorTest |
+			PipelineFeature::kStencilTest |
+			PipelineFeature::kDepthTest |
+			PipelineFeature::kBlending |
+			PipelineFeature::kFaceCulling |
+			PipelineFeature::kZWrite;
+
+		context.face_culling = FaceCulling::Back;
+		context.vertex_order = VertexOrder::CW;
+		context.color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
+		context.stencil_func = CompareFunc::kAlways;
+		context.stencil_pass_op = StencilOp::kKeep;
+		context.stencil_fail_op = StencilOp::kKeep;
+		context.stencil_zfail_op = StencilOp::kKeep;
+		context.stencil_read_mask = 0xFF;
+		context.stencil_write_mask = 0xFF;
+		context.stencil_ref_val = 0;
+		context.ztest_func = CompareFunc::kLEqual;
+		context.src_factor = BlendFactor::kSrcAlpha;
+		context.dst_factor = BlendFactor::kOneMinusSrcAlpha;
+		context.blend_op = BlendFunc::kAdd;
 	}
 
 	GraphicsDevice::~GraphicsDevice()
@@ -73,7 +84,9 @@ namespace CpuRasterizer
 
 		if (target_rendertexture == nullptr)
 		{
-			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil, CpuRasterSharedData.enable_msaa, CpuRasterSharedData.msaa_subsample_count);
+			target_rendertexture = std::make_unique<RenderTexture>(w, h, FrameContent::kColor | FrameContent::kDepth | FrameContent::kStencil, 
+																   is_flag_enabled(context, PipelineFeature::kMSAA),
+																   context.msaa_subsample_count);
 		}
 		else
 		{
@@ -81,16 +94,11 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::set_viewport(size_t w, size_t h)
+	void GraphicsDevice::set_viewport(size_t x, size_t y, size_t w, size_t h)
 	{
+		UNUSED(x);
+		UNUSED(y);
 		resize(w, h);
-	}
-
-	void GraphicsDevice::set_subsample_count(uint8_t count)
-	{
-		CpuRasterSharedData.enable_msaa = count > 0;
-		CpuRasterSharedData.msaa_subsample_count = count;
-		CpuRasterSharedData.msaa_dirty = true;
 	}
 
 	RenderTexture* GraphicsDevice::get_active_rendertexture() const 
@@ -127,7 +135,7 @@ namespace CpuRasterizer
 		return buffer_id_allocator.alloc(id);
 	}
 
-	void GraphicsDevice::set_active_rendertexture(uint32_t& id)
+	void GraphicsDevice::set_active_rendertexture(uint32_t id)
 	{
 		if (frame_buffer_map.count(id) > 0)
 		{
@@ -152,14 +160,104 @@ namespace CpuRasterizer
 		return false;
 	}
 
-	void GraphicsDevice::draw(const RenderCommand& task)
+	void GraphicsDevice::enable_flag(PipelineFeature flag)
 	{
-		input2raster(*task.shader, task.v1, task.v2, task.v3);
+		context.pipeline_feature_flag |= flag;
+	}
+
+	void GraphicsDevice::disable_flag(PipelineFeature flag)
+	{	
+		context.pipeline_feature_flag &= ~flag;
+	}
+
+	bool GraphicsDevice::is_flag_enabled(PipelineFeature flag)
+	{
+		return is_flag_enabled(context, flag);
+	}
+
+	bool GraphicsDevice::is_flag_enabled(const GraphicsContext& ctx, PipelineFeature flag)
+	{
+		return (ctx.pipeline_feature_flag & flag) != PipelineFeature::kNone;
+	}
+
+	void GraphicsDevice::set_subsample_count(uint8_t count)
+	{
+		if (count > 0)
+		{
+			enable_flag(PipelineFeature::kMSAA);
+		}
+		else
+		{
+			disable_flag(PipelineFeature::kMSAA);
+		}
+
+		context.msaa_subsample_count = count;
+		msaa_dirty = true;
+	}
+
+	void GraphicsDevice::set_multisample_frequency(MultiSampleFrequency frequency)
+	{
+		context.multi_sample_frequency = frequency;
+	}
+
+	void GraphicsDevice::set_stencil_func(CompareFunc func)
+	{
+		context.stencil_func = func;
+	}
+
+	void GraphicsDevice::set_stencil_op(StencilOp pass_op, StencilOp fail_op, StencilOp zfail_op)
+	{
+		context.stencil_pass_op = pass_op;
+		context.stencil_fail_op = fail_op;
+		context.stencil_zfail_op = zfail_op;
+	}
+
+	void GraphicsDevice::set_stencil_mask(stencil_t ref_val, stencil_t write_mask, stencil_t read_mask)
+	{
+		context.stencil_ref_val = ref_val;
+		context.stencil_write_mask = write_mask;
+		context.stencil_read_mask = read_mask;
+	}
+
+	void GraphicsDevice::set_depth_func(CompareFunc func)
+	{
+		context.ztest_func = func;
+	}
+
+	void GraphicsDevice::set_blend_func(BlendFunc func)
+	{
+		context.blend_op = func;
+	}
+
+	void GraphicsDevice::set_blend_factor(BlendFactor src_factor, BlendFactor dst_factor)
+	{
+		context.src_factor = src_factor;
+		context.dst_factor = dst_factor;
+	}
+
+	void GraphicsDevice::set_front_face(VertexOrder order)
+	{
+		context.vertex_order = order;
+	}
+
+	void GraphicsDevice::set_cull_face(FaceCulling face_culling)
+	{
+		context.face_culling = face_culling;
+	}
+
+	void GraphicsDevice::set_color_mask(ColorMask mask)
+	{
+		context.color_mask = mask;
+	}
+
+	void GraphicsDevice::draw(const GraphicsCommand& task)
+	{
+		input2raster(*task.shader, task.context, task.v1, task.v2, task.v3);
 	}
 
 	void GraphicsDevice::submit_primitive(Shader* shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
-		RenderCommand cmd = { shader, v1, v2, v3 };
+		GraphicsCommand cmd = { context, shader, v1, v2, v3 };
 		primitive_commands.emplace_back(cmd);
 	}
 
@@ -182,7 +280,7 @@ namespace CpuRasterizer
 			[this](auto&& rect, auto&& task_queue)
 		{
 			this->rasterize_tile(rect, task_queue);
-			if (CpuRasterSharedData.enable_msaa)
+			if (is_flag_enabled(context, PipelineFeature::kMSAA))
 			{
 				this->resolve_tile(rect, task_queue);
 			}
@@ -191,10 +289,10 @@ namespace CpuRasterizer
 
 	void GraphicsDevice::clear_buffer(FrameContent flag)
 	{
-		if (CpuRasterSharedData.msaa_dirty)
+		if (msaa_dirty)
 		{
-			target_rendertexture->set_msaa_param(CpuRasterSharedData.enable_msaa, CpuRasterSharedData.msaa_subsample_count);
-			CpuRasterSharedData.msaa_dirty = false;
+			target_rendertexture->set_msaa_param(is_flag_enabled(context, PipelineFeature::kMSAA), context.msaa_subsample_count);
+			msaa_dirty = false;
 		}
 
 		get_active_rendertexture()->clear(flag);
@@ -215,12 +313,12 @@ namespace CpuRasterizer
 		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
-	void GraphicsDevice::input2raster(const Shader& shader, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2raster(const Shader& shader, const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		// vertex stage
-		v2f o1 = process_vertex(shader, v1);
-		v2f o2 = process_vertex(shader, v2);
-		v2f o3 = process_vertex(shader, v3);
+		v2f o1 = shader.vertex_shader(vertex_to_a2v(v1)); 
+		v2f o2 = shader.vertex_shader(vertex_to_a2v(v2));
+		v2f o3 = shader.vertex_shader(vertex_to_a2v(v3));
 
 		Vertex c1 = v2f_to_vertex(o1);
 		Vertex c2 = v2f_to_vertex(o2);
@@ -229,7 +327,7 @@ namespace CpuRasterizer
 		if (Clipper::inside_cvv(c1.position, c2.position, c3.position))
 		{
 			// all in cvv, rasterize directly
-			clip2raster(shader, c1, c2, c3);
+			clip2raster(shader, ctx, c1, c2, c3);
 			statistics.triangle_count++;
 		}
 		else
@@ -242,14 +340,14 @@ namespace CpuRasterizer
 			for (size_t idx = 0; idx < triangles.size(); idx++)
 			{
 				Vertex clip1 = triangles[idx][0]; Vertex clip2 = triangles[idx][1]; Vertex clip3 = triangles[idx][2];
-				clip2raster(shader, clip1, clip2, clip3);
+				clip2raster(shader, ctx, clip1, clip2, clip3);
 			}
 
 			statistics.triangle_count += triangles.size();
 		}
 	}
 
-	void GraphicsDevice::clip2raster(const Shader& shader, const Vertex& c1, const Vertex& c2, const Vertex& c3)
+	void GraphicsDevice::clip2raster(const Shader& shader, const GraphicsContext& ctx, const Vertex& c1, const Vertex& c2, const Vertex& c3)
 	{
 		// clip space to ndc (perspective division)
 		Vertex ndc1 = Pipeline::clip2ndc(c1);
@@ -257,8 +355,8 @@ namespace CpuRasterizer
 		Vertex ndc3 = Pipeline::clip2ndc(c3);
 
 		// face culling
-		bool double_face = CpuRasterSharedData.face_culling == FaceCulling::None;
-		bool enable_face_culling = (CpuRasterSharedData.raster_flag & RasterFlag::kFaceCulling) != RasterFlag::kNone;
+		bool double_face = ctx.face_culling == FaceCulling::None;
+		bool enable_face_culling = is_flag_enabled(ctx, PipelineFeature::kFaceCulling);
 		if (!double_face && enable_face_culling)
 		{
 			if ((ndc1.mask & ndc2.mask & ndc3.mask & kNormalMask) != 0)
@@ -266,7 +364,7 @@ namespace CpuRasterizer
 				if (Clipper::backface_culling_ndc(ndc1.normal)) { statistics.culled_backface_triangle_count++; return; }
 			}
 			else {
-				if (CpuRasterSharedData.vert_order == VertexOrder::CCW)
+				if (ctx.vertex_order == VertexOrder::CCW)
 				{
 					if (Clipper::backface_culling_ndc(ndc3.position.xyz, ndc2.position.xyz, ndc1.position.xyz)) { statistics.culled_backface_triangle_count++; return; }
 				}
@@ -297,14 +395,9 @@ namespace CpuRasterizer
 			else
 			{
 				// rasterize triangle directly
-				rasterize(*triangle, shader, RasterizerStrategy::kScanline);
+				rasterize(*triangle, shader, ctx, RasterizerStrategy::kScanline);
 			}
 		}
-	}
-
-	v2f GraphicsDevice::process_vertex(const Shader& shader, const Vertex& vert) const
-	{
-		return shader.vertex_shader(vertex_to_a2v(vert));
 	}
 
 	void GraphicsDevice::rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue)
@@ -314,7 +407,7 @@ namespace CpuRasterizer
 			TileTask task;
 			if (task_queue.try_consume(task))
 			{
-				rasterize(rect, task.triangle, *task.shader);
+				rasterize(rect, task.triangle, *task.shader, task.context);
 
 				// wireframe
 				if ((CpuRasterSharedData.debug_flag & RenderFlag::kWireFrame) != RenderFlag::kNone)
@@ -339,7 +432,7 @@ namespace CpuRasterizer
 				{
 					tinymath::Color dst_color = ColorEncoding::decode(dst);
 					tinymath::Color src_color = tinymath::Color(r, g, 0.0f, 0.5f);
-					tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, BlendFactor::kSrcAlpha, BlendFactor::kOneMinusSrcAlpha, BlendOp::kAdd);
+					tinymath::Color blended_color = FrameBuffer::blend(src_color, dst_color, BlendFactor::kSrcAlpha, BlendFactor::kOneMinusSrcAlpha, BlendFunc::kAdd);
 					auto pixel_color = ColorEncoding::encode_rgba(blended_color.r, blended_color.g, blended_color.b, blended_color.a);
 					buffer.get_framebuffer()->write_color(pixel.row, pixel.col, pixel_color);
 				}
@@ -379,7 +472,7 @@ namespace CpuRasterizer
 		);
 	}
 
-	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader)
+	void GraphicsDevice::rasterize(const tinymath::Rect& rect, const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
 	{
 		auto bounds = tri.get_bounds();
 		int padding = kBoundsPadding;
@@ -393,12 +486,12 @@ namespace CpuRasterizer
 		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
 		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
-		if (CpuRasterSharedData.enable_msaa)
+		if (is_flag_enabled(ctx, PipelineFeature::kMSAA))
 		{
 			// msaa on
 			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, tri, &shader](auto&& buffer, auto&& block)
+				[this, tri, &shader, &ctx](auto&& buffer, auto&& block)
 			{
 				SubsampleParam sp1 = { {0, 0, 0, 1}, false };
 				SubsampleParam sp2 = { {0, 0, 0, 1}, false };
@@ -413,7 +506,7 @@ namespace CpuRasterizer
 						auto px2 = buffer.get_subpixel(block.top_right.row, block.top_right.col, x_subsample_idx, y_subsample_idx);
 						auto px3 = buffer.get_subpixel(block.bottom_left.row, block.bottom_left.col, x_subsample_idx, y_subsample_idx);
 						auto px4 = buffer.get_subpixel(block.bottom_right.row, block.bottom_right.col, x_subsample_idx, y_subsample_idx);
-						rasterize_pixel_block(tri, shader, buffer, px1, px2, px3, px4, sp1, sp2, sp3, sp4);
+						rasterize_pixel_block(tri, shader, ctx, buffer, px1, px2, px3, px4, sp1, sp2, sp3, sp4);
 					}
 				}
 			});
@@ -423,7 +516,7 @@ namespace CpuRasterizer
 			// msaa off
 			get_active_rendertexture()->foreach_pixel_block(
 				rect,
-				[this, &tri, &shader](auto&& buffer, auto&& block)
+				[this, &tri, &shader, &ctx](auto&& buffer, auto&& block)
 			{
 				SubsampleParam sp;
 				Pixel p1, p2, p3, p4;
@@ -431,13 +524,14 @@ namespace CpuRasterizer
 				p2 = block.top_right;
 				p3 = block.bottom_left;
 				p4 = block.bottom_right;
-				rasterize_pixel_block(tri, shader, buffer, p1, p2, p3, p4, sp, sp, sp, sp);
+				rasterize_pixel_block(tri, shader, ctx, buffer, p1, p2, p3, p4, sp, sp, sp, sp);
 			});
 		}
 	}
 
 	void GraphicsDevice::rasterize_pixel_block(const Triangle& tri,
 											   const Shader& shader, 
+											   const GraphicsContext& ctx,
 											   const RenderTexture& rt, 
 											   const Pixel& px1,
 											   const Pixel& px2,
@@ -463,38 +557,38 @@ namespace CpuRasterizer
 		Fragment ddx = Pipeline::substract(frag1, frag2);
 		Fragment ddy = Pipeline::substract(frag1, frag3);
 
-		FrameBuffer& fb = (CpuRasterSharedData.enable_msaa) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+		FrameBuffer& fb = is_flag_enabled(ctx, PipelineFeature::kMSAA) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
 		if (px1_inside)
 		{
-			process_fragment(fb, frag1, ddx, ddy, px1.row, px1.col, shader, p1);
+			multisample_fragment_stage(fb, frag1, ddx, ddy, px1.row, px1.col, shader, ctx, p1);
 		}
 
 		if (px2_inside)
 		{
-			process_fragment(fb, frag2, ddx, ddy, px2.row, px2.col, shader, p2);
+			multisample_fragment_stage(fb, frag2, ddx, ddy, px2.row, px2.col, shader, ctx, p2);
 		}
 
 		if (px3_inside)
 		{
-			process_fragment(fb, frag3, ddx, ddy, px3.row, px3.col, shader, p3);
+			multisample_fragment_stage(fb, frag3, ddx, ddy, px3.row, px3.col, shader, ctx, p3);
 		}
 
 		if (px4_inside)
 		{
-			process_fragment(fb, frag4, ddx, ddy, px4.row, px4.col, shader, p4);
+			multisample_fragment_stage(fb, frag4, ddx, ddy, px4.row, px4.col, shader, ctx, p4);
 		}
 	}
 
-	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, RasterizerStrategy strategy)
+	void GraphicsDevice::rasterize(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx, RasterizerStrategy strategy)
 	{
 		if (strategy == RasterizerStrategy::kScanblock)
 		{
-			scanblock(tri, shader);
+			scanblock(tri, shader, ctx);
 		}
 		else
 		{
-			scanline(tri, shader);
+			scanline(tri, shader, ctx);
 		}
 
 		// wireframe
@@ -506,7 +600,7 @@ namespace CpuRasterizer
 		}
 	}
 
-	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader)
+	void GraphicsDevice::scanblock(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -526,17 +620,17 @@ namespace CpuRasterizer
 
 		get_active_rendertexture()->foreach_pixel(
 			rect,
-			[this, &tri, &shader](auto&& buffer, auto&& pixel)
+			[this, &tri, &shader, &ctx](auto&& buffer, auto&& pixel)
 		{
 			Fragment frag;
 			if (tri.barycentric_interpolate(pixel.pos, frag))
 			{
-				process_fragment(*buffer.get_framebuffer(), frag, Fragment(), Fragment(), pixel.row, pixel.col, shader);
+				fragment_stage(*buffer.get_framebuffer(), frag, Fragment(), Fragment(), pixel.row, pixel.col, shader, ctx);
 			}
 		});
 	}
 
-	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader)
+	void GraphicsDevice::scanline(const Triangle& tri, const Shader& shader, const GraphicsContext& ctx)
 	{
 		size_t w, h;
 		get_active_rendertexture()->get_size(w, h);
@@ -566,46 +660,48 @@ namespace CpuRasterizer
 			assert(right >= left);
 			for (size_t col = (size_t)left; col < (size_t)right; col++)
 			{
-				process_fragment(*get_active_rendertexture()->get_framebuffer(), lhs, Fragment(), Fragment(), row, col, shader);
+				fragment_stage(*get_active_rendertexture()->get_framebuffer(), lhs, Fragment(), Fragment(), row, col, shader, ctx);
 				auto dx = Pipeline::differential(lhs, rhs);
 				lhs = Pipeline::intagral(lhs, dx);
 			}
 		}
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const Shader& shader)
+	bool GraphicsDevice::fragment_stage(FrameBuffer& rt, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
+										  const Shader& shader, const GraphicsContext& ctx)
 	{
 		SubsampleParam subsample_param;
-		return process_fragment(rt, frag, ddx, ddy, row, col, shader, subsample_param);
+		return multisample_fragment_stage(rt, frag, ddx, ddy, row, col, shader, ctx, subsample_param);
 	}
 
-	bool GraphicsDevice::process_fragment(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col, const Shader& shader, SubsampleParam& subsample_param)
+	bool GraphicsDevice::multisample_fragment_stage(FrameBuffer& buffer, const Fragment& frag, const Fragment& ddx, const Fragment& ddy, size_t row, size_t col,
+										  const Shader& shader, const GraphicsContext& ctx, SubsampleParam& subsample_param)
 	{
 		tinymath::color_rgba pixel_color;
 
-		bool enable_scissor_test = (CpuRasterSharedData.raster_flag & RasterFlag::kScissorTest) != RasterFlag::kNone;
-		bool enable_alpha_test = (CpuRasterSharedData.raster_flag & RasterFlag::kAlphaTest) != RasterFlag::kNone;
-		bool enable_stencil_test = (CpuRasterSharedData.raster_flag & RasterFlag::kStencilTest) != RasterFlag::kNone;
-		bool enable_depth_test = (CpuRasterSharedData.raster_flag & RasterFlag::kDepthTest) != RasterFlag::kNone;
+		bool enable_scissor_test = is_flag_enabled(ctx, PipelineFeature::kScissorTest);
+		bool enable_alpha_test = is_flag_enabled(ctx, PipelineFeature::kAlphaTest); 
+		bool enable_stencil_test = is_flag_enabled(ctx, PipelineFeature::kStencilTest); 
+		bool enable_depth_test = is_flag_enabled(ctx, PipelineFeature::kDepthTest);
 
-		RasterFlag op_pass = RasterFlag::kScissorTest | RasterFlag::kAlphaTest | RasterFlag::kStencilTest | RasterFlag::kDepthTest;
+		PipelineFeature op_pass = PipelineFeature::kScissorTest | PipelineFeature::kAlphaTest | PipelineFeature::kStencilTest | PipelineFeature::kDepthTest;
 
 		float z = frag.position.z / frag.position.w;
 
-		ColorMask color_mask = CpuRasterSharedData.color_mask;
-		CompareFunc stencil_func = CpuRasterSharedData.stencil_func;
-		StencilOp stencil_pass_op = CpuRasterSharedData.stencil_pass_op;
-		StencilOp stencil_fail_op = CpuRasterSharedData.stencil_fail_op;
-		StencilOp stencil_zfail_op = CpuRasterSharedData.stencil_zfail_op;
-		uint8_t stencil_read_mask = CpuRasterSharedData.stencil_read_mask;
-		uint8_t stencil_write_mask = CpuRasterSharedData.stencil_write_mask;
-		uint8_t stencil_ref_val = CpuRasterSharedData.stencil_ref_val;
-		CompareFunc ztest_func = CpuRasterSharedData.ztest_func;
-		bool zwrite_on = (CpuRasterSharedData.raster_flag & RasterFlag::kZWrite) != RasterFlag::kNone;
-		BlendFactor src_factor = CpuRasterSharedData.src_factor;
-		BlendFactor dst_factor = CpuRasterSharedData.dst_factor;
-		BlendOp blend_op = CpuRasterSharedData.blend_op;
-		bool enable_blending = (CpuRasterSharedData.raster_flag & RasterFlag::kBlending) != RasterFlag::kNone;
+		ColorMask color_mask = ctx.color_mask;
+		CompareFunc stencil_func = ctx.stencil_func;
+		StencilOp stencil_pass_op = ctx.stencil_pass_op;
+		StencilOp stencil_fail_op = ctx.stencil_fail_op;
+		StencilOp stencil_zfail_op = ctx.stencil_zfail_op;
+		uint8_t stencil_read_mask = ctx.stencil_read_mask;
+		uint8_t stencil_write_mask = ctx.stencil_write_mask;
+		uint8_t stencil_ref_val = ctx.stencil_ref_val;
+		CompareFunc ztest_func = ctx.ztest_func;
+		bool zwrite_on = is_flag_enabled(ctx, PipelineFeature::kZWrite);
+		BlendFactor src_factor = ctx.src_factor;
+		BlendFactor dst_factor = ctx.dst_factor;
+		BlendFunc blend_op = ctx.blend_op;
+		bool enable_blending = is_flag_enabled(ctx, PipelineFeature::kBlending);
 
 		UNUSED(stencil_write_mask);
 
@@ -614,7 +710,7 @@ namespace CpuRasterizer
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~RasterFlag::kDepthTest;
+				op_pass &= ~PipelineFeature::kDepthTest;
 				statistics.earlyz_optimized++;
 				return false; // here we can assume fragment shader will not modify depth (cuz modifying depth in fragment shader is not implemented yet)
 			}
@@ -623,9 +719,9 @@ namespace CpuRasterizer
 		// fragment shader
 		tinymath::Color fragment_result = tinymath::kColorBlack;
 
-		if (!CpuRasterSharedData.enable_msaa ||
+		if (!is_flag_enabled(ctx, PipelineFeature::kMSAA) ||
 			!subsample_param.pixel_color_calculated ||
-			CpuRasterSharedData.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
+			ctx.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
 			v2f v_out = frag_to_v2f(frag);
 
@@ -662,7 +758,7 @@ namespace CpuRasterizer
 		{
 			if (!buffer.perform_stencil_test(stencil_ref_val, stencil_read_mask, stencil_func, row, col))
 			{
-				op_pass &= ~RasterFlag::kStencilTest;
+				op_pass &= ~PipelineFeature::kStencilTest;
 			}
 			buffer.update_stencil_buffer(row, col, op_pass, stencil_pass_op, stencil_fail_op, stencil_zfail_op, stencil_ref_val);
 		}
@@ -672,12 +768,12 @@ namespace CpuRasterizer
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{
-				op_pass &= ~RasterFlag::kDepthTest;
+				op_pass &= ~PipelineFeature::kDepthTest;
 			}
 		}
 
 		// write depth
-		if (zwrite_on && (op_pass & RasterFlag::kDepthTest) != RasterFlag::kNone)
+		if (zwrite_on && (op_pass & PipelineFeature::kDepthTest) != PipelineFeature::kNone)
 		{
 			buffer.write_depth(row, col, z);
 		}
@@ -736,12 +832,12 @@ namespace CpuRasterizer
 		return false;
 	}
 
-	bool GraphicsDevice::validate_fragment(RasterFlag op_pass) const
+	bool GraphicsDevice::validate_fragment(PipelineFeature op_pass) const
 	{
-		if ((op_pass & RasterFlag::kScissorTest) == RasterFlag::kNone) return false;
-		if ((op_pass & RasterFlag::kAlphaTest) == RasterFlag::kNone) return false;
-		if ((op_pass & RasterFlag::kStencilTest) == RasterFlag::kNone) return false;
-		if ((op_pass & RasterFlag::kDepthTest) == RasterFlag::kNone) return false;
+		if ((op_pass & PipelineFeature::kScissorTest) == PipelineFeature::kNone) return false;
+		if ((op_pass & PipelineFeature::kAlphaTest) == PipelineFeature::kNone) return false;
+		if ((op_pass & PipelineFeature::kStencilTest) == PipelineFeature::kNone) return false;
+		if ((op_pass & PipelineFeature::kDepthTest) == PipelineFeature::kNone) return false;
 		return true;
 	}
 

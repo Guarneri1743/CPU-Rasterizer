@@ -7,12 +7,12 @@
 #include "InputManager.hpp"
 #include "Window.hpp"
 #include "Singleton.hpp"
-#include "GraphicsDevice.hpp"
 #include "Scene.hpp"
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Serialization.hpp"
 #include "Time.hpp"
+#include "CGL.h"
 
 #undef near
 #undef far
@@ -23,6 +23,8 @@ namespace CpuRasterizer
 	int rt_size[2];
 	int shadowmap_size[2];
 	int sub_samples = 4;
+	bool enable_msaa = false;
+
 
 	InspectorEditor::InspectorEditor(int x, int y, int w, int h) : BaseEditor(x, y, w, h)
 	{
@@ -65,12 +67,14 @@ namespace CpuRasterizer
 		{
 			if (ImGui::InputInt2("RT Size", rt_size))
 			{
-				CpuRasterDevice.set_viewport(rt_size[0], rt_size[1]);
+				cglSetViewPort(0, 0, rt_size[0], rt_size[1]);
 			}
 			else
 			{
-				rt_size[0] = (int)CpuRasterDevice.get_width();
-				rt_size[1] = (int)CpuRasterDevice.get_height();
+				size_t x, y, width, height;
+				cglGetViewport(x, y, width, height);
+				rt_size[0] = (int)width;
+				rt_size[1] = (int)height;
 			}
 			ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 		}
@@ -98,19 +102,19 @@ namespace CpuRasterizer
 			}
 			
 			if (cam_update) scene.main_cam->update_projection_matrix();
-			if (ImGui::Checkbox("MSAA", &CpuRasterSharedData.enable_msaa))
+			if (ImGui::Checkbox("MSAA", &enable_msaa))
 			{
-				if (CpuRasterSharedData.enable_msaa)
+				if (enable_msaa)
 				{
-					CpuRasterDevice.set_subsample_count((uint8_t)sub_samples);
+					cglSetSubSampleCount((uint8_t)sub_samples);
 				}
 				else
 				{
-					CpuRasterDevice.set_subsample_count((uint8_t)0);
+					cglSetSubSampleCount((uint8_t)0);
 				}
 			}
 
-			if (CpuRasterSharedData.enable_msaa)
+			if (enable_msaa)
 			{
 				const char* frequencies[] = {
 				"PixelFrequency",
@@ -133,18 +137,18 @@ namespace CpuRasterizer
 						if (ImGui::Selectable(frequencies[i]))
 						{
 							selected_frequency = i;
-							CpuRasterSharedData.multi_sample_frequency = frequency_flags[i];
+							cglSetMultisampleFrequency(frequency_flags[i]);
 						}
 					ImGui::EndPopup();
 				}
 
 				if (ImGui::InputInt("Subsamples", &sub_samples))
 				{
-					CpuRasterDevice.set_subsample_count((uint8_t)sub_samples);
+					cglSetSubSampleCount((uint8_t)sub_samples);
 				}
 				else
 				{
-					sub_samples = (int)CpuRasterDevice.get_subsample_count();
+					sub_samples = (int)cglGetSubSampleCount();
 				}
 			}
 		}

@@ -1,4 +1,5 @@
 #include "CGL.h"
+#include <unordered_map>
 #include "tinymath.h"
 #include "Define.hpp"
 #include "GraphicsDevice.hpp"
@@ -54,35 +55,70 @@ void cglClearMainWindow()
 	Window::main()->clear();
 }
 
-void cglEnable(cglRasterFlag flag)
+void cglEnable(cglPipelineFeature flag)
 {
-	CpuRasterSharedData.raster_flag |= flag;
+	CpuRasterDevice.enable_flag(flag);
 }
 
-void cglDisable(cglRasterFlag flag)
+void cglDisable(cglPipelineFeature flag)
 {
-	CpuRasterSharedData.raster_flag &= ~flag;
+	CpuRasterDevice.disable_flag(flag);
 }
 
 void cglCullFace(cglFaceCulling face)
 {
-	CpuRasterSharedData.face_culling = face;
+	CpuRasterDevice.set_cull_face(face);
 }
 
 void cglFrontFace(cglVertexOrder order)
 {
-	CpuRasterSharedData.vert_order = order;
+	CpuRasterDevice.set_front_face(order);
 }
 
-CGL_EXTERN void cglDepthFunc(cglCompareFunc func)
+void cglDepthFunc(cglCompareFunc func)
 {
-	CpuRasterSharedData.ztest_func = func;
+	CpuRasterDevice.set_depth_func(func);
+}
+
+void cglSetBlendFunc(cglBlendFunc func)
+{
+	CpuRasterDevice.set_blend_func(func);
+}
+
+void cglSetStencilFunc(cglCompareFunc func)
+{
+	CpuRasterDevice.set_stencil_func(func);
+}
+
+void cglStencilMask(cglStencilValue ref_val, cglStencilValue write_mask, cglStencilValue read_mask)
+{
+	CpuRasterDevice.set_stencil_mask(ref_val, write_mask, read_mask);
+}
+
+void cglSetStencilOp(cglStencilOp pass_op, cglStencilOp fail_op, cglStencilOp zfail_op)
+{
+	CpuRasterDevice.set_stencil_op(pass_op, fail_op, zfail_op);
+}
+
+void cglSetBlendFactor(cglBlendFactor src_factor, cglBlendFactor dst_factor)
+{
+	CpuRasterDevice.set_blend_factor(src_factor, dst_factor);
+}
+
+void cglSetColorMask(cglColorMask mask)
+{
+	CpuRasterDevice.set_color_mask(mask);
 }
 
 int cglGenId(uint32_t& id)
 {
 	int ret = CpuRasterDevice.try_alloc_id(id) ? 1 : 0;
 	return ret;
+}
+
+uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content)
+{
+	return CpuRasterDevice.create_buffer(width, height, content);
 }
 
 bool cglGenTexture(uint32_t& id)
@@ -148,7 +184,7 @@ bool cglCreateProgram(Shader* shader, uint32_t& id)
 	return true;
 }
 
-bool cglUseProgram(uint32_t& id)
+bool cglUseProgram(uint32_t id)
 {
 	if (shader_stack_count < kMaxShaderNum)
 	{
@@ -191,14 +227,27 @@ void cglUniformMatrix4fv(uint32_t id, property_name prop_id, cglMat4 mat)
 	}
 }
 
+void cglDrawCoordinates(const cglVec3& pos, const cglVec3& forward, const cglVec3& up, const cglVec3& right, const cglMat4& m, const cglMat4& v, const cglMat4& p)
+{
+	CpuRasterDevice.draw_coordinates(pos, forward, up, right, m, v, p);
+}
+
 void cglGetRTSize(size_t& w, size_t& h)
 {
 	CpuRasterDevice.get_active_rendertexture()->get_size(w, h);
 }
 
-void cglSetViewPort(size_t w, size_t h)
+void cglSetViewPort(size_t x, size_t y, size_t w, size_t h)
 {
-	CpuRasterDevice.set_viewport(w, h);
+	CpuRasterDevice.set_viewport(x, y, w, h);
+}
+
+void cglGetViewport(size_t& x, size_t& y, size_t& width, size_t& height)
+{
+	x = 0;
+	y = 0;
+	width = CpuRasterDevice.get_width();
+	height = CpuRasterDevice.get_height();
 }
 
 void cglSetClearColor(cglColor clear_color)
@@ -234,6 +283,21 @@ void cglFencePixels()
 	CpuRasterDevice.fence_pixels();
 }
 
+void cglSetActiveRenderTarget(uint32_t id)
+{
+	CpuRasterDevice.set_active_rendertexture(id);
+}
+
+void cglResetActiveRenderTarget()
+{
+	CpuRasterDevice.reset_active_rendertexture();
+}
+
+void* cglGetTargetColorBuffer()
+{
+	return CpuRasterDevice.get_target_color_buffer();
+}
+
 void cglSetSubSampleCount(uint8_t count)
 {
 	CpuRasterDevice.set_subsample_count(count);
@@ -244,18 +308,7 @@ uint8_t cglGetSubSampleCount()
 	return CpuRasterDevice.get_subsample_count();
 }
 
-int cglSetMSAAEnabled(int enabled)
-{
-	return CpuRasterSharedData.enable_msaa = enabled == 1 ? true : false;
-}
-
-int cglIsMSAAEnabled()
-{
-	return CpuRasterSharedData.enable_msaa ? 1 : 0;
-}
-
-
 void cglSetMultisampleFrequency(cglMultisampleFrequency frequency)
 {
-	CpuRasterSharedData.multi_sample_frequency = frequency;
+	CpuRasterDevice.set_multisample_frequency(frequency);
 }

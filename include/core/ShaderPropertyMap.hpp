@@ -15,10 +15,10 @@ namespace CpuRasterizer
 		std::unordered_map<property_name, float> name2float;
 		std::unordered_map<property_name, tinymath::vec4f> name2float4;
 		std::unordered_map<property_name, int> name2int;
-		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
-		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		std::unordered_map<property_name, tinymath::mat4x4> name2mat4x4;
 		std::unordered_map<property_name, std::string> keywords;
+		std::unordered_map<property_name, std::shared_ptr<Texture>> name2tex;
+		std::unordered_map<property_name, std::shared_ptr<CubeMap>> name2cubemap;
 		std::unordered_map<property_name, std::shared_ptr<RenderTexture>> name2framebuffer;
 
 		ShaderPropertyMap() {}

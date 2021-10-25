@@ -622,7 +622,7 @@ namespace CpuRasterizer
 				rapidjson::Document doc;
 				doc.ParseStream(fs);
 				material.color_mask = (ColorMask)doc["color_mask"].GetInt();
-				material.blend_op = (BlendOp)doc["blend_op"].GetInt();
+				material.blend_op = (BlendFunc)doc["blend_op"].GetInt();
 				material.src_factor = (BlendFactor)doc["src_factor"].GetInt();
 				material.dst_factor = (BlendFactor)doc["dst_factor"].GetInt();
 				material.ztest_func = (CompareFunc)doc["ztest_func"].GetInt();
@@ -647,8 +647,8 @@ namespace CpuRasterizer
 				material.material_name = doc["material_name"].GetString();
 				material.meta_path = doc["meta_path"].GetString();
 				material.target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());
-
 				deserialize(doc, material.local_properties);
+				material.initialize();
 
 				fclose(fd);
 			}

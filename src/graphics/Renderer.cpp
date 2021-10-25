@@ -1,6 +1,5 @@
 #include "Renderer.hpp"
 #include "Singleton.hpp"
-#include "GraphicsDevice.hpp"
 #include "GlobalShaderParams.hpp"
 #include "Config.h"
 #include "Scene.hpp"
@@ -8,6 +7,7 @@
 #include "Material.hpp"
 #include "Transform.hpp"
 #include "Mesh.hpp"
+#include "CGL.h"
 
 namespace CpuRasterizer
 {
@@ -90,7 +90,7 @@ namespace CpuRasterizer
 		target->material->local_properties.set_mat4x4(mat_vp_prop, p * v);
 		target->material->local_properties.set_mat4x4(mat_mvp_prop, p * v * m);
 
-		target->material->sync();
+		target->material->use(render_pass);
 
 		if (target != nullptr)
 		{
@@ -102,12 +102,12 @@ namespace CpuRasterizer
 					auto& v0 = mesh.vertices[mesh.indices[idx]];
 					auto& v1 = mesh.vertices[mesh.indices[idx + 1]];
 					auto& v2 = mesh.vertices[mesh.indices[idx + 2]];
-					CpuRasterDevice.submit_primitive(target->material->get_shader(render_pass), v0, v1, v2);
+					cglSubmitPrimitive(v0, v1, v2);
 				}
 			}
 		}
 
-		CpuRasterDevice.fence_primitives();
+		cglFencePrimitives();
 	}
 
 	void Renderer::draw_gizmos() const
@@ -125,7 +125,7 @@ namespace CpuRasterizer
 		auto right = tinymath::kVec3fRight;
 		auto scale = tinymath::scale(model_matrix().get_scale());
 		tinymath::mat4x4 m = model_matrix() * tinymath::inverse(scale);
-		CpuRasterDevice.draw_coordinates(pos, forward, up, right, m, view, proj);
+		cglDrawCoordinates(pos, forward, up, right, m, view, proj);
 	}
 
 	Renderer& Renderer::operator =(const Renderer& other)

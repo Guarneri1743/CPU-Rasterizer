@@ -5,6 +5,7 @@
 #include "Utility.hpp"
 #include "Logger.hpp"
 #include "Shader.hpp"
+#include "CGL.h"
 
 namespace CpuRasterizer
 {
@@ -25,10 +26,11 @@ namespace CpuRasterizer
 		this->zwrite_on = true;
 		this->src_factor = BlendFactor::kSrcAlpha;
 		this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
-		this->blend_op = BlendOp::kAdd;
+		this->blend_op = BlendFunc::kAdd;
 		this->double_face = false;
 		this->transparent = false;
 		this->cast_shadow = true;
+		initialize();
 	}
 
 	Material::Material(std::string name) : Material()
@@ -39,6 +41,7 @@ namespace CpuRasterizer
 	Material::Material(std::string name, std::shared_ptr<Shader> shader) : Material(name)
 	{
 		this->target_shader = shader;
+		initialize();
 	}
 
 	Material::Material(const Material& other)
@@ -49,66 +52,83 @@ namespace CpuRasterizer
 	Material::~Material()
 	{}
 
-	Shader* Material::get_shader(RenderPass pass) const
+	void Material::initialize()
+	{
+		if (target_shader != nullptr)
+		{
+			cglCreateProgram(shadow_caster.get(), target_shader_id);
+		}
+
+		if (shadow_caster != nullptr)
+		{
+			cglCreateProgram(shadow_caster.get(), shadow_caster_id);
+		}
+	}
+
+	uint32_t Material::get_shader(RenderPass pass) const
 	{
 		if (pass == RenderPass::kShadow)
 		{
-			return shadow_caster.get();
+			return shadow_caster_id;
 		}
-		return target_shader.get();
+		return target_shader_id;
 	}
 
-	void Material::sync(Shader* shader)
+	void Material::use(RenderPass pass)
 	{
-		CpuRasterSharedData.ztest_func = ztest_func;
-		CpuRasterSharedData.src_factor = src_factor;
-		CpuRasterSharedData.dst_factor = dst_factor;
-		CpuRasterSharedData.blend_op = blend_op;
+		cglDepthFunc(ztest_func);
+		cglSetBlendFactor(src_factor, dst_factor);
+		cglSetBlendFunc(blend_op);
+
 		if (zwrite_on)
 		{
-			CpuRasterSharedData.raster_flag |= RasterFlag::kZWrite;
+			cglEnable(PipelineFeature::kZWrite);
 		}
 		else
 		{
-			CpuRasterSharedData.raster_flag &= ~RasterFlag::kZWrite;
+			cglDisable(PipelineFeature::kZWrite);
 		}
 
 		if (transparent)
 		{
-			CpuRasterSharedData.raster_flag |= RasterFlag::kBlending;
+			cglEnable(PipelineFeature::kBlending);
 		}
 		else
 		{
-			CpuRasterSharedData.raster_flag &= ~RasterFlag::kBlending;
+			cglDisable(PipelineFeature::kBlending);
 		}
-		
-		CpuRasterSharedData.stencil_func = stencil_func;
-		CpuRasterSharedData.stencil_pass_op = stencil_pass_op;
-		CpuRasterSharedData.stencil_fail_op = stencil_fail_op;
-		CpuRasterSharedData.stencil_zfail_op = stencil_zfail_op;
-		CpuRasterSharedData.stencil_read_mask = stencil_read_mask;
-		CpuRasterSharedData.stencil_write_mask = stencil_write_mask;
-		CpuRasterSharedData.stencil_ref_val = stencil_ref_val;
-		CpuRasterSharedData.color_mask = color_mask;
+
+		cglSetStencilFunc(stencil_func);
+		cglStencilMask(stencil_ref_val, stencil_write_mask, stencil_read_mask);
+		cglSetStencilOp(stencil_pass_op, stencil_fail_op, stencil_zfail_op);
+		cglSetColorMask(color_mask);
 		if (!double_face)
 		{
-			CpuRasterSharedData.raster_flag |= RasterFlag::kFaceCulling;
+			cglEnable(PipelineFeature::kFaceCulling);
 		}
 		else
 		{
-			CpuRasterSharedData.raster_flag &= ~RasterFlag::kFaceCulling;
+			cglDisable(PipelineFeature::kFaceCulling);
 		}
-		CpuRasterSharedData.face_culling = double_face ? FaceCulling::None : FaceCulling::Back;
 
-		shader->local_properties = local_properties;
-	}
+		cglCullFace(double_face ? FaceCulling::None : FaceCulling::Back);
 
-	void Material::sync()
-	{
-		sync(target_shader.get());
-		if (shadow_caster != nullptr)
+		cglUseProgram(get_shader(pass));
+
+		// todo
+		if (pass == RenderPass::kShadow)
 		{
-			sync(shadow_caster.get());
+			if (shadow_caster != nullptr)
+			{
+				shadow_caster->local_properties = local_properties;
+			}
+		}
+		else
+		{
+			if (target_shader != nullptr)
+			{
+				target_shader->local_properties = local_properties;
+			}
 		}
 	}
 
@@ -137,5 +157,7 @@ namespace CpuRasterizer
 		this->double_face = other.double_face;
 		this->transparent = other.transparent;
 		this->local_properties = other.local_properties;
+		this->target_shader_id = other.target_shader_id;
+		this->shadow_caster_id = other.shadow_caster_id;
 	}
 }

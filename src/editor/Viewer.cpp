@@ -6,7 +6,7 @@
 #include "SceneViewEditor.hpp"
 #include "ExplorerEditor.hpp"
 #include "Window.hpp"
-#include "GraphicsDevice.hpp"
+#include "CGL.h"
 #include "Time.hpp"
 #include "Scene.hpp"
 
@@ -32,7 +32,7 @@ namespace CpuRasterizer
 		editors.emplace_back(std::move(hierarchy));
 		editors.emplace_back(std::move(sceneview));
 		editors.emplace_back(std::move(explorer));
-		CpuRasterDevice.set_viewport(600, 400);
+		cglSetViewPort(0, 0, 600, 400);
 		Time::start();
 		CpuRasterizer::Scene::open_scene("/scenes/default_scene.scene");
 		playing = true;
@@ -59,11 +59,12 @@ namespace CpuRasterizer
 					Scene::current()->render();
 				}
 
+				size_t x, y, w, h;
+				cglGetViewport(x, y, w, h);
+
 				// blit framebuffer to screen
-				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(CpuRasterDevice.get_target_color_buffer()),
-											CpuRasterDevice.get_width(),
-											CpuRasterDevice.get_height(),
-											false);
+				Window::main()->blit2screen(reinterpret_cast<uint8_t*>(cglGetTargetColorBuffer()),
+											w, h, false);
 
 				// render editors
 				BaseEditor::pre_render();

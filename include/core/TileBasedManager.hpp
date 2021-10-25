@@ -7,6 +7,7 @@
 #include "SafeQueue.hpp"
 #include "Triangle.hpp"
 #include "Shader.hpp"
+#include "GraphicsContext.hpp"
 
 namespace CpuRasterizer
 {
@@ -16,6 +17,7 @@ namespace CpuRasterizer
 	{
 		Triangle triangle;
 		const Shader* shader;
+		GraphicsContext context;
 	};
 
 	struct Tile
