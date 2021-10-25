@@ -166,7 +166,7 @@ Result:
 		cglDisable(cglPipelineFeature::kFaceCulling);
 		cglDepthFunc(cglCompareFunc::kAlways);
 
-		auto tex = std::make_shared<Texture>(128, 128, cglTextureFormat::kRGB);
+		auto tex = std::make_shared<Texture>(64, 64, cglTextureFormat::kRGB);
 
 		// generate a checkerboard texture
 		for (size_t r = 0; r < 64; ++r)
