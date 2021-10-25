@@ -38,20 +38,21 @@ int main()
 	cglDisable(cglPipelineFeature::kFaceCulling);
 	cglDepthFunc(cglCompareFunc::kAlways);
 
-	auto tex = std::make_shared<Texture>(128, 128, cglTextureFormat::kRGB);
+	cglColorRgb* tex_buf = new cglColorRgb[64 * 64 * sizeof(cglColorRgb)];
 
 	// generate a checkerboard texture
-	for (size_t r = 0; r< tex->height; ++r)
+	for (size_t r = 0; r < 64; ++r)
 	{
-		for (size_t c = 0; c < tex->width; ++c)
+		for (size_t c = 0; c < 64; ++c)
 		{
 			auto val = ((r & 0x8) == 0) ^ ((c & 0x8) == 0);
-			tex->write(r, c, { (float)val, (float)val, (float)val, 1.0f });
+			tex_buf[r * 64 + c] = cglEncodeRgb((float)val, (float)val, (float)val);
 		}
 	}
 
-	property_name prop_id = 123;
-	shader.local_properties.set_texture(prop_id, tex);
+	uint32_t tex_id;
+	cglGenTexture(tex_id);
+	cglTexImage2D(tex_id, 64, 64, cglTextureFormat::kRGB, tex_buf);
 
 	// set background color
 	cglSetClearColor(tinymath::kColorBlue);
@@ -65,6 +66,12 @@ int main()
 		cglClearBuffer(cglFrameContent::kColor | cglFrameContent::kDepth | cglFrameContent::kStencil);
 
 		cglUseProgram(shader_id);
+
+		cglActivateTexture(tex_id);
+
+		// todo: strinify the key
+		property_name tex_prop = 123;
+		cglUniform1i(shader_id, tex_prop, tex_id);
 
 		// submit primitive
 		cglSubmitPrimitive(v1, v2, v3); 

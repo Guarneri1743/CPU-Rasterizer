@@ -80,7 +80,6 @@ int main()
 	cglGenTexture(tex_id);
 	cglTexImage3D(tex_id, 64, 64, 64, cglTextureFormat::kRGB, tex_buf);
 
-
 	HelloTexture3DShader shader;
 	uint32_t shader_id;
 	cglCreateProgram(&shader, shader_id);
