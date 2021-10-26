@@ -33,8 +33,8 @@ namespace CpuRasterizer
 		bool cast_shadow;
 		std::shared_ptr<ShaderProgram> target_shader;
 		std::shared_ptr<ShaderProgram> shadow_caster;
-		uint32_t target_shader_id;
-		uint32_t shadow_caster_id;
+		resource_id target_shader_id;
+		resource_id shadow_caster_id;
 		ShaderPropertyMap local_properties;
 
 	public:
@@ -45,7 +45,7 @@ namespace CpuRasterizer
 		~Material();
 		
 		void initialize();
-		uint32_t get_shader(RenderPass pass) const;
+		resource_id get_shader(RenderPass pass) const;
 		void use(RenderPass pass);
 		
 		Material& operator =(const Material& other);

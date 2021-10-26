@@ -19,8 +19,7 @@ int main()
 	}, nullptr);
 
 	HelloTriangleShader shader;
-	uint32_t shader_id;
-	cglCreateProgram(&shader, shader_id);
+	resource_id shader_id = cglCreateProgram(&shader);
 
 	// a triangle 
 	cglVert v1(cglVec4(-0.5f, -0.5f, 0.0f, 1.0f), cglVec3Zero, cglVec2Zero);

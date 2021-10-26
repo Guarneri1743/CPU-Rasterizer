@@ -68,7 +68,7 @@ namespace CpuRasterizer
 		static void open_scene(const char* path);
 
 	private:
-		uint32_t shadowmap_id;
+		resource_id shadowmap_id;
 		static Scene* current_scene;
 	};
 }

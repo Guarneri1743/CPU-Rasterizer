@@ -56,16 +56,16 @@ namespace CpuRasterizer
 	{
 		if (target_shader != nullptr)
 		{
-			cglCreateProgram(target_shader.get(), target_shader_id);
+			target_shader_id = cglCreateProgram(target_shader.get());
 		}
 
 		if (shadow_caster != nullptr)
 		{
-			cglCreateProgram(shadow_caster.get(), shadow_caster_id);
+			shadow_caster_id = cglCreateProgram(shadow_caster.get());
 		}
 	}
 
-	uint32_t Material::get_shader(RenderPass pass) const
+	resource_id Material::get_shader(RenderPass pass) const
 	{
 		if (pass == RenderPass::kShadow)
 		{

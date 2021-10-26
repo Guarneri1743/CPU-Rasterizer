@@ -79,7 +79,7 @@
 #define cglPrint(...) Logger::log(Logger::Severity::kLog, __VA_ARGS__)
 #define cglError(...) Logger::log(Logger::Severity::kError, __VA_ARGS__)
 
-// flags
+
 #define cglFrameContent FrameContent
 #define cglCompareFunc CompareFunc
 #define cglMultisampleFrequency MultiSampleFrequency
@@ -94,15 +94,15 @@
 #define cglPointer void*
 #define cglTextureType TextureType
 #define cglStencilValue stencil_t
-
-// colors
+#define cglResID resource_id
+#define cglPropertyName property_name
+#define cglShaderProgram CpuRasterizer::ShaderProgram*
 #define cglColorGray tinymath::color_gray
 #define cglColorRg tinymath::color_rg
 #define cglColorRgb tinymath::color_rgb
 #define cglColorRgba tinymath::color_rgba
 #define cglColorRgb16 tinymath::color_rgb16f
 #define cglColorRgba16 tinymath::color_rgba16f
-
 #define cglEncodeGray ColorEncoding::encode_gray
 #define cglEncodeRg ColorEncoding::encode_rg
 #define cglEncodeRgb ColorEncoding::encode_rgb
@@ -110,7 +110,6 @@
 #define cglEncodeRgb16 ColorEncoding::encode_rgb16f
 #define cglEncodeRgba16 ColorEncoding::encode_rgba16f
 #define cglDecode ColorEncoding::decode
-
 #define cglPipelineFeature PipelineFeature
 #define cglFaceCulling FaceCulling
 #define cglVertexOrder VertexOrder
@@ -168,36 +167,34 @@ extern "C" {
 	CGL_EXTERN void cglDrawSegment(cglVec3 start, cglVec3 end, cglMat4 mvp, cglColor col);
 	CGL_EXTERN void cglFencePrimitives();
 	CGL_EXTERN void cglFencePixels();
-	CGL_EXTERN void cglSetActiveRenderTarget(uint32_t id);
+	CGL_EXTERN void cglSetActiveRenderTarget(cglResID id);
 	CGL_EXTERN void cglResetActiveRenderTarget();
 	CGL_EXTERN void* cglGetTargetColorBuffer();
-	CGL_EXTERN int cglGenId(uint32_t& id);
-	CGL_EXTERN uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
+	CGL_EXTERN cglResID cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
 
 	// IB/VB
 	CGL_EXTERN size_t cglBindVertexBuffer(const std::vector<cglVert>& buffer);
 	CGL_EXTERN size_t cglBindIndexBuffer(const std::vector<size_t>& buffer);
-	CGL_EXTERN void cglUseVertexBuffer(size_t id); 
-	CGL_EXTERN void cglUseIndexBuffer(size_t id);
-	CGL_EXTERN void cglFreeVertexBuffer(size_t id);
-	CGL_EXTERN void cglFreeIndexBuffer(size_t id);
+	CGL_EXTERN void cglUseVertexBuffer(cglResID id);
+	CGL_EXTERN void cglUseIndexBuffer(cglResID id);
+	CGL_EXTERN void cglFreeVertexBuffer(cglResID id);
+	CGL_EXTERN void cglFreeIndexBuffer(cglResID id);
 
 	// todo: texture
 	// decouple cpu resource and 'gpu' resource
-	CGL_EXTERN bool cglGenTexture(uint32_t& id);
-	CGL_EXTERN void cglBindTexture(cglTextureType type, uint32_t id);
-	CGL_EXTERN bool cglActivateTexture(uint32_t id);
+	CGL_EXTERN void cglBindTexture(cglTextureType type, cglResID id);
+	CGL_EXTERN bool cglActivateTexture(cglResID id);
 	CGL_EXTERN void cglGenerateMipmap();
 
 	// shader
-	CGL_EXTERN bool cglCreateProgram(CpuRasterizer::ShaderProgram* shader, uint32_t& id);
-	CGL_EXTERN bool cglUseProgram(uint32_t id);
-	CGL_EXTERN void cglUniform1i(uint32_t id, property_name prop_id, int v);
-	CGL_EXTERN void cglUniform1f(uint32_t id, property_name prop_id, float v);
-	CGL_EXTERN void cglUniform4fv(uint32_t id, property_name prop_id, cglVec4 v);
-	CGL_EXTERN void cglUniformMatrix4fv(uint32_t id, property_name prop_id, cglMat4 mat);
+	CGL_EXTERN size_t cglCreateProgram(cglShaderProgram shader);
+	CGL_EXTERN void cglUseProgram(cglResID id);
+	CGL_EXTERN void cglUniform1i(cglResID id, cglPropertyName prop_id, int v);
+	CGL_EXTERN void cglUniform1f(cglResID id, cglPropertyName prop_id, float v);
+	CGL_EXTERN void cglUniform4fv(cglResID id, cglPropertyName prop_id, cglVec4 v);
+	CGL_EXTERN void cglUniformMatrix4fv(cglResID id, cglPropertyName prop_id, cglMat4 mat);
 
-	// tools
+	// utils
 	CGL_EXTERN void cglDrawCoordinates(const cglVec3& pos, const cglVec3& forward, const cglVec3& up, const cglVec3& right, const cglMat4& m, const cglMat4& v, const cglMat4& p);
 
 #ifdef __cplusplus

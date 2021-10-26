@@ -100,6 +100,9 @@ function setupSlotion()
 
       filter { "platforms:Win*", "configurations:Release*" }
          links { "assimp", "opengl32", "glfw3"  }
+
+      filter { "system:windows", "action:vs*"}
+    	 flags { "MultiProcessorCompile" }
 end
 
 function setupViewerProject()

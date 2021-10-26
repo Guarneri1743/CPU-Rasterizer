@@ -27,28 +27,35 @@ namespace CpuRasterizer
 
 		// misc
 		void set_viewport(size_t x, size_t y, size_t w, size_t h);
-		void use_shader(ShaderProgram* shader);
 		void draw_primitive();
 		void fence_primitives();
 		void fence_pixels();
 		void clear_buffer(FrameContent flag);
 		void set_clear_color(const tinymath::Color color);
-		bool try_alloc_id(uint32_t& id);
-		uint32_t create_buffer(size_t width, size_t height, FrameContent content);
-		bool get_buffer(uint32_t id, std::shared_ptr<RenderTexture>& buffer) const;
+		resource_id create_buffer(size_t width, size_t height, FrameContent content);
+		bool get_buffer(resource_id id, std::shared_ptr<RenderTexture>& buffer) const;
+
+		// shader
+		size_t create_shader_program(ShaderProgram* shader);
+		void delete_shader_program(resource_id id);
+		void use_program(resource_id id);
+		void set_uniform_int(resource_id id, property_name prop_id, int v);
+		void set_uniform_float(resource_id id, property_name prop_id, float v);
+		void set_uniform_float4(resource_id id, property_name prop_id, tinymath::vec4f v);
+		void set_uniform_mat4x4(resource_id id, property_name prop_id, tinymath::mat4x4 mat);
 
 		// VB/IB
-		size_t bind_vertex_buffer(const std::vector<Vertex>& buffer);
-		size_t bind_index_buffer(const std::vector<size_t>& buffer);
-		void free_vertex_buffer(size_t id);
-		void free_index_buffer(size_t id);
-		void use_vertex_buffer(size_t id); 
-		void use_index_buffer(size_t id);
+		resource_id bind_vertex_buffer(const std::vector<Vertex>& buffer);
+		resource_id bind_index_buffer(const std::vector<size_t>& buffer);
+		void delete_vertex_buffer(resource_id id);
+		void delete_index_buffer(resource_id id);
+		void use_vertex_buffer(resource_id id);
+		void use_index_buffer(resource_id id);
 
 		// rt
 		RenderTexture* get_active_rendertexture() const ;
 		tinymath::color_rgba* get_target_color_buffer() const  { return target_rendertexture->get_color_buffer_ptr(); }
-		void set_active_rendertexture(uint32_t id);
+		void set_active_rendertexture(resource_id id);
 		void reset_active_rendertexture() ;
 		
 		// msaa
@@ -129,17 +136,19 @@ namespace CpuRasterizer
 
 	private:
 		std::unique_ptr<RenderTexture> target_rendertexture; // glfw use double buffering by default, so only one frame buffer is needed
-		std::unordered_map<uint32_t, std::shared_ptr<RenderTexture>> frame_buffer_map;
 		std::vector<GraphicsContext> contexts;
 		
 		GraphicsContext context;
-		uint32_t active_frame_buffer_id;
+		resource_id active_frame_buffer_id;
 
 		// VB/IB
+		std::vector<std::shared_ptr<RenderTexture>> rendertextures;
 		std::vector<std::vector<Vertex>> vertex_buffer_table;
 		std::vector<std::vector<size_t>> index_buffer_table;
 		size_t current_vertex_buffer_id;
 		size_t current_index_buffer_id;
+
+		std::vector<ShaderProgram*> shader_programs;
 
 		bool msaa_dirty;
 	};

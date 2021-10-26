@@ -1,4 +1,5 @@
 #pragma once
+#include "Define.hpp"
 #include <string>
 #include <stdint.h>
 
@@ -11,9 +12,9 @@ namespace CpuRasterizer
 		virtual ~Object();
 
 	protected:
-		uint32_t id;
+		resource_id id;
 
 	public:
-		uint32_t get_id();
+		resource_id get_id();
 	};
 }

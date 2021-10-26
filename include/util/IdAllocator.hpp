@@ -2,19 +2,42 @@
 #include <stdint.h>
 #include <limits>
 
-constexpr uint32_t kInvalidID = 0;
-constexpr uint32_t kMaxID = UINT_MAX;
+constexpr size_t kInvalidID = 0;
+constexpr size_t kMaxID = UINT64_MAX;
 
+// todo
+
+template<typename T, T invalid_id, T rhs>
 class IdAllocator
 {
 private:
-	uint32_t cur;
-	uint32_t lhs;
-	uint32_t rhs;
+	T cur;
 
 public:
-	IdAllocator(uint32_t _lhs, uint32_t _rhs);
-	uint32_t alloc();
-	bool alloc(uint32_t& id);
-	void free(uint32_t id);
+	T alloc()
+	{
+		T id;
+		if (alloc(id))
+		{
+			return id;
+		}
+		return invalid_id;
+	}
+
+	bool alloc(T& id)
+	{
+		id = invalid_id;
+		if (cur < rhs)
+		{
+			id = cur++;
+			return true;
+		}
+
+		return false;
+	}
+
+	void free(T id)
+	{
+		UNUSED(id);
+	}
 };

@@ -21,7 +21,7 @@
 
 namespace CpuRasterizer
 {
-	static IdAllocator buffer_id_allocator(kInvalidID + 1, UINT_MAX);
+	constexpr resource_id kDefaultRenderTextureID = 0;
 
 	struct SubsampleParam
 	{
@@ -31,7 +31,7 @@ namespace CpuRasterizer
 
 	GraphicsDevice::GraphicsDevice()
 	{
-		active_frame_buffer_id = kInvalidID;
+		active_frame_buffer_id = kDefaultRenderTextureID;
 		statistics.culled_backface_triangle_count = 0;
 		statistics.culled_triangle_count = 0;
 		statistics.earlyz_optimized = 0;
@@ -63,6 +63,10 @@ namespace CpuRasterizer
 		context.blend_op = BlendFunc::kAdd;
 		vertex_buffer_table.push_back(std::vector<Vertex>()); // dummy buffer
 		index_buffer_table.push_back(std::vector<size_t>()); // dummy buffer
+		shader_programs.push_back(nullptr); // dummy shader
+		rendertextures.push_back(nullptr); // dummy rt
+		current_index_buffer_id = 0;
+		current_vertex_buffer_id = 0;
 	}
 
 	GraphicsDevice::~GraphicsDevice()
@@ -94,41 +98,32 @@ namespace CpuRasterizer
 
 	RenderTexture* GraphicsDevice::get_active_rendertexture() const 
 	{
-		if (kInvalidID == active_frame_buffer_id)
+		if (kDefaultRenderTextureID == active_frame_buffer_id)
 		{
 			return target_rendertexture.get();
 		}
 
-		if (frame_buffer_map.count(active_frame_buffer_id) > 0)
+		size_t index = static_cast<size_t>(active_frame_buffer_id);
+		if (index > kDefaultRenderTextureID && index < rendertextures.size())
 		{
-			return frame_buffer_map.at(active_frame_buffer_id).get();
+			return rendertextures[index].get();
 		}
 
 		return target_rendertexture.get();
 	}
 
-	uint32_t GraphicsDevice::create_buffer(size_t w, size_t h, FrameContent content) 
+	resource_id GraphicsDevice::create_buffer(size_t w, size_t h, FrameContent content)
 	{
 		auto buffer = std::make_shared<RenderTexture>(w, h, content);
-
-		uint32_t id;
-		if (buffer_id_allocator.alloc(id))
-		{
-			frame_buffer_map.insert(std::make_pair(id, buffer));
-			return id;
-		}
-
-		return kInvalidID;
+		resource_id id = static_cast<resource_id>(rendertextures.size());
+		rendertextures.emplace_back(buffer);
+		return id;
 	}
 
-	bool GraphicsDevice::try_alloc_id(uint32_t& id)
+	void GraphicsDevice::set_active_rendertexture(resource_id id)
 	{
-		return buffer_id_allocator.alloc(id);
-	}
-
-	void GraphicsDevice::set_active_rendertexture(uint32_t id)
-	{
-		if (frame_buffer_map.count(id) > 0)
+		size_t index = static_cast<size_t>(id);
+		if (index >= kDefaultRenderTextureID && index < rendertextures.size())
 		{
 			active_frame_buffer_id = id;
 		}
@@ -136,53 +131,56 @@ namespace CpuRasterizer
 
 	void GraphicsDevice::reset_active_rendertexture() 
 	{
-		active_frame_buffer_id = kInvalidID;
+		active_frame_buffer_id = kDefaultRenderTextureID;
 	}
 
-	bool GraphicsDevice::get_buffer(uint32_t id, std::shared_ptr<RenderTexture>& buffer) const 
+	bool GraphicsDevice::get_buffer(resource_id id, std::shared_ptr<RenderTexture>& buffer) const
 	{
 		buffer = nullptr;
-		if (frame_buffer_map.count(id) > 0)
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < rendertextures.size())
 		{
-			buffer = frame_buffer_map.at(id);
+			buffer = rendertextures[index];
 			return true;
 		}
 
 		return false;
 	}
 
-	size_t GraphicsDevice::bind_vertex_buffer(const std::vector<Vertex>& buffer)
+	resource_id GraphicsDevice::bind_vertex_buffer(const std::vector<Vertex>& buffer)
 	{
-		size_t id = vertex_buffer_table.size();
+		resource_id id = static_cast<resource_id>(vertex_buffer_table.size());
 		vertex_buffer_table.emplace_back(buffer);
 		return id;
 	}
 
-	size_t GraphicsDevice::bind_index_buffer(const std::vector<size_t>& buffer)
+	resource_id GraphicsDevice::bind_index_buffer(const std::vector<size_t>& buffer)
 	{
-		size_t id = index_buffer_table.size();
+		resource_id id = static_cast<resource_id>(index_buffer_table.size());
 		index_buffer_table.emplace_back(buffer);
 		return id;
 	}
 
-	void GraphicsDevice::free_vertex_buffer(size_t id)
+	void GraphicsDevice::delete_vertex_buffer(resource_id id)
 	{
-		vertex_buffer_table[id] = vertex_buffer_table[vertex_buffer_table.size() - 1];
+		size_t index = static_cast<size_t>(id);
+		vertex_buffer_table[index] = vertex_buffer_table[vertex_buffer_table.size() - 1];
 		vertex_buffer_table.erase(vertex_buffer_table.end());
 	}
 
-	void GraphicsDevice::free_index_buffer(size_t id)
+	void GraphicsDevice::delete_index_buffer(resource_id id)
 	{
-		index_buffer_table[id] = index_buffer_table[index_buffer_table.size() - 1];
+		size_t index = static_cast<size_t>(id);
+		index_buffer_table[index] = index_buffer_table[index_buffer_table.size() - 1];
 		index_buffer_table.erase(index_buffer_table.end());
 	}
 
-	void GraphicsDevice::use_vertex_buffer(size_t id)
+	void GraphicsDevice::use_vertex_buffer(resource_id id)
 	{
 		context.current_vertex_buffer_id = id;
 	}
 
-	void GraphicsDevice::use_index_buffer(size_t id)
+	void GraphicsDevice::use_index_buffer(resource_id id)
 	{
 		context.current_index_buffer_id = id;
 	}
@@ -277,9 +275,62 @@ namespace CpuRasterizer
 		context.color_mask = mask;
 	}
 
-	void GraphicsDevice::use_shader(ShaderProgram* shader)
+	resource_id GraphicsDevice::create_shader_program(ShaderProgram* shader)
 	{
-		context.shader = shader;
+		resource_id id = static_cast<resource_id>(shader_programs.size());
+		shader_programs.emplace_back(shader);
+		return id;
+	}
+
+	void GraphicsDevice::delete_shader_program(resource_id id)
+	{
+		shader_programs[static_cast<size_t>(id)] = shader_programs[shader_programs.size() - 1];
+		shader_programs.erase(shader_programs.end());
+	}
+
+	void GraphicsDevice::use_program(resource_id id)
+	{
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < shader_programs.size())
+		{
+			context.shader = shader_programs[index];
+		}
+	}
+
+	void GraphicsDevice::set_uniform_int(resource_id id, property_name prop_id, int v)
+	{
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < shader_programs.size())
+		{
+			shader_programs[index]->local_properties.set_int(prop_id, v);
+		}
+	}
+
+	void GraphicsDevice::set_uniform_float(resource_id id, property_name prop_id, float v)
+	{
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < shader_programs.size())
+		{
+			shader_programs[index]->local_properties.set_float(prop_id, v);
+		}
+	}
+
+	void GraphicsDevice::set_uniform_float4(resource_id id, property_name prop_id, tinymath::vec4f v)
+	{
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < shader_programs.size())
+		{
+			shader_programs[index]->local_properties.set_float4(prop_id, v);
+		}
+	}
+
+	void GraphicsDevice::set_uniform_mat4x4(resource_id id, property_name prop_id, tinymath::mat4x4 mat)
+	{
+		size_t index = static_cast<size_t>(id);
+		if (index >= 0 && index < shader_programs.size())
+		{
+			shader_programs[index]->local_properties.set_mat4x4(prop_id, mat);
+		}
 	}
 
 	void GraphicsDevice::draw_primitive()
@@ -333,9 +384,9 @@ namespace CpuRasterizer
 
 		get_active_rendertexture()->clear(flag);
 
-		for (auto& kv : frame_buffer_map)
+		for(size_t index = kDefaultRenderTextureID + 1; index < rendertextures.size(); ++index)
 		{
-			kv.second->clear(flag);
+			rendertextures[index]->clear(flag);
 		}
 
 		statistics.culled_triangle_count = 0;

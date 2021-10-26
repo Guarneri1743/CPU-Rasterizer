@@ -77,8 +77,7 @@ int main()
 	}
 
 	HelloTexture3DShader shader;
-	uint32_t shader_id;
-	cglCreateProgram(&shader, shader_id);
+	resource_id shader_id = cglCreateProgram(&shader);
 
 	std::vector<size_t> index_buffer = 
 	{ 

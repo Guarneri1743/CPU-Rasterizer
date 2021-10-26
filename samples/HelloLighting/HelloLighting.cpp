@@ -48,8 +48,7 @@ int main()
 	cglMat4 view = cglLookat(cam_pos, cube_pos, cglVec3Up);
 	cglMat4 proj = cglPerspective(60.0f, (float)w / (float)h, near, far);
 
-	uint32_t shader_id;
-	cglCreateProgram(&shader, shader_id);
+	resource_id shader_id = cglCreateProgram(&shader);
 
 	cglUniformMatrix4fv(shader_id, mat_model_prop, model);
 	cglUniformMatrix4fv(shader_id, mat_view_prop, view);

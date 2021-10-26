@@ -10,16 +10,6 @@
 
 using namespace CpuRasterizer;
 
-constexpr int kMaxMipmap = 8;
-constexpr int kMaxShaderNum = 128;
-constexpr int kMaxTextureNum = 128;
-
-static std::unordered_map<uint32_t, ShaderProgram*> id2shader;
-static std::unordered_map<uint32_t, TextureType> id2texturetype;
-
-static uint32_t current_shader = 0;
-static uint32_t current_texture = 0;
-
 void cglInitWindow(const char* title, size_t w, size_t h)
 {
 	Window::initialize_main_window(title, w, h);
@@ -112,13 +102,7 @@ void cglSetColorMask(cglColorMask mask)
 	CpuRasterDevice.set_color_mask(mask);
 }
 
-int cglGenId(uint32_t& id)
-{
-	int ret = CpuRasterDevice.try_alloc_id(id) ? 1 : 0;
-	return ret;
-}
-
-uint32_t cglCreateBuffer(size_t width, size_t height, cglFrameContent content)
+cglResID cglCreateBuffer(size_t width, size_t height, cglFrameContent content)
 {
 	return CpuRasterDevice.create_buffer(width, height, content);
 }
@@ -133,39 +117,34 @@ size_t cglBindIndexBuffer(const std::vector<size_t>& buffer)
 	return CpuRasterDevice.bind_index_buffer(buffer);
 }
 
-void cglUseVertexBuffer(size_t id)
+void cglUseVertexBuffer(cglResID id)
 {
 	CpuRasterDevice.use_vertex_buffer(id);
 }
 
-void cglUseIndexBuffer(size_t id)
+void cglUseIndexBuffer(cglResID id)
 {
 	CpuRasterDevice.use_index_buffer(id);
 }
 
-void cglFreeVertexBuffer(size_t id)
+void cglFreeVertexBuffer(cglResID id)
 {
-	CpuRasterDevice.free_vertex_buffer(id);
+	CpuRasterDevice.delete_vertex_buffer(id);
 }
 
-void cglFreeIndexBuffer(size_t id)
+void cglFreeIndexBuffer(cglResID id)
 {
-	CpuRasterDevice.free_index_buffer(id);
+	CpuRasterDevice.delete_index_buffer(id);
 }
 
-bool cglGenTexture(uint32_t& id)
-{
-	return CpuRasterDevice.try_alloc_id(id);
-}
-
-void cglBindTexture(cglTextureType type, uint32_t id)
+void cglBindTexture(cglTextureType type, cglResID id)
 {
 	// to be implement
 	UNUSED(type);
 	UNUSED(id);
 }
 
-bool cglActivateTexture(uint32_t id)
+bool cglActivateTexture(cglResID id)
 {
 	// to be implement	
 	UNUSED(id);
@@ -177,59 +156,34 @@ void cglGenerateMipmap()
 	// to be implement	
 }
 
-bool cglCreateProgram(ShaderProgram* shader, uint32_t& id)
+cglResID cglCreateProgram(cglShaderProgram shader)
 {
-	if (CpuRasterDevice.try_alloc_id(id))
-	{
-		id2shader[id] = shader;
-		return true;
-	}
-
-	return false;
+	return CpuRasterDevice.create_shader_program(shader);
 }
 
-bool cglUseProgram(uint32_t id)
+void cglUseProgram(cglResID id)
 {
-	if (id2shader.count(id) > 0)
-	{
-		current_shader = id;
-		CpuRasterDevice.use_shader(id2shader[current_shader]);
-		return true;
-	}
-
-	return false;
+	CpuRasterDevice.use_program(id);
 }
 
-void cglUniform1i(uint32_t id, property_name prop_id, int v)
+void cglUniform1i(cglResID id, cglPropertyName prop_id, int v)
 {
-	if (id2shader.count(id) > 0)
-	{
-		id2shader[id]->local_properties.set_int(prop_id, v);
-	}
+	CpuRasterDevice.set_uniform_int(id, prop_id, v);
 }
 
-void cglUniform1f(uint32_t id, property_name prop_id, float v)
+void cglUniform1f(cglResID id, cglPropertyName prop_id, float v)
 {
-	if (id2shader.count(id) > 0)
-	{
-		id2shader[id]->local_properties.set_float(prop_id, v);
-	}
+	CpuRasterDevice.set_uniform_float(id, prop_id, v);
 }
 
-void cglUniform4fv(uint32_t id, property_name prop_id, cglVec4 v)
+void cglUniform4fv(cglResID id, cglPropertyName prop_id, cglVec4 v)
 {
-	if (id2shader.count(id) > 0)
-	{
-		id2shader[id]->local_properties.set_float4(prop_id, v);
-	}
+	CpuRasterDevice.set_uniform_float4(id, prop_id, v);
 }
 
-void cglUniformMatrix4fv(uint32_t id, property_name prop_id, cglMat4 mat)
+void cglUniformMatrix4fv(cglResID id, cglPropertyName prop_id, cglMat4 mat)
 {
-	if (id2shader.count(id) > 0)
-	{
-		id2shader[id]->local_properties.set_mat4x4(prop_id, mat);
-	}
+	CpuRasterDevice.set_uniform_mat4x4(id, prop_id, mat);
 }
 
 void cglDrawCoordinates(const cglVec3& pos, const cglVec3& forward, const cglVec3& up, const cglVec3& right, const cglMat4& m, const cglMat4& v, const cglMat4& p)
@@ -285,7 +239,7 @@ void cglFencePixels()
 	CpuRasterDevice.fence_pixels();
 }
 
-void cglSetActiveRenderTarget(uint32_t id)
+void cglSetActiveRenderTarget(cglResID id)
 {
 	CpuRasterDevice.set_active_rendertexture(id);
 }

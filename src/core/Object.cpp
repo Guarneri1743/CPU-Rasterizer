@@ -6,7 +6,7 @@
 
 namespace CpuRasterizer
 {
-	IdAllocator idalloc(kInvalidID + 1, kMaxID);
+	IdAllocator<resource_id, kInvalidID, kMaxID> idalloc;
 
 	Object::Object()
 	{
@@ -18,7 +18,7 @@ namespace CpuRasterizer
 		idalloc.free(id);
 	}
 
-	uint32_t Object::get_id()
+	resource_id Object::get_id()
 	{
 		return id;
 	}
