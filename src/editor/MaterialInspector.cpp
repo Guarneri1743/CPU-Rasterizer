@@ -1,5 +1,6 @@
 #include "MaterialInspector.hpp"
 #include <filesystem>
+#include "Define.hpp"
 #include "Utility.hpp"
 #include "Serialization.hpp"
 #include "imgui/imgui.h"
@@ -81,6 +82,164 @@ namespace CpuRasterizer
 			{
 				metallic_offset = material.local_properties.get_float(metallic_offset_prop);
 			}
+
+			// ZWrite
+			ImGui::Checkbox("Zwrite", &material.zwrite_on);
+
+			// Cast Shadow
+			ImGui::Checkbox("Cast Shadow", &material.cast_shadow);
+
+			// face culling
+			ImGui::Checkbox("Double Face", &material.double_face);
+
+			// blend on/off
+			ImGui::Checkbox("Blend On", &material.transparent);
+
+			// blend func
+			{
+				const BlendFunc funcs[] = { BlendFunc::kAdd, BlendFunc::kSub };
+				const char* blend_modes[] = { "Add", "Sub" };
+				static int selected_blend_func = 0;
+				if (ImGui::Button("BlendMode.."))
+					ImGui::OpenPopup("blending");
+				ImGui::SameLine();
+				ImGui::TextUnformatted(selected_blend_func == -1 ? "<None>" : blend_modes[selected_blend_func]);
+				if (ImGui::BeginPopup("blending"))
+				{
+					ImGui::Separator();
+					for (int i = 0; i < IM_ARRAYSIZE(blend_modes); i++)
+						if (ImGui::Selectable(blend_modes[i]))
+						{
+							selected_blend_func = i;
+							material.blend_op = funcs[selected_blend_func];
+						}
+					ImGui::EndPopup();
+				}
+				else
+				{
+					for (int i = 0; i < IM_ARRAYSIZE(blend_modes); ++i)
+					{
+						if (funcs[i] == material.blend_op)
+						{
+							selected_blend_func = i;
+							break;
+						}
+					}
+				}
+			}
+
+			// blend src factor
+			{
+				const BlendFactor factors[] = 
+				{ 
+					BlendFactor::kSrcAlpha, 
+					BlendFactor::kSrcColor,
+					BlendFactor::kOneMinusSrcAlpha,
+					BlendFactor::kOneMinusSrcColor,
+					BlendFactor::kOne,
+					BlendFactor::kDstAlpha,
+					BlendFactor::kDstColor,
+					BlendFactor::kOneMinusDstAlpha,
+					BlendFactor::kOneMinusDstColor
+				};
+
+				const char* factor_names[] = 
+				{ 
+					"SrcAlpha", 
+					"SrcColor",
+					"OneMinusSrcAlpha",
+					"OneMinusSrcColor",
+					"One",
+					"DstAlpha",
+					"DstColor",
+					"OneMinusDstAlpha",
+					"OneMinusDstColor"
+				};
+				static int selected_src_factor = 0;
+				if (ImGui::Button("BlendFactor.."))
+					ImGui::OpenPopup("blend_factors");
+				ImGui::SameLine();
+				ImGui::TextUnformatted(selected_src_factor == -1 ? "<None>" : factor_names[selected_src_factor]);
+				if (ImGui::BeginPopup("blend_factors"))
+				{
+					ImGui::Separator();
+					for (int i = 0; i < IM_ARRAYSIZE(factor_names); i++)
+						if (ImGui::Selectable(factor_names[i]))
+						{
+							selected_src_factor = i;
+							material.src_factor = factors[selected_src_factor];
+						}
+					ImGui::EndPopup();
+				}
+				else
+				{
+					for (int i = 0; i < IM_ARRAYSIZE(factor_names); ++i)
+					{
+						if (factors[i] == material.src_factor)
+						{
+							selected_src_factor = i;
+							break;
+						}
+					}
+				}
+			}
+
+			// blend dst factor
+			{
+				const BlendFactor factors[] =
+				{
+					BlendFactor::kSrcAlpha,
+					BlendFactor::kSrcColor,
+					BlendFactor::kOneMinusSrcAlpha,
+					BlendFactor::kOneMinusSrcColor,
+					BlendFactor::kOne,
+					BlendFactor::kDstAlpha,
+					BlendFactor::kDstColor,
+					BlendFactor::kOneMinusDstAlpha,
+					BlendFactor::kOneMinusDstColor
+				};
+
+				const char* factor_names[] =
+				{
+					"SrcAlpha",
+					"SrcColor",
+					"OneMinusSrcAlpha",
+					"OneMinusSrcColor",
+					"One",
+					"DstAlpha",
+					"DstColor",
+					"OneMinusDstAlpha",
+					"OneMinusDstColor"
+				};
+				static int selected_dst_factor = 0;
+				if (ImGui::Button("BlendFactor.."))
+					ImGui::OpenPopup("blend_factors");
+				ImGui::SameLine();
+				ImGui::TextUnformatted(selected_dst_factor == -1 ? "<None>" : factor_names[selected_dst_factor]);
+				if (ImGui::BeginPopup("blend_factors"))
+				{
+					ImGui::Separator();
+					for (int i = 0; i < IM_ARRAYSIZE(factor_names); i++)
+						if (ImGui::Selectable(factor_names[i]))
+						{
+							selected_dst_factor = i;
+							material.dst_factor = factors[selected_dst_factor];
+						}
+					ImGui::EndPopup();
+				}
+				else
+				{
+					for (int i = 0; i < IM_ARRAYSIZE(factor_names); ++i)
+					{
+						if (factors[i] == material.dst_factor)
+						{
+							selected_dst_factor = i;
+							break;
+						}
+					}
+				}
+			}
+			
 
 			if (ImGui::Button("Save"))
 			{
