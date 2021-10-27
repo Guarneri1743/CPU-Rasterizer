@@ -9,27 +9,29 @@
 
 namespace CpuRasterizer
 {
-	Material::Material()
+	Material::Material():
+		material_name("default_material"),
+		target_shader(std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<PBRShader>())),
+		shadow_caster(std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<ShadowShader>())),
+		color_mask((ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha)),
+		stencil_func(CompareFunc::kAlways),
+		stencil_pass_op(StencilOp::kKeep),
+		stencil_fail_op(StencilOp::kKeep),
+		stencil_zfail_op(StencilOp::kKeep),
+		stencil_read_mask(0xFF),
+		stencil_write_mask(0xFF),
+		stencil_ref_val(0),
+		ztest_func(CompareFunc::kLess),
+		zwrite_on(true),
+		src_factor(BlendFactor::kSrcAlpha),
+		dst_factor(BlendFactor::kOneMinusSrcAlpha),
+		blend_op(BlendFunc::kAdd),
+		double_face(false),
+		transparent(false),
+		cast_shadow(true),
+		render_queue(0),
+		stencil_on(false)
 	{
-		this->material_name = "default_material";
-		this->target_shader = std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<PBRShader>()); 
-		this->shadow_caster = std::dynamic_pointer_cast<ShaderProgram>(std::make_shared<ShadowShader>());
-		this->color_mask = (ColorMask::kRed | ColorMask::kGreen | ColorMask::kBlue | ColorMask::kAlpha);
-		this->stencil_func = CompareFunc::kAlways;
-		this->stencil_pass_op = StencilOp::kKeep;
-		this->stencil_fail_op = StencilOp::kKeep;
-		this->stencil_zfail_op = StencilOp::kKeep;
-		this->stencil_read_mask = 0xFF;
-		this->stencil_write_mask = 0xFF;
-		this->stencil_ref_val = 0;
-		this->ztest_func = CompareFunc::kLess;
-		this->zwrite_on = true;
-		this->src_factor = BlendFactor::kSrcAlpha;
-		this->dst_factor = BlendFactor::kOneMinusSrcAlpha;
-		this->blend_op = BlendFunc::kAdd;
-		this->double_face = false;
-		this->transparent = false;
-		this->cast_shadow = true;
 		initialize();
 	}
 
@@ -79,6 +81,15 @@ namespace CpuRasterizer
 		cglDepthFunc(ztest_func);
 		cglSetBlendFactor(src_factor, dst_factor);
 		cglSetBlendFunc(blend_op);
+
+		if (stencil_on)
+		{
+			cglEnable(PipelineFeature::kStencilTest);
+		}
+		else
+		{
+			cglDisable(PipelineFeature::kStencilTest);
+		}
 
 		if (zwrite_on)
 		{
@@ -160,5 +171,7 @@ namespace CpuRasterizer
 		this->local_properties = other.local_properties;
 		this->target_shader_id = other.target_shader_id;
 		this->shadow_caster_id = other.shadow_caster_id;
+		this->render_queue = other.render_queue;
+		this->stencil_on = other.stencil_on;
 	}
 }

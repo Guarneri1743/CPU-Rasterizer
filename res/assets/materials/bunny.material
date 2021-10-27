@@ -1,23 +1,25 @@
 {
     "material_name": "default_material",
-    "target_shader": "pbr_shader",
+    "target_shader": "PBRShader",
     "meta_path": "/materials/bunny.material",
     "color_mask": 15,
     "blend_op": 0,
     "src_factor": 2,
     "dst_factor": 3,
     "ztest_func": 2,
-    "zwrite_mode": 1,
+    "zwrite_on": true,
     "stencil_fail_op": 0,
-    "stencil_func": 1,
+    "stencil_func": 4,
     "stencil_pass_op": 0,
     "stencil_read_mask": 255,
-    "stencil_ref_val": 0,
+    "stencil_ref_val": 1,
     "stencil_write_mask": 255,
     "stencil_zfail_op": 0,
     "double_face": false,
     "transparent": false,
     "cast_shadow": true,
+    "render_queue": 1,
+    "stencil_on": true,
     "name2float": [
         [
             30,
@@ -33,7 +35,7 @@
         ],
         [
             33,
-            1.0
+            0.10499999672174454
         ]
     ],
     "name2float4": [
@@ -41,9 +43,9 @@
             40,
             {
                 "x": 1.0,
-                "y": 0.9999899864196777,
-                "z": 0.9999899864196777,
-                "w": 0.9999899864196777
+                "y": 0.0,
+                "z": 0.0,
+                "w": 0.0
             }
         ]
     ],

@@ -65,8 +65,8 @@ namespace CpuRasterizer
 		index_buffer_table.push_back(std::vector<size_t>()); // dummy buffer
 		shader_programs.push_back(nullptr); // dummy shader
 		rendertextures.push_back(nullptr); // dummy rt
-		current_index_buffer_id = 0;
-		current_vertex_buffer_id = 0;
+		context.current_index_buffer_id = 0;
+		context.current_vertex_buffer_id = 0;
 	}
 
 	GraphicsDevice::~GraphicsDevice()
@@ -165,14 +165,14 @@ namespace CpuRasterizer
 	{
 		size_t index = static_cast<size_t>(id);
 		vertex_buffer_table[index] = vertex_buffer_table[vertex_buffer_table.size() - 1];
-		vertex_buffer_table.erase(vertex_buffer_table.end());
+		vertex_buffer_table.erase(vertex_buffer_table.end()-1);
 	}
 
 	void GraphicsDevice::delete_index_buffer(resource_id id)
 	{
 		size_t index = static_cast<size_t>(id);
 		index_buffer_table[index] = index_buffer_table[index_buffer_table.size() - 1];
-		index_buffer_table.erase(index_buffer_table.end());
+		index_buffer_table.erase(index_buffer_table.end()-1);
 	}
 
 	void GraphicsDevice::use_vertex_buffer(resource_id id)
@@ -285,7 +285,7 @@ namespace CpuRasterizer
 	void GraphicsDevice::delete_shader_program(resource_id id)
 	{
 		shader_programs[static_cast<size_t>(id)] = shader_programs[shader_programs.size() - 1];
-		shader_programs.erase(shader_programs.end());
+		shader_programs.erase(shader_programs.end()-1);
 	}
 
 	void GraphicsDevice::use_program(resource_id id)
@@ -335,6 +335,8 @@ namespace CpuRasterizer
 
 	void GraphicsDevice::draw_primitive()
 	{
+		if (context.current_index_buffer_id == 0) return;
+
 		for (size_t index = 0; index < index_buffer_table[context.current_index_buffer_id].size(); index += 3)
 		{
 			context.indices[0] = index;
@@ -794,7 +796,7 @@ namespace CpuRasterizer
 		UNUSED(stencil_write_mask);
 
 		// early-z
-		if (enable_depth_test && !enable_alpha_test)
+		if (enable_depth_test && !enable_alpha_test && !enable_stencil_test)
 		{
 			if (!buffer.perform_depth_test(ztest_func, row, col, z))
 			{

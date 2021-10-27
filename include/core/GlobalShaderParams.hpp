@@ -22,7 +22,7 @@ namespace CpuRasterizer {
 			shadow_bias = 0.02f;
 			enable_shadow = true;
 			pcf_on = true;
-			enable_ibl = true;
+			enable_ibl = false;
 			enable_gizmos = true;
 			width = 800;
 			height = 600;

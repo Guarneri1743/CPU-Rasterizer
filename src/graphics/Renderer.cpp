@@ -26,24 +26,40 @@ namespace CpuRasterizer
 	}
 
 	Renderer::~Renderer()
-	{}
+	{
+		if (target != nullptr)
+		{
+			for (auto& vid : vertex_buffer_ids)
+			{
+				cglFreeVertexBuffer(vid);
+			}
+
+			for (auto& iid : index_buffer_ids)
+			{
+				cglFreeIndexBuffer(iid);
+			}
+		}
+	}
 
 	void Renderer::upload_mesh()
 	{
 		if (target != nullptr)
 		{
-			std::vector<Vertex> vertices;
-			std::vector<size_t> indices;
 			for (auto& mesh : target->meshes)
 			{
-				vertices.insert(vertices.end(), mesh.vertices.begin(), mesh.vertices.end());
-				indices.insert(indices.end(), mesh.indices.begin(), mesh.indices.end());
+				// check indices
+				for (int idx = 0; idx < mesh.indices.size(); ++idx)
+				{
+					if (mesh.indices[idx] < 0 || mesh.indices[idx] >= mesh.vertices.size())
+					{
+						mesh.indices[idx] = 0;
+					}
+				}
+				auto vid = cglBindVertexBuffer(mesh.vertices);
+				auto iid = cglBindIndexBuffer(mesh.indices);
+				vertex_buffer_ids.emplace_back(vid);
+				index_buffer_ids.emplace_back(iid);
 			}
-
-			auto vid = cglBindVertexBuffer(vertices);
-			auto iid = cglBindIndexBuffer(indices);
-			vertex_buffer_ids.emplace_back(vid);
-			index_buffer_ids.emplace_back(iid);
 		}
 	}
 

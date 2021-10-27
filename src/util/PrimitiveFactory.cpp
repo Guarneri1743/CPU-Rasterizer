@@ -202,6 +202,10 @@ namespace CpuRasterizer {
 
 	std::shared_ptr<Model> PrimitiveFactory::cube(std::shared_ptr<Material> material)
 	{
+		for (int i = 0; i < 36; ++i)
+		{
+			cube_vertices[i].mask |= kNormalMask;
+		}
 		const std::vector<Vertex> vert(cube_vertices, cube_vertices + 36);
 		const std::vector<size_t> ind(cube_indices, cube_indices + 36);
 		return Model::load_raw(vert, ind, material);

@@ -9,6 +9,202 @@
 
 namespace CpuRasterizer
 {
+	void draw_stencil_op(const char* button, const char* popup, StencilOp& op, int& selected_op)
+	{
+		const StencilOp funcs[] =
+		{
+			StencilOp::kDecrement,
+			StencilOp::kDecrementWrap,
+			StencilOp::kIncrement,
+			StencilOp::kIncrementWrap,
+			StencilOp::kInvert,
+			StencilOp::kKeep,
+			StencilOp::kReplace,
+			StencilOp::kZero
+		};
+
+		const char* func_names[] =
+		{
+			"kDecrement",
+			"kDecrementWrap",
+			"kIncrement",
+			"kIncrementWrap",
+			"kInvert",
+			"kKeep",
+			"kReplace",
+			"kZero"
+		};
+
+		if (ImGui::Button(button))
+			ImGui::OpenPopup(popup);
+		ImGui::SameLine();
+		ImGui::TextUnformatted(selected_op == -1 ? "<None>" : func_names[selected_op]);
+		if (ImGui::BeginPopup(popup))
+		{
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(func_names); i++)
+				if (ImGui::Selectable(func_names[i]))
+				{
+					selected_op = i;
+					op = funcs[selected_op];
+				}
+			ImGui::EndPopup();
+		}
+		else
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(func_names); ++i)
+			{
+				if (funcs[i] == op)
+				{
+					selected_op = i;
+					break;
+				}
+			}
+		}
+	}
+
+	void draw_compare_func(const char* button, const char* popup, CompareFunc& func, int& selected_compare_func)
+	{
+		const CompareFunc funcs[] =
+		{
+			CompareFunc::kAlways,
+			CompareFunc::kEqual,
+			CompareFunc::kGEqual,
+			CompareFunc::kGreater,
+			CompareFunc::kLEqual,
+			CompareFunc::kLess,
+			CompareFunc::kNever,
+			CompareFunc::kNotEqual
+		};
+
+		const char* func_names[] =
+		{
+			"Always",
+			"Equal",
+			"GEqual",
+			"Greater",
+			"LEqual",
+			"Less",
+			"Never",
+			"NotEqual"
+		};
+
+		if (ImGui::Button(button))
+			ImGui::OpenPopup(popup);
+		ImGui::SameLine();
+		ImGui::TextUnformatted(selected_compare_func == -1 ? "<None>" : func_names[selected_compare_func]);
+		if (ImGui::BeginPopup(popup))
+		{
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(func_names); i++)
+				if (ImGui::Selectable(func_names[i]))
+				{
+					selected_compare_func = i;
+					func = funcs[selected_compare_func];
+				}
+			ImGui::EndPopup();
+		}
+		else
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(func_names); ++i)
+			{
+				if (funcs[i] == func)
+				{
+					selected_compare_func = i;
+					break;
+				}
+			}
+		}
+	}
+
+	void draw_blend_factor(const char* button, const char* popup, BlendFactor& factor, int& selected_factor)
+	{
+		const BlendFactor factors[] =
+		{
+			BlendFactor::kSrcAlpha,
+			BlendFactor::kSrcColor,
+			BlendFactor::kOneMinusSrcAlpha,
+			BlendFactor::kOneMinusSrcColor,
+			BlendFactor::kOne,
+			BlendFactor::kDstAlpha,
+			BlendFactor::kDstColor,
+			BlendFactor::kOneMinusDstAlpha,
+			BlendFactor::kOneMinusDstColor
+		};
+
+		const char* factor_names[] =
+		{
+			"SrcAlpha",
+			"SrcColor",
+			"OneMinusSrcAlpha",
+			"OneMinusSrcColor",
+			"One",
+			"DstAlpha",
+			"DstColor",
+			"OneMinusDstAlpha",
+			"OneMinusDstColor"
+		};
+
+		if (ImGui::Button(button))
+			ImGui::OpenPopup(popup);
+		ImGui::SameLine();
+		ImGui::TextUnformatted(selected_factor == -1 ? "<None>" : factor_names[selected_factor]);
+		if (ImGui::BeginPopup(popup))
+		{
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(factor_names); i++)
+				if (ImGui::Selectable(factor_names[i]))
+				{
+					selected_factor = i;
+					factor = factors[selected_factor];
+				}
+			ImGui::EndPopup();
+		}
+		else
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(factor_names); ++i)
+			{
+				if (factors[i] == factor)
+				{
+					selected_factor = i;
+					break;
+				}
+			}
+		}
+	}
+
+	void draw_blend_func(const char* button, const char* popup, BlendFunc& func, int& selected_blend_func)
+	{
+		const BlendFunc funcs[] = { BlendFunc::kAdd, BlendFunc::kSub };
+		const char* blend_modes[] = { "Add", "Sub" };
+		if (ImGui::Button(button))
+			ImGui::OpenPopup(popup);
+		ImGui::SameLine();
+		ImGui::TextUnformatted(selected_blend_func == -1 ? "<None>" : blend_modes[selected_blend_func]);
+		if (ImGui::BeginPopup(popup))
+		{
+			ImGui::Separator();
+			for (int i = 0; i < IM_ARRAYSIZE(blend_modes); i++)
+				if (ImGui::Selectable(blend_modes[i]))
+				{
+					selected_blend_func = i;
+					func = funcs[selected_blend_func];
+				}
+			ImGui::EndPopup();
+		}
+		else
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(blend_modes); ++i)
+			{
+				if (funcs[i] == func)
+				{
+					selected_blend_func = i;
+					break;
+				}
+			}
+		}
+	}
+
 	void MaterialInspector::on_gui(Material& material)
 	{
 		if (ImGui::CollapsingHeader("Material", ImGuiTreeNodeFlags_DefaultOpen))
@@ -35,7 +231,7 @@ namespace CpuRasterizer
 				}
 			}
 
-			if (ImGui::ColorEdit3("TintColor", tint_color))
+			if (ImGui::ColorEdit4("TintColor", tint_color))
 			{
 				material.local_properties.set_float4(tint_color_prop, tinymath::vec4f(tint_color[0], tint_color[1], tint_color[2], tint_color[3]));
 			}
@@ -83,6 +279,45 @@ namespace CpuRasterizer
 				metallic_offset = material.local_properties.get_float(metallic_offset_prop);
 			}
 
+			ImGui::Checkbox("StencilTest", &material.stencil_on);
+
+			static int stencilfunc, stencilpass, stencilfail, stencilzfail, depthfunc, blendfunc, blendsrc, blenddst;
+			draw_compare_func("StencilFunc", "stencilfunc", material.stencil_func, stencilfunc);
+			draw_stencil_op("StencilPassOp", "stencilpass", material.stencil_pass_op, stencilpass);
+			draw_stencil_op("StencilFailOp", "stencilfail", material.stencil_fail_op, stencilfail);
+			draw_stencil_op("StencilZFailOp", "stencilzfail", material.stencil_zfail_op, stencilzfail);
+
+			static int stencil_ref, stencil_readmask, stencil_writemask;
+			if (ImGui::InputInt("StencilRef", &stencil_ref))
+			{
+				material.stencil_ref_val = (stencil_t)stencil_ref;
+			}
+			else
+			{
+				stencil_ref = (int)material.stencil_ref_val;
+			}
+
+			if(ImGui::InputInt("StencilReadMask", &stencil_readmask))
+			{
+				material.stencil_read_mask = (stencil_t)stencil_readmask;
+			}
+			else
+			{
+				stencil_readmask = (int)material.stencil_read_mask;
+			}
+
+			if (ImGui::InputInt("StencilWriteMask", &stencil_writemask))
+			{
+				material.stencil_write_mask = (stencil_t)stencil_writemask;
+			}
+			else
+			{
+				stencil_writemask = (int)material.stencil_write_mask;
+			}
+
+
+			draw_compare_func("DepthFunc", "depthfunc", material.ztest_func, depthfunc);
+
 			// ZWrite
 			ImGui::Checkbox("Zwrite", &material.zwrite_on);
 
@@ -95,152 +330,14 @@ namespace CpuRasterizer
 			// blend on/off
 			ImGui::Checkbox("Blend On", &material.transparent);
 
-			// blend func
-			{
-				const BlendFunc funcs[] = { BlendFunc::kAdd, BlendFunc::kSub };
-				const char* blend_modes[] = { "Add", "Sub" };
-				static int selected_blend_func = 0;
-				if (ImGui::Button("BlendMode.."))
-					ImGui::OpenPopup("blending");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(selected_blend_func == -1 ? "<None>" : blend_modes[selected_blend_func]);
-				if (ImGui::BeginPopup("blending"))
-				{
-					ImGui::Separator();
-					for (int i = 0; i < IM_ARRAYSIZE(blend_modes); i++)
-						if (ImGui::Selectable(blend_modes[i]))
-						{
-							selected_blend_func = i;
-							material.blend_op = funcs[selected_blend_func];
-						}
-					ImGui::EndPopup();
-				}
-				else
-				{
-					for (int i = 0; i < IM_ARRAYSIZE(blend_modes); ++i)
-					{
-						if (funcs[i] == material.blend_op)
-						{
-							selected_blend_func = i;
-							break;
-						}
-					}
-				}
-			}
+			draw_blend_func("BlendFunc", "blendfunc", material.blend_op, blendfunc);
 
-			// blend src factor
-			{
-				const BlendFactor factors[] = 
-				{ 
-					BlendFactor::kSrcAlpha, 
-					BlendFactor::kSrcColor,
-					BlendFactor::kOneMinusSrcAlpha,
-					BlendFactor::kOneMinusSrcColor,
-					BlendFactor::kOne,
-					BlendFactor::kDstAlpha,
-					BlendFactor::kDstColor,
-					BlendFactor::kOneMinusDstAlpha,
-					BlendFactor::kOneMinusDstColor
-				};
+			draw_blend_factor("BlendSrcFactor", "blendsrcfactor", material.src_factor, blendsrc);
 
-				const char* factor_names[] = 
-				{ 
-					"SrcAlpha", 
-					"SrcColor",
-					"OneMinusSrcAlpha",
-					"OneMinusSrcColor",
-					"One",
-					"DstAlpha",
-					"DstColor",
-					"OneMinusDstAlpha",
-					"OneMinusDstColor"
-				};
-				static int selected_src_factor = 0;
-				if (ImGui::Button("BlendFactor.."))
-					ImGui::OpenPopup("blend_factors");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(selected_src_factor == -1 ? "<None>" : factor_names[selected_src_factor]);
-				if (ImGui::BeginPopup("blend_factors"))
-				{
-					ImGui::Separator();
-					for (int i = 0; i < IM_ARRAYSIZE(factor_names); i++)
-						if (ImGui::Selectable(factor_names[i]))
-						{
-							selected_src_factor = i;
-							material.src_factor = factors[selected_src_factor];
-						}
-					ImGui::EndPopup();
-				}
-				else
-				{
-					for (int i = 0; i < IM_ARRAYSIZE(factor_names); ++i)
-					{
-						if (factors[i] == material.src_factor)
-						{
-							selected_src_factor = i;
-							break;
-						}
-					}
-				}
-			}
+			draw_blend_factor("BlendDstFactor", "blenddstfactor", material.dst_factor, blenddst);
 
-			// blend dst factor
-			{
-				const BlendFactor factors[] =
-				{
-					BlendFactor::kSrcAlpha,
-					BlendFactor::kSrcColor,
-					BlendFactor::kOneMinusSrcAlpha,
-					BlendFactor::kOneMinusSrcColor,
-					BlendFactor::kOne,
-					BlendFactor::kDstAlpha,
-					BlendFactor::kDstColor,
-					BlendFactor::kOneMinusDstAlpha,
-					BlendFactor::kOneMinusDstColor
-				};
-
-				const char* factor_names[] =
-				{
-					"SrcAlpha",
-					"SrcColor",
-					"OneMinusSrcAlpha",
-					"OneMinusSrcColor",
-					"One",
-					"DstAlpha",
-					"DstColor",
-					"OneMinusDstAlpha",
-					"OneMinusDstColor"
-				};
-				static int selected_dst_factor = 0;
-				if (ImGui::Button("BlendFactor.."))
-					ImGui::OpenPopup("blend_factors");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(selected_dst_factor == -1 ? "<None>" : factor_names[selected_dst_factor]);
-				if (ImGui::BeginPopup("blend_factors"))
-				{
-					ImGui::Separator();
-					for (int i = 0; i < IM_ARRAYSIZE(factor_names); i++)
-						if (ImGui::Selectable(factor_names[i]))
-						{
-							selected_dst_factor = i;
-							material.dst_factor = factors[selected_dst_factor];
-						}
-					ImGui::EndPopup();
-				}
-				else
-				{
-					for (int i = 0; i < IM_ARRAYSIZE(factor_names); ++i)
-					{
-						if (factors[i] == material.dst_factor)
-						{
-							selected_dst_factor = i;
-							break;
-						}
-					}
-				}
-			}
+			ImGui::InputInt("RenderQueue", &material.render_queue);
 			
-
 			if (ImGui::Button("Save"))
 			{
 				std::filesystem::path path(ASSETS_PATH + material.meta_path);

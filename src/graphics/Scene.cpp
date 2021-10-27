@@ -264,10 +264,18 @@ namespace CpuRasterizer
 			return;
 		}
 
-		if (enable_skybox && CpuRasterSharedData.enable_ibl)
+		if (enable_skybox)
 		{
 			skybox->render();
 		}
+
+		// sort by render queue
+		std::sort(objects.begin(), objects.end(), [](const std::shared_ptr<Renderer>& lhs, const std::shared_ptr<Renderer>& rhs) {
+			if (lhs->target->material->render_queue < rhs->target->material->render_queue)
+				return true;
+			else
+				return false;
+		});
 
 		for (auto& obj : objects)
 		{
@@ -381,6 +389,7 @@ namespace CpuRasterizer
 		Scene* deserialized_scene = new Scene();
 		Serializer::deserialize(path, *deserialized_scene);
 		if (deserialized_scene == nullptr) return;
+		CpuRasterSharedData.enable_ibl = deserialized_scene->enable_skybox;
 		CpuRasterSharedData.enable_shadow = deserialized_scene->enable_shadow;
 		CpuRasterSharedData.pcf_on = deserialized_scene->pcf_on;
 		CpuRasterSharedData.shadow_bias = deserialized_scene->shadow_bias;

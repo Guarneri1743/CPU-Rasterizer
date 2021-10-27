@@ -587,6 +587,8 @@ namespace CpuRasterizer
 			doc.AddMember("double_face", material.double_face, doc.GetAllocator());
 			doc.AddMember("transparent", material.transparent, doc.GetAllocator());
 			doc.AddMember("cast_shadow", material.cast_shadow, doc.GetAllocator());
+			doc.AddMember("render_queue", (int32_t)material.render_queue, doc.GetAllocator());
+			doc.AddMember("stencil_on", material.stencil_on, doc.GetAllocator());
 
 			serialize(material.local_properties, doc);
 
@@ -634,6 +636,10 @@ namespace CpuRasterizer
 				{
 					material.zwrite_on = doc["zwrite_mode"].GetInt() == 1 ? true : false;
 				}
+				if (doc.HasMember("stencil_on"))
+				{
+					material.stencil_on = doc["stencil_on"].GetBool();
+				}
 				material.stencil_fail_op = (StencilOp)doc["stencil_fail_op"].GetInt();
 				material.stencil_func = (CompareFunc)doc["stencil_func"].GetInt();
 				material.stencil_pass_op = (StencilOp)doc["stencil_pass_op"].GetInt();
@@ -644,6 +650,10 @@ namespace CpuRasterizer
 				material.double_face = doc["double_face"].GetBool();
 				material.transparent = doc["transparent"].GetBool();
 				material.cast_shadow = doc["cast_shadow"].GetBool();
+				if (doc.HasMember("render_queue"))
+				{
+					material.render_queue = doc["render_queue"].GetInt();
+				}
 				material.material_name = doc["material_name"].GetString();
 				material.meta_path = doc["meta_path"].GetString();
 				material.target_shader = ShaderLab::get_shader(doc["target_shader"].GetString());

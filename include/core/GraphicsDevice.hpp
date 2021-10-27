@@ -145,8 +145,6 @@ namespace CpuRasterizer
 		std::vector<std::shared_ptr<RenderTexture>> rendertextures;
 		std::vector<std::vector<Vertex>> vertex_buffer_table;
 		std::vector<std::vector<size_t>> index_buffer_table;
-		size_t current_vertex_buffer_id;
-		size_t current_index_buffer_id;
 
 		std::vector<ShaderProgram*> shader_programs;
 
