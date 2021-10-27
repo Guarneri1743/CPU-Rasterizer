@@ -336,14 +336,9 @@ namespace CpuRasterizer
 	void GraphicsDevice::draw_primitive()
 	{
 		if (context.current_index_buffer_id == 0) return;
+		if (context.current_vertex_buffer_id == 0) return;
 
-		for (size_t index = 0; index < index_buffer_table[context.current_index_buffer_id].size(); index += 3)
-		{
-			context.indices[0] = index;
-			context.indices[1] = index + 1;
-			context.indices[2] = index + 2;
-			contexts.emplace_back(context);
-		}
+		contexts.emplace_back(context);
 	}
 
 	void GraphicsDevice::fence_primitives()
@@ -354,16 +349,14 @@ namespace CpuRasterizer
 			contexts.end(),
 			[this](auto&& ctx)
 		{
-			if (ctx.current_vertex_buffer_id < vertex_buffer_table.size())
+			auto& vb = vertex_buffer_table[ctx.current_vertex_buffer_id];
+			auto& ib = index_buffer_table[ctx.current_index_buffer_id];
+			for (size_t idx = 0; idx < ib.size(); idx += 3)
 			{
-				auto& vb = vertex_buffer_table[ctx.current_vertex_buffer_id];
-				if (ctx.indices[0] < vb.size() && ctx.indices[1] < vb.size() && ctx.indices[2] < vb.size())
-				{
-					auto& v1 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[0]];
-					auto& v2 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[1]];
-					auto& v3 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[2]];
-					input2raster(ctx, v1, v2, v3);
-				}
+				 auto& v1 = vb[ib[idx]];
+				 auto& v2 = vb[ib[idx + 1]];
+				 auto& v3 = vb[ib[idx + 2]];
+				 input2raster(ctx, v1, v2, v3);
 			}
 		});
 
