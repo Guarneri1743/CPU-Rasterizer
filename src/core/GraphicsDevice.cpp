@@ -354,10 +354,17 @@ namespace CpuRasterizer
 			contexts.end(),
 			[this](auto&& ctx)
 		{
-			auto& v1 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[0]];
-			auto& v2 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[1]];
-			auto& v3 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[2]];
-			input2raster(ctx, v1, v2, v3);
+			if (ctx.current_vertex_buffer_id < vertex_buffer_table.size())
+			{
+				auto& vb = vertex_buffer_table[ctx.current_vertex_buffer_id];
+				if (ctx.indices[0] < vb.size() && ctx.indices[1] < vb.size() && ctx.indices[2] < vb.size())
+				{
+					auto& v1 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[0]];
+					auto& v2 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[1]];
+					auto& v3 = vertex_buffer_table[ctx.current_vertex_buffer_id][ctx.indices[2]];
+					input2raster(ctx, v1, v2, v3);
+				}
+			}
 		});
 
 		contexts.clear();
