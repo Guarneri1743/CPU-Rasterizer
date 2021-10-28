@@ -104,7 +104,7 @@ namespace CpuRasterizer
 		void draw_coordinates(const tinymath::vec3f& pos, const tinymath::vec3f& forward, const tinymath::vec3f& up, const tinymath::vec3f& right, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p);
 
 	private:
-		void input2raster(const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void input2vertex(const GraphicsContext& context, const Vertex& v1, const Vertex& v2, const Vertex& v3);
 		void clip2raster(const GraphicsContext& context, const Vertex& c1, const Vertex& c2, const Vertex& c3);
 		void rasterize_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);
 		void resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue);

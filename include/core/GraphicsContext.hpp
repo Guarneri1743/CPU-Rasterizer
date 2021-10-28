@@ -41,6 +41,7 @@ namespace CpuRasterizer
 		MultiSampleFrequency multi_sample_frequency;
 		uint8_t msaa_subsample_count;
 
+		size_t indices[3];
 		resource_id current_vertex_buffer_id;
 		resource_id current_index_buffer_id;
 

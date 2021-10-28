@@ -18,10 +18,10 @@ namespace CpuRasterizer
 		ret.texcoord2 = v0.texcoord2 * w0 + v1.texcoord2 * w1 + v2.texcoord2 * w2;
 		ret.texcoord3 = v0.texcoord3 * w0 + v1.texcoord3 * w1 + v2.texcoord3 * w2;
 		ret.texcoord4 = v0.texcoord4 * w0 + v1.texcoord4 * w1 + v2.texcoord4 * w2;
-		ret.texcoord5 = v0.texcoord5 * w0 + v1.texcoord5 * w1 + v2.texcoord5 * w2;
-		ret.texcoord6 = v0.texcoord6 * w0 + v1.texcoord6 * w1 + v2.texcoord6 * w2;
-		ret.texcoord7 = v0.texcoord7 * w0 + v1.texcoord7 * w1 + v2.texcoord7 * w2;
-		ret.texcoord8 = v0.texcoord8 * w0 + v1.texcoord8 * w1 + v2.texcoord8 * w2;
+		//ret.texcoord5 = v0.texcoord5 * w0 + v1.texcoord5 * w1 + v2.texcoord5 * w2;
+		//ret.texcoord6 = v0.texcoord6 * w0 + v1.texcoord6 * w1 + v2.texcoord6 * w2;
+		//ret.texcoord7 = v0.texcoord7 * w0 + v1.texcoord7 * w1 + v2.texcoord7 * w2;
+		//ret.texcoord8 = v0.texcoord8 * w0 + v1.texcoord8 * w1 + v2.texcoord8 * w2;
 
 		ret.rhw = v0.rhw * w0 + v1.rhw * w1 + v2.rhw * w2;
 		return ret;

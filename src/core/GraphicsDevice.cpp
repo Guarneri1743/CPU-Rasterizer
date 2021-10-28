@@ -338,7 +338,15 @@ namespace CpuRasterizer
 		if (context.current_index_buffer_id == 0) return;
 		if (context.current_vertex_buffer_id == 0) return;
 
-		contexts.emplace_back(context);
+		auto& ib = index_buffer_table[context.current_index_buffer_id];
+
+		for (size_t idx = 0; idx < ib.size(); idx += 3)
+		{
+			context.indices[0] = ib[idx];
+			context.indices[1] = ib[idx + 1];
+			context.indices[2] = ib[idx + 2];
+			contexts.emplace_back(context);
+		}
 	}
 
 	void GraphicsDevice::fence_primitives()
@@ -350,14 +358,10 @@ namespace CpuRasterizer
 			[this](auto&& ctx)
 		{
 			auto& vb = vertex_buffer_table[ctx.current_vertex_buffer_id];
-			auto& ib = index_buffer_table[ctx.current_index_buffer_id];
-			for (size_t idx = 0; idx < ib.size(); idx += 3)
-			{
-				 auto& v1 = vb[ib[idx]];
-				 auto& v2 = vb[ib[idx + 1]];
-				 auto& v3 = vb[ib[idx + 2]];
-				 input2raster(ctx, v1, v2, v3);
-			}
+			auto& v1 = vb[ctx.indices[0]];
+			auto& v2 = vb[ctx.indices[1]];
+			auto& v3 = vb[ctx.indices[2]];
+			input2vertex(ctx, v1, v2, v3);
 		});
 
 		contexts.clear();
@@ -402,7 +406,7 @@ namespace CpuRasterizer
 		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
-	void GraphicsDevice::input2raster(const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
+	void GraphicsDevice::input2vertex(const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
 	{
 		auto& shader = *ctx.shader;
 
