@@ -76,6 +76,7 @@
 #define cglMat3Zero tinymath::kMat3x3Zero
 #define cglMat4Zero tinymath::kMat4x4Zero
 #define cglVert CpuRasterizer::Vertex
+#define cglRenderTexture CpuRasterizer::RenderTexture
 #define cglPrint(...) Logger::log(Logger::Severity::kLog, __VA_ARGS__)
 #define cglError(...) Logger::log(Logger::Severity::kError, __VA_ARGS__)
 
@@ -170,7 +171,9 @@ extern "C" {
 	CGL_EXTERN void cglSetActiveRenderTarget(cglResID id);
 	CGL_EXTERN void cglResetActiveRenderTarget();
 	CGL_EXTERN void* cglGetTargetColorBuffer();
-	CGL_EXTERN cglResID cglCreateBuffer(size_t width, size_t height, cglFrameContent content);
+	CGL_EXTERN void* cglGetActiveColorBuffer();
+	CGL_EXTERN cglResID cglCreateBuffer(size_t width, size_t height, cglFrameContent content); 
+	CGL_EXTERN void cglGetBuffer(cglResID id, std::shared_ptr<cglRenderTexture>& buffer);
 
 	// IB/VB
 	CGL_EXTERN size_t cglBindVertexBuffer(const std::vector<cglVert>& buffer);

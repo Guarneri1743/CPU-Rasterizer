@@ -55,6 +55,7 @@ namespace CpuRasterizer
 		FrameBuffer* get_msaa_framebuffer() const  { return msaa_framebuffer.get(); }
 		TileBasedManager* get_tile_based_manager() const { return tile_based_manager.get(); }
 
+		bool has_msaa_buf() const { return has_msaa_buffer; }
 		void set_msaa_param(bool msaa_on, uint8_t subsample_count);
 		uint8_t get_subsample_count() { return msaa_subsample_count; }
 		uint8_t get_subsamples_per_axis() { return subsamples_per_axis; }

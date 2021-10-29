@@ -236,8 +236,8 @@ namespace CpuRasterizer
 
 	void Window::blit2screen(uint8_t* framebuffer, size_t w, size_t h, bool draw_directly)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 		glBindTexture(GL_TEXTURE_2D, FBO);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)w, (int)h, 0, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer);
 
 		if (draw_directly)
 		{

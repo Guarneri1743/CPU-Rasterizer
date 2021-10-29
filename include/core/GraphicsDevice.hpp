@@ -54,6 +54,7 @@ namespace CpuRasterizer
 
 		// rt
 		RenderTexture* get_active_rendertexture() const ;
+		tinymath::color_rgba* get_active_color_buffer() const { return get_active_rendertexture()->get_color_buffer_ptr(); }
 		tinymath::color_rgba* get_target_color_buffer() const  { return target_rendertexture->get_color_buffer_ptr(); }
 		void set_active_rendertexture(resource_id id);
 		void reset_active_rendertexture() ;

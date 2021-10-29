@@ -111,8 +111,7 @@ namespace CpuRasterizer
 
 		shadowmap_id = cglCreateBuffer(512, 512, FrameContent::kDepth);
 		std::shared_ptr<RenderTexture> shadowmap;
-		// todo
-		CpuRasterDevice.get_buffer(shadowmap_id, shadowmap);
+		cglGetBuffer(shadowmap_id, shadowmap);
 
 		ShaderPropertyMap::global_shader_properties.set_cubemap(cubemap_prop, Scene::current()->cubemap);
 		ShaderPropertyMap::global_shader_properties.set_rendertexture(shadowmap_prop, shadowmap);
@@ -228,6 +227,7 @@ namespace CpuRasterizer
 			auto prev_enable_msaa = CpuRasterDevice.is_flag_enabled(PipelineFeature::kMSAA);
 			cglDisable(PipelineFeature::kMSAA);
 			cglSetActiveRenderTarget(shadowmap_id);
+			cglClearBuffer(cglFrameContent::kDepth);
 			render_shadow();
 			cglFencePixels();
 			cglResetActiveRenderTarget();

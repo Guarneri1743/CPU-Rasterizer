@@ -9,6 +9,8 @@
 #include "Logger.hpp"
 #include "Serialization.hpp"
 #include "EditorSharedData.hpp"
+#include "PreviewGUI.hpp"
+#include "CGL.h"
 
 namespace CpuRasterizer
 {
@@ -37,7 +39,7 @@ namespace CpuRasterizer
 			{
 				// explorer
 				{
-					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, (float)rect.h()), true, window_flags);
+					ImGui::BeginChild("Explorer", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.25f, (float)rect.h() - 32), true, window_flags);
 					draw_directories(ASSETS_PATH.c_str());
 					ImGui::EndChild();
 				}
@@ -47,7 +49,7 @@ namespace CpuRasterizer
 				// contents
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
-					ImGui::BeginChild("Content", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.75f, (float)rect.h()), true, window_flags);
+					ImGui::BeginChild("Content", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.75f, (float)rect.h() - 32), true, window_flags);
 					if (std::filesystem::is_directory(EditorSharedData::explorer_selection))
 					{
 						draw_files(EditorSharedData::explorer_selection);
@@ -62,7 +64,7 @@ namespace CpuRasterizer
 			if (ImGui::BeginTabItem("Console"))
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 2.0f);
-				ImGui::BeginChild("Console", ImVec2(ImGui::GetWindowContentRegionWidth(), (float)rect.h()), true, window_flags);
+				ImGui::BeginChild("Console", ImVec2(ImGui::GetWindowContentRegionWidth(), (float)rect.h() - 32), true, window_flags);
 				draw_console();
 				ImGui::EndChild();
 				ImGui::PopStyleVar();
@@ -73,8 +75,12 @@ namespace CpuRasterizer
 		}
 	}
 
+	std::unordered_map<std::string, PreviewGUI*> preview_cache;
 	void ExplorerEditor::draw_files(const std::filesystem::path& dir)
 	{
+		int preview_column_size = 8;
+		int preview_size = 0;
+		int preview_index = 0;
 		for (auto& path : std::filesystem::directory_iterator(dir))
 		{
 			std::string full_name = path.path().generic_string();
@@ -87,9 +93,37 @@ namespace CpuRasterizer
 			std::string label = get_prefix(path) + nice_name;
 			if (!is_dir)
 			{
-				if (ImGui::Selectable(label.c_str(), EditorSharedData::content_selection == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
+				std::string ext = path.path().extension().string();
+				if (ext == ".material")
 				{
-					EditorSharedData::content_selection = path.path().string();
+					ImGui::PushID(preview_index);
+					auto key = path.path().string();
+					if (preview_cache.count(key) > 0)
+					{
+						preview_cache[key]->on_gui(preview_index);
+					}
+					else
+					{
+						PreviewGUI* preview = new PreviewGUI(path.path().string(), 128, 128);
+						preview_cache[key] = preview;
+						preview->on_gui(preview_index);
+					}
+					ImGui::SameLine();
+					ImGui::PopID();
+					if (preview_size == preview_column_size)
+					{
+						preview_size = 0;
+						ImGui::NewLine();
+					}
+					preview_size++;
+					preview_index++;
+				}
+				else
+				{
+					if (ImGui::Selectable(label.c_str(), EditorSharedData::content_selection == path.path(), ImGuiSelectableFlags_AllowItemOverlap))
+					{
+						EditorSharedData::content_selection = path.path().string();
+					}
 				}
 
 				if (ImGui::BeginPopupContextItem("RightClickPopup"))
@@ -100,7 +134,6 @@ namespace CpuRasterizer
 						size_t length = asset_path.length();
 						std::string relative_path = path.path().generic_string();
 						relative_path = relative_path.replace(relative_path.begin(), relative_path.begin() + length, "");
-						std::string ext = path.path().extension().string();
 						if (ext == ".scene")
 						{
 							if (ImGui::Selectable("Open")) { Scene::open_scene(relative_path.c_str()); }
@@ -150,7 +183,6 @@ namespace CpuRasterizer
 				EditorSharedData::log_selection = idx;
 			}
 		}
-		draw_space(3);
 	}
 
 	std::size_t count_dirs(std::filesystem::path path)

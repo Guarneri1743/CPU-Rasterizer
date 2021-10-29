@@ -24,6 +24,8 @@
 #include "Renderer.hpp"
 
 #undef GetObject
+#undef near
+#undef far
 
 namespace CpuRasterizer
 {

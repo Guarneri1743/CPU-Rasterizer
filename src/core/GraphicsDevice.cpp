@@ -384,16 +384,11 @@ namespace CpuRasterizer
 	{
 		if (msaa_dirty)
 		{
-			target_rendertexture->set_msaa_param(is_flag_enabled(context, PipelineFeature::kMSAA), context.msaa_subsample_count);
+			get_active_rendertexture()->set_msaa_param(is_flag_enabled(context, PipelineFeature::kMSAA), context.msaa_subsample_count);
 			msaa_dirty = false;
 		}
 
 		get_active_rendertexture()->clear(flag);
-
-		for(size_t index = kDefaultRenderTextureID + 1; index < rendertextures.size(); ++index)
-		{
-			rendertextures[index]->clear(flag);
-		}
 
 		statistics.culled_triangle_count = 0;
 		statistics.culled_backface_triangle_count = 0;
@@ -403,7 +398,7 @@ namespace CpuRasterizer
 
 	void GraphicsDevice::set_clear_color(const tinymath::Color color)
 	{
-		target_rendertexture->set_clear_color(ColorEncoding::encode_rgba(color));
+		get_active_rendertexture()->set_clear_color(ColorEncoding::encode_rgba(color));
 	}
 
 	void GraphicsDevice::input2vertex(const GraphicsContext& ctx, const Vertex& v1, const Vertex& v2, const Vertex& v3)
@@ -538,6 +533,9 @@ namespace CpuRasterizer
 	void GraphicsDevice::resolve_tile(const tinymath::Rect& rect, SafeQueue<TileTask>& task_queue)
 	{
 		UNUSED(task_queue);
+		if (!get_active_rendertexture()->has_msaa_buf())
+			return;
+
 		get_active_rendertexture()->foreach_pixel(
 			rect,
 			[this](auto&& buffer, auto&& pixel)
@@ -581,7 +579,7 @@ namespace CpuRasterizer
 		col_start = tinymath::clamp(col_start, rect.x(), rect.x() + rect.size().x);
 		col_end = tinymath::clamp(col_end, rect.y(), rect.x() + rect.size().x);
 
-		if (is_flag_enabled(ctx, PipelineFeature::kMSAA))
+		if (is_flag_enabled(ctx, PipelineFeature::kMSAA) && get_active_rendertexture()->has_msaa_buf())
 		{
 			// msaa on
 			get_active_rendertexture()->foreach_pixel_block(
@@ -651,7 +649,7 @@ namespace CpuRasterizer
 		Fragment ddx = Pipeline::substract(frag1, frag2);
 		Fragment ddy = Pipeline::substract(frag1, frag3);
 
-		FrameBuffer& fb = is_flag_enabled(ctx, PipelineFeature::kMSAA) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
+		FrameBuffer& fb = (is_flag_enabled(ctx, PipelineFeature::kMSAA) && rt.has_msaa_buf()) ? *rt.get_msaa_framebuffer() : *rt.get_framebuffer();
 
 		if (px1_inside)
 		{
@@ -806,14 +804,14 @@ namespace CpuRasterizer
 			{
 				op_pass &= ~PipelineFeature::kDepthTest;
 				statistics.earlyz_optimized++;
-				return false; // here we can assume fragment shader will not modify depth (cuz modifying depth in fragment shader is not implemented yet)
+				return false; // assume fragment shader will not modify depth. todo: notify depth modification
 			}
 		}
 
 		// fragment shader
 		tinymath::Color fragment_result = tinymath::kColorBlack;
 
-		if (!is_flag_enabled(ctx, PipelineFeature::kMSAA) ||
+		if (!is_flag_enabled(ctx, PipelineFeature::kMSAA) || 
 			!subsample_param.pixel_color_calculated ||
 			ctx.multi_sample_frequency == MultiSampleFrequency::kSubsampleFrequency)
 		{
@@ -938,7 +936,7 @@ namespace CpuRasterizer
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& v, const tinymath::mat4x4& p, const tinymath::vec2f& screen_translation)
 	{
 		size_t w, h;
-		target_rendertexture->get_size(w, h);
+		get_active_rendertexture()->get_size(w, h);
 
 		tinymath::vec4f clip_start = p * v * tinymath::vec4f(start);
 		tinymath::vec4f clip_end = p * v * tinymath::vec4f(end);
@@ -965,13 +963,13 @@ namespace CpuRasterizer
 			s1 = translation * s1;
 			s2 = translation * s2;
 
-			SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+			SegmentDrawer::bresenham(get_active_rendertexture()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 		}
 	}
 
 	void GraphicsDevice::draw_screen_segment(const tinymath::vec4f& start, const tinymath::vec4f& end, const tinymath::Color& col)
 	{
-		SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
+		SegmentDrawer::bresenham(get_active_rendertexture()->get_color_raw_buffer(), (int)start.x, (int)start.y, (int)end.x, (int)end.y, ColorEncoding::encode_rgba(col));
 	}
 
 	void GraphicsDevice::draw_segment(const tinymath::vec3f& start, const tinymath::vec3f& end, const tinymath::Color& col, const tinymath::mat4x4& m, const tinymath::mat4x4& v, const tinymath::mat4x4& p)
@@ -998,7 +996,7 @@ namespace CpuRasterizer
 	void GraphicsDevice::draw_segment(const tinymath::vec4f& clip_start, const tinymath::vec4f& clip_end, const tinymath::Color& col)
 	{
 		size_t w, h;
-		target_rendertexture->get_size(w, h);
+		get_active_rendertexture()->get_size(w, h);
 
 		bool clip = true;
 		auto start_clipped = clip_start;
@@ -1017,7 +1015,7 @@ namespace CpuRasterizer
 			tinymath::vec4f s1 = Pipeline::ndc2screen(w, h, n1);
 			tinymath::vec4f s2 = Pipeline::ndc2screen(w, h, n2);
 
-			SegmentDrawer::bresenham(target_rendertexture->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
+			SegmentDrawer::bresenham(get_active_rendertexture()->get_color_raw_buffer(), (int)s1.x, (int)s1.y, (int)s2.x, (int)s2.y, ColorEncoding::encode_rgba(col));
 		}
 	}
 

@@ -107,6 +107,11 @@ cglResID cglCreateBuffer(size_t width, size_t height, cglFrameContent content)
 	return CpuRasterDevice.create_buffer(width, height, content);
 }
 
+CGL_EXTERN void cglGetBuffer(cglResID id, std::shared_ptr<cglRenderTexture>& buffer)
+{
+	CpuRasterDevice.get_buffer(id, buffer);
+}
+
 size_t cglBindVertexBuffer(const std::vector<cglVert>& buffer)
 {
 	return CpuRasterDevice.bind_vertex_buffer(buffer);
@@ -252,6 +257,11 @@ void cglResetActiveRenderTarget()
 void* cglGetTargetColorBuffer()
 {
 	return CpuRasterDevice.get_target_color_buffer();
+}
+
+void* cglGetActiveColorBuffer()
+{
+	return CpuRasterDevice.get_active_color_buffer();
 }
 
 void cglSetSubSampleCount(uint8_t count)
