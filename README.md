@@ -512,7 +512,9 @@ Result:
 
 <img src="/gallery/IBL.png" width = "512" height = "400" alt="overview" align=bottom /> 
 
-<img src="/gallery/IBL2.png" width = "512" height = "400" alt="overview" align=bottom /> 
+### MaterialEditor
+
+<img src="/gallery/material_editor.png" width = "512" height = "340" alt="overview" align=bottom /> 
 
 ### HDRI Tool
 

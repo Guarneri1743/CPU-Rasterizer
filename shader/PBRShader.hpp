@@ -488,7 +488,7 @@ namespace CpuRasterizer
 			setup(ndv, material_data.roughness, normal, view_dir, ibl_data);
 
 			//shadow
-			float shadow_atten = 1.0f - get_shadow_atten(input.texcoord0);
+			float shadow_atten = CpuRasterSharedData.enable_shadow ? 1.0f - get_shadow_atten(input.texcoord0) : 1.0f;
 
 			tinymath::Color albedo = material_data.albedo_color;
 			float ao = material_data.ao;
