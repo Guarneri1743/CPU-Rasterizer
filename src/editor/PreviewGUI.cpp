@@ -80,8 +80,16 @@ namespace CpuRasterizer
 		ImVec4 bg_col = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);       
 		ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);      
 		if (ImGui::ImageButton((ImTextureID)PreviewFBO, size, uv0, uv1, 4, bg_col, tint_col))
-		{
+		{	
+			if (renderer != nullptr && renderer->target != nullptr && renderer->target->material != nullptr)
+			{
+				if (Scene::current()->selection != nullptr)
+				{
+					Scene::current()->selection->get_model()->material = renderer->target->material;
+				}
+			}
 
+			ImGui::EndPopup();
 		}
 	}
 }

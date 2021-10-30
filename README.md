@@ -514,7 +514,7 @@ Result:
 
 ### MaterialEditor
 
-<img src="/gallery/material_editor.png" width = "512" height = "340" alt="overview" align=bottom /> 
+<img src="/gallery/material_editor.png" width = "512" height = "400" alt="overview" align=bottom /> 
 
 ### HDRI Tool
 

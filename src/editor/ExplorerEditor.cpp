@@ -124,33 +124,33 @@ namespace CpuRasterizer
 					{
 						EditorSharedData::content_selection = path.path().string();
 					}
-				}
 
-				if (ImGui::BeginPopupContextItem("RightClickPopup"))
-				{
-					if (path.path().has_extension())
+					if (ImGui::BeginPopupContextItem("RightClickPopup"))
 					{
-						std::string asset_path = ASSETS_PATH;
-						size_t length = asset_path.length();
-						std::string relative_path = path.path().generic_string();
-						relative_path = relative_path.replace(relative_path.begin(), relative_path.begin() + length, "");
-						if (ext == ".scene")
+						if (path.path().has_extension())
 						{
-							if (ImGui::Selectable("Open")) { Scene::open_scene(relative_path.c_str()); }
-						}
-						else if (ext == ".model")
-						{
-							if (ImGui::Selectable("Add")) 
+							std::string asset_path = ASSETS_PATH;
+							size_t length = asset_path.length();
+							std::string relative_path = path.path().generic_string();
+							relative_path = relative_path.replace(relative_path.begin(), relative_path.begin() + length, "");
+							if (ext == ".scene")
 							{
-								Model* deserialized_model = new Model();
-								Serializer::deserialize(relative_path.c_str(), *deserialized_model);
-								std::shared_ptr<Model> model = std::shared_ptr<Model>(deserialized_model);
-								Scene::current()->add(model);
+								if (ImGui::Selectable("Open")) { Scene::open_scene(relative_path.c_str()); }
+							}
+							else if (ext == ".model")
+							{
+								if (ImGui::Selectable("Add"))
+								{
+									Model* deserialized_model = new Model();
+									Serializer::deserialize(relative_path.c_str(), *deserialized_model);
+									std::shared_ptr<Model> model = std::shared_ptr<Model>(deserialized_model);
+									Scene::current()->add(model);
+								}
 							}
 						}
-					}
 
-					ImGui::EndPopup();
+						ImGui::EndPopup();
+					}
 				}
 			}
 			else
