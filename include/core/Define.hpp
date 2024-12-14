@@ -51,6 +51,14 @@ const property_name mat_projection_prop = 52;
 const property_name mat_vp_prop = 53;
 const property_name mat_mvp_prop = 54;
 
+// posteffect
+const property_name screen_param_prop = 60;
+const property_name scene_color_prop = 61;
+const property_name blur_direction_prop = 62;
+const property_name exposure_prop = 63;
+const property_name bloom_threshold_prop = 64;
+const property_name bloom_bright_color_prop = 65;
+
 // lighting
 const property_name light_position_prop = 80;
 const property_name light_color_prop = 82;

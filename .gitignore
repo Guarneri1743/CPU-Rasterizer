@@ -1,0 +1,6 @@
+*.exe
+.idea/
+.vscode/
+
+**/build/
+**/CmakeCache.txt
